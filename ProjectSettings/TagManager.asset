@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - ClickBlock
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -13,10 +15,10 @@ TagManager:
   - UI
   - 
   - Ground
-  - 
+  - Enemy
   - Wall
   - Player
-  - 
+  - Bullet
   - 
   - 
   - 
@@ -43,6 +45,12 @@ TagManager:
     locked: 0
   - name: Wall
     uniqueID: 498688087
+    locked: 0
+  - name: Enemy
+    uniqueID: 285576527
+    locked: 0
+  - name: Bullet
+    uniqueID: 992383713
     locked: 0
   - name: Player
     uniqueID: 3104790055
