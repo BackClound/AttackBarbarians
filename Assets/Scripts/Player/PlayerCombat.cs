@@ -3,9 +3,11 @@ using UnityEngine;
 
 /// <summary>
 /// TODO是否需要重命名为PlayerCombatManager
+/// 这里只分配对应的enemy
 /// </summary>
 public class PlayerCombat : EntityCombat
 {
+    private Player player;
     [SerializeField] protected Player_Stats entity_Stats;
     [SerializeField] private Transform bulletSpownPoint;
     //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
@@ -17,7 +19,8 @@ public class PlayerCombat : EntityCombat
 
     protected override void Awake()
     {
-        entity_Stats = GetComponent<Player_Stats>();
+        player = GetComponent<Player>();
+        entity_Stats = player.player_Stats;
         maxBulletCount = Mathf.FloorToInt(entity_Stats.maxBulletCount.GetFinalValue());
         if (bullets == null || bullets.Length < maxBulletCount)
         {
@@ -30,12 +33,21 @@ public class PlayerCombat : EntityCombat
     private void FixedUpdate()
     {
         //在攻击完成之后，再次检测攻击
-        CheckEnemyInRadius();
+        if (!isAttacking)
+        {
+            CheckEnemyInRadius();
+
+        }
 
         if (canAttack && !isAttacking)
         {
+            //切换player状态为PlayerShootState
             StartCoroutine(AttackEnemyWithWeaponCo());
+
         }
+
+        //当 coolDown == false && isAttacking == false, 切换Player状态为PlayerIdleState
+
     }
 
     protected override void CheckEnemyInRadius()
@@ -70,6 +82,7 @@ public class PlayerCombat : EntityCombat
         isAttacking = true;
         while (currentAttackTime < maxBulletCount)
         {
+            //TODO  同步子弹发射的时机和Player attack动画的同步机制
             AttackEnemyWithWeapon(bullets[currentAttackTime].gameObject);
             yield return new WaitForSeconds(attackInterval);
             currentAttackTime++;

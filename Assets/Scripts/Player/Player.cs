@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class Player : Entity
 {
+    public Player_Stats player_Stats { get; private set; }
+    public PlayerSkillManager skillManager { get; private set; }
+
     #region Player State
     public StateMachine stateMachine { get; private set; }
     public PlayerIdleState idleState { get; private set; }
@@ -15,11 +18,13 @@ public class Player : Entity
     public override void Awake()
     {
         base.Awake();
+
+        player_Stats = GetComponent<Player_Stats>();
+        skillManager = GetComponent<PlayerSkillManager>();
         stateMachine = new StateMachine();
         idleState = new PlayerIdleState(this, stateMachine, "Idle");
         shootState = new PlayerShootState(this, stateMachine, "Shoot");
         deadState = new PlayerDeadState(this, stateMachine, "Dead");
-
     }
 
     private void Start()
