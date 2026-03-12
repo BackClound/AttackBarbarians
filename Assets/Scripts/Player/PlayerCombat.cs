@@ -3,31 +3,16 @@ using UnityEngine;
 
 /// <summary>
 /// TODO是否需要重命名为PlayerCombatManager
+/// 管理Player的基础攻击能力和方式
 /// 这里只分配对应的enemy
 /// </summary>
 public class PlayerCombat : EntityCombat
 {
     private Player player;
-    [SerializeField] protected Player_Stats entity_Stats;
-    [SerializeField] private Transform bulletSpownPoint;
-    //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
-    [SerializeField] private GameObject bulletPre;
-    private Transform[] bullets;
-    private int maxBulletCount;
-    [SerializeField] private float attackInterval;
-    [SerializeField] private int currentAttackTime = 0;
 
     protected override void Awake()
     {
         player = GetComponent<Player>();
-        entity_Stats = player.player_Stats;
-        maxBulletCount = Mathf.FloorToInt(entity_Stats.maxBulletCount.GetFinalValue());
-        if (bullets == null || bullets.Length < maxBulletCount)
-        {
-            bullets = new Transform[maxBulletCount];
-            InitialBulletList();
-        }
-
     }
 
     private void FixedUpdate()
@@ -35,31 +20,43 @@ public class PlayerCombat : EntityCombat
         //在攻击完成之后，再次检测攻击
         if (!isAttacking)
         {
-            CheckEnemyInRadius();
-
+            CheckEnemyInRadiusWithSorted();
         }
 
         if (canAttack && !isAttacking)
         {
             //切换player状态为PlayerShootState
-            StartCoroutine(AttackEnemyWithWeaponCo());
-
+            player.stateMachine.ChangeState(player.shootState);
         }
-
-        //当 coolDown == false && isAttacking == false, 切换Player状态为PlayerIdleState
-
+        else
+        {
+            player.stateMachine.ChangeState(player.idleState);
+        }
     }
 
-    protected override void CheckEnemyInRadius()
+    /// <summary>
+    /// 每次敌人之后，扫描最近的敌人
+    /// 检测敌人，根据距离对enemy进行排序
+    /// 获取enemy的血量信息，将该enemy作为Target分配给Bullet作为待攻击目标
+    /// </summary>
+    protected override void CheckEnemyInRadiusWithSorted()
     {
         effectiveEnemys.Clear();
         canAttack = false;
         //获取离得最近的Enemy
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(checkEnemy.position, checkEnemyDistance, enemyLayer);
-        Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
+        Vector2 startPosition = checkEnemy.position;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, checkEnemyDistance, enemyLayer);
+        // Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
+        //对检测到的敌人进行排序
+        System.Array.Sort(colliders, (a, b) =>
+       {
+           float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
+           float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
+           return sqrDistanceA.CompareTo(sqrDistanceB);
+
+       });
         foreach (var coll in colliders)
         {
-            Debug.Log("CheckEnemyInRadius current coll = " + coll + " coll Tag = " + coll.gameObject.gameObject);
             if (coll != null && coll.gameObject.CompareTag(enemyTag))
             {
                 Enemy enemy = coll.GetComponent<Enemy>();
@@ -67,48 +64,5 @@ public class PlayerCombat : EntityCombat
                 canAttack = true;
             }
         }
-        if (effectiveEnemys.Count <= 0 || currentAttackTime >= maxBulletCount) return;
-
-        //分配攻击次数和敌人，当有新的enemy并且bullet不为空的时候，为新的敌人分配为可攻击的子弹
-        for (int i = 0; i < maxBulletCount; i++)
-        {
-            int index = Random.Range(0, effectiveEnemys.Count);
-            bullets[i].GetComponent<AttackObject>().SetupAttackObject(effectiveEnemys[index].transform, null, 10f);
-        }
     }
-
-    private IEnumerator AttackEnemyWithWeaponCo()
-    {
-        isAttacking = true;
-        while (currentAttackTime < maxBulletCount)
-        {
-            //TODO  同步子弹发射的时机和Player attack动画的同步机制
-            AttackEnemyWithWeapon(bullets[currentAttackTime].gameObject);
-            yield return new WaitForSeconds(attackInterval);
-            currentAttackTime++;
-        }
-        isAttacking = false;
-    }
-
-    protected override void AttackEnemyWithWeapon(GameObject bullet)
-    {
-        bullet.SetActive(true);
-    }
-
-    private void InitialBulletList()
-    {
-        for (int i = 0; i < maxBulletCount; i++)
-        {
-            GameObject bullet = CreateBulletPre();
-            bullet.SetActive(false);
-            bullets[i] = bullet.transform;
-        }
-    }
-
-    private GameObject CreateBulletPre()
-    {
-        GameObject bullet = Instantiate(bulletPre, bulletSpownPoint.position, Quaternion.identity);
-        return bullet;
-    }
-
 }

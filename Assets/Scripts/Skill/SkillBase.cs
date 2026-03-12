@@ -8,9 +8,14 @@ public class SkillBase : MonoBehaviour
 
     protected SkillLevelData skillData;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         latestUsedTime = Time.time - coolDownTime;
+    }
+
+    protected virtual void Update()
+    {
+
     }
 
     public void UnlockSkillLevelToNewLevel(SkillLevelData levelData)

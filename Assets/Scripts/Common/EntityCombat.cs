@@ -14,7 +14,7 @@ public class EntityCombat : MonoBehaviour
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected string enemyTag;
     [SerializeField] protected string enemyLayerName;
-    [SerializeField] protected List<Entity> effectiveEnemys;
+    [SerializeField] public List<Entity> effectiveEnemys;
     [SerializeField] protected bool canAttack;
     protected bool isAttacking;
     #endregion
@@ -33,12 +33,9 @@ public class EntityCombat : MonoBehaviour
     /// 当enemy已经分配了攻击之后，标记该敌人，其他的魔法攻击优先攻击未标记的敌人，
     /// 当所有敌人都已被标记之后，进行随机
     /// </summary>
-    protected virtual void CheckEnemyInRadius()
-    {
+    protected virtual void CheckEnemyInRadius() { }
 
-    }
-
-    protected virtual void AttackEnemyWithWeapon(GameObject bullet) { }
+    protected virtual void CheckEnemyInRadiusWithSorted() { }
 
     void OnDrawGizmos()
     {

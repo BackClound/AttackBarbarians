@@ -5,7 +5,7 @@ public class EntityState
     protected StateMachine stateMachine;
     protected string animName;
 
-    protected bool isAnimEnd;
+    protected bool isAnimFinished;
 
     protected Animator anim;
     protected Rigidbody2D rb;
@@ -19,7 +19,7 @@ public class EntityState
     public virtual void OnEnter()
     {
         anim?.SetBool(animName, true);
-        isAnimEnd = false;
+        isAnimFinished = false;
     }
 
     public virtual void OnUpdate() { }
@@ -31,9 +31,14 @@ public class EntityState
         anim.SetBool(animName, false);
     }
 
-    public void OnAnimEnd()
+    public virtual void OnAnimFinished()
     {
-        isAnimEnd = true;
+        isAnimFinished = true;
+    }
+
+    public virtual void OnAnimEventTrigger()
+    {
+
     }
 
     public virtual void ApplyAnimSpeedMulti() { }

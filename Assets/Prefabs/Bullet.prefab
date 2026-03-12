@@ -46,8 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackObject
   target: {fileID: 0}
+  isStartAttacking: 0
   canMove: 0
-  moveSpeed: 8
+  moveSpeed: 12
 --- !u!1 &2085468511823283027
 GameObject:
   m_ObjectHideFlags: 0

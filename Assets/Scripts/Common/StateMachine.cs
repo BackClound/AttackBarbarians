@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class StateMachine
 {
-    [SerializeField] private EntityState currentState;
+    public EntityState currentState { get; private set; }
 
     public void InitialState(EntityState state)
     {
@@ -19,6 +19,7 @@ public class StateMachine
 
     public void ChangeState(EntityState newState)
     {
+        if (currentState == newState) return;
         currentState.OnExit();
         currentState = newState;
         currentState.OnEnter();

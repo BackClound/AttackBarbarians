@@ -15,12 +15,14 @@ public class AttackObject : MonoBehaviour, IAttackable
     #region 目标信息
     [SerializeField] private Transform target;
     [SerializeField] private bool isStartAttacking;
+    private Vector2 originalPosition;
     #endregion
     [SerializeField] private bool canMove;
     [SerializeField] private float moveSpeed;
     private void Awake()
     {
         canMove = false;
+        originalPosition = transform.position;
     }
 
     private void Update()
@@ -47,6 +49,12 @@ public class AttackObject : MonoBehaviour, IAttackable
     void OnTriggerEnter2D(Collider2D collision)
     {
         //获取接触到的可被攻击的敌人
+    }
+
+    public void RecoverObjectStatus()
+    {
+        gameObject.SetActive(false);
+        transform.position = originalPosition;
     }
 }
 
