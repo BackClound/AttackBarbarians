@@ -9,8 +9,8 @@ public class EntityCombat : MonoBehaviour
 {
     #region Check Enemys
     //TODO 这个应该在工具类中根据手机的屏幕尺寸获取一个屏幕高度70% - 80%的距离
-    [SerializeField] protected float checkEnemyDistance = 25;
-    [SerializeField] protected Transform checkEnemy;
+    [SerializeField] protected float maxCheckDistance = 25;
+    [SerializeField] protected Transform checkPosition;
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected string enemyTag;
     [SerializeField] protected string enemyLayerName;
@@ -40,11 +40,11 @@ public class EntityCombat : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        if (checkEnemy == null)
+        if (checkPosition == null)
         {
-            checkEnemy = transform;
+            checkPosition = transform;
         }
-        Gizmos.DrawWireSphere(checkEnemy.position, checkEnemyDistance);
+        Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
     }
 
 }

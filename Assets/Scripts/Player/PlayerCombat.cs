@@ -44,8 +44,8 @@ public class PlayerCombat : EntityCombat
         effectiveEnemys.Clear();
         canAttack = false;
         //获取离得最近的Enemy
-        Vector2 startPosition = checkEnemy.position;
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, checkEnemyDistance, enemyLayer);
+        Vector2 startPosition = checkPosition.position;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, maxCheckDistance, enemyLayer);
         // Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
         //对检测到的敌人进行排序
         System.Array.Sort(colliders, (a, b) =>

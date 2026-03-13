@@ -12,9 +12,29 @@ public class Enemy : Entity
     [SerializeField] private bool canBeStillAlive = true;
 
     [Header("Attack info")]
-    [SerializeField] private float moveSpeed;
+    [SerializeField] public float moveSpeed;
     [SerializeField] private float attackCheck;
     [SerializeField] private float attackDistance;
+
+    #region 
+    public EnemyMoveState moveState { get; private set; }
+    public EnemyAttackState attackState { get; private set; }
+    public EnemyDeadState deadState { get; private set; }
+    #endregion
+
+    public override void Awake()
+    {
+        base.Awake();
+        stateMachine = new StateMachine();
+        moveState = new EnemyMoveState(this, stateMachine, "isMove");
+        attackState = new EnemyAttackState(this, stateMachine, "isAttack");
+        deadState = new EnemyDeadState(this, stateMachine, "isDead");
+    }
+
+    private void Start()
+    {
+        stateMachine.InitialState(moveState);
+    }
 
     /// <summary>
     /// 攻击已发出在攻击生效前，更新是否可被攻击
@@ -27,5 +47,10 @@ public class Enemy : Entity
     public bool CanBeDamage()
     {
         return currentHp > 0 && canBeStillAlive;
+    }
+
+    public void SetVelocity(Vector2 velocity)
+    {
+        rb.linearVelocity = velocity;
     }
 }
