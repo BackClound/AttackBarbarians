@@ -34,7 +34,7 @@ public class EntityState
         isAnimFinished = true;
     }
 
-    public virtual void OnAnimEventTrigger()
+    public virtual void OnAnimAttackTrigger()
     {
 
     }

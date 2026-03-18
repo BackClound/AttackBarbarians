@@ -17,6 +17,7 @@ public class EnemyGenerateManager : MonoBehaviour
     private int maxSpawnCount;
     //当前波次的时间
     [SerializeField] private float spawnCoolDownTimer;
+    [SerializeField] private bool canAutoGenerateEnenmy;
 
     //当前波次内可以创建enemy的次数
     private int spawnCount;
@@ -45,7 +46,7 @@ public class EnemyGenerateManager : MonoBehaviour
     private void Update()
     {
         spawnCoolDownTimer += Time.deltaTime;
-        if (spawnCoolDownTimer > spawnInterval)
+        if (spawnCoolDownTimer > spawnInterval && canAutoGenerateEnenmy)
         {
             CreateEnemy();
             spawnCoolDownTimer = 0;

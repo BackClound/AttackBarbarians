@@ -51,9 +51,9 @@ public class Player : Entity
         stateMachine.currentState.OnAnimFinished();
     }
 
-    public void OnAnimatorEventTrigger()
+    public void OnAnimatorAttackTrigger()
     {
         Debug.Log("Player trigger OnAnimEventTrigger");
-        stateMachine.currentState.OnAnimEventTrigger();
+        stateMachine.currentState.OnAnimAttackTrigger();
     }
 }

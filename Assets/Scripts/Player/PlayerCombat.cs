@@ -72,6 +72,6 @@ public class PlayerCombat : EntityCombat
 
     public override void PerformAttack()
     {
-        player?.OnAnimatorEventTrigger();
+        player?.OnAnimatorAttackTrigger();
     }
 }

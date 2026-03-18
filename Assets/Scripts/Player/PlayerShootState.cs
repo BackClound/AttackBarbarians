@@ -28,7 +28,7 @@ public class PlayerShootState : PlayerState
         }
     }
 
-    public override void OnAnimEventTrigger()
+    public override void OnAnimAttackTrigger()
     {
         canShoot = true;
     }
