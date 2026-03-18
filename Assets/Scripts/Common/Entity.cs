@@ -12,4 +12,10 @@ public class Entity : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<Collider2D>();
     }
+
+    public virtual void Start() { }
+
+    public virtual void OnAniamtorFinished()
+    {
+    }
 }

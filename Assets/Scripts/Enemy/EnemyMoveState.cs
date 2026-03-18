@@ -11,4 +11,12 @@ public class EnemyMoveState : EnemyState
         base.OnEnter();
         rb.linearVelocity = Vector2.down * enemy.moveSpeed;
     }
+
+    public override void OnUpdate()
+    {
+        if (enemy.isWallDetected())
+        {
+            stateMachine.ChangeState(enemy.idleState);
+        }
+    }
 }

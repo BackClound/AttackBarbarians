@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : Entity
@@ -10,30 +12,24 @@ public class Enemy : Entity
     public float currentHp;
     public float expectHp;
     [SerializeField] private bool canBeStillAlive = true;
+    [SerializeField] public float cooldownThreshold;
 
     [Header("Attack info")]
     [SerializeField] public float moveSpeed;
-    [SerializeField] private float attackCheck;
-    [SerializeField] private float attackDistance;
+    [SerializeField] protected Transform attackCheck;
+    [SerializeField] protected float attackDistance;
+    [SerializeField] protected LayerMask wallLayer;
 
     #region 
-    public EnemyMoveState moveState { get; private set; }
-    public EnemyAttackState attackState { get; private set; }
-    public EnemyDeadState deadState { get; private set; }
+    public EnemyIdleState idleState;
+    public EnemyMoveState moveState;
+    public EnemyAttackState attackState;
+    public EnemyDeadState deadState;
     #endregion
 
-    public override void Awake()
+    public override void Start()
     {
-        base.Awake();
-        stateMachine = new StateMachine();
-        moveState = new EnemyMoveState(this, stateMachine, "isMove");
-        attackState = new EnemyAttackState(this, stateMachine, "isAttack");
-        deadState = new EnemyDeadState(this, stateMachine, "isDead");
-    }
-
-    private void Start()
-    {
-        stateMachine.InitialState(moveState);
+        stateMachine.InitialState(idleState);
     }
 
     /// <summary>
@@ -44,6 +40,9 @@ public class Enemy : Entity
         canBeStillAlive = currentHp - damage > 0;
     }
 
+    public virtual bool isWallDetected() => Physics2D.Raycast(attackCheck.position, Vector2.down, attackDistance, wallLayer);
+
+    public virtual float GetDamageValue() => 10;
     public bool CanBeDamage()
     {
         return currentHp > 0 && canBeStillAlive;
@@ -53,4 +52,23 @@ public class Enemy : Entity
     {
         rb.linearVelocity = velocity;
     }
+
+    public override void OnAniamtorFinished()
+    {
+        if (stateMachine.currentState == attackState)
+        {
+            stateMachine.ChangeState(idleState);
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        if (attackCheck == null)
+        {
+            attackCheck = transform;
+        }
+        Gizmos.DrawLine(attackCheck.position, attackCheck.position + Vector3.down * attackDistance);
+    }
+
 }

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 /// <summary>
@@ -14,9 +12,7 @@ public class EntityCombat : MonoBehaviour
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] protected string enemyTag;
     [SerializeField] protected string enemyLayerName;
-    [SerializeField] public List<Entity> effectiveEnemys;
-    [SerializeField] protected bool canAttack;
-    protected bool isAttacking;
+
     #endregion
 
 
@@ -44,7 +40,12 @@ public class EntityCombat : MonoBehaviour
         {
             checkPosition = transform;
         }
-        Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
+        // Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
+    }
+
+    public virtual void PerformAttack()
+    {
+
     }
 
 }

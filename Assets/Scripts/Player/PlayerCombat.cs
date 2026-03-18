@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -9,6 +10,9 @@ using UnityEngine;
 public class PlayerCombat : EntityCombat
 {
     private Player player;
+    [SerializeField] public List<Entity> effectiveEnemys;
+    [SerializeField] protected bool canAttack;
+    protected bool isAttacking;
 
     protected override void Awake()
     {
@@ -64,5 +68,10 @@ public class PlayerCombat : EntityCombat
                 canAttack = true;
             }
         }
+    }
+
+    public override void PerformAttack()
+    {
+        player?.OnAnimatorEventTrigger();
     }
 }

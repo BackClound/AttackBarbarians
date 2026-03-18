@@ -2,15 +2,21 @@ using UnityEngine;
 
 public class EnemyCombatManager : EntityCombat
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private Enemy enemy;
+    private WallControlManager wallControl;
+    protected override void Awake()
     {
-
+        wallControl = WallControlManager.sInstance;
+        enemy = GetComponent<Enemy>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void PerformAttack()
     {
-
+        RaycastHit2D hit2D = Physics2D.Raycast(checkPosition.position, Vector2.down, maxCheckDistance, enemyLayer);
+        wallControl = hit2D.collider.GetComponent<WallControlManager>();
+        if (wallControl != null)
+        {
+            wallControl.TakeDamage(enemy.GetDamageValue());
+        }
     }
 }

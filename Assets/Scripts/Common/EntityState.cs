@@ -4,9 +4,7 @@ public class EntityState
 {
     protected StateMachine stateMachine;
     protected string animName;
-
     protected bool isAnimFinished;
-
     protected Animator anim;
     protected Rigidbody2D rb;
 

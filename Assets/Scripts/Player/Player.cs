@@ -1,3 +1,4 @@
+using UnityEditor.Toolbars;
 using UnityEngine;
 
 /// <summary>
@@ -28,7 +29,7 @@ public class Player : Entity
         playerCombatManager = GetComponent<PlayerCombat>();
     }
 
-    private void Start()
+    public override void Start()
     {
         stateMachine.InitialState(idleState);
     }
@@ -43,7 +44,7 @@ public class Player : Entity
         stateMachine.currentState?.OnFixedUpdate();
     }
 
-    public void OnAniamtorFinished()
+    public override void OnAniamtorFinished()
     {
         Debug.Log("Player trigger OnAniamtorFinished");
 

@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3233036758561666843}
-  - component: {fileID: 5907276461074182955}
+  - component: {fileID: 5650306267527336612}
   - component: {fileID: 8085847031335957498}
   - component: {fileID: 5617618210259548225}
   - component: {fileID: 8584551330808589326}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BatLevel_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36,7 +36,7 @@ Transform:
   - {fileID: 2919334597548017115}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5907276461074182955
+--- !u!114 &5650306267527336612
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,18 +45,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 118330131270576344}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbd00019bb3bd49a5b7ca0c4ef1d107f, type: 3}
+  m_Script: {fileID: 11500000, guid: f17fe99451f60457b8761db7e1d7658c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 5617618210259548225}
   coll: {fileID: 8584551330808589326}
-  maxHp: 14
+  maxHp: 0
   currentHp: 14
-  expectHp: 0
+  expectHp: 14
   canBeStillAlive: 1
+  cooldownThreshold: 2
   moveSpeed: 7
-  attackCheck: 0
-  attackDistance: 0
+  attackCheck: {fileID: 3233036758561666843}
+  attackDistance: 0.6
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &8085847031335957498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,15 +73,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0c6a65982db54e938fdbe5a539b0e76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatManager
-  maxCheckDistance: 25
+  maxCheckDistance: 1
   checkPosition: {fileID: 3233036758561666843}
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 512
   enemyTag: 
   enemyLayerName: 
-  effectiveEnemys: []
-  canAttack: 0
 --- !u!50 &5617618210259548225
 Rigidbody2D:
   serializedVersion: 5
@@ -162,6 +164,7 @@ GameObject:
   - component: {fileID: 2919334597548017115}
   - component: {fileID: 540366410278865094}
   - component: {fileID: 3023100071970216135}
+  - component: {fileID: 7359095170110612231}
   m_Layer: 0
   m_Name: Animator
   m_TagString: Untagged
@@ -265,3 +268,15 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7359095170110612231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3975127465069301962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2261f010dde9f4da8b315e1f99fd2f8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimatorTrigger

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7229051600059493058}
   - component: {fileID: 6220225739137670033}
   - component: {fileID: 8514988554708672772}
+  - component: {fileID: 4230166657030931565}
   m_Layer: 0
   m_Name: Bat_02
   m_TagString: Untagged
@@ -114,6 +115,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4230166657030931565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295205208437114212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2261f010dde9f4da8b315e1f99fd2f8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimatorTrigger
 --- !u!1 &5449595325056827577
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,11 +136,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9124445643067620972}
-  - component: {fileID: 4781360253280644267}
+  - component: {fileID: -7710734334286059824}
   - component: {fileID: 3889800454562858154}
   - component: {fileID: 1296796543505137845}
   - component: {fileID: 488430557039050598}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: BatLevel_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +163,7 @@ Transform:
   - {fileID: 7229051600059493058}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4781360253280644267
+--- !u!114 &-7710734334286059824
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -159,18 +172,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 5449595325056827577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbd00019bb3bd49a5b7ca0c4ef1d107f, type: 3}
+  m_Script: {fileID: 11500000, guid: f17fe99451f60457b8761db7e1d7658c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 1296796543505137845}
   coll: {fileID: 488430557039050598}
   maxHp: 12
   currentHp: 12
   expectHp: 0
   canBeStillAlive: 1
+  cooldownThreshold: 2
   moveSpeed: 6.5
-  attackCheck: 0
-  attackDistance: 0
+  attackCheck: {fileID: 9124445643067620972}
+  attackDistance: 0.6
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &3889800454562858154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,15 +200,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0c6a65982db54e938fdbe5a539b0e76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatManager
-  maxCheckDistance: 25
+  maxCheckDistance: 1
   checkPosition: {fileID: 9124445643067620972}
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 1024
-  enemyTag: Player
-  enemyLayerName: Player
-  effectiveEnemys: []
-  canAttack: 0
+    m_Bits: 512
+  enemyTag: Wall
+  enemyLayerName: Wall
 --- !u!50 &1296796543505137845
 Rigidbody2D:
   serializedVersion: 5
