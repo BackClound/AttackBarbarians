@@ -11,7 +11,5 @@ public class EnemyState : EntityState
         this.enemy = enemy;
         this.anim = enemy.anim;
         this.rb = enemy.rb;
-        cooldownThreshold = enemy.cooldownThreshold;
-        cooldownTimer = cooldownThreshold;
     }
 }

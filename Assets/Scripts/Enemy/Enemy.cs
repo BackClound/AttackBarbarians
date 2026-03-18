@@ -55,10 +55,7 @@ public class Enemy : Entity
 
     public override void OnAniamtorFinished()
     {
-        if (stateMachine.currentState == attackState)
-        {
-            stateMachine.ChangeState(idleState);
-        }
+        stateMachine.currentState.OnAnimFinished();
     }
 
     private void OnDrawGizmos()

@@ -40,7 +40,7 @@ public class EntityCombat : MonoBehaviour
         {
             checkPosition = transform;
         }
-        // Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
+        Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
     }
 
     public virtual void PerformAttack()

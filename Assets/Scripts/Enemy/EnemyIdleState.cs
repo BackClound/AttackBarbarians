@@ -10,6 +10,8 @@ public class EnemyIdleState : EnemyState
     {
         base.OnEnter();
         //使用move的动画，但是velocity设置为0
+        cooldownThreshold = enemy.cooldownThreshold;
+        cooldownTimer = cooldownThreshold;
         rb.linearVelocity = Vector2.zero;
     }
     public override void OnUpdate()
