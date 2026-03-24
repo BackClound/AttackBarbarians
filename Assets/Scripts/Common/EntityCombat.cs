@@ -31,7 +31,7 @@ public class EntityCombat : MonoBehaviour
     /// </summary>
     protected virtual void CheckEnemyInRadius() { }
 
-    protected virtual void CheckEnemyInRadiusWithSorted() { }
+    public virtual void CheckEnemyInRadiusWithSorted() { }
 
     void OnDrawGizmos()
     {

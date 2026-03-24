@@ -30,7 +30,21 @@ public class AttackObject : MonoBehaviour, IAttackable
         if (canMove)
         {
             transform.position = Vector2.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
+            if (Vector2.Distance(transform.position, target.position) < 0.3f)
+            {
+                RecoverObjectStatus();
+            }
         }
+    }
+
+    private void OnEnable()
+    {
+        // canMove = true;
+    }
+
+    private void OnDisable()
+    {
+        canMove = false;
     }
 
     public void SetupAttackObject(Transform target, AttackInfo info, float damage)
@@ -54,6 +68,7 @@ public class AttackObject : MonoBehaviour, IAttackable
     public void RecoverObjectStatus()
     {
         gameObject.SetActive(false);
+        canMove = false;
         transform.position = originalPosition;
     }
 }

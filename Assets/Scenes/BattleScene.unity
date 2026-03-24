@@ -1114,9 +1114,19 @@ MonoBehaviour:
   maxAttackCount: 10
   currentAttackCount: 0
   attackInterval: 0.3
-  currentAttackTime: 0
+  coolDownTimer: 0
+  cooldownThreshold: 4
+  maxCheckDistance: 25
+  checkPosition: {fileID: 13335480}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  enemyTag: Enemy
+  effectiveEnemys: []
   shootLine: 0
   shootWave: 0
+  hasEffectiveEnemy: 0
+  isCoolDown: 0
 --- !u!1 &906468940
 GameObject:
   m_ObjectHideFlags: 0
@@ -1151,41 +1161,7 @@ Transform:
   - {fileID: 1943675723}
   m_Father: {fileID: 1869007418}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1069919062
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1069919063}
-  m_Layer: 0
-  m_Name: LeftWall
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1069919063
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1069919062}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 85514983}
-  - {fileID: 1855374632}
-  - {fileID: 342174646}
-  m_Father: {fileID: 1869007418}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1102190315
+--- !u!1001 &993126620
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1197,13 +1173,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: BatLevel_1
       objectReference: {fileID: 0}
+    - target: {fileID: 4766495136149570709, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     - target: {fileID: 8344809219264004464, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.21
+      value: -1.49
       objectReference: {fileID: 0}
     - target: {fileID: 8344809219264004464, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.64
+      value: 6.96
       objectReference: {fileID: 0}
     - target: {fileID: 8344809219264004464, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1242,6 +1222,40 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
+--- !u!1 &1069919062
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1069919063}
+  m_Layer: 0
+  m_Name: LeftWall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1069919063
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069919062}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 85514983}
+  - {fileID: 1855374632}
+  - {fileID: 342174646}
+  m_Father: {fileID: 1869007418}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1332129259
 GameObject:
   m_ObjectHideFlags: 0
@@ -1765,6 +1779,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WallControlManager
   maxHP: 1000
   currentHP: 1000
+  anim: {fileID: 0}
   beDamaged: 0
 --- !u!1 &1943675722
 GameObject:
@@ -2132,4 +2147,4 @@ SceneRoots:
   - {fileID: 1869007418}
   - {fileID: 825728583}
   - {fileID: 186641251}
-  - {fileID: 1102190315}
+  - {fileID: 993126620}

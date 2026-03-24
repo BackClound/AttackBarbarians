@@ -4,8 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// TODO是否需要重命名为PlayerCombatManager
-/// 管理Player的基础攻击能力和方式
-/// 这里只分配对应的enemy
+/// 这里负责检测对应的enemy，保存对应的Enemys 列表，切换到PlayerShootState,
 /// </summary>
 public class PlayerCombat : EntityCombat
 {
@@ -21,21 +20,21 @@ public class PlayerCombat : EntityCombat
 
     private void FixedUpdate()
     {
-        //在攻击完成之后，再次检测攻击
-        if (!isAttacking)
-        {
-            CheckEnemyInRadiusWithSorted();
-        }
+        //TODO 该逻辑移动到PlayerIdleState的Update方法中
+        // if (!isAttacking)
+        // {
+        //     CheckEnemyInRadiusWithSorted();
+        // }
 
-        if (canAttack && !isAttacking)
-        {
-            //切换player状态为PlayerShootState
-            player.stateMachine.ChangeState(player.shootState);
-        }
-        else
-        {
-            player.stateMachine.ChangeState(player.idleState);
-        }
+        // if (canAttack && !isAttacking)
+        // {
+        //     //切换player状态为PlayerShootState
+        //     player.stateMachine.ChangeState(player.shootState);
+        // }
+        // else
+        // {
+        //     player.stateMachine.ChangeState(player.idleState);
+        // }
     }
 
     /// <summary>
@@ -43,7 +42,7 @@ public class PlayerCombat : EntityCombat
     /// 检测敌人，根据距离对enemy进行排序
     /// 获取enemy的血量信息，将该enemy作为Target分配给Bullet作为待攻击目标
     /// </summary>
-    protected override void CheckEnemyInRadiusWithSorted()
+    public override void CheckEnemyInRadiusWithSorted()
     {
         effectiveEnemys.Clear();
         canAttack = false;
@@ -66,8 +65,14 @@ public class PlayerCombat : EntityCombat
                 Enemy enemy = coll.GetComponent<Enemy>();
                 effectiveEnemys.Add(enemy);
                 canAttack = true;
+                isAttacking = true;
             }
         }
+    }
+
+    public void UpdateAttackStatus(bool isAttacking)
+    {
+        this.isAttacking = isAttacking;
     }
 
     public override void PerformAttack()

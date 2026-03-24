@@ -53,6 +53,11 @@ public class Enemy : Entity
         rb.linearVelocity = velocity;
     }
 
+    public bool IsEnemyAvailable()
+    {
+        return currentHp > 0 && expectHp > 0;
+    }
+
     public override void OnAniamtorFinished()
     {
         stateMachine.currentState.OnAnimFinished();
