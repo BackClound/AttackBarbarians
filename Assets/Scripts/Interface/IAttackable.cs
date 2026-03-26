@@ -5,5 +5,5 @@ using UnityEngine;
 /// </summary>
 public interface IAttackable
 {
-    public void DoDamage(float damage);
+    public void DoDamage(Entity_Stats stats, float damage);
 }

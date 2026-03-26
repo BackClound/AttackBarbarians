@@ -10,12 +10,14 @@ GameObject:
   m_Component:
   - component: {fileID: 8344809219264004464}
   - component: {fileID: 8789040610686946338}
+  - component: {fileID: 1519419517830280383}
+  - component: {fileID: 2640175899680227429}
   - component: {fileID: 5335459097766836919}
   - component: {fileID: 7093294223847605618}
   - component: {fileID: 5981320913119421051}
   m_Layer: 8
   m_Name: BatLevel_1
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -50,17 +52,70 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 7093294223847605618}
   coll: {fileID: 5981320913119421051}
-  maxHp: 10
-  currentHp: 10
-  expectHp: 0
-  canBeStillAlive: 1
-  cooldownThreshold: 2
+  enemy_Stats: {fileID: 0}
   moveSpeed: 6
   attackCheck: {fileID: 8344809219264004464}
   attackDistance: 0.6
   wallLayer:
     serializedVersion: 2
     m_Bits: 512
+  cooldownThreshold: 2
+--- !u!114 &1519419517830280383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4766495136149570709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f80350b040d14150801481547717b6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Entity_Stats
+  majorStats:
+    moveSpeed:
+      baseValue: 6
+    maxHp:
+      baseValue: 30
+    attackSpeed:
+      baseValue: 0
+    attackSpeedMulti:
+      baseValue: 0
+  offenseStats:
+    damage:
+      baseValue: 10
+    critPower:
+      baseValue: 0
+    critChance:
+      baseValue: 0
+    attackSpeedMulti:
+      baseValue: 0
+    fireDamage:
+      baseValue: 0
+    iceDamage:
+      baseValue: 0
+    lightingDamage:
+      baseValue: 0
+  defenseStats:
+    armor:
+      baseValue: 0
+    armorReduce:
+      baseValue: 0
+--- !u!114 &2640175899680227429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4766495136149570709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5886f7dc7d8604f8da4099e9e9e0b18d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy_Health
+  currentHp: 0
+  realHp: 0
+  isDead: 0
 --- !u!114 &5335459097766836919
 MonoBehaviour:
   m_ObjectHideFlags: 0

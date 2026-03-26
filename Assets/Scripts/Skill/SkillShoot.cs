@@ -6,11 +6,11 @@ using UnityEngine;
 public class SkillShoot : SkillBase
 {
     private Player player;
-    private Player_Stats player_Stats;
     //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
     [SerializeField] private GameObject shootPrefab;
     [SerializeField] private Transform bulletSpownPoint;
     [Header("基础攻击数值")]
+    //TODO 是否需要设置两个列表，一个控制available bullets，一个控制unAvailable bullets
     [SerializeField] private Transform[] bullets;
     [SerializeField] private int maxAttackCount = 10;
     [SerializeField] private int currentAttackCount;
@@ -114,10 +114,10 @@ public class SkillShoot : SkillBase
         //分配攻击次数和敌人，当有新的enemy并且bullet不为空的时候，为新的敌人分配为可攻击的子弹
         foreach (Enemy enemy in effectiveEnemys)
         {
-            Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
-            if (enemy.CanBeDamage() && currentAttackCount < maxAttackCount)
+            Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
+            if (enemy.enemy_Health.CanBeDamage() && currentAttackCount < maxAttackCount)
             {
-                bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy.transform, null, 10f);
+                bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy, null, 10f);
                 bullets[currentAttackCount].gameObject.SetActive(true);
                 // ActivateBulletOrNot(bullets[currentAttackCount].gameObject, true);
                 currentAttackCount++;
@@ -169,7 +169,7 @@ public class SkillShoot : SkillBase
         foreach (var coll in colliders)
         {
             Enemy enemy = coll.GetComponent<Enemy>();
-            if (enemy != null && enemy.CanBeDamage())
+            if (enemy != null && enemy.enemy_Health.CanBeDamage())
             {
                 effectiveEnemys.Add(enemy);
             }
@@ -183,7 +183,7 @@ public class SkillShoot : SkillBase
     //应该在攻击结束之后，调用该方法，更新当前是否还有effective的敌人,移除available的敌人，更新hasEffectiveEnemy的值
     public void CheckEnemyIsAvailable()
     {
-        effectiveEnemys.RemoveAll(enemy => !enemy.IsEnemyAvailable());
+        effectiveEnemys.RemoveAll(enemy => !enemy.enemy_Health.CanBeDamage());
         //effective enemy是否为null，不为null， 直接return
         if (effectiveEnemys.Count > 0)
         {

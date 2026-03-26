@@ -137,6 +137,8 @@ GameObject:
   m_Component:
   - component: {fileID: 961533417271930279}
   - component: {fileID: -8418840950274108914}
+  - component: {fileID: 7083296024104848661}
+  - component: {fileID: 5038841072152307958}
   - component: {fileID: 3692527364732037574}
   - component: {fileID: 1856810686869785089}
   - component: {fileID: 2165080457796251178}
@@ -177,17 +179,70 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 1856810686869785089}
   coll: {fileID: 2165080457796251178}
-  maxHp: 16
-  currentHp: 16
-  expectHp: 0
-  canBeStillAlive: 1
-  cooldownThreshold: 2
+  enemy_Stats: {fileID: 0}
   moveSpeed: 8
   attackCheck: {fileID: 961533417271930279}
   attackDistance: 0.6
   wallLayer:
     serializedVersion: 2
     m_Bits: 512
+  cooldownThreshold: 2
+--- !u!114 &7083296024104848661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6325858709102536717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f80350b040d14150801481547717b6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Entity_Stats
+  majorStats:
+    moveSpeed:
+      baseValue: 8
+    maxHp:
+      baseValue: 50
+    attackSpeed:
+      baseValue: 0
+    attackSpeedMulti:
+      baseValue: 0
+  offenseStats:
+    damage:
+      baseValue: 14
+    critPower:
+      baseValue: 0
+    critChance:
+      baseValue: 0
+    attackSpeedMulti:
+      baseValue: 0
+    fireDamage:
+      baseValue: 0
+    iceDamage:
+      baseValue: 0
+    lightingDamage:
+      baseValue: 0
+  defenseStats:
+    armor:
+      baseValue: 0
+    armorReduce:
+      baseValue: 0
+--- !u!114 &5038841072152307958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6325858709102536717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5886f7dc7d8604f8da4099e9e9e0b18d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy_Health
+  currentHp: 0
+  realHp: 0
+  isDead: 0
 --- !u!114 &3692527364732037574
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Serializable]
 public class OffenseGroupStats
 {
     public Stat damage; //基本攻击伤害

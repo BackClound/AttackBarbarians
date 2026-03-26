@@ -7,7 +7,7 @@ public class Stat
 {
     [SerializeField] private float baseValue;
 
-    [SerializeField] private float finalValue;
+    private float finalValue;
 
     public void SetBaseValue(float value)
     {
@@ -15,9 +15,18 @@ public class Stat
         finalValue = value;
     }
 
-
-    public float GetFinalValue()
+    public float GetValue()
     {
+        finalValue = GetFinalValue();
+
+        return finalValue;
+    }
+
+
+    private float GetFinalValue()
+    {
+        finalValue = baseValue;
+
         return finalValue;
     }
 

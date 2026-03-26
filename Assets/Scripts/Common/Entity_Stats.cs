@@ -14,5 +14,33 @@ public class Entity_Stats : MonoBehaviour
     [Header("抗性")]
     public DefenseGroupStats defenseStats;
 
+    public float GetMaxHp()
+    {
+        //TODO 是否需要添加其他的增加生命值的项
+        return majorStats.maxHp.GetValue();
+    }
+
+    public float GetTotalDamage()
+    {
+        var isCrit = offenseStats.critChance.GetValue() > Random.Range(0, 1);
+        var baseDamage = offenseStats.damage.GetValue() * (isCrit ? offenseStats.critPower.GetValue() + 1 : 1);
+        return baseDamage + offenseStats.iceDamage.GetValue() + offenseStats.fireDamage.GetValue() + offenseStats.lightingDamage.GetValue();
+    }
+
+    public float GetArmorDefense()
+    {
+        return defenseStats.armor.GetValue();
+    }
+
+    public virtual bool CanBeDamage()
+    {
+        return false;
+    }
+
+    public virtual void ReduceHp(float damage) { }
+
+    public virtual void RaiseHp(float healing) { }
+
+    public virtual void Die() { }
 
 }

@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 
+[Serializable]
 public class DefenseGroupStats
 {
     public Stat armor; //护甲值

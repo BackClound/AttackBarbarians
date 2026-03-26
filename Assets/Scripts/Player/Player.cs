@@ -6,9 +6,11 @@ using UnityEngine;
 /// </summary>
 public class Player : Entity
 {
-    public Player_Stats player_Stats { get; private set; }
+    #region Player other Controlers
+    public Player_Health player_Health { get; private set; }
     public PlayerSkillManager skillManager { get; private set; }
     public PlayerCombat playerCombatManager { get; private set; }
+    #endregion
 
     #region Player State
     public PlayerIdleState idleState { get; private set; }
@@ -24,7 +26,7 @@ public class Player : Entity
         shootState = new PlayerShootState(this, stateMachine, "Shoot");
         deadState = new PlayerDeadState(this, stateMachine, "Dead");
 
-        player_Stats = GetComponent<Player_Stats>();
+        player_Health = GetComponent<Player_Health>();
         skillManager = GetComponent<PlayerSkillManager>();
         playerCombatManager = GetComponent<PlayerCombat>();
     }

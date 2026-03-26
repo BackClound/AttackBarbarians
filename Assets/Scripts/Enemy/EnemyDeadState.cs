@@ -6,4 +6,17 @@ public class EnemyDeadState : EnemyState
     {
 
     }
+
+    public override void OnUpdate()
+    {
+        if (isAnimFinished)
+        {
+            enemy.Die();
+        }
+    }
+
+    public override void OnAnimFinished()
+    {
+        base.OnAnimFinished();
+    }
 }
