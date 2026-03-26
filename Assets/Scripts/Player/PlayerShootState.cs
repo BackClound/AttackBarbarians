@@ -20,13 +20,13 @@ public class PlayerShootState : PlayerState
     public override void OnUpdate()
     {
         //TODO 这里应该根据skill的信息控制发射逻辑
-        Debug.Log("player shoot state canShoot " + isStartShooting);
+        // Debug.Log("player shoot state canShoot " + isStartShooting);
         if (skillShoot.CanUseShootSkill())
         {
             if (isStartShooting)
             {
                 isStartShooting = false;
-                Debug.Log("Start activate the bullet in player shoot state");
+                // Debug.Log("Start activate the bullet in player shoot state");
                 skillShoot.ActivateOneShootAttack();
             }
         }

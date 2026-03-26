@@ -1103,6 +1103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c947c3dfb83d34ab7a70e7ab125b3b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_Health
+  entity_Stats: {fileID: 0}
 --- !u!1 &839134031
 GameObject:
   m_ObjectHideFlags: 0

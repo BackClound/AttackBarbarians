@@ -22,11 +22,12 @@ public class Enemy_Health : Entity_Health
 
     public override bool CanBeDamage()
     {
-        return currentHp > 0 && realHp > 0 && !isDead;
+        return currentHp > 0 && !isDead;
     }
 
     public override void ReduceHp(float damage)
     {
+        Debug.Log("Enemy health reduce HP " + damage);
         currentHp -= damage;
         if (currentHp <= 0)
         {

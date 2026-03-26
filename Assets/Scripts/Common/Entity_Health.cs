@@ -18,7 +18,10 @@ public class Entity_Health : MonoBehaviour, IDamagable
         return false;
     }
 
-    public virtual void ReduceHp(float damage) { }
+    public virtual void ReduceHp(float damage)
+    {
+        Debug.Log("Entity health reduce HP " + damage);
+    }
 
     public virtual void RaiseHp(float healing) { }
 

@@ -48,14 +48,14 @@ public class Player : Entity
 
     public override void OnAniamtorFinished()
     {
-        Debug.Log("Player trigger OnAniamtorFinished");
+        // Debug.Log("Player trigger OnAniamtorFinished");
 
         stateMachine.currentState.OnAnimFinished();
     }
 
     public void OnAnimatorAttackTrigger()
     {
-        Debug.Log("Player trigger OnAnimEventTrigger");
+        // Debug.Log("Player trigger OnAnimEventTrigger");
         stateMachine.currentState.OnAnimAttackTrigger();
     }
 }

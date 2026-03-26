@@ -12,6 +12,8 @@ public class AttackObject : MonoBehaviour, IAttackable
     private string attackName;
     #endregion
 
+    private Rigidbody2D rb;
+
     #region 目标信息
     [SerializeField] private Transform target;
     [SerializeField] private bool isStartAttacking;
@@ -21,6 +23,7 @@ public class AttackObject : MonoBehaviour, IAttackable
     [SerializeField] private float moveSpeed;
     private void Awake()
     {
+        rb = GetComponent<Rigidbody2D>();
         canMove = false;
         originalPosition = transform.position;
     }
@@ -29,11 +32,16 @@ public class AttackObject : MonoBehaviour, IAttackable
     {
         if (canMove)
         {
-            transform.position = Vector2.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
-            if (Vector2.Distance(transform.position, target.position) < 0.3f)
-            {
-                RecoverObjectStatus();
-            }
+            rb.linearVelocity = (target.position - transform.position).normalized * moveSpeed;
+            // transform.position = Vector2.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
+            // if (Vector2.Distance(transform.position, target.position) < 0.3f)
+            // {
+            //     // RecoverObjectStatus();
+            // }
+        }
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
@@ -57,18 +65,26 @@ public class AttackObject : MonoBehaviour, IAttackable
         target.enemy_Health.WillReduceHp(damage);
     }
 
-    public void DoDamage(Entity_Stats stats, float damage)
+    public void DoDamage(Entity_Health stats, float damage)
     {
+        Debug.Log("Attack Object start do damage " + damage);
         stats.ReduceHp(damage);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
         //获取接触到的可被攻击的敌人
+        Debug.Log("Attack Object OnTriggerEnter2D  collision TAG = " + collision.gameObject.tag);
         if (collision != null)
         {
             var enemy = collision.GetComponent<Enemy>();
-            DoDamage(enemy.enemy_Health.entity_Stats, damageValue);
+            Debug.Log("Attack Object OnTriggerEnter2D  enemy = " + enemy);
+            if (enemy != null)
+            {
+                DoDamage(enemy.enemy_Health, damageValue);
+                RecoverObjectStatus();
+            }
+
         }
     }
 
@@ -76,6 +92,8 @@ public class AttackObject : MonoBehaviour, IAttackable
     {
         gameObject.SetActive(false);
         canMove = false;
+        target = null;
+        damageValue = 0;
         transform.position = originalPosition;
     }
 }

@@ -114,7 +114,7 @@ public class SkillShoot : SkillBase
         //分配攻击次数和敌人，当有新的enemy并且bullet不为空的时候，为新的敌人分配为可攻击的子弹
         foreach (Enemy enemy in effectiveEnemys)
         {
-            Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
+            // Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
             if (enemy.enemy_Health.CanBeDamage() && currentAttackCount < maxAttackCount)
             {
                 bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy, null, 10f);
@@ -157,7 +157,7 @@ public class SkillShoot : SkillBase
         //获取离得最近的Enemy
         Vector2 startPosition = checkPosition.position;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, maxCheckDistance, enemyLayer);
-        Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
+        // Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
         //对检测到的敌人进行排序
         System.Array.Sort(colliders, (a, b) =>
        {
