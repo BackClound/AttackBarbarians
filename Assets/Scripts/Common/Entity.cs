@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Entity : MonoBehaviour
+public class Entity : MonoBehaviour, IDamagable
 {
     public StateMachine stateMachine;
     public Animator anim { get; private set; }
@@ -15,7 +15,7 @@ public class Entity : MonoBehaviour
 
     public virtual void Start() { }
 
-    public virtual void OnAniamtorFinished()
-    {
-    }
+    public virtual void OnAniamtorFinished() { }
+
+    public virtual void TakeDamage(float damage) { }
 }

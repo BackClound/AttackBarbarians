@@ -52,7 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 7093294223847605618}
   coll: {fileID: 5981320913119421051}
-  enemy_Stats: {fileID: 0}
+  enemy_Health: {fileID: 0}
   moveSpeed: 6
   attackCheck: {fileID: 8344809219264004464}
   attackDistance: 0.6
@@ -113,6 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5886f7dc7d8604f8da4099e9e9e0b18d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy_Health
+  entity_Stats: {fileID: 0}
   currentHp: 0
   realHp: 0
   isDead: 0

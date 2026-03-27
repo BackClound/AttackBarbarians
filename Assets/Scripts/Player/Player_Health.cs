@@ -15,7 +15,7 @@ public class Player_Health : Entity_Health
         return currentHp > 0 && !isDead;
     }
 
-    public override void ReduceHp(float damage)
+    protected override void ReduceHp(float damage)
     {
         currentHp -= damage;
         if (currentHp < 0)

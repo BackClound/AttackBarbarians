@@ -5,6 +5,7 @@ public class Enemy_Health : Entity_Health
     private Enemy enemy;
     // 最大生命值，当前生命值，和预期被攻击后剩余的生命值，realHp用来控制下一次攻击是否可以攻击该敌人
     [SerializeField] private float currentHp;
+    //TODO realHP不能用来进行判断，因为子弹按照特定的方向进行射击，不能保证准确无误的击中Enemy
     [SerializeField] private float realHp;
     [SerializeField] private bool isDead = false;
 
@@ -25,7 +26,7 @@ public class Enemy_Health : Entity_Health
         return currentHp > 0 && !isDead;
     }
 
-    public override void ReduceHp(float damage)
+    protected override void ReduceHp(float damage)
     {
         Debug.Log("Enemy health reduce HP " + damage);
         currentHp -= damage;

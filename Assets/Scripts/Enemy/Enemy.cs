@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy : Entity
+public class Enemy : Entity, IDamagable
 {
     public Enemy_Health enemy_Health;
 
@@ -58,4 +58,9 @@ public class Enemy : Entity
         Gizmos.DrawLine(attackCheck.position, attackCheck.position + Vector3.down * attackDistance);
     }
 
+    public override void TakeDamage(float damage)
+    {
+        enemy_Health.TakeDamage(damage);
+        DamageNumberController.numberControllerInstance.ShowDamageNumber(damage, transform.position);
+    }
 }

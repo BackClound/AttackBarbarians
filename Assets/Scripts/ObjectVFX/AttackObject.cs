@@ -62,13 +62,13 @@ public class AttackObject : MonoBehaviour, IAttackable
         //target will Take damagevalue, and update the realHp
         damageValue = damage;
         //将会对enemy进行攻击，对enemy的真实血量进行预更新
-        target.enemy_Health.WillReduceHp(damage);
+        // target.enemy_Health.WillReduceHp(damage);
     }
 
-    public void DoDamage(Entity_Health stats, float damage)
+    public void DoDamage(Entity enemy, float damage)
     {
         Debug.Log("Attack Object start do damage " + damage);
-        stats.ReduceHp(damage);
+        enemy.TakeDamage(damage);
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -81,7 +81,7 @@ public class AttackObject : MonoBehaviour, IAttackable
             Debug.Log("Attack Object OnTriggerEnter2D  enemy = " + enemy);
             if (enemy != null)
             {
-                DoDamage(enemy.enemy_Health, damageValue);
+                DoDamage(enemy, damageValue);
                 RecoverObjectStatus();
             }
 

@@ -1,12 +1,15 @@
 using UnityEngine;
 
-public class Entity_Health : MonoBehaviour, IDamagable
+public class Entity_Health : MonoBehaviour
 {
 
     public Entity_Stats entity_Stats;
 
 
-    public void TakeDamage(Entity_Stats entity_Stats, float damage) { }
+    public void TakeDamage(float damage)
+    {
+        ReduceHp(damage);
+    }
 
     public virtual void Awake()
     {
@@ -18,9 +21,9 @@ public class Entity_Health : MonoBehaviour, IDamagable
         return false;
     }
 
-    public virtual void ReduceHp(float damage)
+    protected virtual void ReduceHp(float damage)
     {
-        Debug.Log("Entity health reduce HP " + damage);
+        // Debug.Log("Entity health reduce HP " + damage);
     }
 
     public virtual void RaiseHp(float healing) { }

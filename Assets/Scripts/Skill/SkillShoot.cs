@@ -52,7 +52,12 @@ public class SkillShoot : SkillBase
             InitialBulletList();
         }
         coolDownTimer = cooldownThreshold;
-        shootSpeedAnimMulti = .3f;
+        // shootSpeedAnimMulti = .3f;
+    }
+
+    private void Start()
+    {
+        shootSpeedAnimMulti = player.player_Health.entity_Stats.majorStats.attackSpeedMulti.GetValue();
     }
 
     protected override void Update()
