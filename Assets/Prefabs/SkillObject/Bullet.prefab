@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6063409251496642413}
-  - component: {fileID: 9111891225305702828}
+  - component: {fileID: -7709136861826091376}
   - component: {fileID: 1025483329664979295}
   - component: {fileID: 4335819064137879375}
   m_Layer: 0
@@ -35,7 +35,7 @@ Transform:
   - {fileID: 894258740605968054}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9111891225305702828
+--- !u!114 &-7709136861826091376
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,12 +44,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 483969735156635527}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a76af3ad376e9461ca481c33e1c6a3a7, type: 3}
+  m_Script: {fileID: 11500000, guid: f49324a82f8cd44bb88afe16bd5d4ca2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttackObject
-  isStartAttacking: 0
+  m_EditorClassIdentifier: Assembly-CSharp::SKillObject_Bullet
   canMove: 0
   moveSpeed: 20
+  isStartAttacking: 0
 --- !u!50 &1025483329664979295
 Rigidbody2D:
   serializedVersion: 5
