@@ -123,7 +123,7 @@ public class SkillShoot : SkillBase
             // Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
             if (enemy.enemy_Health.CanBeDamage() && currentAttackCount < maxAttackCount)
             {
-                bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy, null, player.player_Health.entity_Stats.GetTotalDamage());
+                bullets[currentAttackCount].GetComponent<SkillObject_Base>().SetupAttackObject(enemy, null, player.player_Health.entity_Stats.GetTotalDamage());
                 bullets[currentAttackCount].gameObject.SetActive(true);
                 // ActivateBulletOrNot(bullets[currentAttackCount].gameObject, true);
                 currentAttackCount++;

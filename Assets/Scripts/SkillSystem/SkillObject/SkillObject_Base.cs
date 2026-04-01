@@ -5,7 +5,7 @@ using UnityEngine;
 /// 
 /// TODO 怎么获取entity所具有的攻击，防御等方面的数据
 /// </summary>
-public class AttackObject : MonoBehaviour, IAttackable
+public class SkillObject_Base : MonoBehaviour, IAttackable
 {
     #region 基础数值
     private float damageValue;
