@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class Player : Entity
 {
+
+    public static Player sInstance { get; private set; }
+
     #region Player other Controlers
     public Player_Health player_Health { get; private set; }
     public PlayerSkillManager skillManager { get; private set; }
@@ -21,6 +24,12 @@ public class Player : Entity
     public override void Awake()
     {
         base.Awake();
+        if (sInstance != null && sInstance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        sInstance = this;
         stateMachine = new StateMachine();
         idleState = new PlayerIdleState(this, stateMachine, "Idle");
         shootState = new PlayerShootState(this, stateMachine, "Shoot");
@@ -51,6 +60,11 @@ public class Player : Entity
         // Debug.Log("Player trigger OnAniamtorFinished");
 
         stateMachine.currentState.OnAnimFinished();
+    }
+
+    public void Die()
+    {
+        stateMachine.ChangeState(deadState);
     }
 
     public void OnAnimatorAttackTrigger()

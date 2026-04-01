@@ -15,9 +15,17 @@ public class WallControlManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private float maxHP;
-
-    [SerializeField] private float currentHP;
+    private Player_Health playerHealth
+    {
+        get
+        {
+            if (Player.sInstance != null)
+            {
+                return Player.sInstance.player_Health;
+            }
+            return null;
+        }
+    }
 
     public Animator anim;
     [SerializeField] public bool beDamaged;
@@ -60,15 +68,11 @@ public class WallControlManager : MonoBehaviour
     /// <param name="damage"></param>
     public void TakeDamage(float damage)
     {
-        if (currentHP > 0)
+        if (playerHealth != null)
         {
-            currentHP -= damage;
-            beDamaged = true;
+            playerHealth.TakeDamage(damage);
         }
-        if (currentHP <= 0)
-        {
-            Debug.Log("游戏结束，玩家失败！！！");
-        }
+        beDamaged = true;
     }
 
     public void ResetDamageState(bool isDamaged)
