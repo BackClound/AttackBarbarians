@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine;
 public class SkillShoot : SkillBase
 {
     private Player player;
+    public Action<float> updateAttackSpeedMultiAction;
     //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
     [SerializeField] private GameObject shootPrefab;
     [SerializeField] private Transform bulletSpownPoint;
@@ -52,12 +54,11 @@ public class SkillShoot : SkillBase
             InitialBulletList();
         }
         coolDownTimer = cooldownThreshold;
-        // shootSpeedAnimMulti = .3f;
     }
 
     private void Start()
     {
-        shootSpeedAnimMulti = player.player_Health.entity_Stats.majorStats.attackSpeedMulti.GetValue();
+        shootSpeedAnimMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
     }
 
     protected override void Update()
@@ -122,7 +123,7 @@ public class SkillShoot : SkillBase
             // Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
             if (enemy.enemy_Health.CanBeDamage() && currentAttackCount < maxAttackCount)
             {
-                bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy, null, 10f);
+                bullets[currentAttackCount].GetComponent<AttackObject>().SetupAttackObject(enemy, null, player.player_Health.entity_Stats.GetTotalDamage());
                 bullets[currentAttackCount].gameObject.SetActive(true);
                 // ActivateBulletOrNot(bullets[currentAttackCount].gameObject, true);
                 currentAttackCount++;
@@ -183,6 +184,13 @@ public class SkillShoot : SkillBase
         {
             hasEffectiveEnemy = true;
         }
+    }
+
+    [ContextMenu("Update Shoot Speed Anim Multi")]
+    private void UpdateAttackSpeedMulti()
+    {
+        shootSpeedAnimMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
+        updateAttackSpeedMultiAction.Invoke(shootSpeedAnimMulti);
     }
 
     //应该在攻击结束之后，调用该方法，更新当前是否还有effective的敌人,移除available的敌人，更新hasEffectiveEnemy的值

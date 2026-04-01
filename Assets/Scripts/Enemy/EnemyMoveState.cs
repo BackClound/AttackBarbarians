@@ -9,7 +9,7 @@ public class EnemyMoveState : EnemyState
     public override void OnEnter()
     {
         base.OnEnter();
-        rb.linearVelocity = Vector2.down * enemy.moveSpeed;
+        enemy.SetVelocity(Vector2.down * enemy.moveSpeed);
     }
 
     public override void OnUpdate()

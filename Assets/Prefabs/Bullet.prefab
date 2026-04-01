@@ -47,10 +47,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a76af3ad376e9461ca481c33e1c6a3a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackObject
-  target: {fileID: 0}
   isStartAttacking: 0
   canMove: 0
-  moveSpeed: 18
+  moveSpeed: 20
 --- !u!50 &1025483329664979295
 Rigidbody2D:
   serializedVersion: 5

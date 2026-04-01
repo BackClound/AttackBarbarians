@@ -13,6 +13,7 @@ public class PlayerShootState : PlayerState
         base.OnEnter();
         skillShoot = player.skillManager.sKillShoot;
         isStartShooting = false;
+        skillShoot.updateAttackSpeedMultiAction += ApplyShootSpeedMulti;
         shootSpeedMulti = skillShoot.shootSpeedAnimMulti;
         anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
     }
@@ -34,6 +35,12 @@ public class PlayerShootState : PlayerState
         {
             stateMachine.ChangeState(player.idleState);
         }
+    }
+
+    public void ApplyShootSpeedMulti(float multi)
+    {
+        shootSpeedMulti = multi;
+        anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
     }
 
 

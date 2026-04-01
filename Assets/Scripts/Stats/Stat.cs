@@ -6,6 +6,7 @@ using UnityEngine;
 public class Stat
 {
     [SerializeField] private float baseValue;
+    [SerializeField] private bool shouldUpdate;
 
     private float finalValue;
 

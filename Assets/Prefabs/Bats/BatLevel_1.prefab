@@ -74,33 +74,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Entity_Stats
   majorStats:
     moveSpeed:
-      baseValue: 6
+      baseValue: 3
+      shouldUpdate: 0
     maxHp:
       baseValue: 30
+      shouldUpdate: 0
     attackSpeed:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
       baseValue: 0
+      shouldUpdate: 0
   offenseStats:
     damage:
       baseValue: 10
+      shouldUpdate: 0
     critPower:
       baseValue: 0
+      shouldUpdate: 0
     critChance:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
       baseValue: 0
+      shouldUpdate: 0
     fireDamage:
       baseValue: 0
+      shouldUpdate: 0
     iceDamage:
       baseValue: 0
+      shouldUpdate: 0
     lightingDamage:
       baseValue: 0
+      shouldUpdate: 0
   defenseStats:
     armor:
       baseValue: 0
+      shouldUpdate: 0
     armorReduce:
       baseValue: 0
+      shouldUpdate: 0
 --- !u!114 &2640175899680227429
 MonoBehaviour:
   m_ObjectHideFlags: 0

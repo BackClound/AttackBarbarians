@@ -15,7 +15,7 @@ public class AttackObject : MonoBehaviour, IAttackable
     private Rigidbody2D rb;
 
     #region 目标信息
-    [SerializeField] private Transform target;
+    private Vector2 moveDirection;
     [SerializeField] private bool isStartAttacking;
     private Vector2 originalPosition;
     #endregion
@@ -32,7 +32,12 @@ public class AttackObject : MonoBehaviour, IAttackable
     {
         if (canMove)
         {
-            rb.linearVelocity = (target.position - transform.position).normalized * moveSpeed;
+            if (moveDirection == null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                return;
+            }
+            rb.linearVelocity = moveDirection * moveSpeed;
             // transform.position = Vector2.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
             // if (Vector2.Distance(transform.position, target.position) < 0.3f)
             // {
@@ -48,16 +53,23 @@ public class AttackObject : MonoBehaviour, IAttackable
     private void OnEnable()
     {
         canMove = true;
+        Invoke("RecoverObjectStatus", 4f);
     }
 
     private void OnDisable()
     {
         canMove = false;
+        CancelInvoke();
     }
 
     public void SetupAttackObject(Enemy target, AttackInfo info, float damage)
     {
-        this.target = target.transform;
+        if (target == null)
+        {
+            Debug.LogError("Attack Object Setup Attack Object failed due to null target");
+            return;
+        }
+        moveDirection = (target.transform.position - transform.position).normalized;
         canMove = true;
         //target will Take damagevalue, and update the realHp
         damageValue = damage;
@@ -92,9 +104,9 @@ public class AttackObject : MonoBehaviour, IAttackable
     {
         gameObject.SetActive(false);
         canMove = false;
-        target = null;
         damageValue = 0;
         transform.position = originalPosition;
+        moveDirection = Vector2.zero;
     }
 }
 

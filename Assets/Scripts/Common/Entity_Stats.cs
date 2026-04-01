@@ -27,6 +27,16 @@ public class Entity_Stats : MonoBehaviour
         return baseDamage + offenseStats.iceDamage.GetValue() + offenseStats.fireDamage.GetValue() + offenseStats.lightingDamage.GetValue();
     }
 
+    public float GetMoveSpeed()
+    {
+        return majorStats.moveSpeed.GetValue();
+    }
+
+    public float GetAttackSpeedMultiplier()
+    {
+        return majorStats.attackSpeedMulti.GetValue();
+    }
+
     public float GetArmorDefense()
     {
         return defenseStats.armor.GetValue();

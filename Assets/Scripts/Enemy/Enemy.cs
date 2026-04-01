@@ -27,6 +27,7 @@ public class Enemy : Entity, IDamagable
     public override void Start()
     {
         stateMachine.InitialState(idleState);
+        moveSpeed = enemy_Health.entity_Stats.GetMoveSpeed();
     }
 
     public virtual bool isWallDetected() => Physics2D.Raycast(attackCheck.position, Vector2.down, attackDistance, wallLayer);

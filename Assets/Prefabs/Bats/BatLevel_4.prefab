@@ -52,7 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BatEnemy
   rb: {fileID: 4440036454814578735}
   coll: {fileID: 8516776333425304213}
-  enemy_Stats: {fileID: 0}
+  enemy_Health: {fileID: 0}
   moveSpeed: 7.5
   attackCheck: {fileID: 6059657913063643347}
   attackDistance: 0.6
@@ -74,33 +74,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Entity_Stats
   majorStats:
     moveSpeed:
-      baseValue: 7.5
+      baseValue: 3
+      shouldUpdate: 0
     maxHp:
       baseValue: 45
+      shouldUpdate: 0
     attackSpeed:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
       baseValue: 0
+      shouldUpdate: 0
   offenseStats:
     damage:
       baseValue: 13
+      shouldUpdate: 0
     critPower:
       baseValue: 0
+      shouldUpdate: 0
     critChance:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
       baseValue: 0
+      shouldUpdate: 0
     fireDamage:
       baseValue: 0
+      shouldUpdate: 0
     iceDamage:
       baseValue: 0
+      shouldUpdate: 0
     lightingDamage:
       baseValue: 0
+      shouldUpdate: 0
   defenseStats:
     armor:
       baseValue: 0
+      shouldUpdate: 0
     armorReduce:
       baseValue: 0
+      shouldUpdate: 0
 --- !u!114 &4990398373582002827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,6 +126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5886f7dc7d8604f8da4099e9e9e0b18d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy_Health
+  entity_Stats: {fileID: 0}
   currentHp: 0
   realHp: 0
   isDead: 0

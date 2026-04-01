@@ -144,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 13335479}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.55, y: 2.44, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1257,32 +1257,45 @@ MonoBehaviour:
   majorStats:
     moveSpeed:
       baseValue: 0
+      shouldUpdate: 0
     maxHp:
       baseValue: 1000
+      shouldUpdate: 0
     attackSpeed:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
-      baseValue: 0.5
+      baseValue: 1
+      shouldUpdate: 0
   offenseStats:
     damage:
-      baseValue: 10
+      baseValue: 45
+      shouldUpdate: 0
     critPower:
       baseValue: 0
+      shouldUpdate: 0
     critChance:
       baseValue: 0
+      shouldUpdate: 0
     attackSpeedMulti:
       baseValue: 0
+      shouldUpdate: 0
     fireDamage:
       baseValue: 0
+      shouldUpdate: 0
     iceDamage:
       baseValue: 0
+      shouldUpdate: 0
     lightingDamage:
       baseValue: 0
+      shouldUpdate: 0
   defenseStats:
     armor:
       baseValue: 0
+      shouldUpdate: 0
     armorReduce:
       baseValue: 0
+      shouldUpdate: 0
 --- !u!114 &825728589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1322,7 +1335,7 @@ Transform:
   m_GameObject: {fileID: 839134031}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.37, y: 1.52, z: 0}
+  m_LocalPosition: {x: -0.43, y: 2.37, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
