@@ -1353,11 +1353,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b348dfa73f10843d4bc3486c64983ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillShoot
-  shootPrefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
-  bulletSpownPoint: {fileID: 839134032}
-  bullets: []
+  bulletSpawnPrefab: {fileID: 1089714990345592040, guid: 9a00d02bca7be487d9717ab6aecfda17, type: 3}
+  bulletSpawnPoint: {fileID: 839134032}
+  bulletWaveList: []
   maxAttackCount: 10
   currentAttackCount: 0
+  maxBulletPerWave: 3
   attackInterval: 0.3
   coolDownTimer: 0
   cooldownThreshold: 4
@@ -1368,8 +1369,8 @@ MonoBehaviour:
     m_Bits: 256
   enemyTag: Enemy
   effectiveEnemys: []
-  shootLine: 0
-  shootWave: 0
+  shootLine: 1
+  shootAngle: 0
   hasEffectiveEnemy: 0
   isCoolDown: 0
 --- !u!1 &906468940
@@ -2696,7 +2697,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1190177241
-  m_SortingLayer: 4
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -1639092883, guid: f08f774f1eacc7b4b94233888f448e59, type: 3}

@@ -24,19 +24,18 @@ public class SkillObject_Base : MonoBehaviour, IAttackable
 
     protected virtual void Update() { }
 
-    private void OnEnable()
+    public virtual void OnEnable()
     {
         canMove = true;
-        Invoke("RecoverObjectStatus", 4f);
     }
 
-    private void OnDisable()
+    public virtual void OnDisable()
     {
         canMove = false;
         CancelInvoke();
     }
 
-    public virtual void SetupAttackObject(Enemy target, AttackInfo info, float damage) { }
+    public virtual void SetupAttackObject(Vector2 moveDirection, AttackInfo info, float damage) { }
 
     public void DoDamage(Entity enemy, float damage)
     {

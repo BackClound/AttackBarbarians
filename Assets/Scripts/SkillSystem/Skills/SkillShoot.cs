@@ -9,13 +9,15 @@ public class SkillShoot : SkillBase
     private Player player;
     public Action<float> updateAttackSpeedMultiAction;
     //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
-    [SerializeField] private GameObject shootPrefab;
-    [SerializeField] private Transform bulletSpownPoint;
+    [SerializeField] private GameObject bulletSpawnPrefab;
+    [SerializeField] private Transform bulletSpawnPoint;
+
     [Header("基础攻击数值")]
     //TODO 是否需要设置两个列表，一个控制available bullets，一个控制unAvailable bullets
-    [SerializeField] private Transform[] bullets;
+    [SerializeField] private List<SkillObject_BulletSpawn> bulletWaveList;
     [SerializeField] private int maxAttackCount = 10;
     [SerializeField] private int currentAttackCount;
+    [SerializeField] private int maxBulletPerWave = 3;
     [SerializeField] private float attackInterval;
     [SerializeField] private float coolDownTimer = 0;
     [SerializeField] private float cooldownThreshold = 4;
@@ -31,9 +33,9 @@ public class SkillShoot : SkillBase
 
 
 
-    [Header("多发弹道信息")]
-    [SerializeField] private int shootLine;
-    [SerializeField] private int shootWave;
+    [Header("弹道信息")]
+    [SerializeField] private int shootLine = 1;
+    [SerializeField] private float shootAngle = 0;
 
     [Header("多波次攻击")]
     private float spaceBetweenBulletLine;
@@ -48,12 +50,32 @@ public class SkillShoot : SkillBase
         player = GetComponentInParent<Player>();
         // player_Stats = player.player_Stats;
         // maxAttackCount = Mathf.FloorToInt(player_Stats.maxBulletCount.GetFinalValue());
-        if (bullets == null || bullets.Length < maxAttackCount)
+        if (bulletWaveList == null || bulletWaveList.Count == 0)
         {
-            bullets = new Transform[maxAttackCount];
+            bulletWaveList = new List<SkillObject_BulletSpawn>();
             InitialBulletList();
         }
         coolDownTimer = cooldownThreshold;
+    }
+
+    private void InitialBulletList()
+    {
+        for (int i = 0; i < maxAttackCount; i++)
+        {
+            SkillObject_BulletSpawn bulletSpawn = CreateBulletSpawnPre();
+            bulletWaveList.Add(bulletSpawn);
+        }
+    }
+
+    [ContextMenu("Update Bullet List")]
+    private void UpdateTheBulletList()
+    {
+        for (int i = 0; i < maxAttackCount; i++)
+        {
+            var currentBulletSpawn = bulletWaveList[i];
+            //TODO 根据shootLine和shootAngle计算bullet的发射角度，调整bullet的朝向
+            //   currentBulletSpawn.UpdateBulletMaxCount(maxBulletPerWave, currentBulletSpawn.gameObject);
+        }
     }
 
     private void Start()
@@ -79,20 +101,13 @@ public class SkillShoot : SkillBase
 
     public bool CanUseShootSkill() => hasEffectiveEnemy && !isCoolDown;
 
-    private void InitialBulletList()
+    private SkillObject_BulletSpawn CreateBulletSpawnPre()
     {
-        for (int i = 0; i < maxAttackCount; i++)
-        {
-            GameObject bullet = CreateBulletPre();
-            bullet.SetActive(false);
-            bullets[i] = bullet.transform;
-        }
-    }
-
-    private GameObject CreateBulletPre()
-    {
-        GameObject bullet = Instantiate(shootPrefab, bulletSpownPoint.position, Quaternion.identity);
-        return bullet;
+        GameObject bullet = Instantiate(bulletSpawnPrefab, bulletSpawnPoint.position, Quaternion.identity);
+        SkillObject_BulletSpawn bulletSpawn = bullet.GetComponent<SkillObject_BulletSpawn>();
+        bulletSpawn.SetupBulletSpawn(player, maxBulletPerWave);
+        bullet.SetActive(false);
+        return bulletSpawn;
     }
 
     public void ActivateBulletOrNot(GameObject bullet, bool isActivite)
@@ -123,9 +138,7 @@ public class SkillShoot : SkillBase
             // Debug.Log("ActivateAttackEnemy check enemy state = " + enemy.enemy_Health.CanBeDamage() + ", currentAttackCount = " + currentAttackCount);
             if (enemy.enemy_Health.CanBeDamage() && currentAttackCount < maxAttackCount)
             {
-                bullets[currentAttackCount].GetComponent<SkillObject_Base>().SetupAttackObject(enemy, null, player.player_Health.entity_Stats.GetTotalDamage());
-                bullets[currentAttackCount].gameObject.SetActive(true);
-                // ActivateBulletOrNot(bullets[currentAttackCount].gameObject, true);
+                ApplyBulletWithEnemy(enemy);
                 currentAttackCount++;
                 //退出循环，继续执行后面逻辑
                 break;
@@ -149,6 +162,13 @@ public class SkillShoot : SkillBase
             player.stateMachine.ChangeState(player.idleState);
             return;
         }
+    }
+
+    private void ApplyBulletWithEnemy(Enemy enemy)
+    {
+        //TODO 根据bulletIndexInLine和shootLine计算bullet的发射角度，调整bullet的朝向
+        SkillObject_BulletSpawn bullet = bulletWaveList[currentAttackCount];
+        bullet.ApplyBulletWithEnemy(enemy);
     }
 
     /// <summary>

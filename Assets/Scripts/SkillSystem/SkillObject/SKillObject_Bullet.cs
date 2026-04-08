@@ -18,17 +18,12 @@ public class SKillObject_Bullet : SkillObject_Base
     {
         if (canMove)
         {
-            if (moveDirection == null)
+            if (moveDirection == Vector2.zero)
             {
                 rb.linearVelocity = Vector2.zero;
                 return;
             }
-            rb.linearVelocity = moveDirection * moveSpeed;
-            // transform.position = Vector2.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
-            // if (Vector2.Distance(transform.position, target.position) < 0.3f)
-            // {
-            //     // RecoverObjectStatus();
-            // }
+            rb.linearVelocity = moveDirection.normalized * moveSpeed;
         }
         else
         {
@@ -36,14 +31,20 @@ public class SKillObject_Bullet : SkillObject_Base
         }
     }
 
-    public override void SetupAttackObject(Enemy target, AttackInfo info, float damage)
+    public override void OnEnable()
     {
-        if (target == null)
+        base.OnEnable();
+        Invoke("RecoverObjectStatus", 4f);
+    }
+
+    public override void SetupAttackObject(Vector2 moveDirection, AttackInfo info, float damage)
+    {
+        if (moveDirection == Vector2.zero)
         {
-            Debug.LogError("Attack Object Setup Attack Object failed due to null target");
+            Debug.LogError("Attack Object Setup Attack Object failed due to zero moveDirection");
             return;
         }
-        moveDirection = (target.transform.position - transform.position).normalized;
+        this.moveDirection = moveDirection.normalized;
         canMove = true;
         //target will Take damagevalue, and update the realHp
         damageValue = damage;

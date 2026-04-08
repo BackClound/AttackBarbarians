@@ -38,7 +38,6 @@ public class EnemyGenerateManager : MonoBehaviour
             mainCamera = Camera.main;
         }
         //初始化 spawn信息
-        spawnInterval = 1.5f;
         spawnCoolDownTimer = 0;
         StartCoroutine(DelayInitialEnemyBounds());
     }

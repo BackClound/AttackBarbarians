@@ -49,11 +49,11 @@ TagManager:
   - name: Enemy
     uniqueID: 285576527
     locked: 0
-  - name: Bullet
-    uniqueID: 992383713
-    locked: 0
   - name: Player
     uniqueID: 3104790055
+    locked: 0
+  - name: Bullet
+    uniqueID: 992383713
     locked: 0
   m_RenderingLayers:
   - Default

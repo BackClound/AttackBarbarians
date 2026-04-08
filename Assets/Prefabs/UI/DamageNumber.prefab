@@ -51,10 +51,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageNumber
   numberText: {fileID: 4359190739838850321}
-  intervalThreshold: 1
+  intervalThreshold: 0.5
   intervalTime: 0
-  floatSpeed: 0.8
-  scaleSpeed: 0.5
+  floatSpeed: 1.2
+  scaleSpeed: 0.8
 --- !u!222 &3221654515599927088
 CanvasRenderer:
   m_ObjectHideFlags: 0
