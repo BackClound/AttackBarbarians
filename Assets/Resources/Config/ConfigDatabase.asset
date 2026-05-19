@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d15f28c2759d4e15a0b5249623361217, type: 3}
+  m_Name: ConfigDatabase
+  m_EditorClassIdentifier: 
+  players:
+  - {fileID: 11400000, guid: 5f2585b0e0714a7d84929aade39be6ea, type: 2}
+  enemies:
+  - {fileID: 11400000, guid: 0eff639642124c36a326df3296ce6783, type: 2}
+  skills:
+  - {fileID: 11400000, guid: f7415046b87e49f0b74755b50e875dab, type: 2}
+  buffs:
+  - {fileID: 11400000, guid: b580748b14654bbba284a7b69c187cbd, type: 2}
+  waves:
+  - {fileID: 11400000, guid: d323b39826634a8fb69b55d9e2a1ef57, type: 2}
+  bosses: []
+  dropTables:
+  - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}

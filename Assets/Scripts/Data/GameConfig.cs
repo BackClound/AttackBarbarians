@@ -16,12 +16,18 @@ public class GameConfig : ScriptableObject
     [SerializeField] private bool startGameOnBootstrap = true;
     [SerializeField] private bool enableRuntimeLogs;
 
+    [Header("Config")]
+    [SerializeField] private ConfigDatabaseSO configDatabase;
+    [SerializeField] private bool validateConfigOnBootstrap = true;
+
     [Header("Pool")]
     [SerializeField] private int defaultPoolPrewarmCount = 8;
     [SerializeField] private bool allowPoolGrowth = true;
 
     public bool StartGameOnBootstrap => startGameOnBootstrap;
     public bool EnableRuntimeLogs => enableRuntimeLogs;
+    public ConfigDatabaseSO ConfigDatabase => configDatabase;
+    public bool ValidateConfigOnBootstrap => validateConfigOnBootstrap;
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);
     public bool AllowPoolGrowth => allowPoolGrowth;
 }

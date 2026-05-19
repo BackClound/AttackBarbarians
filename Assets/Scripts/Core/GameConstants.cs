@@ -73,6 +73,17 @@ public static class GameConstants
     public static class ResourcePaths
     {
         public const string GameConfig = "Config/GameConfig";
+        public const string ConfigDatabase = "Config/ConfigDatabase";
+    }
+
+    public static class ConfigIds
+    {
+        public const string PlayerDefault = "player.default";
+        public const string EnemyBat = "enemy.bat";
+        public const string SkillShoot = "skill.shoot";
+        public const string BuffAttackUp = "buff.attack_up";
+        public const string Wave01 = "wave.01";
+        public const string DropTableCommon = "drop.common";
     }
 
     public static class PoolKeys

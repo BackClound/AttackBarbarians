@@ -19,6 +19,7 @@
 | `GameStateChange` | **否** | 事件 Payload | — |
 | `GameEventContext` | **否** | 事件 Payload | — |
 | `GameConfig` | **否**（SO 资产） | `Assets/Resources/Config/GameConfig.asset` | `ConfigManager.GameConfig` |
+| `ConfigDatabaseSO` | **否**（SO 资产） | `Assets/Resources/Config/ConfigDatabase.asset` | `ConfigManager.Database` |
 
 **不要**将上述 Manager 挂在 Player、Enemy、Wall、UI Canvas、子弹 Prefab 上。
 
@@ -42,6 +43,7 @@ GameSystems                    ← 空物体，挂 GameBootstrapper（可同挂 
 1. 右键 Create → **Attack Barbarians → Config → Game Config**
 2. 保存为 `Assets/Resources/Config/GameConfig.asset`
 3. 拖到 `ConfigManager` 的 **Game Config** 字段（或依赖 Resources 自动加载）
+4. 创建 **Config Database**（`Assets/Resources/Config/ConfigDatabase.asset`），填入各类 Data SO，并拖到 `GameConfig.Config Database`（详见 `docs/config_system.md`）
 
 ## GameBootstrapper Inspector
 
