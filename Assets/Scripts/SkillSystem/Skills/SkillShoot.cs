@@ -80,7 +80,13 @@ public class SkillShoot : SkillBase
 
     private void Start()
     {
+        RefreshAttackSpeedFromStats();
+    }
+
+    public void RefreshAttackSpeedFromStats()
+    {
         shootSpeedAnimMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
+        updateAttackSpeedMultiAction?.Invoke(shootSpeedAnimMulti);
     }
 
     protected override void Update()

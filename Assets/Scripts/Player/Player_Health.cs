@@ -27,9 +27,11 @@ public class Player_Health : Entity_Health
     protected override void ReduceHp(float damage)
     {
         currentHp -= damage;
-        if (currentHp < 0)
+        if (currentHp <= 0 && !isDead)
         {
             isDead = true;
+            currentHp = 0;
+            Die();
         }
         UpdateHealthBar();
     }
@@ -54,6 +56,17 @@ public class Player_Health : Entity_Health
             Player.sInstance.Die();
             //show game over UI
         }
+    }
+
+    ///TODO:是否只有enemy在局内随时间生命上限进行提升， Player的生命上限受增益buff控制。
+    public void ApplyMaxHpMultiplierFromBuff()
+    {
+        if (entity_Stats == null) return;
+        var max = entity_Stats.GetMaxHp();
+        if (max <= 0) return;
+        var ratio = healthBarSlider != null ? healthBarSlider.value : currentHp / max;
+        currentHp = Mathf.Clamp(ratio * max, 1f, max);
+        UpdateHealthBar();
     }
 
 }

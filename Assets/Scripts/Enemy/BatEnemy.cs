@@ -19,7 +19,9 @@ public class BatEnemy : Enemy
 
     public override float GetDamageValue()
     {
-        //应该根据Enemy_Stats计算最终伤害
+        //TODO 是否需要添加其他的增加伤害的项
+        if (enemy_Health != null && enemy_Health.entity_Stats != null)
+            return enemy_Health.entity_Stats.GetTotalDamage();
         return 10;
     }
 }

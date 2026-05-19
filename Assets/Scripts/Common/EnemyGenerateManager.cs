@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
 using UnityEngine;
 
 public class EnemyGenerateManager : MonoBehaviour
@@ -25,6 +24,8 @@ public class EnemyGenerateManager : MonoBehaviour
     private int enemySpawnAmount;
     //当前波次时间内，每次生成的enemy的间隔
     [SerializeField] private float spawnInterval;
+    //当前波次时间内，每次生成的enemy的间隔
+    [SerializeField] private float _baseSpawnInterval;
 
     //用于保存在不同时间段内可以产生的enemy的数量
     private Dictionary<int, List<GameObject>> enemyList = new Dictionary<int, List<GameObject>>();
@@ -37,6 +38,7 @@ public class EnemyGenerateManager : MonoBehaviour
         {
             mainCamera = Camera.main;
         }
+        _baseSpawnInterval = spawnInterval > 0.05f ? spawnInterval : 1.5f;
         //初始化 spawn信息
         spawnCoolDownTimer = 0;
         StartCoroutine(DelayInitialEnemyBounds());
@@ -44,8 +46,8 @@ public class EnemyGenerateManager : MonoBehaviour
 
     private void Update()
     {
-        spawnCoolDownTimer += Time.deltaTime;
-        if (spawnCoolDownTimer > spawnInterval && canAutoGenerateEnenmy)
+            spawnCoolDownTimer += Time.deltaTime;
+            if (spawnCoolDownTimer > spawnInterval && canAutoGenerateEnenmy)
         {
             CreateEnemy();
             spawnCoolDownTimer = 0;

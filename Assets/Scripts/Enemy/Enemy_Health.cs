@@ -30,7 +30,7 @@ public class Enemy_Health : Entity_Health
     {
         Debug.Log("Enemy health reduce HP " + damage);
         currentHp -= damage;
-        if (currentHp <= 0)
+        if (currentHp <= 0 && !isDead)
         {
             isDead = true;
             Die();
