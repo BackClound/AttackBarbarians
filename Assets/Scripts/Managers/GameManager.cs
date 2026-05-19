@@ -8,38 +8,17 @@ using UnityEngine.SceneManagement;
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。由 <see cref="GameBootstrapper"/> 初始化，不应单独在场景中重复创建多个实例。</para>
 /// <para><b>推荐挂载对象：</b>挂在 <c>GameSystems</c> 根物体上，或作为其子物体 <c>GameManager</c> 的唯一组件。</para>
 /// <para><b>不要挂载到：</b>Player、Enemy、UI 面板；避免与 <see cref="Player"/> 单例混在同一物体上。</para>
-/// <para><b>获取方式：</b>优先 <c>ServiceLocator.Get&lt;GameManager&gt;()</c>；Bootstrap 前可用 <c>GameManager.Instance</c>（Awake 后）。</para>
+/// <para><b>获取方式：</b>优先 <c>ServiceLocator.Get&lt;GameManager&gt;()</c>；Bootstrap 前可用 <see cref="MonoSingleton{T}.Instance"/>（Awake 后）。</para>
 /// <para><b>调用示例：</b>玩家死亡时 <c>ServiceLocator.Get&lt;GameManager&gt;().GameOver()</c>；暂停菜单 <c>PauseGame()</c> / <c>ResumeGame()</c>。</para>
 /// </remarks>
-public class GameManager : MonoBehaviour, IGameSystem
+public class GameManager : MonoSingleton<GameManager>, IGameSystem
 {
-    public static GameManager Instance { get; private set; }
-
     [SerializeField] private GameState initialState = GameState.Bootstrapping;
 
     public bool IsInitialized { get; private set; }
     public GameState CurrentState { get; private set; }
     public GameState PreviousState { get; private set; }
     public bool IsPaused => CurrentState == GameState.Paused;
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-    }
 
     public void Initialize()
     {

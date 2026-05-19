@@ -1,27 +1,27 @@
 using UnityEngine;
 
+/// <summary>
+/// 城墙表现与受击代理：将敌人伤害转发到 Player 血量，并驱动墙体动画状态机。
+/// </summary>
+/// <remarks>
+/// <para><b>是否需要挂载：</b>是。挂在场景墙体物体上。</para>
+/// <para><b>获取方式：</b><see cref="Instance"/> 或旧名 <see cref="sInstance"/>（不再使用 Find 懒查找）。</para>
+/// </remarks>
 public class WallControlManager : MonoBehaviour
 {
-    private static WallControlManager _sInstance;
-    public static WallControlManager sInstance
-    {
-        get
-        {
-            if (_sInstance == null)
-            {
-                _sInstance = FindFirstObjectByType<WallControlManager>();
-            }
-            return _sInstance;
-        }
-    }
+    public static WallControlManager sInstance => Instance;
+
+    public static WallControlManager Instance => SingletonHost<WallControlManager>.Instance;
+
+    public static bool HasInstance => SingletonHost<WallControlManager>.HasInstance;
 
     private Player_Health playerHealth
     {
         get
         {
-            if (Player.sInstance != null)
+            if (Player.HasInstance)
             {
-                return Player.sInstance.player_Health;
+                return Player.Instance.player_Health;
             }
             return null;
         }
@@ -39,18 +39,22 @@ public class WallControlManager : MonoBehaviour
 
     private void Awake()
     {
-        if (_sInstance != null && _sInstance != this)
+        if (!SingletonHost<WallControlManager>.TryClaim(this, this, SingletonOptions.SceneDefault, out bool destroyedOwner) || destroyedOwner)
         {
-            Destroy(gameObject);
             return;
         }
+
         anim = GetComponent<Animator>();
         beDamaged = false;
-        _sInstance = this;
 
         stateMachine = new StateMachine();
         idleState = new WallIdleState(this, stateMachine, "isIdle");
         damageState = new WallDamageState(this, stateMachine, "isDamaged");
+    }
+
+    private void OnDestroy()
+    {
+        SingletonHost<WallControlManager>.Release(this);
     }
 
     private void Start()

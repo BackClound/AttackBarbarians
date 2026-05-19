@@ -16,10 +16,8 @@ using UnityEngine;
 /// <para><b>启动顺序：</b>ConfigManager → EventBus（代码创建）→ PoolManager → GameManager。</para>
 /// <para><b>获取方式：</b><c>GameBootstrapper.Instance</c> 或 <c>ServiceLocator.Get&lt;GameBootstrapper&gt;()</c>（Bootstrap 完成后）。</para>
 /// </remarks>
-public class GameBootstrapper : MonoBehaviour
+public class GameBootstrapper : MonoSingleton<GameBootstrapper>
 {
-    public static GameBootstrapper Instance { get; private set; }
-
     [Header("Lifecycle")]
     [SerializeField] private bool initializeOnAwake = true;
     [SerializeField] private bool dontDestroyOnLoad = true;
@@ -33,21 +31,11 @@ public class GameBootstrapper : MonoBehaviour
     private EventBus eventBus;
     private bool isBootstrapped;
 
-    private void Awake()
+    protected override SingletonOptions Options =>
+        dontDestroyOnLoad ? SingletonOptions.PersistentDefault : SingletonOptions.SceneDefault;
+
+    protected override void OnSingletonAwake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
-        if (dontDestroyOnLoad)
-        {
-            DontDestroyOnLoad(gameObject);
-        }
-
         if (initializeOnAwake)
         {
             Bootstrap();
@@ -68,13 +56,8 @@ public class GameBootstrapper : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    protected override void OnSingletonDestroy()
     {
-        if (Instance != this)
-        {
-            return;
-        }
-
         for (int i = systems.Count - 1; i >= 0; i--)
         {
             systems[i].Shutdown();
@@ -82,7 +65,6 @@ public class GameBootstrapper : MonoBehaviour
 
         systems.Clear();
         ServiceLocator.Clear();
-        Instance = null;
     }
 
     /// <summary>手动触发引导流程；若已在 Awake 中初始化则不会重复执行。</summary>

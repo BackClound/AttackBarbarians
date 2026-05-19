@@ -14,6 +14,7 @@
 | `ServiceLocator` | **否** | 静态类 | `Get` / `TryGet` |
 | `IGameSystem` | **否** | 接口 | — |
 | `GameConstants` | **否** | 静态常量 | 直接引用 |
+| `MonoSingleton<T>` / `SingletonHost<T>` | **否** | 单例基类 / 宿主 | `Instance` / `TryGet` |
 | `GameState` | **否** | 枚举 | — |
 | `GameStateChange` | **否** | 事件 Payload | — |
 | `GameEventContext` | **否** | 事件 Payload | — |
@@ -82,3 +83,8 @@ GameEvents.SubscribeGameStateChanged(OnGameStateChanged);
 
 - `Player`、`EnemyGenerateManager`、`SkillShoot` 等**保持原场景引用**，不要求迁到 `GameSystems`。
 - 新系统通过 `ServiceLocator` / `EventBus` 旁路接入；迁移完成后再逐步下线旧入口。
+
+## 单例框架
+
+- Manager 优先 `ServiceLocator`；场景对象用 `MonoSingleton` / `SingletonHost` 的 `Instance`。
+- 详见 **`docs/singleton_framework.md`**。

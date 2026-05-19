@@ -66,6 +66,12 @@ Assets/Scripts/Core/
  GameState.cs
  IGameSystem.cs
  ServiceLocator.cs
+ Singleton/
+  MonoSingleton.cs
+  PersistentMonoSingleton.cs
+  SingletonDuplicatePolicy.cs
+  SingletonHost.cs
+  SingletonOptions.cs
 Assets/Scripts/
  Data/GameConfig.cs
  Enemy/

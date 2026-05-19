@@ -13,7 +13,12 @@ using UnityEngine.InputSystem;
 /// </remarks>
 public class DamageNumberController : GameEventSubscriberBase
 {
-    public static DamageNumberController numberControllerInstance;
+    /// <summary>旧字段名，与 <see cref="Instance"/> 相同。</summary>
+    public static DamageNumberController numberControllerInstance => Instance;
+
+    public static DamageNumberController Instance => SingletonHost<DamageNumberController>.Instance;
+
+    public static bool HasInstance => SingletonHost<DamageNumberController>.HasInstance;
 
     [SerializeField] private Transform numberCanvas;
     [SerializeField] private GameObject numberPrefab;
@@ -23,21 +28,12 @@ public class DamageNumberController : GameEventSubscriberBase
 
     private void Awake()
     {
-        if (numberControllerInstance != null && numberControllerInstance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        numberControllerInstance = this;
+        SingletonHost<DamageNumberController>.TryClaim(this, this, SingletonOptions.SceneDefault, out _);
     }
 
     private void OnDestroy()
     {
-        if (numberControllerInstance == this)
-        {
-            numberControllerInstance = null;
-        }
+        SingletonHost<DamageNumberController>.Release(this);
     }
 
     private void Update()

@@ -5,8 +5,12 @@ using UnityEngine;
 /// </summary>
 public class Player : Entity
 {
+    /// <summary>场景内玩家单例。旧代码请逐步改用 <see cref="Instance"/>。</summary>
+    public static Player sInstance => Instance;
 
-    public static Player sInstance { get; private set; }
+    public static Player Instance => SingletonHost<Player>.Instance;
+
+    public static bool HasInstance => SingletonHost<Player>.HasInstance;
 
     #region Player other Controlers
     public Player_Health player_Health { get; private set; }
@@ -23,12 +27,11 @@ public class Player : Entity
     public override void Awake()
     {
         base.Awake();
-        if (sInstance != null && sInstance != this)
+        if (!SingletonHost<Player>.TryClaim(this, this, SingletonOptions.SceneDefault, out bool destroyedOwner) || destroyedOwner)
         {
-            Destroy(gameObject);
             return;
         }
-        sInstance = this;
+
         stateMachine = new StateMachine();
         idleState = new PlayerIdleState(this, stateMachine, "Idle");
         shootState = new PlayerShootState(this, stateMachine, "Shoot");
@@ -70,5 +73,10 @@ public class Player : Entity
     {
         // Debug.Log("Player trigger OnAnimEventTrigger");
         stateMachine.currentState.OnAnimAttackTrigger();
+    }
+
+    private void OnDestroy()
+    {
+        SingletonHost<Player>.Release(this);
     }
 }
