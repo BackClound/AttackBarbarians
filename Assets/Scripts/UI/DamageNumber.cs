@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class DamageNumber : MonoBehaviour
+public class DamageNumber : MonoBehaviour, IPoolable
 {
     public static Action<GameObject> resetNumberText;
     [SerializeField] private TextMeshProUGUI numberText;
@@ -52,13 +52,33 @@ public class DamageNumber : MonoBehaviour
         }
     }
 
-    private void DisableNumberComponent()
+    public void OnSpawn()
     {
-        gameObject.SetActive(false);
-        numberText.text = "";
+        intervalTime = intervalThreshold;
+    }
+
+    public void OnDespawn()
+    {
+        if (numberText != null)
+        {
+            numberText.text = string.Empty;
+        }
+
         damageValue = 0;
         intervalTime = intervalThreshold;
         transform.localScale = originalScale;
+    }
+
+    private void DisableNumberComponent()
+    {
+        if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.IsManagedInstance(gameObject))
+        {
+            poolManager.Despawn(gameObject);
+            return;
+        }
+
+        OnDespawn();
+        gameObject.SetActive(false);
         resetNumberText?.Invoke(gameObject);
     }
 }

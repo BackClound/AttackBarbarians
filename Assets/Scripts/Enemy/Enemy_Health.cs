@@ -71,4 +71,12 @@ public class Enemy_Health : Entity_Health
 
         enemy.stateMachine.ChangeState(enemy.deadState);
     }
+
+    /// <summary>对象池复用前重置血量与死亡标记。</summary>
+    public void ResetForPool()
+    {
+        isDead = false;
+        currentHp = entity_Stats.GetMaxHp();
+        realHp = currentHp;
+    }
 }

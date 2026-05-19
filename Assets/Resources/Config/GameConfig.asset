@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::GameConfig
   startGameOnBootstrap: 1
-  enableRuntimeLogs: 0
+  enableRuntimeLogs: 1
   defaultPoolPrewarmCount: 8
   allowPoolGrowth: 1

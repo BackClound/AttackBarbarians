@@ -42,8 +42,20 @@ public class SkillObject_BulletSpawn : MonoBehaviour
 
     private GameObject CreateBulletPre()
     {
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        return bullet;
+        if (ServiceLocator.TryGet(out PoolManager poolManager))
+        {
+            GameObject pooled = poolManager.Allocate(
+                GameConstants.PoolKeys.Bullet,
+                transform.position,
+                Quaternion.identity,
+                transform);
+            if (pooled != null)
+            {
+                return pooled;
+            }
+        }
+
+        return Instantiate(bulletPrefab, transform.position, Quaternion.identity);
     }
 
     public void UpdateMaxBullets(int newMaxBullets)
@@ -67,7 +79,7 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             {
                 var bulletToRemove = bulletList[bulletList.Count - 1];
                 bulletList.RemoveAt(bulletList.Count - 1);
-                Destroy(bulletToRemove.gameObject);
+                ReleaseBulletInstance(bulletToRemove.gameObject);
             }
         }
     }
@@ -88,8 +100,25 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             float angle = baseAngle + angleOffset;
             bullet.rotation = Quaternion.Euler(0, 0, angle);
             Vector2 forwardDir = bullet.right;
+            bulletList[i].OnSpawn();
             bulletList[i].SetupAttackObject(forwardDir, null, player.player_Health.entity_Stats.GetTotalDamage());
             bullet.gameObject.SetActive(true);
         }
+    }
+
+    private static void ReleaseBulletInstance(GameObject bulletObject)
+    {
+        if (bulletObject == null)
+        {
+            return;
+        }
+
+        if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.IsManagedInstance(bulletObject))
+        {
+            poolManager.ReturnAllocated(bulletObject);
+            return;
+        }
+
+        Destroy(bulletObject);
     }
 }

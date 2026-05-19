@@ -1,56 +1,30 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 对象池管理器：按 Key 预热、Spawn、Despawn，供敌人、子弹、飘字等高频对象复用。
+/// 对象池管理器：按 Key 注册、预热、Spawn、Despawn、清空，供敌人、子弹、飘字等高频对象复用。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。</para>
-/// <para><b>推荐挂载对象：</b>在 <c>GameSystems</c> 下创建子物体 <c>PoolRoot</c>，将本组件挂在 <c>PoolRoot</c> 上；各池的 <c>Parent</c> 可指向 <c>PoolRoot</c> 下对应子节点（如 <c>Pool_Enemy</c>、<c>Pool_Bullet</c>）。</para>
+/// <para><b>推荐挂载对象：</b>在 <c>GameSystems</c> 下创建子物体 <c>PoolRoot</c>，将本组件挂在 <c>PoolRoot</c> 上。</para>
 /// <para><b>不要挂载到：</b>Player、单个 Enemy Prefab、子弹 Prefab 上。</para>
-/// <para><b>Inspector 配置：</b>在 <c>Pools</c> 列表中为每项填写 Key（与 <see cref="GameConstants.PoolKeys"/> 一致）、Prefab、Prewarm Count、可选 Parent。</para>
-/// <para><b>获取方式：</b><c>ServiceLocator.Get&lt;PoolManager&gt;()</c>；调用 <c>Spawn(key, position, rotation)</c> / <c>Despawn(instance)</c>。</para>
-/// <para><b>注意：</b>未配置 Key 时 Spawn 返回 null，调用方应保留 Instantiate 回退逻辑直至迁移完成。</para>
+/// <para><b>Inspector 配置：</b>拖入 <see cref="PoolConfigSO"/> 和/或在 <c>Inspector Pools</c> 中填写条目；Key 与 <see cref="GameConstants.PoolKeys"/> 一致。</para>
+/// <para><b>获取方式：</b><c>ServiceLocator.Get&lt;PoolManager&gt;()</c>。</para>
 /// </remarks>
 public class PoolManager : MonoBehaviour, IGameSystem
 {
-    [Serializable]
-    private class PoolDefinition
-    {
-        public string key;
-        public GameObject prefab;
-        public int prewarmCount = 8;
-        public Transform parent;
-    }
+    [SerializeField] private PoolConfigSO poolConfig;
+    [SerializeField] private List<PoolEntry> inspectorPools = new List<PoolEntry>();
 
-    [SerializeField] private List<PoolDefinition> pools = new List<PoolDefinition>();
-
-    private readonly Dictionary<string, PoolDefinition> definitions = new Dictionary<string, PoolDefinition>(32);
-    private readonly Dictionary<string, Queue<GameObject>> inactiveObjects = new Dictionary<string, Queue<GameObject>>(32);
-    private readonly Dictionary<GameObject, string> activeObjectKeys = new Dictionary<GameObject, string>(128);
+    private readonly Dictionary<string, GameObjectPoolHandle> pools = new Dictionary<string, GameObjectPoolHandle>(32);
 
     public bool IsInitialized { get; private set; }
 
     public void Initialize()
     {
-        definitions.Clear();
-        inactiveObjects.Clear();
-        activeObjectKeys.Clear();
-
-        for (int i = 0; i < pools.Count; i++)
-        {
-            PoolDefinition definition = pools[i];
-            if (definition == null || string.IsNullOrEmpty(definition.key) || definition.prefab == null)
-            {
-                continue;
-            }
-
-            definitions[definition.key] = definition;
-            inactiveObjects[definition.key] = new Queue<GameObject>(definition.prewarmCount);
-            Prewarm(definition);
-        }
-
+        pools.Clear();
+        RegisterEntries(poolConfig != null ? poolConfig.Entries : null);
+        RegisterEntries(inspectorPools);
         IsInitialized = true;
     }
 
@@ -58,37 +32,41 @@ public class PoolManager : MonoBehaviour, IGameSystem
 
     public void Shutdown()
     {
-        definitions.Clear();
-        inactiveObjects.Clear();
-        activeObjectKeys.Clear();
+        ClearAll(destroyInstances: true);
         IsInitialized = false;
     }
 
+    public bool HasPool(string key) => !string.IsNullOrEmpty(key) && pools.ContainsKey(key);
+
     public GameObject Spawn(string key, Vector3 position, Quaternion rotation, Transform parent = null)
     {
-        if (!definitions.TryGetValue(key, out PoolDefinition definition))
+        if (!TryGetPool(key, out GameObjectPoolHandle handle))
         {
             return null;
         }
 
-        GameObject instance = GetOrCreateInstance(definition);
-        if (instance == null)
-        {
-            return null;
-        }
-
-        Transform instanceTransform = instance.transform;
-        instanceTransform.SetParent(parent, false);
-        instanceTransform.SetPositionAndRotation(position, rotation);
-        instance.SetActive(true);
-        activeObjectKeys[instance] = key;
-        return instance;
+        Transform instance = handle.Pool.Spawn(position, rotation, parent != null ? parent : handle.Entry.Parent);
+        return instance != null ? instance.gameObject : null;
     }
 
     public T Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent = null) where T : Component
     {
         GameObject instance = Spawn(key, position, rotation, parent);
         return instance != null ? instance.GetComponent<T>() : null;
+    }
+
+    /// <summary>
+    /// 借出未激活实例（不触发 OnSpawn），供 Skill 预创建子弹列表等场景。
+    /// </summary>
+    public GameObject Allocate(string key, Vector3 position, Quaternion rotation, Transform parent = null)
+    {
+        if (!TryGetPool(key, out GameObjectPoolHandle handle))
+        {
+            return null;
+        }
+
+        Transform instance = handle.Pool.Allocate(position, rotation, parent != null ? parent : handle.Entry.Parent);
+        return instance != null ? instance.gameObject : null;
     }
 
     public void Despawn(GameObject instance)
@@ -98,56 +76,142 @@ public class PoolManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        if (!activeObjectKeys.TryGetValue(instance, out string key) || !inactiveObjects.TryGetValue(key, out Queue<GameObject> queue))
+        if (!TryFindPoolForInstance(instance, out GameObjectPoolHandle handle))
         {
             Destroy(instance);
             return;
         }
 
-        activeObjectKeys.Remove(instance);
-        instance.SetActive(false);
-
-        Transform parent = definitions.TryGetValue(key, out PoolDefinition definition) ? definition.parent : transform;
-        instance.transform.SetParent(parent != null ? parent : transform, false);
-        queue.Enqueue(instance);
+        handle.Pool.Despawn(instance.transform);
     }
 
-    private void Prewarm(PoolDefinition definition)
+    public void ReturnAllocated(GameObject instance)
     {
-        int count = Mathf.Max(0, definition.prewarmCount);
-        for (int i = 0; i < count; i++)
+        if (instance == null)
         {
-            GameObject instance = CreateInstance(definition);
-            if (instance != null)
+            return;
+        }
+
+        if (!TryFindPoolForInstance(instance, out GameObjectPoolHandle handle))
+        {
+            Destroy(instance);
+            return;
+        }
+
+        handle.Pool.ReturnAllocated(instance.transform);
+    }
+
+    public bool IsManagedInstance(GameObject instance)
+    {
+        return instance != null && TryFindPoolForInstance(instance, out _);
+    }
+
+    public void ClearAll(bool destroyInstances)
+    {
+        foreach (KeyValuePair<string, GameObjectPoolHandle> pair in pools)
+        {
+            pair.Value.Pool.Clear(destroyInstances);
+        }
+
+        if (destroyInstances)
+        {
+            pools.Clear();
+        }
+    }
+
+    public void ClearPool(string key, bool destroyInstances)
+    {
+        if (pools.TryGetValue(key, out GameObjectPoolHandle handle))
+        {
+            handle.Pool.Clear(destroyInstances);
+            if (destroyInstances)
             {
-                inactiveObjects[definition.key].Enqueue(instance);
+                pools.Remove(key);
             }
         }
     }
 
-    private GameObject GetOrCreateInstance(PoolDefinition definition)
+    private void RegisterEntries(IReadOnlyList<PoolEntry> entries)
     {
-        Queue<GameObject> queue = inactiveObjects[definition.key];
-        while (queue.Count > 0)
+        if (entries == null)
         {
-            GameObject instance = queue.Dequeue();
-            if (instance != null)
-            {
-                return instance;
-            }
+            return;
         }
 
+        for (int i = 0; i < entries.Count; i++)
+        {
+            RegisterEntry(entries[i]);
+        }
+    }
+
+    private void RegisterEntry(PoolEntry entry)
+    {
+        if (entry == null || !entry.IsValid)
+        {
+            return;
+        }
+
+        Transform parent = entry.Parent != null ? entry.Parent : transform;
+        int prewarm = entry.InitialCount;
         ConfigManager configManager = ServiceLocator.TryGet(out ConfigManager manager) ? manager : null;
-        bool canGrow = configManager == null || configManager.GameConfig == null || configManager.GameConfig.AllowPoolGrowth;
-        return canGrow ? CreateInstance(definition) : null;
+        if (prewarm <= 0 && configManager != null && configManager.GameConfig != null)
+        {
+            prewarm = configManager.GameConfig.DefaultPoolPrewarmCount;
+        }
+
+        bool canExpand = entry.CanExpand;
+        if (configManager != null && configManager.GameConfig != null && !configManager.GameConfig.AllowPoolGrowth)
+        {
+            canExpand = false;
+        }
+
+        var pool = new ObjectPool<Transform>(
+            entry.Prefab.transform,
+            parent,
+            entry.MaxCount,
+            canExpand,
+            entry.OverflowPolicy,
+            prefabTransform => Instantiate(entry.Prefab, parent).transform);
+
+        pool.Prewarm(prewarm);
+        pools[entry.Key] = new GameObjectPoolHandle(entry, pool);
     }
 
-    private GameObject CreateInstance(PoolDefinition definition)
+    private bool TryGetPool(string key, out GameObjectPoolHandle handle)
     {
-        Transform parent = definition.parent != null ? definition.parent : transform;
-        GameObject instance = Instantiate(definition.prefab, parent);
-        instance.name = definition.prefab.name;
-        instance.SetActive(false);
-        return instance;
+        if (string.IsNullOrEmpty(key))
+        {
+            handle = null;
+            return false;
+        }
+
+        return pools.TryGetValue(key, out handle);
+    }
+
+    private bool TryFindPoolForInstance(GameObject instance, out GameObjectPoolHandle handle)
+    {
+        foreach (KeyValuePair<string, GameObjectPoolHandle> pair in pools)
+        {
+            if (pair.Value.Pool.Owns(instance.transform))
+            {
+                handle = pair.Value;
+                return true;
+            }
+        }
+
+        handle = null;
+        return false;
+    }
+
+    private sealed class GameObjectPoolHandle
+    {
+        public GameObjectPoolHandle(PoolEntry entry, ObjectPool<Transform> pool)
+        {
+            Entry = entry;
+            Pool = pool;
+        }
+
+        public PoolEntry Entry { get; }
+        public ObjectPool<Transform> Pool { get; }
     }
 }

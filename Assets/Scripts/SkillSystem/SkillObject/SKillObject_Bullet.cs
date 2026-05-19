@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SKillObject_Bullet : SkillObject_Base
+public class SKillObject_Bullet : SkillObject_Base, IPoolable
 {
     #region 目标信息
     private Vector2 moveDirection;
@@ -69,12 +69,31 @@ public class SKillObject_Bullet : SkillObject_Base
         }
     }
 
-    override protected void RecoverObjectStatus()
+    public void OnSpawn()
+    {
+        transform.position = originalPosition;
+        moveDirection = Vector2.zero;
+        canMove = false;
+        damageValue = 0;
+    }
+
+    public void OnDespawn()
     {
         canMove = false;
         damageValue = 0;
-        transform.position = originalPosition;
         moveDirection = Vector2.zero;
+        transform.position = originalPosition;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        CancelInvoke();
+    }
+
+    override protected void RecoverObjectStatus()
+    {
+        OnDespawn();
         gameObject.SetActive(false);
     }
 

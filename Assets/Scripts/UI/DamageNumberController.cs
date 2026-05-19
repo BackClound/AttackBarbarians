@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,8 +7,8 @@ using UnityEngine.InputSystem;
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 UI Canvas 或专用 <c>DamageNumberRoot</c> 物体上。</para>
-/// <para><b>Inspector：</b>配置 <c>numberCanvas</c>、<c>numberPrefab</c>。</para>
-/// <para><b>兼容：</b><see cref="ShowDamageNumber"/> 仍可供调试或旧代码旁路调用；敌人受击已改由事件驱动。</para>
+/// <para><b>Inspector：</b>配置 <c>numberCanvas</c>、<c>numberPrefab</c>；优先从 <see cref="PoolManager"/> 获取（Key = <see cref="GameConstants.PoolKeys.DamageNumber"/>）。</para>
+/// <para><b>兼容：</b>未配置对象池时回退到本地队列 + Instantiate。</para>
 /// </remarks>
 public class DamageNumberController : GameEventSubscriberBase
 {
@@ -24,7 +23,7 @@ public class DamageNumberController : GameEventSubscriberBase
     [SerializeField] private GameObject numberPrefab;
 
     private readonly List<DamageNumber> damageNumbers = new List<DamageNumber>();
-    private readonly ConcurrentQueue<DamageNumber> availableDamageNumbers = new ConcurrentQueue<DamageNumber>();
+    private readonly Queue<DamageNumber> availableDamageNumbers = new Queue<DamageNumber>();
 
     private void Awake()
     {
@@ -72,9 +71,19 @@ public class DamageNumberController : GameEventSubscriberBase
 
     private DamageNumber GetDamageNumber()
     {
+        if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.HasPool(GameConstants.PoolKeys.DamageNumber))
+        {
+            DamageNumber pooled = poolManager.Spawn<DamageNumber>(
+                GameConstants.PoolKeys.DamageNumber,
+                Vector3.zero,
+                Quaternion.identity,
+                numberCanvas);
+            return pooled;
+        }
+
         if (availableDamageNumbers.Count == 0)
         {
-            DamageNumber newNumber = InitialDamageNumber();
+            DamageNumber newNumber = CreateFallbackDamageNumber();
             if (newNumber != null && !damageNumbers.Contains(newNumber))
             {
                 damageNumbers.Add(newNumber);
@@ -82,13 +91,20 @@ public class DamageNumberController : GameEventSubscriberBase
             }
         }
 
-        return availableDamageNumbers.TryDequeue(out DamageNumber damageNumber) ? damageNumber : null;
+        return availableDamageNumbers.Count > 0 && availableDamageNumbers.TryDequeue(out DamageNumber damageNumber)
+            ? damageNumber
+            : null;
     }
 
-    private DamageNumber InitialDamageNumber()
+    private DamageNumber CreateFallbackDamageNumber()
     {
-        var number = Instantiate(numberPrefab, transform.position, Quaternion.identity, numberCanvas);
-        number.SetActive(false);
-        return number.GetComponent<DamageNumber>();
+        if (numberPrefab == null || numberCanvas == null)
+        {
+            return null;
+        }
+
+        GameObject instance = Instantiate(numberPrefab, numberCanvas.position, Quaternion.identity, numberCanvas);
+        instance.SetActive(false);
+        return instance.GetComponent<DamageNumber>();
     }
 }

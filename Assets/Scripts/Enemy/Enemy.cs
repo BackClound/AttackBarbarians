@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy : Entity, IDamagable
+public class Enemy : Entity, IDamagable, IPoolable
 {
     public Enemy_Health enemy_Health;
 
@@ -46,7 +46,41 @@ public class Enemy : Entity, IDamagable
 
     public void Die()
     {
+        if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.IsManagedInstance(gameObject))
+        {
+            poolManager.Despawn(gameObject);
+            return;
+        }
+
         Destroy(gameObject);
+    }
+
+    public void OnSpawn()
+    {
+        enemy_Health.ResetForPool();
+        moveSpeed = enemy_Health.entity_Stats.GetMoveSpeed();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        stateMachine.InitialState(idleState);
+    }
+
+    public void OnDespawn()
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        if (anim != null)
+        {
+            // 重新绑定动画
+            anim.Rebind();
+            // 更新动画
+            anim.Update(0f);
+        }
     }
 
     private void OnDrawGizmos()

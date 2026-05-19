@@ -31,6 +31,8 @@ public class EnemyGenerateManager : MonoBehaviour
     private Dictionary<int, List<GameObject>> enemyList = new Dictionary<int, List<GameObject>>();
 
     [SerializeField] private GameObject[] enemyPrefabs;
+    [Tooltip("与 enemyPrefabs 一一对应的对象池 Key；留空或不足时使用 GameConstants.PoolKeys.Enemy")]
+    [SerializeField] private string[] enemyPoolKeys;
 
     void Awake()
     {
@@ -56,10 +58,38 @@ public class EnemyGenerateManager : MonoBehaviour
 
     private void CreateEnemy()
     {
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0)
+        {
+            return;
+        }
+
         var xPosition = Random.Range(minLeftPosition, maxRightPosition);
         var yPosition = Random.Range(minYPosition, maxYPosition);
+        var spawnPosition = new Vector3(xPosition, yPosition, 0f);
         int index = Random.Range(0, enemyPrefabs.Length);
-        Instantiate(enemyPrefabs[index], new Vector3(xPosition, yPosition), Quaternion.identity);
+        string poolKey = ResolveEnemyPoolKey(index);
+
+        if (ServiceLocator.TryGet(out PoolManager poolManager) &&
+            poolManager.HasPool(poolKey) &&
+            poolManager.Spawn(poolKey, spawnPosition, Quaternion.identity) != null)
+        {
+            return;
+        }
+
+        Instantiate(enemyPrefabs[index], spawnPosition, Quaternion.identity);
+    }
+
+    private string ResolveEnemyPoolKey(int prefabIndex)
+    {
+        if (enemyPoolKeys != null &&
+            prefabIndex >= 0 &&
+            prefabIndex < enemyPoolKeys.Length &&
+            !string.IsNullOrEmpty(enemyPoolKeys[prefabIndex]))
+        {
+            return enemyPoolKeys[prefabIndex];
+        }
+
+        return GameConstants.PoolKeys.Enemy;
     }
 
     /// <summary>
