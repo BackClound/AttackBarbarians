@@ -22,8 +22,6 @@ public class GameManager : MonoBehaviour, IGameSystem
     public GameState PreviousState { get; private set; }
     public bool IsPaused => CurrentState == GameState.Paused;
 
-    private EventBus eventBus;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -45,7 +43,6 @@ public class GameManager : MonoBehaviour, IGameSystem
 
     public void Initialize()
     {
-        eventBus = ServiceLocator.TryGet(out EventBus bus) ? bus : null;
         CurrentState = initialState;
         PreviousState = initialState;
         IsInitialized = true;
@@ -63,6 +60,7 @@ public class GameManager : MonoBehaviour, IGameSystem
     {
         Time.timeScale = 1f;
         ChangeState(GameState.Playing);
+        GameEvents.RaiseGameStarted(this);
     }
 
     public void PauseGame()
@@ -74,7 +72,7 @@ public class GameManager : MonoBehaviour, IGameSystem
 
         Time.timeScale = 0f;
         ChangeState(GameState.Paused);
-        eventBus?.Publish(GameConstants.EventKeys.GamePaused, this);
+        GameEvents.RaiseGamePaused(this);
     }
 
     public void ResumeGame()
@@ -86,7 +84,7 @@ public class GameManager : MonoBehaviour, IGameSystem
 
         Time.timeScale = 1f;
         ChangeState(GameState.Playing);
-        eventBus?.Publish(GameConstants.EventKeys.GameResumed, this);
+        GameEvents.RaiseGameResumed(this);
     }
 
     public void GameOver()
@@ -98,7 +96,7 @@ public class GameManager : MonoBehaviour, IGameSystem
 
         Time.timeScale = 0f;
         ChangeState(GameState.GameOver);
-        eventBus?.Publish(GameConstants.EventKeys.GameOver, this);
+        GameEvents.RaiseGameOver(this);
     }
 
     public void RestartGame()
@@ -124,7 +122,7 @@ public class GameManager : MonoBehaviour, IGameSystem
         GameState oldState = CurrentState;
         PreviousState = oldState;
         CurrentState = newState;
-        eventBus?.Publish(GameConstants.EventKeys.GameStateChanged, this, new GameStateChange(oldState, newState));
+        GameEvents.RaiseGameStateChanged(this, new GameStateChange(oldState, newState));
     }
 }
 

@@ -27,6 +27,10 @@ public class Player_Health : Entity_Health
     protected override void ReduceHp(float damage)
     {
         currentHp -= damage;
+        float maxHp = entity_Stats.GetMaxHp();
+        GameEvents.RaisePlayerDamaged(this, new PlayerHealthEventArgs(currentHp, maxHp, -damage, null));
+        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, -damage, null));
+
         if (currentHp <= 0 && !isDead)
         {
             isDead = true;
@@ -53,6 +57,7 @@ public class Player_Health : Entity_Health
     {
         if (isDead)
         {
+            GameEvents.RaisePlayerDied(this);
             Player.sInstance.Die();
             if (ServiceLocator.TryGet(out GameManager gameManager))
             {

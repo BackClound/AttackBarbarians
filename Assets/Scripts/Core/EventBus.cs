@@ -23,7 +23,7 @@ public struct GameEventContext
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否。由 <see cref="GameBootstrapper"/> 在代码中 <c>new EventBus()</c> 创建并注册到 <see cref="ServiceLocator"/>。</para>
 /// <para><b>获取方式：</b><c>ServiceLocator.Get&lt;EventBus&gt;()</c>（Bootstrap 之后）。</para>
-/// <para><b>使用方式：</b>订阅 <c>Subscribe(GameConstants.EventKeys.xxx, handler)</c>；在 OnDestroy 或 Shutdown 时 <c>Unsubscribe</c>；发布 <c>Publish(key, sender, payload)</c>。</para>
+/// <para><b>使用方式：</b>业务发布优先 <see cref="GameEvents"/>；底层订阅 <c>Subscribe(GameConstants.EventKeys.xxx, handler)</c>，Shutdown 时 <c>Unsubscribe</c>。</para>
 /// <para><b>事件 Key：</b>使用 <see cref="GameConstants.EventKeys"/> 中的常量，避免魔法字符串。</para>
 /// </remarks>
 public sealed class EventBus : IGameSystem

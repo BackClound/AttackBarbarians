@@ -79,6 +79,10 @@ Assets/Scripts/
   EnemyMoveState.cs
   EnemyState.cs
   Enemy_Health.cs
+ Events/
+  GameEventArgs.cs
+  GameEvents.cs
+  GameEventSubscriberBase.cs
  Interface/
   IAttackable.cs
   IDamagable.cs

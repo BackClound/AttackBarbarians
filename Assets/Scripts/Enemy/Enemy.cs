@@ -62,6 +62,5 @@ public class Enemy : Entity, IDamagable
     public override void TakeDamage(float damage)
     {
         enemy_Health.TakeDamage(damage);
-        DamageNumberController.numberControllerInstance.ShowDamageNumber(damage, transform.position);
     }
 }

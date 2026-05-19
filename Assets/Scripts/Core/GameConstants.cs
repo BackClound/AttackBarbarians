@@ -24,14 +24,50 @@ public static class GameConstants
 
     public static class EventKeys
     {
+        // Game
         public const string GameStateChanged = "Game.StateChanged";
+        public const string GameStarted = "Game.Started";
         public const string GamePaused = "Game.Paused";
         public const string GameResumed = "Game.Resumed";
         public const string GameOver = "Game.Over";
+
+        // Wave
         public const string WaveStarted = "Wave.Started";
         public const string WaveCompleted = "Wave.Completed";
+
+        // Player
         public const string PlayerDamaged = "Player.Damaged";
+        public const string PlayerDied = "Player.Died";
+        public const string PlayerHealthChanged = "Player.HealthChanged";
+        public const string PlayerLevelUp = "Player.LevelUp";
+
+        // Enemy
+        public const string EnemySpawned = "Enemy.Spawned";
         public const string EnemyKilled = "Enemy.Killed";
+
+        // Damage
+        public const string DamageApplied = "Damage.Applied";
+
+        // Skill
+        public const string SkillUsed = "Skill.Used";
+        public const string SkillLevelUp = "Skill.LevelUp";
+
+        // Buff
+        public const string BuffApplied = "Buff.Applied";
+        public const string BuffRemoved = "Buff.Removed";
+        public const string BuffChanged = "Buff.Changed";
+
+        // UI
+        public const string UiPanelOpened = "UI.PanelOpened";
+        public const string UiPanelClosed = "UI.PanelClosed";
+
+        // Audio
+        public const string AudioPlaySfx = "Audio.PlaySfx";
+        public const string AudioPlayMusic = "Audio.PlayMusic";
+
+        // Save
+        public const string SaveCompleted = "Save.Completed";
+        public const string SaveLoaded = "Save.Loaded";
     }
 
     public static class ResourcePaths

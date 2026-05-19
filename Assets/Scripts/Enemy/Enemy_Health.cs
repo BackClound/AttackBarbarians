@@ -30,6 +30,13 @@ public class Enemy_Health : Entity_Health
     {
         Debug.Log("Enemy health reduce HP " + damage);
         currentHp -= damage;
+
+        GameEvents.RaiseDamageApplied(enemy, new DamageEventArgs(
+            damage,
+            enemy.transform.position,
+            null,
+            enemy.gameObject));
+
         if (currentHp <= 0 && !isDead)
         {
             isDead = true;
@@ -57,6 +64,11 @@ public class Enemy_Health : Entity_Health
 
     public override void Die()
     {
+        GameEvents.RaiseEnemyKilled(enemy, new EnemyEventArgs(
+            enemy.gameObject,
+            enemy.transform.position,
+            null));
+
         enemy.stateMachine.ChangeState(enemy.deadState);
     }
 }

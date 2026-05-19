@@ -1,18 +1,25 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class DamageNumberController : MonoBehaviour
+/// <summary>
+/// 伤害飘字控制器：订阅 <see cref="GameConstants.EventKeys.DamageApplied"/> 显示数字。
+/// </summary>
+/// <remarks>
+/// <para><b>是否需要挂载：</b>是。挂在 UI Canvas 或专用 <c>DamageNumberRoot</c> 物体上。</para>
+/// <para><b>Inspector：</b>配置 <c>numberCanvas</c>、<c>numberPrefab</c>。</para>
+/// <para><b>兼容：</b><see cref="ShowDamageNumber"/> 仍可供调试或旧代码旁路调用；敌人受击已改由事件驱动。</para>
+/// </remarks>
+public class DamageNumberController : GameEventSubscriberBase
 {
-
     public static DamageNumberController numberControllerInstance;
+
     [SerializeField] private Transform numberCanvas;
     [SerializeField] private GameObject numberPrefab;
-    private List<DamageNumber> damageNumbers = new List<DamageNumber>();
-    private ConcurrentQueue<DamageNumber> availableDamageNumbers = new ConcurrentQueue<DamageNumber>();
 
+    private readonly List<DamageNumber> damageNumbers = new List<DamageNumber>();
+    private readonly ConcurrentQueue<DamageNumber> availableDamageNumbers = new ConcurrentQueue<DamageNumber>();
 
     private void Awake()
     {
@@ -21,7 +28,16 @@ public class DamageNumberController : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         numberControllerInstance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (numberControllerInstance == this)
+        {
+            numberControllerInstance = null;
+        }
     }
 
     private void Update()
@@ -30,6 +46,26 @@ public class DamageNumberController : MonoBehaviour
         {
             ShowDamageNumber(10, Vector3.one);
         }
+    }
+
+    protected override void RegisterHandlers(EventBus bus)
+    {
+        GameEvents.SubscribeDamageApplied(OnDamageApplied);
+    }
+
+    protected override void UnregisterHandlers(EventBus bus)
+    {
+        GameEvents.UnsubscribeDamageApplied(OnDamageApplied);
+    }
+
+    private void OnDamageApplied(GameEventContext context)
+    {
+        if (context.Payload is not DamageEventArgs args)
+        {
+            return;
+        }
+
+        ShowDamageNumber(args.Amount, args.WorldPosition);
     }
 
     public void ShowDamageNumber(float totalDamage, Vector3 location)
@@ -43,15 +79,14 @@ public class DamageNumberController : MonoBehaviour
         if (availableDamageNumbers.Count == 0)
         {
             DamageNumber newNumber = InitialDamageNumber();
-            if (!damageNumbers.Contains(newNumber) && !availableDamageNumbers.Contains(newNumber))
+            if (newNumber != null && !damageNumbers.Contains(newNumber))
             {
                 damageNumbers.Add(newNumber);
                 availableDamageNumbers.Enqueue(newNumber);
             }
         }
-        var isAvailable = availableDamageNumbers.TryDequeue(out var damageNumber);
-        Debug.Log("GetDamageNumber isAvailable = " + isAvailable);
-        return isAvailable ? damageNumber : null;
+
+        return availableDamageNumbers.TryDequeue(out DamageNumber damageNumber) ? damageNumber : null;
     }
 
     private DamageNumber InitialDamageNumber()
@@ -60,5 +95,4 @@ public class DamageNumberController : MonoBehaviour
         number.SetActive(false);
         return number.GetComponent<DamageNumber>();
     }
-
 }

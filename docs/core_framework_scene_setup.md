@@ -74,10 +74,8 @@ if (ServiceLocator.TryGet(out GameManager gameManager))
 }
 
 // 订阅状态变化（UI 等，须在 OnDestroy 取消订阅）
-if (ServiceLocator.TryGet(out EventBus bus))
-{
-    bus.Subscribe(GameConstants.EventKeys.GameStateChanged, OnGameStateChanged);
-}
+GameEvents.SubscribeGameStateChanged(OnGameStateChanged);
+// 取消订阅：GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
 ```
 
 ## 与旧逻辑的关系
