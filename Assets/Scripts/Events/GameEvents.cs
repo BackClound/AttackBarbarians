@@ -31,6 +31,12 @@ public static class GameEvents
     public static void RaiseGameOver(object sender = null) =>
         Publish(GameConstants.EventKeys.GameOver, sender);
 
+    public static void SubscribeGameOver(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.GameOver, handler);
+
+    public static void UnsubscribeGameOver(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.GameOver, handler);
+
     public static void SubscribeGameStateChanged(Action<GameEventContext> handler) =>
         Subscribe(GameConstants.EventKeys.GameStateChanged, handler);
 
@@ -209,6 +215,18 @@ public static class GameEvents
 
     public static void RaiseSaveLoaded(object sender = null) =>
         Publish(GameConstants.EventKeys.SaveLoaded, sender);
+
+    public static void SubscribeSaveCompleted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.SaveCompleted, handler);
+
+    public static void UnsubscribeSaveCompleted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.SaveCompleted, handler);
+
+    public static void SubscribeSaveLoaded(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.SaveLoaded, handler);
+
+    public static void UnsubscribeSaveLoaded(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.SaveLoaded, handler);
 
     #endregion
 

@@ -163,7 +163,6 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
             case GameState.GameOver:
                 GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.GameOver);
                 GameEvents.RaiseAudioPlayMusic(this, GameConstants.AudioIds.MusicGameOver);
-                GameEvents.RaiseSaveCompleted(this);
                 break;
 
             case GameState.MainMenu:

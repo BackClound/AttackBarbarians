@@ -29,6 +29,11 @@ public class GameConfig : ScriptableObject
     [SerializeField] private int defaultPoolPrewarmCount = 8;
     [SerializeField] private bool allowPoolGrowth = true;
 
+    [Header("Save")]
+    [SerializeField] private string saveFileName = SaveConstants.DefaultSaveFileName;
+    [SerializeField] private bool enableAutoSave = true;
+    [SerializeField] private float autoSaveDebounceSeconds = 2f;
+
     public bool StartGameOnBootstrap => startGameOnBootstrap;
     public bool EnableRuntimeLogs => enableRuntimeLogs;
     public bool SkipUpgradeChoosingOnBootstrap => skipUpgradeChoosingOnBootstrap;
@@ -37,4 +42,9 @@ public class GameConfig : ScriptableObject
     public bool ValidateConfigOnBootstrap => validateConfigOnBootstrap;
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);
     public bool AllowPoolGrowth => allowPoolGrowth;
+    public string SaveFileName => string.IsNullOrWhiteSpace(saveFileName)
+        ? SaveConstants.DefaultSaveFileName
+        : saveFileName;
+    public bool EnableAutoSave => enableAutoSave;
+    public float AutoSaveDebounceSeconds => Mathf.Max(0.1f, autoSaveDebounceSeconds);
 }
