@@ -9,6 +9,8 @@
 | `GameBootstrapper` | **是** | `GameSystems` 根物体 | `Instance` / `ServiceLocator` |
 | `ConfigManager` | **是** | `GameSystems` 根或子物体 | `ServiceLocator.Get<ConfigManager>()` |
 | `GameManager` | **是** | `GameSystems` 根或子物体 `GameManager` | `ServiceLocator.Get<GameManager>()` |
+| `GameFlowManager` | **是** | `GameSystems` 根或子物体 | `ServiceLocator.Get<GameFlowManager>()` |
+| `GameStateMachine` | **否** | 由 `GameManager` 持有 | — |
 | `PoolManager` | **是** | `GameSystems/PoolRoot` | `ServiceLocator.Get<PoolManager>()` |
 | `EventBus` | **否** | 由 Bootstrapper 代码创建 | `ServiceLocator.Get<EventBus>()` |
 | `ServiceLocator` | **否** | 静态类 | `Get` / `TryGet` |
@@ -54,10 +56,13 @@ GameSystems                    ← 空物体，挂 GameBootstrapper（可同挂 
 | Config Manager | 可拖引用；留空自动解析 |
 | Pool Manager | 可拖引用；留空自动解析 |
 | Game Manager | 可拖引用；留空自动解析 |
+| Game Flow Manager | 可拖引用；留空自动解析 |
 
 ## 启动顺序
 
-`ConfigManager.Initialize` → `EventBus.Initialize` → `PoolManager.Initialize` → `GameManager.Initialize` →（若配置允许）`GameManager.StartGame`
+`ConfigManager.Initialize` → `EventBus.Initialize` → `PoolManager.Initialize` → `GameManager.Initialize` → `GameFlowManager.Initialize` →（若配置允许）`GameManager.StartGame`
+
+游戏状态机详见 **`docs/game_state_system.md`**。
 
 ## 手动验证步骤
 

@@ -16,6 +16,11 @@ public class GameConfig : ScriptableObject
     [SerializeField] private bool startGameOnBootstrap = true;
     [SerializeField] private bool enableRuntimeLogs;
 
+    [Header("Game Flow")]
+    [Tooltip("Bootstrap 后跳过升级三选一，波次结算后直接进入 Playing。")]
+    [SerializeField] private bool skipUpgradeChoosingOnBootstrap;
+    [SerializeField] private float defaultWaveTransitionSeconds = 1.5f;
+
     [Header("Config")]
     [SerializeField] private ConfigDatabaseSO configDatabase;
     [SerializeField] private bool validateConfigOnBootstrap = true;
@@ -26,6 +31,8 @@ public class GameConfig : ScriptableObject
 
     public bool StartGameOnBootstrap => startGameOnBootstrap;
     public bool EnableRuntimeLogs => enableRuntimeLogs;
+    public bool SkipUpgradeChoosingOnBootstrap => skipUpgradeChoosingOnBootstrap;
+    public float DefaultWaveTransitionSeconds => Mathf.Max(0f, defaultWaveTransitionSeconds);
     public ConfigDatabaseSO ConfigDatabase => configDatabase;
     public bool ValidateConfigOnBootstrap => validateConfigOnBootstrap;
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);

@@ -68,6 +68,27 @@ public static class GameConstants
         // Save
         public const string SaveCompleted = "Save.Completed";
         public const string SaveLoaded = "Save.Loaded";
+
+        // Upgrade
+        public const string UpgradeSelectionOpened = "Upgrade.SelectionOpened";
+        public const string UpgradeSelectionCompleted = "Upgrade.SelectionCompleted";
+    }
+
+    public static class UiPanelIds
+    {
+        public const string MainMenu = "ui.main_menu";
+        public const string Pause = "ui.pause";
+        public const string GameOver = "ui.game_over";
+        public const string WaveTransition = "ui.wave_transition";
+        public const string Upgrade = "ui.upgrade";
+    }
+
+    public static class AudioIds
+    {
+        public const string MusicMainMenu = "audio.music.main_menu";
+        public const string MusicPaused = "audio.music.paused";
+        public const string MusicGameOver = "audio.music.game_over";
+        public const string MusicUpgrade = "audio.music.upgrade";
     }
 
     public static class ResourcePaths

@@ -37,6 +37,35 @@ public static class GameEvents
     public static void UnsubscribeGameStateChanged(Action<GameEventContext> handler) =>
         Unsubscribe(GameConstants.EventKeys.GameStateChanged, handler);
 
+    /// <summary>与 <see cref="SubscribeGameStateChanged"/> 等价，便于对照模块文档中的 OnGameStateChanged 命名。</summary>
+    public static void SubscribeOnGameStateChanged(Action<GameEventContext> handler) =>
+        SubscribeGameStateChanged(handler);
+
+    public static void UnsubscribeOnGameStateChanged(Action<GameEventContext> handler) =>
+        UnsubscribeGameStateChanged(handler);
+
+    #endregion
+
+    #region Upgrade
+
+    public static void RaiseUpgradeSelectionOpened(object sender = null) =>
+        Publish(GameConstants.EventKeys.UpgradeSelectionOpened, sender);
+
+    public static void RaiseUpgradeSelectionCompleted(object sender = null) =>
+        Publish(GameConstants.EventKeys.UpgradeSelectionCompleted, sender);
+
+    public static void SubscribeUpgradeSelectionOpened(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UpgradeSelectionOpened, handler);
+
+    public static void UnsubscribeUpgradeSelectionOpened(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UpgradeSelectionOpened, handler);
+
+    public static void SubscribeUpgradeSelectionCompleted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UpgradeSelectionCompleted, handler);
+
+    public static void UnsubscribeUpgradeSelectionCompleted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UpgradeSelectionCompleted, handler);
+
     #endregion
 
     #region Wave
