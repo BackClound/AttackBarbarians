@@ -59,21 +59,32 @@ Assets/Scripts/Common/
  Entity_Health.cs
  Entity_Stats.cs
  StateMachine.cs
-Assets/Scripts/Enemy/
- BatEnemy.cs
- Enemy.cs
- EnemyAnimatorTrigger.cs
- EnemyAttackState.cs
- EnemyCombatManager.cs
- EnemyDeadState.cs
- EnemyIdleState.cs
- EnemyMoveState.cs
- EnemyState.cs
- Enemy_Health.cs
-Assets/Scripts/Interface/
- IAttackable.cs
- IDamagable.cs
+Assets/Scripts/Core/
+ EventBus.cs
+ GameBootstrapper.cs
+ GameConstants.cs
+ GameState.cs
+ IGameSystem.cs
+ ServiceLocator.cs
 Assets/Scripts/
+ Data/GameConfig.cs
+ Enemy/
+  BatEnemy.cs
+  Enemy.cs
+  EnemyAnimatorTrigger.cs
+  EnemyAttackState.cs
+  EnemyCombatManager.cs
+  EnemyDeadState.cs
+  EnemyIdleState.cs
+  EnemyMoveState.cs
+  EnemyState.cs
+  Enemy_Health.cs
+ Interface/
+  IAttackable.cs
+  IDamagable.cs
+ Managers/
+  ConfigManager.cs
+  GameManager.cs
  ObjectVFX/AttackInfo.cs
  Player/
   Player.cs
@@ -84,6 +95,7 @@ Assets/Scripts/
   PlayerShootState.cs
   PlayerState.cs
   Player_Health.cs
+ Pool/PoolManager.cs
  SkillSystem/Data/
   ShootWaveData.cs
   SkillLevelData.cs

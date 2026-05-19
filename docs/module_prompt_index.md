@@ -20,8 +20,13 @@ Attack Barbarians 是 Unity 2D 竖屏无限防守 + Roguelike 游戏。核心循
 - 统一战斗模型：用 `DamageInfo` 携带攻击来源、目标、技能、元素、暴击、DOT、击退等上下文。
 - 统一阶段推进：按 `work_flow.md` 分为基础框架、战斗核心、成长系统、内容系统、外围系统、优化阶段。
 
+## Core Framework 场景挂载
+- 详见 `docs/core_framework_scene_setup.md`（Manager 挂载位置、Hierarchy、配置资产、验证步骤）。
+- 生成 Core 相关代码时必须为每个类补充 `///` 注释，说明是否挂载及推荐 GameObject。
+
 ## 模块提示词文件清单
 - `prompt_core_framework.md`
+- `core_framework_scene_setup.md`
 - `prompt_event_system.md`
 - `prompt_object_pool_system.md`
 - `prompt_config_system.md`

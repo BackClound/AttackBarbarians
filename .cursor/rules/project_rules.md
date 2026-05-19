@@ -122,3 +122,10 @@ AI开发要求
 事件流
 扩展性
 性能影响
+
+12. Core Framework 场景挂载（Manager 类）
+- GameBootstrapper、ConfigManager、GameManager、PoolManager：挂在场景空物体 GameSystems（及 PoolRoot 子物体），不挂在 Player/Enemy/UI。
+- EventBus、ServiceLocator、GameConstants、GameState：不挂载。
+- GameConfig：ScriptableObject，路径 Assets/Resources/Config/GameConfig.asset。
+- 每个新增类必须写 /// 类注释，说明是否挂载、推荐物体、ServiceLocator 获取方式。
+- 详见 docs/core_framework_scene_setup.md。

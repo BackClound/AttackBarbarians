@@ -54,6 +54,10 @@ public class Player_Health : Entity_Health
         if (isDead)
         {
             Player.sInstance.Die();
+            if (ServiceLocator.TryGet(out GameManager gameManager))
+            {
+                gameManager.GameOver();
+            }
             //show game over UI
         }
     }
