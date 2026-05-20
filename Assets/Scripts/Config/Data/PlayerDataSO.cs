@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -17,12 +18,21 @@ public class PlayerDataSO : ConfigDataBase
     [SerializeField] private int startLevel = 1;
     [SerializeField] private float experiencePerLevel = 100f;
 
+    [Header("Combat")]
+    [SerializeField] private float attackRadius = 25f;
+    [SerializeField] private PlayerTargetPolicy targetPolicy = PlayerTargetPolicy.NearestToWall;
+    [SerializeField] private string[] initialSkillIds;
+
     [Header("Presentation")]
     [SerializeField] private string description;
 
     public StatBlockConfig BaseStats => baseStats;
     public int StartLevel => Mathf.Max(1, startLevel);
     public float ExperiencePerLevel => Mathf.Max(1f, experiencePerLevel);
+    public float AttackRadius => Mathf.Max(0.5f, attackRadius);
+    public PlayerTargetPolicy TargetPolicy => targetPolicy;
+    public IReadOnlyList<string> InitialSkillIds =>
+        initialSkillIds != null ? initialSkillIds : System.Array.Empty<string>();
     public string Description => description;
 
     public override void CollectValidationErrors(ConfigValidationResult result)

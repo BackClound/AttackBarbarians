@@ -13,14 +13,22 @@ public class ObjectPool<T> where T : Component
     private readonly int maxCount;
     private readonly bool canExpand;
     private readonly PoolOverflowPolicy overflowPolicy;
+    // 不活跃对象队列
     private readonly Queue<T> inactive = new Queue<T>(16);
+    // 活跃对象链表
     private readonly LinkedList<T> activeOrder = new LinkedList<T>();
+    // 活跃对象字典
     private readonly Dictionary<T, LinkedListNode<T>> activeNodes = new Dictionary<T, LinkedListNode<T>>(64);
+    // 池able缓存字典
     private readonly Dictionary<T, IPoolable> poolableCache = new Dictionary<T, IPoolable>(64);
+    // 实例工厂函数
     private readonly Func<T, T> instanceFactory;
 
+    // 不活跃对象数量
     public int InactiveCount => inactive.Count;
+    // 活跃对象数量
     public int ActiveCount => activeOrder.Count;
+    // 总对象数量
     public int TotalCount => InactiveCount + ActiveCount;
 
     public ObjectPool(

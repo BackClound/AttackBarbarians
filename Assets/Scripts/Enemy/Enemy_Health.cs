@@ -9,6 +9,9 @@ public class Enemy_Health : Entity_Health
     [SerializeField] private float realHp;
     [SerializeField] private bool isDead = false;
 
+    public float CurrentHp => currentHp;
+    public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : currentHp;
+
     public override void Awake()
     {
         base.Awake();

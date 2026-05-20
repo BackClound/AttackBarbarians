@@ -28,6 +28,9 @@ MonoBehaviour:
     lightningDamage: 0
     armor: 0
     armorReduce: 0
+  attackRadius: 25
+  targetPolicy: 2
+  initialSkillIds: []
   startLevel: 1
   experiencePerLevel: 100
   description: Default player

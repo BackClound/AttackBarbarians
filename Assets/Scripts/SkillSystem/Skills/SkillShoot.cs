@@ -85,7 +85,15 @@ public class SkillShoot : SkillBase
 
     public void RefreshAttackSpeedFromStats()
     {
-        shootSpeedAnimMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
+        if (player != null && player.controller != null && player.controller.RuntimeStats.IsInitialized)
+        {
+            shootSpeedAnimMulti = player.controller.RuntimeStats.Get(StatType.AttackSpeedMulti);
+        }
+        else if (player != null && player.player_Health != null && player.player_Health.entity_Stats != null)
+        {
+            shootSpeedAnimMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
+        }
+
         updateAttackSpeedMultiAction?.Invoke(shootSpeedAnimMulti);
     }
 
@@ -137,6 +145,12 @@ public class SkillShoot : SkillBase
             if (!hasEffectiveEnemy) return;
         }
 
+        if (player != null && player.controller != null)
+        {
+            player.controller.NotifyAttackStarted(GameConstants.ConfigIds.SkillShoot);
+            player.controller.NotifySkillCast(GameConstants.ConfigIds.SkillShoot);
+        }
+
         //3. 激活bullet进行攻击
         //分配攻击次数和敌人，当有新的enemy并且bullet不为空的时候，为新的敌人分配为可攻击的子弹
         foreach (Enemy enemy in effectiveEnemys)
@@ -185,19 +199,32 @@ public class SkillShoot : SkillBase
     public void CheckEnemyInRadiusWithSorted()
     {
         effectiveEnemys.Clear();
+        hasEffectiveEnemy = false;
 
-        //获取离得最近的Enemy
-        Vector2 startPosition = checkPosition.position;
+        if (player != null && player.controller != null && player.controller.IsReady)
+        {
+            if (player.controller.CopyCombatTargetsTo(effectiveEnemys))
+            {
+                hasEffectiveEnemy = true;
+            }
+
+            return;
+        }
+
+        ScanEnemiesLegacy();
+    }
+
+    private void ScanEnemiesLegacy()
+    {
+        Vector2 startPosition = checkPosition != null ? checkPosition.position : transform.position;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, maxCheckDistance, enemyLayer);
-        // Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
-        //对检测到的敌人进行排序
         System.Array.Sort(colliders, (a, b) =>
-       {
-           float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
-           float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
-           return sqrDistanceA.CompareTo(sqrDistanceB);
+        {
+            float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
+            float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
+            return sqrDistanceA.CompareTo(sqrDistanceB);
+        });
 
-       });
         foreach (var coll in colliders)
         {
             Enemy enemy = coll.GetComponent<Enemy>();

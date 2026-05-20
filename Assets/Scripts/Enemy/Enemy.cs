@@ -4,6 +4,11 @@ public class Enemy : Entity, IDamagable, IPoolable
 {
     public Enemy_Health enemy_Health;
 
+    [Header("Classification")]
+    [SerializeField] private bool isBoss;
+
+    public bool IsBoss => isBoss;
+
     [Header("Attack info")]
     [SerializeField] public float moveSpeed;
     [SerializeField] protected Transform attackCheck;

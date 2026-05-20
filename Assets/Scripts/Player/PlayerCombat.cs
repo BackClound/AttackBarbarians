@@ -9,7 +9,7 @@ using UnityEngine;
 public class PlayerCombat : EntityCombat
 {
     private Player player;
-    [SerializeField] public List<Entity> effectiveEnemys;
+    [SerializeField] public List<Enemy> effectiveEnemys;
     [SerializeField] protected bool canAttack;
     protected bool isAttacking;
 
@@ -46,26 +46,44 @@ public class PlayerCombat : EntityCombat
     {
         effectiveEnemys.Clear();
         canAttack = false;
-        //获取离得最近的Enemy
+        isAttacking = false;
+
+        if (player != null && player.controller != null && player.controller.IsReady)
+        {
+            if (player.controller.CopyCombatTargetsTo(effectiveEnemys))
+            {
+                canAttack = true;
+                isAttacking = true;
+            }
+
+            return;
+        }
+
+        ScanEnemiesLegacy();
+    }
+
+    private void ScanEnemiesLegacy()
+    {
         Vector2 startPosition = checkPosition.position;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, maxCheckDistance, enemyLayer);
-        // Debug.Log("CheckEnemyInRadius colliders count = " + colliders.Length);
-        //对检测到的敌人进行排序
         System.Array.Sort(colliders, (a, b) =>
-       {
-           float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
-           float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
-           return sqrDistanceA.CompareTo(sqrDistanceB);
+        {
+            float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
+            float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
+            return sqrDistanceA.CompareTo(sqrDistanceB);
+        });
 
-       });
         foreach (var coll in colliders)
         {
             if (coll != null && coll.gameObject.CompareTag(enemyTag))
             {
                 Enemy enemy = coll.GetComponent<Enemy>();
-                effectiveEnemys.Add(enemy);
-                canAttack = true;
-                isAttacking = true;
+                if (enemy != null)
+                {
+                    effectiveEnemys.Add(enemy);
+                    canAttack = true;
+                    isAttacking = true;
+                }
             }
         }
     }

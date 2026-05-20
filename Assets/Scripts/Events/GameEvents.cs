@@ -110,6 +110,33 @@ public static class GameEvents
     public static void RaisePlayerLevelUp(object sender, int newLevel) =>
         Publish(GameConstants.EventKeys.PlayerLevelUp, sender, newLevel);
 
+    public static void RaisePlayerAttackStarted(object sender, PlayerAttackEventArgs args) =>
+        Publish(GameConstants.EventKeys.PlayerAttackStarted, sender, args);
+
+    public static void RaisePlayerSkillCast(object sender, string skillId) =>
+        Publish(GameConstants.EventKeys.PlayerSkillCast, sender, skillId);
+
+    public static void RaisePlayerStatsChanged(object sender, PlayerStatsChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.PlayerStatsChanged, sender, args);
+
+    public static void SubscribePlayerHealthChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.PlayerHealthChanged, handler);
+
+    public static void UnsubscribePlayerHealthChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.PlayerHealthChanged, handler);
+
+    public static void SubscribePlayerStatsChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.PlayerStatsChanged, handler);
+
+    public static void UnsubscribePlayerStatsChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.PlayerStatsChanged, handler);
+
+    public static void SubscribePlayerAttackStarted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.PlayerAttackStarted, handler);
+
+    public static void UnsubscribePlayerAttackStarted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.PlayerAttackStarted, handler);
+
     public static void SubscribePlayerDamaged(Action<GameEventContext> handler) =>
         Subscribe(GameConstants.EventKeys.PlayerDamaged, handler);
 

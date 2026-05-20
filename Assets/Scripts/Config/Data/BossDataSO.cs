@@ -14,7 +14,9 @@ public class BossDataSO : ConfigDataBase
 
     // 阶段
     [Header("Phases")]
+    // 阶段数量
     [SerializeField] private int phaseCount = 1;
+    // 阶段血量阈值列表
     [SerializeField] private List<float> phaseHpThresholds = new List<float> { 0.5f };
 
     [Header("Modifiers")]

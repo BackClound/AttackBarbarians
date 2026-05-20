@@ -66,4 +66,18 @@ public sealed class StatRuntimeSnapshot
             values[statType] = ConfigValidator.ApplyModifiers(baseValue, modifiers, statType);
         }
     }
+
+    public void CopyFrom(StatRuntimeSnapshot other)
+    {
+        values.Clear();
+        if (other == null)
+        {
+            return;
+        }
+
+        foreach (var pair in other.values)
+        {
+            values[pair.Key] = pair.Value;
+        }
+    }
 }

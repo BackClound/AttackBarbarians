@@ -104,3 +104,31 @@ public readonly struct PlayerHealthEventArgs
         Source = source;
     }
 }
+
+/// <summary>
+/// 玩家属性快照变更事件负载。
+/// </summary>
+public readonly struct PlayerStatsChangedEventArgs
+{
+    public StatRuntimeSnapshot Snapshot { get; }
+
+    public PlayerStatsChangedEventArgs(StatRuntimeSnapshot snapshot)
+    {
+        Snapshot = snapshot;
+    }
+}
+
+/// <summary>
+/// 玩家开始攻击（动画/开火帧）事件负载。
+/// </summary>
+public readonly struct PlayerAttackEventArgs
+{
+    public Enemy PrimaryTarget { get; }
+    public string SkillId { get; }
+
+    public PlayerAttackEventArgs(Enemy primaryTarget, string skillId = null)
+    {
+        PrimaryTarget = primaryTarget;
+        SkillId = skillId ?? string.Empty;
+    }
+}

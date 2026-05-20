@@ -40,6 +40,9 @@ public static class GameConstants
         public const string PlayerDied = "Player.Died";
         public const string PlayerHealthChanged = "Player.HealthChanged";
         public const string PlayerLevelUp = "Player.LevelUp";
+        public const string PlayerAttackStarted = "Player.AttackStarted";
+        public const string PlayerSkillCast = "Player.SkillCast";
+        public const string PlayerStatsChanged = "Player.StatsChanged";
 
         // Enemy
         public const string EnemySpawned = "Enemy.Spawned";

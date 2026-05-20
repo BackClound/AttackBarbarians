@@ -13,6 +13,7 @@ public class Player : Entity
     public static bool HasInstance => SingletonHost<Player>.HasInstance;
 
     #region Player other Controlers
+    public PlayerController controller { get; private set; }
     public Player_Health player_Health { get; private set; }
     public PlayerSkillManager skillManager { get; private set; }
     public PlayerCombat playerCombatManager { get; private set; }
@@ -37,6 +38,7 @@ public class Player : Entity
         shootState = new PlayerShootState(this, stateMachine, "Shoot");
         deadState = new PlayerDeadState(this, stateMachine, "Dead");
 
+        controller = GetComponent<PlayerController>();
         player_Health = GetComponent<Player_Health>();
         skillManager = GetComponent<PlayerSkillManager>();
         playerCombatManager = GetComponent<PlayerCombat>();
