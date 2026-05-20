@@ -13,7 +13,7 @@ using UnityEngine;
 /// <item><description>将同物体或子物体上的 <see cref="ConfigManager"/>、<see cref="SaveManager"/>、<see cref="PoolManager"/>、<see cref="GameManager"/> 拖入对应槽位；留空时会在 Awake 时自动查找或在本物体上 AddComponent。</description></item>
 /// <item><description><c>Dont Destroy On Load</c> 建议开启，保证跨场景保留引导流程（单例冲突时会销毁重复实例）。</description></item>
 /// </list>
-/// <para><b>启动顺序：</b>ConfigManager → SaveManager → EventBus → PoolManager → GameManager → GameFlowManager → RunSession/Settlement/Experience → EnemySpawner → WaveManager。</para>
+/// <para><b>启动顺序：</b>ConfigManager → SaveManager → EventBus → PoolManager → GameManager → GameFlowManager → RunSession/Settlement/Experience → DamageSystem → EnemySpawner → WaveManager。</para>
 /// <para><b>获取方式：</b><c>GameBootstrapper.Instance</c> 或 <c>ServiceLocator.Get&lt;GameBootstrapper&gt;()</c>（Bootstrap 完成后）。</para>
 /// </remarks>
 public class GameBootstrapper : MonoSingleton<GameBootstrapper>
@@ -33,6 +33,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private PlayerExperienceService playerExperienceService;
     [SerializeField] private EnemySpawnerManager enemySpawnerManager;
     [SerializeField] private WaveManager waveManager;
+    [SerializeField] private DamageSystem damageSystem;
 
     private readonly List<IGameSystem> systems = new List<IGameSystem>(16);
     private EventBus eventBus;
@@ -106,6 +107,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         playerExperienceService = ResolveOrCreate(playerExperienceService);
         enemySpawnerManager = ResolveOrCreate(enemySpawnerManager);
         waveManager = ResolveOrCreate(waveManager);
+        damageSystem = ResolveOrCreate(damageSystem);
         eventBus = new EventBus();
     }
 
@@ -125,6 +127,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(playerExperienceService);
         ServiceLocator.Register(enemySpawnerManager);
         ServiceLocator.Register(waveManager);
+        ServiceLocator.Register(damageSystem);
 
         systems.Add(configManager);
         systems.Add(saveManager);
@@ -135,6 +138,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(runSessionTracker);
         systems.Add(runRewardSettlementService);
         systems.Add(playerExperienceService);
+        systems.Add(damageSystem);
         systems.Add(enemySpawnerManager);
         systems.Add(waveManager);
     }

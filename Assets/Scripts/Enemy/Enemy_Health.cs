@@ -41,22 +41,23 @@ public class Enemy_Health : Entity_Health
         return currentHp > 0 && !isDead;
     }
 
+    protected override void OnBeforeDamageApplied(DamageInfo info, DamageResult result)
+    {
+        if (info.Source != null)
+        {
+            lastDamageSource = info.Source;
+        }
+    }
+
     protected override void ReduceHp(float damage)
     {
         currentHp -= damage;
-
-        GameEvents.RaiseDamageApplied(enemy, new DamageEventArgs(
-            damage,
-            enemy.transform.position,
-            lastDamageSource,
-            enemy.gameObject));
-
-        lastDamageSource = null;
 
         if (currentHp <= 0 && !isDead)
         {
             isDead = true;
             Die();
+            lastDamageSource = null;
         }
     }
 

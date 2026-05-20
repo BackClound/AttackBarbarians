@@ -101,7 +101,8 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             bullet.rotation = Quaternion.Euler(0, 0, angle);
             Vector2 forwardDir = bullet.right;
             bulletList[i].OnSpawn();
-            bulletList[i].SetupAttackObject(forwardDir, null, player.player_Health.entity_Stats.GetTotalDamage());
+            float baseDamage = player.player_Health.entity_Stats.GetBaseAttackDamage();
+            bulletList[i].SetupAttackObject(forwardDir, null, baseDamage);
             bullet.gameObject.SetActive(true);
         }
     }

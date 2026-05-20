@@ -113,6 +113,12 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public override void TakeDamage(float damage)
     {
-        enemy_Health.TakeDamage(damage);
+        TakeDamage(DamageInfo.FromLegacy(damage, gameObject));
+    }
+
+    public override DamageResult TakeDamage(DamageInfo info)
+    {
+        DamageInfo resolved = info.Target != null ? info : info.WithTarget(gameObject);
+        return DamagePipeline.Apply(resolved);
     }
 }

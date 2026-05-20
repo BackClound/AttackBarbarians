@@ -22,7 +22,7 @@ Auto Attack
 Collision
 Wave Spawn
 
-第三阶段：成长系统
+第三阶段：成长系统多层次性· 
 Skill System
 Buff System
 Upgrade System
@@ -52,4 +52,4 @@ GC优化
 移动端优化
 Addressables
 
-重构Player和Enemy的StateMachine有限状态机
+重构Player和Enemy的StateMachine有限状态机以及shoot的旧逻辑代码，移除旧的更新血量，攻击以及受攻击的逻辑，使用现有的core framework框架进行实现

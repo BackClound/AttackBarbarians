@@ -11,19 +11,25 @@ public readonly struct DamageEventArgs
     public object Source { get; }
     public GameObject Target { get; }
     public bool IsCritical { get; }
+    public string SkillId { get; }
+    public ElementType Element { get; }
 
     public DamageEventArgs(
         float amount,
         Vector3 worldPosition,
         object source,
         GameObject target,
-        bool isCritical = false)
+        bool isCritical = false,
+        string skillId = null,
+        ElementType element = ElementType.None)
     {
         Amount = amount;
         WorldPosition = worldPosition;
         Source = source;
         Target = target;
         IsCritical = isCritical;
+        SkillId = skillId ?? string.Empty;
+        Element = element;
     }
 }
 

@@ -17,5 +17,14 @@ public class Entity : MonoBehaviour, IDamagable
 
     public virtual void OnAniamtorFinished() { }
 
-    public virtual void TakeDamage(float damage) { }
+    public virtual void TakeDamage(float damage)
+    {
+        TakeDamage(DamageInfo.FromLegacy(damage, gameObject));
+    }
+
+    public virtual DamageResult TakeDamage(DamageInfo info)
+    {
+        DamageInfo resolved = info.Target != null ? info : info.WithTarget(gameObject);
+        return DamagePipeline.ApplyToDamagable(this, resolved);
+    }
 }

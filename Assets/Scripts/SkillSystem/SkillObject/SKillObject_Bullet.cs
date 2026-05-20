@@ -39,6 +39,7 @@ public class SKillObject_Bullet : SkillObject_Base, IPoolable
 
     public override void SetupAttackObject(Vector2 moveDirection, AttackInfo info, float damage)
     {
+        base.SetupAttackObject(moveDirection, info, damage);
         if (moveDirection == Vector2.zero)
         {
             Debug.LogError("Attack Object Setup Attack Object failed due to zero moveDirection");
@@ -46,8 +47,6 @@ public class SKillObject_Bullet : SkillObject_Base, IPoolable
         }
         this.moveDirection = moveDirection.normalized;
         canMove = true;
-        //target will Take damagevalue, and update the realHp
-        damageValue = damage;
         //将会对enemy进行攻击，对enemy的真实血量进行预更新
         // target.enemy_Health.WillReduceHp(damage);
     }

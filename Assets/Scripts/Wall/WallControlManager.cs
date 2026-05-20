@@ -72,11 +72,39 @@ public class WallControlManager : MonoBehaviour
     /// <param name="damage"></param>
     public void TakeDamage(float damage)
     {
-        if (playerHealth != null)
+        ApplyDamageToPlayer(DamageInfo.FromLegacy(damage, ResolvePlayerTarget(), null));
+    }
+
+    private DamageResult ApplyDamageToPlayer(DamageInfo info)
+    {
+        GameObject target = ResolvePlayerTarget();
+        if (target == null)
         {
-            playerHealth.TakeDamage(damage);
+            return DamageResult.None;
         }
+
+        DamageInfo resolved = info.Target != null ? info : info.WithTarget(target);
+        DamageResult result = DamagePipeline.Apply(resolved);
         beDamaged = true;
+        return result;
+    }
+
+    /// <summary>敌人攻击城墙时由 <see cref="EnemyCombatManager"/> 调用，转发至玩家血量并由 <see cref="DamageSystem"/> 结算。</summary>
+    public void TakeDamageFromEnemy(Enemy enemy, float baseDamage)
+    {
+        GameObject target = ResolvePlayerTarget();
+        if (target == null)
+        {
+            Debug.LogWarning("[WallControlManager] 无法结算伤害：Player 未就绪。");
+            return;
+        }
+
+        ApplyDamageToPlayer(DamageInfo.Create(enemy, target, baseDamage));
+    }
+
+    private GameObject ResolvePlayerTarget()
+    {
+        return Player.HasInstance ? Player.Instance.gameObject : null;
     }
 
     public void ResetDamageState(bool isDamaged)

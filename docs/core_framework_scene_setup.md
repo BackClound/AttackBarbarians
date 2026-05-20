@@ -23,6 +23,8 @@
 | `GameEventContext` | **否** | 事件 Payload | — |
 | `GameConfig` | **否**（SO 资产） | `Assets/Resources/Config/GameConfig.asset` | `ConfigManager.GameConfig` |
 | `ConfigDatabaseSO` | **否**（SO 资产） | `Assets/Resources/Config/ConfigDatabase.asset` | `ConfigManager.Database` |
+| `DamageSystem` | **是** | `GameSystems` 根或子物体 | `ServiceLocator.Get<DamageSystem>()` |
+| `DamageCalculationSO` | **否**（SO 资产） | `Assets/Resources/Config/Damage/DamageCalculation_Default.asset` | `DamageSystem.Rules` / Resources |
 
 **不要**将上述 Manager 挂在 Player、Enemy、Wall、UI Canvas、子弹 Prefab 上。
 

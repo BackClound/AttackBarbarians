@@ -102,6 +102,7 @@ public static class GameConstants
         public const string GameConfig = "Config/GameConfig";
         public const string ConfigDatabase = "Config/ConfigDatabase";
         public const string RunRewardSettlement = "Config/RunReward/RunRewardSettlement_Default";
+        public const string DamageCalculation = "Config/Damage/DamageCalculation_Default";
     }
 
     public static class ConfigIds

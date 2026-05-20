@@ -20,6 +20,15 @@ public class Entity_Stats : MonoBehaviour
         return majorStats.maxHp.GetValue();
     }
 
+    /// <summary>基础攻击伤害（不含暴击与元素附加），供 <see cref="DamageSystem"/> 结算。</summary>
+    public float GetBaseAttackDamage()
+    {
+        return offenseStats != null && offenseStats.damage != null
+            ? offenseStats.damage.GetValue()
+            : 0f;
+    }
+
+    /// <summary>旧版一次性结算（含暴击与元素）。新逻辑请走 <see cref="DamageSystem"/>。</summary>
     public float GetTotalDamage()
     {
         var isCrit = offenseStats.critChance.GetValue() > Random.Range(0, 1);

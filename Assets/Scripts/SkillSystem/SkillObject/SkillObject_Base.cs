@@ -35,12 +35,36 @@ public class SkillObject_Base : MonoBehaviour, IAttackable
         CancelInvoke();
     }
 
-    public virtual void SetupAttackObject(Vector2 moveDirection, AttackInfo info, float damage) { }
+    public virtual void SetupAttackObject(Vector2 moveDirection, AttackInfo info, float damage)
+    {
+        damageValue = damage;
+        if (string.IsNullOrEmpty(attackName))
+        {
+            attackName = GameConstants.ConfigIds.SkillShoot;
+        }
+    }
 
     public void DoDamage(Entity enemy, float damage)
     {
-        Debug.Log("Attack Object start do damage " + damage);
-        enemy.TakeDamage(damage);
+        if (enemy == null)
+        {
+            return;
+        }
+
+        object source = Player.HasInstance ? Player.Instance : (object)gameObject;
+        DamageInfo info = DamageInfo.Create(
+            source,
+            enemy.gameObject,
+            damage,
+            skillId: attackName);
+
+        if (enemy is IDamagable damagable)
+        {
+            damagable.TakeDamage(info);
+            return;
+        }
+
+        DamagePipeline.Apply(info);
     }
 
 

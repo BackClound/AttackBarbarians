@@ -16,7 +16,7 @@ public class EnemyCombatManager : EntityCombat
         wallControl = hit2D.collider.GetComponent<WallControlManager>();
         if (wallControl != null)
         {
-            wallControl.TakeDamage(enemy.GetDamageValue());
+            wallControl.TakeDamageFromEnemy(enemy, enemy.GetDamageValue());
         }
     }
 }
