@@ -107,6 +107,7 @@ public static class GameConstants
         public const string RunRewardSettlement = "Config/RunReward/RunRewardSettlement_Default";
         public const string DamageCalculation = "Config/Damage/DamageCalculation_Default";
         public const string ProjectileDefault = "Config/Projectile/Projectile_Default";
+        public const string AutoAttackDefault = "Config/AutoAttack/AutoAttack_Default";
     }
 
     public static class ConfigIds
@@ -114,6 +115,7 @@ public static class GameConstants
         public const string PlayerDefault = "player.default";
         public const string EnemyBat = "enemy.bat";
         public const string SkillShoot = "skill.shoot";
+        public const string AutoAttackDefault = "auto_attack.default";
         public const string ProjectileDefault = "projectile.default";
         public const string BuffAttackUp = "buff.attack_up";
         public const string Wave01 = "wave.01";

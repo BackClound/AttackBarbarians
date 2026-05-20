@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerShootState : PlayerState
 {
     private SkillShoot skillShoot;
+    private AutoAttackController autoAttack;
     private bool isStartShooting;
     private float shootSpeedMulti;
 
@@ -12,28 +13,37 @@ public class PlayerShootState : PlayerState
     {
         base.OnEnter();
         skillShoot = player.skillManager.sKillShoot;
+        autoAttack = player.controller != null ? player.controller.AutoAttack : null;
         isStartShooting = false;
-        skillShoot.updateAttackSpeedMultiAction += ApplyShootSpeedMulti;
-        shootSpeedMulti = skillShoot.shootSpeedAnimMulti;
-        anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
+        ApplyShootSpeedFromSources();
+        if (skillShoot != null)
+        {
+            skillShoot.updateAttackSpeedMultiAction += ApplyShootSpeedMulti;
+        }
+    }
+
+    public override void OnExit()
+    {
+        if (skillShoot != null)
+        {
+            skillShoot.updateAttackSpeedMultiAction -= ApplyShootSpeedMulti;
+        }
+
+        base.OnExit();
     }
 
     public override void OnUpdate()
     {
-        //TODO 这里应该根据skill的信息控制发射逻辑
-        // Debug.Log("player shoot state canShoot " + isStartShooting);
-        if (skillShoot.CanUseShootSkill())
-        {
-            if (isStartShooting)
-            {
-                isStartShooting = false;
-                // Debug.Log("Start activate the bullet in player shoot state");
-                skillShoot.ActivateOneShootAttack();
-            }
-        }
-        else
+        if (!CanContinueShooting())
         {
             stateMachine.ChangeState(player.idleState);
+            return;
+        }
+
+        if (isStartShooting)
+        {
+            isStartShooting = false;
+            ExecuteShootAttack();
         }
     }
 
@@ -43,9 +53,53 @@ public class PlayerShootState : PlayerState
         anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
     }
 
-
     public override void OnAnimAttackTrigger()
     {
         isStartShooting = true;
+    }
+
+    private bool CanContinueShooting()
+    {
+        if (autoAttack != null && autoAttack.IsReady)
+        {
+            return autoAttack.CanAttack;
+        }
+
+        return skillShoot != null && skillShoot.CanUseShootSkill();
+    }
+
+    private void ExecuteShootAttack()
+    {
+        if (autoAttack != null && autoAttack.IsReady)
+        {
+            autoAttack.ExecuteAttack();
+            if (!autoAttack.CanAttack)
+            {
+                player.playerCombatManager?.UpdateAttackStatus(false);
+                stateMachine.ChangeState(player.idleState);
+            }
+
+            return;
+        }
+
+        skillShoot?.ActivateOneShootAttack();
+    }
+
+    private void ApplyShootSpeedFromSources()
+    {
+        if (autoAttack != null && autoAttack.IsReady)
+        {
+            shootSpeedMulti = autoAttack.AnimSpeedMultiplier;
+        }
+        else if (skillShoot != null)
+        {
+            shootSpeedMulti = skillShoot.shootSpeedAnimMulti;
+        }
+        else
+        {
+            shootSpeedMulti = 1f;
+        }
+
+        anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
     }
 }

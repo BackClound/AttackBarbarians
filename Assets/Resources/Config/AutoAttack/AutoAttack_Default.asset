@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4a1e2f9b8d4650a1e2f3c4d5b6a7e8, type: 3}
+  m_Name: AutoAttack_Default
+  m_EditorClassIdentifier: Assembly-CSharp::AutoAttackDataSO
+  configId: auto_attack.default
+  displayName: Default Auto Attack
+  icon: {fileID: 0}
+  skillId: skill.shoot
+  shotsPerBurst: 10
+  burstRecoverySeconds: 4
+  scanIntervalWhileIdle: 0.12
+  scanIntervalWhileEngaged: 0.25
+  projectileData: {fileID: 11400000, guid: f9430e6e89e354dd7a5f87becbc9c2fb, type: 2}
+  projectilesPerShot: 1
+  fanAngleDegrees: 10
+  spawnPattern: 0

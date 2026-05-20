@@ -85,7 +85,12 @@ public class SkillShoot : SkillBase
 
     public void RefreshAttackSpeedFromStats()
     {
-        if (player != null && player.controller != null && player.controller.RuntimeStats.IsInitialized)
+        if (player != null && player.controller != null && player.controller.AutoAttack != null &&
+            player.controller.AutoAttack.IsReady)
+        {
+            shootSpeedAnimMulti = player.controller.AutoAttack.AnimSpeedMultiplier;
+        }
+        else if (player != null && player.controller != null && player.controller.RuntimeStats.IsInitialized)
         {
             shootSpeedAnimMulti = player.controller.RuntimeStats.Get(StatType.AttackSpeedMulti);
         }
@@ -99,6 +104,12 @@ public class SkillShoot : SkillBase
 
     protected override void Update()
     {
+        if (player != null && player.controller != null && player.controller.AutoAttack != null &&
+            player.controller.AutoAttack.IsReady)
+        {
+            return;
+        }
+
         //处于未攻击状态， 实时检测enemy
         if (!hasEffectiveEnemy)
         {
@@ -113,7 +124,16 @@ public class SkillShoot : SkillBase
         currentAttackCount = 0;
     }
 
-    public bool CanUseShootSkill() => hasEffectiveEnemy && !isCoolDown;
+    public bool CanUseShootSkill()
+    {
+        if (player != null && player.controller != null && player.controller.AutoAttack != null &&
+            player.controller.AutoAttack.IsReady)
+        {
+            return player.controller.AutoAttack.CanAttack;
+        }
+
+        return hasEffectiveEnemy && !isCoolDown;
+    }
 
     private SkillObject_BulletSpawn CreateBulletSpawnPre()
     {
@@ -134,6 +154,18 @@ public class SkillShoot : SkillBase
     /// </summary>
     public void ActivateOneShootAttack()
     {
+        if (player != null && player.controller != null && player.controller.AutoAttack != null &&
+            player.controller.AutoAttack.IsReady)
+        {
+            player.controller.AutoAttack.ExecuteAttack();
+            if (!player.controller.AutoAttack.CanAttack)
+            {
+                player.playerCombatManager.UpdateAttackStatus(false);
+                player.stateMachine.ChangeState(player.idleState);
+            }
+
+            return;
+        }
 
         //1. 检查是否在cooldown， cooldown时直接return
         if (isCoolDown) return;

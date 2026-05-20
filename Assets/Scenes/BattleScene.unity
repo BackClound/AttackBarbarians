@@ -1318,6 +1318,7 @@ GameObject:
   - component: {fileID: 825728583}
   - component: {fileID: 825728584}
   - component: {fileID: 825728590}
+  - component: {fileID: 825728591}
   - component: {fileID: 825728588}
   - component: {fileID: 825728585}
   - component: {fileID: 825728589}
@@ -1548,6 +1549,22 @@ MonoBehaviour:
     m_Bits: 256
   enemyTag: Enemy
   wallReference: {fileID: 1869007418}
+--- !u!114 &825728591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825728580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 659838650c14474093f769437cd04c1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoAttackController
+  autoAttackConfigId: auto_attack.default
+  dataOverride: {fileID: 0}
+  fireOrigin: {fileID: 839134032}
+  combatEnabled: 1
 --- !u!1 &839134031
 GameObject:
   m_ObjectHideFlags: 0

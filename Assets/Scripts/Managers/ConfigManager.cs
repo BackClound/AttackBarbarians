@@ -27,6 +27,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, WaveDataSO> wavesById = new Dictionary<string, WaveDataSO>(8);
     private readonly Dictionary<string, BossDataSO> bossesById = new Dictionary<string, BossDataSO>(4);
     private readonly Dictionary<string, DropTableSO> dropTablesById = new Dictionary<string, DropTableSO>(8);
+    private readonly Dictionary<string, AutoAttackDataSO> autoAttacksById = new Dictionary<string, AutoAttackDataSO>(4);
 
     public bool IsInitialized { get; private set; }
     public GameConfig GameConfig => gameConfig;
@@ -90,6 +91,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
 
     public bool TryGetDropTable(string configId, out DropTableSO data) =>
         TryGet(dropTablesById, configId, out data);
+
+    public bool TryGetAutoAttack(string configId, out AutoAttackDataSO data) =>
+        TryGet(autoAttacksById, configId, out data);
 
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
     {
@@ -155,13 +159,15 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.Waves, wavesById);
         IndexList(Database.Bosses, bossesById);
         IndexList(Database.DropTables, dropTablesById);
+        IndexList(Database.AutoAttacks, autoAttacksById);
 
         if (ShouldLog())
         {
             Debug.Log(
                 $"[ConfigManager] 已加载配置：Player={playersById.Count}, Enemy={enemiesById.Count}, " +
                 $"Skill={skillsById.Count}, Buff={buffsById.Count}, Wave={wavesById.Count}, " +
-                $"Boss={bossesById.Count}, DropTable={dropTablesById.Count}");
+                $"Boss={bossesById.Count}, DropTable={dropTablesById.Count}, " +
+                $"AutoAttack={autoAttacksById.Count}");
         }
     }
 
@@ -193,6 +199,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         wavesById.Clear();
         bossesById.Clear();
         dropTablesById.Clear();
+        autoAttacksById.Clear();
     }
 
     private static bool TryGet<T>(Dictionary<string, T> map, string configId, out T data)

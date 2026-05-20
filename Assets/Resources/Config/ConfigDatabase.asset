@@ -29,3 +29,5 @@ MonoBehaviour:
   bosses: []
   dropTables:
   - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}
+  autoAttacks:
+  - {fileID: 11400000, guid: e3f5a7b29c4d6e8f0a1b2c3d4e5f6a7b, type: 2}

@@ -26,10 +26,12 @@ public class PlayerController : MonoBehaviour
     private Player player;
     private Player_Health playerHealth;
     private Entity_Stats entityStats;
+    private AutoAttackController autoAttack;
     private readonly PlayerRuntimeStats runtimeStats = new PlayerRuntimeStats();
     private readonly PlayerTargetScanner targetScanner = new PlayerTargetScanner();
 
     public Player Player => player;
+    public AutoAttackController AutoAttack => autoAttack;
     public PlayerRuntimeStats RuntimeStats => runtimeStats;
     public PlayerTargetScanner TargetScanner => targetScanner;
     public PlayerDataSO ActiveData { get; private set; }
@@ -39,6 +41,7 @@ public class PlayerController : MonoBehaviour
     {
         player = GetComponent<Player>();
         playerHealth = GetComponent<Player_Health>();
+        autoAttack = GetComponent<AutoAttackController>();
         if (playerHealth != null)
         {
             entityStats = playerHealth.entity_Stats;
@@ -92,6 +95,7 @@ public class PlayerController : MonoBehaviour
         ConfigureTargetScanner();
         IsReady = true;
         playerHealth?.InitializeHpFromStats();
+        autoAttack?.InitializeFromConfig();
 
         GameEvents.UnsubscribeBuffChanged(OnBuffChanged);
         GameEvents.SubscribeBuffChanged(OnBuffChanged);
@@ -156,6 +160,7 @@ public class PlayerController : MonoBehaviour
         runtimeStats.ApplyToEntityStats(entityStats, this);
         playerHealth?.OnMaxHpStatsChanged();
         player.skillManager?.sKillShoot?.RefreshAttackSpeedFromStats();
+        autoAttack?.RefreshAnimSpeedFromStats();
         ConfigureTargetScanner();
     }
 

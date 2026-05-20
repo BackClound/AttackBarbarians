@@ -18,6 +18,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<WaveDataSO> waves = new List<WaveDataSO>();
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
     [SerializeField] private List<DropTableSO> dropTables = new List<DropTableSO>();
+    [SerializeField] private List<AutoAttackDataSO> autoAttacks = new List<AutoAttackDataSO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -26,6 +27,7 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<WaveDataSO> Waves => waves;
     public IReadOnlyList<BossDataSO> Bosses => bosses;
     public IReadOnlyList<DropTableSO> DropTables => dropTables;
+    public IReadOnlyList<AutoAttackDataSO> AutoAttacks => autoAttacks;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -47,6 +49,9 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetDropTable(string configId, out DropTableSO data) =>
         TryGet(dropTables, configId, out data);
+
+    public bool TryGetAutoAttack(string configId, out AutoAttackDataSO data) =>
+        TryGet(autoAttacks, configId, out data);
 
     private static bool TryGet<T>(List<T> list, string configId, out T data) where T : ConfigDataBase
     {

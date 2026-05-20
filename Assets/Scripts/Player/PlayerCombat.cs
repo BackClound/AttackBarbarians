@@ -48,9 +48,20 @@ public class PlayerCombat : EntityCombat
         canAttack = false;
         isAttacking = false;
 
-        if (player != null && player.controller != null && player.controller.IsReady)
+        if (player != null && player.controller != null)
         {
-            if (player.controller.CopyCombatTargetsTo(effectiveEnemys))
+            if (player.controller.AutoAttack != null && player.controller.AutoAttack.IsReady)
+            {
+                if (player.controller.AutoAttack.CopyCombatTargetsTo(effectiveEnemys))
+                {
+                    canAttack = true;
+                    isAttacking = true;
+                }
+
+                return;
+            }
+
+            if (player.controller.IsReady && player.controller.CopyCombatTargetsTo(effectiveEnemys))
             {
                 canAttack = true;
                 isAttacking = true;
