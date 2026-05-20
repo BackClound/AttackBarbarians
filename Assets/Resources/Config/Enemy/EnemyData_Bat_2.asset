@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 505d9560e925420eb91196e94e3556ab, type: 3}
+  m_Name: EnemyData_Bat_2
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
+  configId: enemy.bat.2
+  displayName: BatTwo
+  icon: {fileID: 21300000, guid: e3d7e5298e3bd6748a321d0cd158ebd5, type: 3}
+  baseStats:
+    maxHp: 100
+    moveSpeed: 3
+    attackSpeed: 1
+    attackSpeedMulti: 1
+    damage: 10
+    critChance: 0
+    critPower: 0.5
+    fireDamage: 0
+    iceDamage: 0
+    lightningDamage: 0
+    armor: 0
+    armorReduce: 0
+  attackDistance: 1.5
+  contactDamage: 15
+  attackCooldown: 1
+  prefab: {fileID: 5449595325056827577, guid: 2b33b0e95a9864bf6a6f14d534998d15, type: 3}
+  poolKey: Enemy
+  spawnWeight: 1
+  abilityTags: 1
+  experienceReward: 6

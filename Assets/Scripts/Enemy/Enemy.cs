@@ -62,6 +62,16 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public void OnSpawn()
     {
+        if (TryGetComponent(out EnemyController _))
+        {
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
+
+            return;
+        }
+
         enemy_Health.ResetForPool();
         moveSpeed = enemy_Health.entity_Stats.GetMoveSpeed();
         if (rb != null)
@@ -74,6 +84,11 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public void OnDespawn()
     {
+        if (TryGetComponent(out EnemyController controller))
+        {
+            controller.OnPoolDespawn();
+        }
+
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
@@ -81,9 +96,7 @@ public class Enemy : Entity, IDamagable, IPoolable
 
         if (anim != null)
         {
-            // 重新绑定动画
             anim.Rebind();
-            // 更新动画
             anim.Update(0f);
         }
     }

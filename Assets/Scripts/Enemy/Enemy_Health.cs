@@ -3,11 +3,12 @@ using UnityEngine;
 public class Enemy_Health : Entity_Health
 {
     private Enemy enemy;
-    // 最大生命值，当前生命值，和预期被攻击后剩余的生命值，realHp用来控制下一次攻击是否可以攻击该敌人
+    private EnemyController controller;
     [SerializeField] private float currentHp;
-    //TODO realHP不能用来进行判断，因为子弹按照特定的方向进行射击，不能保证准确无误的击中Enemy
     [SerializeField] private float realHp;
-    [SerializeField] private bool isDead = false;
+    [SerializeField] private bool isDead;
+
+    private object lastDamageSource;
 
     public float CurrentHp => currentHp;
     public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : currentHp;
@@ -16,12 +17,23 @@ public class Enemy_Health : Entity_Health
     {
         base.Awake();
         enemy = GetComponent<Enemy>();
+        controller = GetComponent<EnemyController>();
     }
 
     private void Start()
     {
+        if (controller != null && controller.IsReady)
+        {
+            return;
+        }
+
         currentHp = entity_Stats.GetMaxHp();
         realHp = currentHp;
+    }
+
+    public void SetLastDamageSource(object source)
+    {
+        lastDamageSource = source;
     }
 
     public override bool CanBeDamage()
@@ -31,14 +43,15 @@ public class Enemy_Health : Entity_Health
 
     protected override void ReduceHp(float damage)
     {
-        Debug.Log("Enemy health reduce HP " + damage);
         currentHp -= damage;
 
         GameEvents.RaiseDamageApplied(enemy, new DamageEventArgs(
             damage,
             enemy.transform.position,
-            null,
+            lastDamageSource,
             enemy.gameObject));
+
+        lastDamageSource = null;
 
         if (currentHp <= 0 && !isDead)
         {
@@ -56,7 +69,6 @@ public class Enemy_Health : Entity_Health
     {
         var newHp = currentHp += healing;
         currentHp = Mathf.Min(newHp, entity_Stats.GetMaxHp());
-
         realHp = Mathf.Min(realHp + healing, currentHp);
     }
 
@@ -67,18 +79,23 @@ public class Enemy_Health : Entity_Health
 
     public override void Die()
     {
+        controller?.NotifyDeath();
+
+        int experienceReward = controller != null ? controller.GetExperienceReward() : 0;
         GameEvents.RaiseEnemyKilled(enemy, new EnemyEventArgs(
             enemy.gameObject,
             enemy.transform.position,
-            null));
+            lastDamageSource,
+            controller != null ? controller.ConfigId : string.Empty,
+            experienceReward));
 
         enemy.stateMachine.ChangeState(enemy.deadState);
     }
 
-    /// <summary>对象池复用前重置血量与死亡标记。</summary>
     public void ResetForPool()
     {
         isDead = false;
+        lastDamageSource = null;
         currentHp = entity_Stats.GetMaxHp();
         realHp = currentHp;
     }

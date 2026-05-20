@@ -2,7 +2,7 @@ using UnityEngine;
 
 public enum SkillType
 {
-    SKillShoot,
+    SkillShoot,
     SkillFire,
     SkillIce,
     SkillLighting

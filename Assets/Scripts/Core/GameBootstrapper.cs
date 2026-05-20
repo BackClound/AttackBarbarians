@@ -13,7 +13,7 @@ using UnityEngine;
 /// <item><description>将同物体或子物体上的 <see cref="ConfigManager"/>、<see cref="SaveManager"/>、<see cref="PoolManager"/>、<see cref="GameManager"/> 拖入对应槽位；留空时会在 Awake 时自动查找或在本物体上 AddComponent。</description></item>
 /// <item><description><c>Dont Destroy On Load</c> 建议开启，保证跨场景保留引导流程（单例冲突时会销毁重复实例）。</description></item>
 /// </list>
-/// <para><b>启动顺序：</b>ConfigManager → SaveManager → EventBus（代码创建）→ PoolManager → GameManager → GameFlowManager。</para>
+/// <para><b>启动顺序：</b>ConfigManager → SaveManager → EventBus → PoolManager → GameManager → GameFlowManager → RunSession/Settlement/Experience → EnemySpawner → WaveManager。</para>
 /// <para><b>获取方式：</b><c>GameBootstrapper.Instance</c> 或 <c>ServiceLocator.Get&lt;GameBootstrapper&gt;()</c>（Bootstrap 完成后）。</para>
 /// </remarks>
 public class GameBootstrapper : MonoSingleton<GameBootstrapper>
@@ -28,8 +28,13 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private PoolManager poolManager;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameFlowManager gameFlowManager;
+    [SerializeField] private RunSessionTracker runSessionTracker;
+    [SerializeField] private RunRewardSettlementService runRewardSettlementService;
+    [SerializeField] private PlayerExperienceService playerExperienceService;
+    [SerializeField] private EnemySpawnerManager enemySpawnerManager;
+    [SerializeField] private WaveManager waveManager;
 
-    private readonly List<IGameSystem> systems = new List<IGameSystem>(8);
+    private readonly List<IGameSystem> systems = new List<IGameSystem>(16);
     private EventBus eventBus;
     private bool isBootstrapped;
 
@@ -96,6 +101,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         poolManager = ResolveOrCreate(poolManager);
         gameManager = ResolveOrCreate(gameManager);
         gameFlowManager = ResolveOrCreate(gameFlowManager);
+        runSessionTracker = ResolveOrCreate(runSessionTracker);
+        runRewardSettlementService = ResolveOrCreate(runRewardSettlementService);
+        playerExperienceService = ResolveOrCreate(playerExperienceService);
+        enemySpawnerManager = ResolveOrCreate(enemySpawnerManager);
+        waveManager = ResolveOrCreate(waveManager);
         eventBus = new EventBus();
     }
 
@@ -110,6 +120,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(poolManager);
         ServiceLocator.Register(gameManager);
         ServiceLocator.Register(gameFlowManager);
+        ServiceLocator.Register(runSessionTracker);
+        ServiceLocator.Register(runRewardSettlementService);
+        ServiceLocator.Register(playerExperienceService);
+        ServiceLocator.Register(enemySpawnerManager);
+        ServiceLocator.Register(waveManager);
 
         systems.Add(configManager);
         systems.Add(saveManager);
@@ -117,6 +132,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(poolManager);
         systems.Add(gameManager);
         systems.Add(gameFlowManager);
+        systems.Add(runSessionTracker);
+        systems.Add(runRewardSettlementService);
+        systems.Add(playerExperienceService);
+        systems.Add(enemySpawnerManager);
+        systems.Add(waveManager);
     }
 
     private void InitializeSystems()

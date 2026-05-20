@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 505d9560e925420eb91196e94e3556ab, type: 3}
-  m_Name: EnemyData_Bat
-  m_EditorClassIdentifier: 
-  configId: enemy.bat
-  displayName: Bat
-  icon: {fileID: 0}
+  m_Name: EnemyData_Bat_4
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
+  configId: enemy.bat.4
+  displayName: EnemyBat4
+  icon: {fileID: 21300000, guid: 42c825da492dcef4ca02cfde3899b5be, type: 3}
   baseStats:
-    maxHp: 30
-    moveSpeed: 2
+    maxHp: 100
+    moveSpeed: 3
     attackSpeed: 1
     attackSpeedMulti: 1
     damage: 10
-    critChance: 0.05
+    critChance: 0
     critPower: 0.5
     fireDamage: 0
     iceDamage: 0
@@ -29,11 +29,10 @@ MonoBehaviour:
     armor: 0
     armorReduce: 0
   attackDistance: 1.5
-  contactDamage: 10
+  contactDamage: 20
   attackCooldown: 1
-  prefab: {fileID: 0}
+  prefab: {fileID: 5407043206690283361, guid: e2d22e09fce3a4ac6a6950480f62c35a, type: 3}
   poolKey: Enemy
   spawnWeight: 1
-  experienceReward: 5
-  dropTableId: drop.common
-
+  abilityTags: 1
+  experienceReward: 8

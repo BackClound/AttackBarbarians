@@ -87,13 +87,13 @@ public class Player_Health : Entity_Health
 
     private void UpdateHealthBar()
     {
-        if (healthBarSlider == null)
-        {
-            return;
-        }
+        // if (healthBarSlider == null)
+        // {
+        //     return;
+        // }
 
-        float maxHp = entity_Stats.GetMaxHp();
-        healthBarSlider.value = maxHp > 0f ? currentHp / maxHp : 0f;
+        // float maxHp = entity_Stats.GetMaxHp();
+        // healthBarSlider.value = maxHp > 0f ? currentHp / maxHp : 0f;
     }
 
     public override void Die()

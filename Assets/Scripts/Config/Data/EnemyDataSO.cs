@@ -19,11 +19,15 @@ public class EnemyDataSO : ConfigDataBase
     [SerializeField] private string poolKey = GameConstants.PoolKeys.Enemy;
     [SerializeField] private int spawnWeight = 1;
 
+    [Header("Classification")]
+    [SerializeField] private EnemyAbilityTag abilityTags = EnemyAbilityTag.Normal;
+
     [Header("Rewards")]
+    [Tooltip("击杀时授予玩家经验；金币/钻石仅在局末结算，死亡不掉落。")]
     [SerializeField] private int experienceReward = 5;
-    [SerializeField] private string dropTableId;
 
     public StatBlockConfig BaseStats => baseStats;
+    public EnemyAbilityTag AbilityTags => abilityTags;
     public float AttackDistance => Mathf.Max(0.1f, attackDistance);
     public float ContactDamage => Mathf.Max(0f, contactDamage);
     public float AttackCooldown => Mathf.Max(0.05f, attackCooldown);
@@ -31,7 +35,6 @@ public class EnemyDataSO : ConfigDataBase
     public string PoolKey => string.IsNullOrEmpty(poolKey) ? GameConstants.PoolKeys.Enemy : poolKey;
     public int SpawnWeight => Mathf.Max(1, spawnWeight);
     public int ExperienceReward => Mathf.Max(0, experienceReward);
-    public string DropTableId => dropTableId;
 
     public override void CollectValidationErrors(ConfigValidationResult result)
     {

@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 3692527364732037574}
   - component: {fileID: 1856810686869785089}
   - component: {fileID: 2165080457796251178}
+  - component: {fileID: 4168105054354489472}
   m_Layer: 8
   m_Name: BatLevel_5
   m_TagString: Untagged
@@ -180,6 +181,7 @@ MonoBehaviour:
   rb: {fileID: 1856810686869785089}
   coll: {fileID: 2165080457796251178}
   enemy_Health: {fileID: 0}
+  isBoss: 0
   moveSpeed: 8
   attackCheck: {fileID: 961533417271930279}
   attackDistance: 0.6
@@ -349,3 +351,17 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.9547696, y: 0.92959404}
   m_EdgeRadius: 0
+--- !u!114 &4168105054354489472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6325858709102536717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3681f8a0cc2514be1a663258676503ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
+  defaultConfigId: enemy.bat
+  dataOverride: {fileID: 0}

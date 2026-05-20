@@ -37,13 +37,47 @@ public readonly struct EnemyEventArgs
     public Vector3 Position { get; }
     public object Killer { get; }
     public string EnemyTypeId { get; }
+    /// <summary>击杀授予玩家的经验（不含局末金币/钻石结算）。</summary>
+    public int ExperienceReward { get; }
 
-    public EnemyEventArgs(GameObject enemyObject, Vector3 position, object killer, string enemyTypeId = null)
+    public EnemyEventArgs(
+        GameObject enemyObject,
+        Vector3 position,
+        object killer,
+        string enemyTypeId = null,
+        int experienceReward = 0)
     {
         EnemyObject = enemyObject;
         Position = position;
         Killer = killer;
         EnemyTypeId = enemyTypeId ?? string.Empty;
+        ExperienceReward = Mathf.Max(0, experienceReward);
+    }
+}
+
+/// <summary>
+/// 单局结束奖励结算事件负载（金币/钻石，按游玩时长与难度档位计算）。
+/// </summary>
+public readonly struct RunRewardSettledEventArgs
+{
+    public float SessionDurationSeconds { get; }
+    public int RewardTier { get; }
+    public int DifficultyLevel { get; }
+    public long GoldGranted { get; }
+    public long DiamondsGranted { get; }
+
+    public RunRewardSettledEventArgs(
+        float sessionDurationSeconds,
+        int rewardTier,
+        int difficultyLevel,
+        long goldGranted,
+        long diamondsGranted)
+    {
+        SessionDurationSeconds = sessionDurationSeconds;
+        RewardTier = rewardTier;
+        DifficultyLevel = difficultyLevel;
+        GoldGranted = goldGranted;
+        DiamondsGranted = diamondsGranted;
     }
 }
 

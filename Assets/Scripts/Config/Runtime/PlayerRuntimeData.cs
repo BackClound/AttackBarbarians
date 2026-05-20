@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// 玩家运行时数据：仅保存 configId、等级与属性快照，不持有 SO 引用（便于存档）。
 /// </summary>
@@ -28,6 +30,9 @@ public sealed class PlayerRuntimeData
 
     public void AddExperience(float amount)
     {
-        CurrentExperience += amount;
+        CurrentExperience = Mathf.Max(0f, CurrentExperience + amount);
     }
+
+    public float CurrentExperienceValue => CurrentExperience;
+    public int CurrentLevel => Level;
 }

@@ -12,6 +12,8 @@ public class WaveDataSO : ConfigDataBase
     [SerializeField] private float waveDuration = 30f;
     [SerializeField] private float spawnInterval = 1.5f;
     [SerializeField] private int maxSpawnCount = 20;
+    [Tooltip("每经过一波，敌人四维属性额外乘算 (waveIndex-1)*该系数。")]
+    [SerializeField] private float statScalePerWave = 0.08f;
 
     [Header("Enemies")]
     [SerializeField] private List<string> enemyConfigIds = new List<string>();
@@ -20,7 +22,14 @@ public class WaveDataSO : ConfigDataBase
     public float WaveDuration => Mathf.Max(1f, waveDuration);
     public float SpawnInterval => Mathf.Max(0.05f, spawnInterval);
     public int MaxSpawnCount => Mathf.Max(1, maxSpawnCount);
+    public float StatScalePerWave => Mathf.Max(0f, statScalePerWave);
     public IReadOnlyList<string> EnemyConfigIds => enemyConfigIds;
+
+    public float GetStatMultiplierForWave(int currentWaveIndex)
+    {
+        int index = Mathf.Max(1, currentWaveIndex);
+        return 1f + (index - 1) * StatScalePerWave;
+    }
 
     public override void CollectValidationErrors(ConfigValidationResult result)
     {

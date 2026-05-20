@@ -48,6 +48,9 @@ public static class GameConstants
         public const string EnemySpawned = "Enemy.Spawned";
         public const string EnemyKilled = "Enemy.Killed";
 
+        // Run
+        public const string RunRewardSettled = "Run.RewardSettled";
+
         // Damage
         public const string DamageApplied = "Damage.Applied";
 
@@ -98,6 +101,7 @@ public static class GameConstants
     {
         public const string GameConfig = "Config/GameConfig";
         public const string ConfigDatabase = "Config/ConfigDatabase";
+        public const string RunRewardSettlement = "Config/RunReward/RunRewardSettlement_Default";
     }
 
     public static class ConfigIds

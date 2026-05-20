@@ -20,5 +20,8 @@ public class SettingsData
     public bool invertTouchY;
     public bool hapticEnabled = true;
 
+    /// <summary>0=简单, 1=普通, 2=困难；影响局末金币/钻石结算倍率。</summary>
+    public int gameDifficulty = 1;
+
     public static SettingsData CreateDefault() => new SettingsData();
 }

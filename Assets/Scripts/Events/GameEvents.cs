@@ -22,6 +22,12 @@ public static class GameEvents
     public static void RaiseGameStarted(object sender = null) =>
         Publish(GameConstants.EventKeys.GameStarted, sender);
 
+    public static void SubscribeGameStarted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.GameStarted, handler);
+
+    public static void UnsubscribeGameStarted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.GameStarted, handler);
+
     public static void RaiseGamePaused(object sender = null) =>
         Publish(GameConstants.EventKeys.GamePaused, sender);
 
@@ -164,6 +170,19 @@ public static class GameEvents
 
     public static void UnsubscribeEnemyKilled(Action<GameEventContext> handler) =>
         Unsubscribe(GameConstants.EventKeys.EnemyKilled, handler);
+
+    #endregion
+
+    #region Run
+
+    public static void RaiseRunRewardSettled(object sender, RunRewardSettledEventArgs args) =>
+        Publish(GameConstants.EventKeys.RunRewardSettled, sender, args);
+
+    public static void SubscribeRunRewardSettled(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.RunRewardSettled, handler);
+
+    public static void UnsubscribeRunRewardSettled(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.RunRewardSettled, handler);
 
     #endregion
 

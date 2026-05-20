@@ -171,6 +171,28 @@ public class PlayerController : MonoBehaviour
         RefreshEntityStats();
     }
 
+    /// <summary>击杀敌人获得经验；受 ExperienceGain 属性加成。</summary>
+    public void GrantExperience(int baseAmount, object source = null)
+    {
+        if (!IsReady || baseAmount <= 0 || ActiveData == null)
+        {
+            return;
+        }
+
+        float gainMult = 1f + runtimeStats.Get(StatType.ExperienceGain);
+        float amount = baseAmount * gainMult;
+        var data = runtimeStats.Data;
+        data.AddExperience(amount);
+
+        while (data.CurrentExperienceValue >= ActiveData.ExperiencePerLevel)
+        {
+            data.AddExperience(-ActiveData.ExperiencePerLevel);
+            int newLevel = data.CurrentLevel + 1;
+            data.SetLevel(newLevel);
+            GameEvents.RaisePlayerLevelUp(this, newLevel);
+        }
+    }
+
     private void ConfigureTargetScanner()
     {
         Vector2 wallFallback = wallReference != null

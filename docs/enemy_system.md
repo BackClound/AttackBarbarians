@@ -1,42 +1,55 @@
-## 阶段二：enemy核心机制
+# Enemy 系统实现说明
 
-### 模板 3：实现enemy的生成与可成长性系统
-目标
-实现无线防守模式+肉鸽类游戏机制下的enemy的随机生成机制与随波数增加enemy四维属性提升的机制
+## 概述
 
-上下文
-基于阶段一已创建的 Project 结构和管理器框架
+敌人系统已接入配置驱动、对象池、波次刷怪与事件总线。按产品需求调整：
 
-为不同的波数设置不同的enemy池， 在enemy池中随机选择enemy生成，enemy生成之后沿直线向player移动，到达player侧之后，触发攻击。
-enemy的选择，生成数量，生成间隔，生成位置的添加随机属性
-波次自动推进：当前波次所有敌人生成并消灭后，进入下一波或者当前波次达到30s后自动进入下一波
- 
-enemy拥有基础的移动、攻击、爆击、生命值，经验值、受击特效等数据， 各种数据定义在 Entity_Stats.cs 和 EntityStatsDataSO（ScriptableObject）中
+- **击杀**：仅增加玩家**局内经验**（`EnemyDataSO.experienceReward`），**死亡不掉落**金币/钻石。
+- **局末结算**：`GameOver` 时由 `RunRewardSettlementService` 按**单局游玩时长**（每 5 分钟升一档）与 **难度**（`SaveData.settings.gameDifficulty`）结算金币/钻石，含最低奖励与每档微弱随机浮动。
 
-enemy的攻击目标类型：Player
+## 数据流
 
-Enemy减益buff： 收到Player的技能攻击之后，会获得对应的减益buff，闪电造成麻痹效果，落雷造成区域禁锢效果，火系造成持续伤害效果，水系/冰系造成减速效果
+```
+WaveDataSO → WaveManager → EnemySpawnerManager → PoolManager → EnemyController
+    → Enemy_Health → GameEvents.EnemyKilled → PlayerExperienceService（经验）
+GameOver → RunSessionTracker（时长）→ RunRewardSettlementSO → SaveData.gold/diamonds
+```
 
-Enemy 使用对象池管理
+## 新增脚本
 
-输出要求
-生成enemy孵化管理类 EnemySpawnerManager.cs：
-通过enemy池及WaveManager控制Enemy的创建与回收
-生成 EnemyDataSO.cs：
-包含字段：enemyName（string）、maxHealth (float)、moveSpeed (float)、rewardGold (int)、rewardExp (int)
-生成 Enemy.cs：
-核心属性：currentHealth
-核心方法：TakeDamage(float damage)、Move()、DoDamage()
-受击特效（HitFlash 改变颜色或播放受击动画）
+| 脚本 | 挂载 |
+| --- | --- |
+| `EnemyController` | 敌人 Prefab 根节点 |
+| `EnemySpawnerManager` | GameSystems（或场景管理物体） |
+| `WaveManager` | GameSystems |
+| `PlayerExperienceService` | GameSystems |
+| `RunSessionTracker` | GameSystems |
+| `RunRewardSettlementService` | GameSystems |
+| `RunRewardSettlementSO` | `Resources/Config/RunReward/RunRewardSettlement_Default.asset` |
 
-生成 WaveDataSO.cs：
-包含 List<WaveEnemyEntry>（敌人类型+数量组合）
-生成 WaveManager.cs：
-核心方法：StartWave()、SpawnNextEnemy()、OnEnemyDied()、OnWaveCompleted()
-管理当前波次索引和波次完成事件发布
-支持在波次之间触发肉鸽升级选单
+## 配置
 
-对象池集成
-Enemy 应实现 IPoolable，在 OnSpawn 时重置生命值，在当前enemy池失效时，回收清除所有enemy
+- **敌人**：`Assets/Resources/Config/Enemy/EnemyData_*.asset`（`experienceReward`、`abilityTags`、`poolKey`）
+- **波次**：`Assets/Resources/Config/Wave/WaveData_*.asset`（`enemyConfigIds`、`statScalePerWave`）
+- **局末奖励**：`RunRewardSettlement_Default`（`minutesPerTier=5`、`minimumGold`、各档 `baseGold`/`variance`、难度倍率）
 
-WaveManager 从池中 GetEnemy 而非常规实例化
+## 场景与 Prefab
+
+1. **GameSystems**：Bootstrap 会自动 `AddComponent` 上述 Manager（也可手动拖入 Inspector）。
+2. **敌人 Prefab**：添加 `EnemyController`；保留 `Enemy`、`Enemy_Health`、`Entity_Stats`、状态机与 `IPoolable`。
+3. **对象池**：`PoolManager` 中注册 `Enemy` 等 `poolKey`。
+4. **旧刷怪**：`EnemyGenerateManager` 在 `EnemySpawnerManager` 初始化时默认 `SetAutoSpawnEnabled(false)`，可并存。
+
+## 测试步骤
+
+1. 进入战斗场景，确认 Bootstrap 后 `WaveManager` 开始刷怪（Playing 状态）。
+2. 击杀敌人：Console 可开 `GameConfig.EnableRuntimeLogs`，观察经验与 `Player.LevelUp`。
+3. 故意结束游戏（玩家死亡）：检查 `Run.RewardSettled` 与存档 `gold`/`diamonds` 增加。
+4. 修改 `settings.gameDifficulty` 或拉长对局超过 5 分钟，验证奖励档位与随机区间。
+
+## 未迁移边界
+
+- `EnemyGenerateManager` 仍保留，默认关闭自动刷怪。
+- `DamageSystem.ApplyDamage(DamageInfo)` 未统一，仍为 `TakeDamage(float)`。
+- 能力标签（冲锋/护盾等）仅有 `IEnemyAbility` 接口，无具体实现组件。
+- Boss 波次、掉落表、伤害飘字订阅方可后续接入 `EnemyKilled` / `RunRewardSettled`。

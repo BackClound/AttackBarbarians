@@ -14,13 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   configId: skill.shoot
   displayName: Shoot
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 4ef69770c17cd47219e76038736e9e8f, type: 3}
   skillType: 0
   maxLevel: 10
-  skillPrefab: {fileID: 0}
+  skillPrefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
   baseCooldown: 4
   maxAttackCount: 10
   bulletsPerWave: 3
   checkRadius: 25
   levelEntries: []
-

@@ -51,3 +51,5 @@ GC优化
 内存优化
 移动端优化
 Addressables
+
+重构Player和Enemy的StateMachine有限状态机

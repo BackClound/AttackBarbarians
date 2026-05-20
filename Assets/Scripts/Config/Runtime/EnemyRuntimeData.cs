@@ -10,7 +10,7 @@ public sealed class EnemyRuntimeData
     public float ContactDamage { get; private set; }
     public float AttackCooldown { get; private set; }
     public int ExperienceReward { get; private set; }
-    public string DropTableId { get; private set; }
+    public EnemyAbilityTag AbilityTags { get; private set; }
     public string PoolKey { get; private set; }
 
     public void Initialize(EnemyDataSO source)
@@ -27,7 +27,7 @@ public sealed class EnemyRuntimeData
         ContactDamage = source.ContactDamage;
         AttackCooldown = source.AttackCooldown;
         ExperienceReward = source.ExperienceReward;
-        DropTableId = source.DropTableId;
+        AbilityTags = source.AbilityTags;
         PoolKey = source.PoolKey;
     }
 

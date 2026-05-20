@@ -16,6 +16,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5f2585b0e0714a7d84929aade39be6ea, type: 2}
   enemies:
   - {fileID: 11400000, guid: 0eff639642124c36a326df3296ce6783, type: 2}
+  - {fileID: 11400000, guid: 830a00e1122334346af8ad7fb322e493, type: 2}
+  - {fileID: 11400000, guid: 972f0d94f88bc4c7a90d2f41656899ba, type: 2}
+  - {fileID: 11400000, guid: ddf2b8b507e4f4572ba22a165830f741, type: 2}
+  - {fileID: 11400000, guid: 5fcab54c4d994457f85fc6abeac56214, type: 2}
   skills:
   - {fileID: 11400000, guid: f7415046b87e49f0b74755b50e875dab, type: 2}
   buffs:
