@@ -105,25 +105,60 @@ public static class ConfigValidator
                 continue;
             }
 
-            IReadOnlyList<string> enemyIds = wave.EnemyConfigIds;
-            if (enemyIds == null)
+            ValidateWaveEnemyIdList(wave, wave.EnemyConfigIds, database, result);
+
+            IReadOnlyList<WaveEnemyEntry> entries = wave.EnemyEntries;
+            if (entries == null)
             {
                 continue;
             }
 
-            for (int j = 0; j < enemyIds.Count; j++)
+            for (int j = 0; j < entries.Count; j++)
             {
-                string enemyId = enemyIds[j];
-                if (string.IsNullOrWhiteSpace(enemyId))
+                WaveEnemyEntry entry = entries[j];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.EnemyConfigId))
                 {
-                    result.AddWarning(wave.name, $"EnemyConfigIds[{j}] 为空。");
+                    result.AddWarning(wave.name, $"enemyEntries[{j}] 为空。");
                     continue;
                 }
 
-                if (!database.TryGetEnemy(enemyId, out _))
+                if (!database.TryGetEnemy(entry.EnemyConfigId, out _))
                 {
-                    result.AddError(wave.name, $"引用了不存在的敌人 configId: {enemyId}");
+                    result.AddError(wave.name, $"enemyEntries[{j}] 引用了不存在的敌人: {entry.EnemyConfigId}");
                 }
+            }
+
+            if (wave.HasBoss && !string.IsNullOrWhiteSpace(wave.BossConfigId) &&
+                !database.TryGetBoss(wave.BossConfigId, out _))
+            {
+                result.AddError(wave.name, $"引用了不存在的 Boss configId: {wave.BossConfigId}");
+            }
+        }
+    }
+
+    private static void ValidateWaveEnemyIdList(
+        WaveDataSO wave,
+        IReadOnlyList<string> enemyIds,
+        ConfigDatabaseSO database,
+        ConfigValidationResult result)
+    {
+        if (enemyIds == null)
+        {
+            return;
+        }
+
+        for (int j = 0; j < enemyIds.Count; j++)
+        {
+            string enemyId = enemyIds[j];
+            if (string.IsNullOrWhiteSpace(enemyId))
+            {
+                result.AddWarning(wave.name, $"EnemyConfigIds[{j}] 为空。");
+                continue;
+            }
+
+            if (!database.TryGetEnemy(enemyId, out _))
+            {
+                result.AddError(wave.name, $"引用了不存在的敌人 configId: {enemyId}");
             }
         }
     }

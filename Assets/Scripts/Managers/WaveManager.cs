@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 波次推进：驱动 <see cref="EnemySpawnerManager"/> 刷怪，统计存活并在超时或清场后发布 <see cref="GameEvents.RaiseWaveCompleted"/>。
+/// 波次推进：驱动 <see cref="EnemySpawnerManager"/> 刷怪，统计存活并在超时、清场或 Boss 击败后发布 <see cref="GameEvents.RaiseWaveCompleted"/>。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 <c>GameSystems</c> 子物体上。</para>
@@ -18,16 +18,17 @@ public class WaveManager : MonoBehaviour, IGameSystem
     private WaveDataSO currentWaveData;
     private int currentWaveIndex = 1;
     private int spawnedThisWave;
-    // 波次已过时间 
     private float waveElapsed;
-    // 生成计时器
     private float spawnTimer;
-    // 波次是否激活
     private bool waveActive;
+    private bool bossSpawned;
+    private bool bossDefeated;
     private bool isInitialized;
 
     public bool IsInitialized => isInitialized;
+    public bool IsWaveActive => waveActive;
     public int CurrentWaveIndex => currentWaveIndex;
+    public float WaveElapsed => waveElapsed;
 
     public void Initialize()
     {
@@ -63,32 +64,19 @@ public class WaveManager : MonoBehaviour, IGameSystem
     {
         if (!isInitialized || !waveActive || currentWaveData == null || spawner == null)
         {
-            Debug.LogWarning("[WaveManager] 无法推进波次，条件不满足。");
             return;
         }
 
         if (gameManager != null && gameManager.CurrentState != GameState.Playing)
         {
-            Debug.LogWarning("[WaveManager] 游戏未处于 Playing 状态，暂停波次推进。");
             return;
         }
 
         waveElapsed += deltaTime;
         spawnTimer += deltaTime;
 
-        // 如果生成的敌人数量小于最大数量，并且生成计时器大于生成间隔
-        if (spawnedThisWave < currentWaveData.MaxSpawnCount && spawnTimer >= currentWaveData.SpawnInterval)
-        {
-            Debug.Log($"[WaveManager] 尝试生成敌人 wave={currentWaveIndex} spawned={spawnedThisWave}/{currentWaveData.MaxSpawnCount}");
-            float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
-            if (spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex))
-            {
-                spawnedThisWave++;
-            }
-
-            spawnTimer = 0f;
-        }
-
+        TrySpawnBoss();
+        TrySpawnByInterval();
         TryCompleteWave();
     }
 
@@ -112,13 +100,91 @@ public class WaveManager : MonoBehaviour, IGameSystem
         spawnedThisWave = 0;
         waveElapsed = 0f;
         spawnTimer = 0f;
+        bossSpawned = false;
+        bossDefeated = !currentWaveData.HasBoss;
         waveActive = true;
-        spawner?.ConfigureWavePool(currentWaveData);
+        spawner.ConfigureWavePool(currentWaveData);
 
         GameEvents.RaiseWaveStarted(this, new WaveEventArgs(
             currentWaveIndex,
             currentWaveData.WaveDuration,
             currentWaveData.MaxSpawnCount));
+    }
+
+    public void StopWave()
+    {
+        waveActive = false;
+    }
+
+    /// <summary>立即尝试生成一名敌人（供调试或脚本触发）。</summary>
+    public bool SpawnNext()
+    {
+        if (!waveActive || currentWaveData == null || spawner == null)
+        {
+            return false;
+        }
+
+        return TrySpawnOne();
+    }
+
+    /// <summary>敌人死亡时由事件或外部调用，用于提前结束波次判定。</summary>
+    public void OnEnemyDied(EnemyEventArgs args)
+    {
+        if (!waveActive || currentWaveData == null)
+        {
+            return;
+        }
+
+        if (currentWaveData.HasBoss && args.EnemyObject != null &&
+            args.EnemyObject.TryGetComponent(out Enemy enemy) && enemy.IsBoss)
+        {
+            bossDefeated = true;
+        }
+
+        TryCompleteWave();
+    }
+
+    private void TrySpawnByInterval()
+    {
+        if (spawnedThisWave >= currentWaveData.MaxSpawnCount || spawnTimer < currentWaveData.SpawnInterval)
+        {
+            return;
+        }
+
+        if (TrySpawnOne())
+        {
+            spawnedThisWave++;
+            spawnTimer = 0f;
+        }
+    }
+
+    private void TrySpawnBoss()
+    {
+        if (bossSpawned || !currentWaveData.HasBoss || string.IsNullOrEmpty(currentWaveData.BossConfigId))
+        {
+            return;
+        }
+
+        if (waveElapsed < currentWaveData.BossSpawnAtElapsed)
+        {
+            return;
+        }
+
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        if (spawner.TrySpawnBoss(currentWaveData.BossConfigId, multiplier, currentWaveIndex))
+        {
+            bossSpawned = true;
+            if (!currentWaveData.RequireBossDefeatToComplete)
+            {
+                bossDefeated = true;
+            }
+        }
+    }
+
+    private bool TrySpawnOne()
+    {
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed);
     }
 
     private void TryCompleteWave()
@@ -129,10 +195,14 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
 
         bool allSpawned = spawnedThisWave >= currentWaveData.MaxSpawnCount;
-        bool noAlive = spawner != null && spawner.AliveEnemyCount <= 0;
+        bool noAlive = spawner.AliveEnemyCount <= 0;
         bool timedOut = waveElapsed >= currentWaveData.WaveDuration;
+        bool bossCleared = !currentWaveData.HasBoss || !currentWaveData.RequireBossDefeatToComplete ||
+                           (bossSpawned && bossDefeated && spawner.AliveBossCount <= 0);
+        bool bossOnlyComplete = currentWaveData.HasBoss && currentWaveData.RequireBossDefeatToComplete &&
+                                bossSpawned && bossDefeated && spawner.AliveBossCount <= 0;
 
-        if ((allSpawned && noAlive) || timedOut)
+        if (bossOnlyComplete || timedOut || (allSpawned && noAlive && bossCleared))
         {
             CompleteCurrentWave();
         }
@@ -149,12 +219,10 @@ public class WaveManager : MonoBehaviour, IGameSystem
 
     private void OnEnemyKilled(GameEventContext ctx)
     {
-        if (!waveActive)
+        if (ctx.Payload is EnemyEventArgs args)
         {
-            return;
+            OnEnemyDied(args);
         }
-
-        TryCompleteWave();
     }
 
     private void OnGameStateChanged(GameEventContext ctx)

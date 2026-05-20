@@ -4,7 +4,12 @@ public class EnemyDeadState : EnemyState
 {
     public EnemyDeadState(Enemy enemy, StateMachine machine, string animName) : base(enemy, machine, animName)
     {
+    }
 
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        StopMovement();
     }
 
     public override void OnUpdate()
@@ -13,10 +18,5 @@ public class EnemyDeadState : EnemyState
         {
             enemy.Die();
         }
-    }
-
-    public override void OnAnimFinished()
-    {
-        base.OnAnimFinished();
     }
 }

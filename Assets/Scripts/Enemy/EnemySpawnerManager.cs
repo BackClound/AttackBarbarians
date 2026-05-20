@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -14,28 +12,28 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
     [SerializeField] private EnemyGenerateManager legacySpawner;
     [SerializeField] private bool disableLegacySpawnerOnInit = true;
 
-    [Header("Spawn Bounds")]
-    [SerializeField] private Camera spawnCamera;
-    [SerializeField] private Vector2 viewportMin = new Vector2(0.1f, 0.9f);
-    [SerializeField] private Vector2 viewportMax = new Vector2(0.9f, 1.1f);
+    [Header("Spawn Area")]
+    [SerializeField] private SpawnAreaController spawnArea;
 
-    private readonly List<string> weightedEnemyIds = new List<string>(16);
+    private readonly WaveSpawnSelector spawnSelector = new WaveSpawnSelector();
+    private WaveDataSO activeWaveData;
 
-    private float minLeftX;
-    private float maxRightX;
-    private float minY;
-    private float maxY;
-    private bool boundsReady;
     private bool isInitialized;
 
     public bool IsInitialized => isInitialized;
     public int AliveEnemyCount { get; private set; }
+    public int AliveBossCount { get; private set; }
 
     public void Initialize()
     {
-        if (spawnCamera == null)
+        if (spawnArea == null)
         {
-            spawnCamera = Camera.main;
+            spawnArea = GetComponent<SpawnAreaController>();
+        }
+
+        if (spawnArea == null)
+        {
+            spawnArea = gameObject.AddComponent<SpawnAreaController>();
         }
 
         if (legacySpawner == null)
@@ -48,8 +46,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             legacySpawner.SetAutoSpawnEnabled(false);
         }
 
+        spawnArea.BeginInitialize();
         GameEvents.SubscribeEnemyKilled(OnEnemyKilled);
-        StartCoroutine(DelayInitializeBounds());
         isInitialized = true;
     }
 
@@ -59,62 +57,53 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
     {
         GameEvents.UnsubscribeEnemyKilled(OnEnemyKilled);
         isInitialized = false;
-        boundsReady = false;
+        activeWaveData = null;
     }
 
     public void ConfigureWavePool(WaveDataSO waveData)
     {
-        weightedEnemyIds.Clear();
-
-        if (waveData == null || waveData.EnemyConfigIds == null)
-        {
-            return;
-        }
-
+        activeWaveData = waveData;
         if (!ServiceLocator.TryGet(out ConfigManager configManager))
         {
             return;
         }
 
-        IReadOnlyList<string> ids = waveData.EnemyConfigIds;
-        for (int i = 0; i < ids.Count; i++)
-        {
-            string id = ids[i];
-            if (string.IsNullOrEmpty(id))
-            {
-                continue;
-            }
-
-            if (!configManager.TryGetEnemy(id, out EnemyDataSO enemyData))
-            {
-                Debug.LogWarning($"[EnemySpawnerManager] 波次敌人配置缺失 configId={id}");
-                continue;
-            }
-
-            int weight = enemyData.SpawnWeight;
-            for (int w = 0; w < weight; w++)
-            {
-                weightedEnemyIds.Add(id);
-            }
-        }
+        spawnSelector.Configure(waveData, configManager);
     }
 
-    public bool TrySpawnEnemy(string forcedConfigId, float statMultiplier, int waveIndex)
+    public bool TrySpawnEnemy(string forcedConfigId, float statMultiplier, int waveIndex, float waveElapsedSeconds = 0f)
     {
-        if (!boundsReady)
+        if (spawnArea == null || !spawnArea.IsReady)
         {
-            Debug.LogWarning("[EnemySpawnerManager] 生成边界未就绪，无法生成敌人。");
             return false;
         }
 
         string configId = forcedConfigId;
-        Debug.Log($"[EnemySpawnerManager] 尝试生成敌人 configId={configId} multiplier={statMultiplier} waveIndex={waveIndex}");
         if (string.IsNullOrEmpty(configId))
         {
-            configId = PickRandomEnemyId();
+            configId = spawnSelector.PickEnemyId(waveElapsedSeconds);
         }
 
-        if (string.IsNullOrEmpty(configId))
+        float entryMultiplier = spawnSelector.GetEntryStatMultiplier(configId, statMultiplier);
+        return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsBoss: false);
+    }
+
+    public bool TrySpawnBoss(string bossConfigId, float statMultiplier, int waveIndex)
+    {
+        if (string.IsNullOrEmpty(bossConfigId) ||
+            !ServiceLocator.TryGet(out ConfigManager configManager) ||
+            !configManager.TryGetBoss(bossConfigId, out BossDataSO bossData))
+        {
+            Debug.LogWarning($"[EnemySpawnerManager] Boss 配置缺失 configId={bossConfigId}");
+            return false;
+        }
+
+        return SpawnEnemyInternal(bossData.BaseEnemyConfigId, statMultiplier, waveIndex, markAsBoss: true);
+    }
+
+    private bool SpawnEnemyInternal(string configId, float statMultiplier, int waveIndex, bool markAsBoss)
+    {
+        if (!spawnArea.TryGetRandomSpawnPosition(out Vector3 position))
         {
             return false;
         }
@@ -126,14 +115,9 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        Vector3 position = new Vector3(
-            Random.Range(minLeftX, maxRightX),
-            Random.Range(minY, maxY),
-            0f);
         GameObject instance = SpawnFromPool(enemyData, position);
         if (instance == null)
         {
-            Debug.LogWarning($"[EnemySpawnerManager] 无法生成敌人，实例化失败 configId={configId}");
             return false;
         }
 
@@ -143,8 +127,18 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
+        if (markAsBoss && instance.TryGetComponent(out Enemy enemy))
+        {
+            enemy.SetBossFlag(true);
+        }
+
         controller.InitializeForSpawn(configId, statMultiplier, waveIndex);
         AliveEnemyCount++;
+        if (markAsBoss)
+        {
+            AliveBossCount++;
+        }
+
         return true;
     }
 
@@ -153,7 +147,6 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         string poolKey = data.PoolKey;
         if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.HasPool(poolKey))
         {
-            Debug.Log($"[EnemySpawnerManager] 从对象池生成敌人 poolKey={poolKey} configId={data.ConfigId}");
             return poolManager.Spawn(poolKey, position, Quaternion.identity);
         }
 
@@ -162,48 +155,25 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             Debug.LogWarning($"[EnemySpawnerManager] 对象池缺失，直接实例化敌人 configId={data.ConfigId} poolKey={poolKey}");
             return Instantiate(data.Prefab, position, Quaternion.identity);
         }
-        Debug.LogWarning($"[EnemySpawnerManager] 无法生成敌人，既没有对象池也没有Prefab configId={data.ConfigId}");
+
+        Debug.LogWarning($"[EnemySpawnerManager] 无法生成敌人 configId={data.ConfigId}");
         return null;
-    }
-
-    private string PickRandomEnemyId()
-    {
-        if (weightedEnemyIds.Count == 0)
-        {
-            return GameConstants.ConfigIds.EnemyBat;
-        }
-
-        int index = Random.Range(0, weightedEnemyIds.Count);
-        return weightedEnemyIds[index];
     }
 
     private void OnEnemyKilled(GameEventContext ctx)
     {
-        if (ctx.Payload is not EnemyEventArgs)
+        if (ctx.Payload is not EnemyEventArgs args)
         {
             return;
         }
 
         AliveEnemyCount = Mathf.Max(0, AliveEnemyCount - 1);
-    }
 
-    private IEnumerator DelayInitializeBounds()
-    {
-        yield return new WaitForSeconds(0.2f);
-        if (spawnCamera == null)
+        if (args.EnemyObject != null &&
+            args.EnemyObject.TryGetComponent(out Enemy enemy) &&
+            enemy.IsBoss)
         {
-            spawnCamera = Camera.main;
+            AliveBossCount = Mathf.Max(0, AliveBossCount - 1);
         }
-
-        if (spawnCamera == null)
-        {
-            yield break;
-        }
-
-        minLeftX = spawnCamera.ViewportToWorldPoint(new Vector3(viewportMin.x, 0f)).x;
-        maxRightX = spawnCamera.ViewportToWorldPoint(new Vector3(viewportMax.x, 0f)).x;
-        minY = spawnCamera.ViewportToWorldPoint(new Vector3(0f, viewportMin.y)).y;
-        maxY = spawnCamera.ViewportToWorldPoint(new Vector3(0f, viewportMax.y)).y;
-        boundsReady = true;
     }
 }

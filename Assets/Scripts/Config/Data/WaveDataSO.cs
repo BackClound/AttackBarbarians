@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 波次生成配置：间隔、数量与敌人 ID 权重表。
+/// 波次生成配置：持续时间、敌人组合、Boss 与奖励表引用。
 /// </summary>
 [CreateAssetMenu(fileName = "WaveData", menuName = "Attack Barbarians/Config/Wave Data")]
 public class WaveDataSO : ConfigDataBase
@@ -16,14 +16,30 @@ public class WaveDataSO : ConfigDataBase
     [SerializeField] private float statScalePerWave = 0.08f;
 
     [Header("Enemies")]
+    [SerializeField] private List<WaveEnemyEntry> enemyEntries = new List<WaveEnemyEntry>();
     [SerializeField] private List<string> enemyConfigIds = new List<string>();
+
+    [Header("Boss")]
+    [SerializeField] private bool hasBoss;
+    [SerializeField] private string bossConfigId;
+    [SerializeField] private float bossSpawnAtElapsed = 25f;
+    [SerializeField] private bool requireBossDefeatToComplete = true;
+
+    [Header("Rewards")]
+    [SerializeField] private string rewardTableId;
 
     public int WaveIndex => Mathf.Max(1, waveIndex);
     public float WaveDuration => Mathf.Max(1f, waveDuration);
     public float SpawnInterval => Mathf.Max(0.05f, spawnInterval);
     public int MaxSpawnCount => Mathf.Max(1, maxSpawnCount);
     public float StatScalePerWave => Mathf.Max(0f, statScalePerWave);
+    public IReadOnlyList<WaveEnemyEntry> EnemyEntries => enemyEntries;
     public IReadOnlyList<string> EnemyConfigIds => enemyConfigIds;
+    public bool HasBoss => hasBoss;
+    public string BossConfigId => bossConfigId;
+    public float BossSpawnAtElapsed => Mathf.Max(0f, bossSpawnAtElapsed);
+    public bool RequireBossDefeatToComplete => requireBossDefeatToComplete;
+    public string RewardTableId => rewardTableId;
 
     public float GetStatMultiplierForWave(int currentWaveIndex)
     {
@@ -45,9 +61,16 @@ public class WaveDataSO : ConfigDataBase
             result.AddError(name, "spawnInterval 必须大于 0。");
         }
 
-        if (enemyConfigIds == null || enemyConfigIds.Count == 0)
+        bool hasEntries = enemyEntries != null && enemyEntries.Count > 0;
+        bool hasLegacyIds = enemyConfigIds != null && enemyConfigIds.Count > 0;
+        if (!hasEntries && !hasLegacyIds)
         {
-            result.AddWarning(name, "未配置 enemyConfigIds。");
+            result.AddWarning(name, "未配置 enemyEntries 或 enemyConfigIds。");
+        }
+
+        if (hasBoss && string.IsNullOrWhiteSpace(bossConfigId))
+        {
+            result.AddWarning(name, "hasBoss 为 true 但 bossConfigId 为空。");
         }
     }
 }

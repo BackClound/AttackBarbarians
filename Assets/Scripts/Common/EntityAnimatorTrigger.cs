@@ -54,9 +54,9 @@ public class EntityAnimatorTrigger : MonoBehaviour
             return;
         }
 
-        if (entity is Enemy enemy && enemy.controller != null)
+        if (entity is Enemy enemy)
         {
-            enemy.controller.ExecuteWallAttack();
+            enemy.OnAnimatorAttackTrigger();
         }
     }
 }

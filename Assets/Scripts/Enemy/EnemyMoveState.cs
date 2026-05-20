@@ -9,13 +9,14 @@ public class EnemyMoveState : EnemyState
     public override void OnEnter()
     {
         base.OnEnter();
-        enemy.SetVelocity(Vector2.down * enemy.moveSpeed);
+        ApplyMoveVelocity(Vector2.down);
     }
 
     public override void OnUpdate()
     {
-        if (enemy.IsWallDetected())
+        if (IsWallInAttackRange())
         {
+            StopMovement();
             stateMachine.ChangeState(enemy.idleState);
         }
     }

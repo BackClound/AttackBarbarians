@@ -4,17 +4,21 @@ public class EnemyAttackState : EnemyState
     {
     }
 
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        StopMovement();
+    }
+
     public override void OnUpdate()
     {
-        base.OnUpdate();
-
         if (isAnimFinished)
         {
             stateMachine.ChangeState(enemy.idleState);
             return;
         }
 
-        if (!enemy.IsWallDetected())
+        if (!IsWallInAttackRange())
         {
             stateMachine.ChangeState(enemy.idleState);
         }

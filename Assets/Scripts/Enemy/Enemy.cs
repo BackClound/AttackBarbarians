@@ -10,6 +10,8 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public bool IsBoss => isBoss;
 
+    public void SetBossFlag(bool value) => isBoss = value;
+
     [Header("Attack probe (legacy Inspector fields)")]
     [SerializeField] protected Transform attackCheck;
     [SerializeField] protected float attackDistance;
@@ -84,6 +86,11 @@ public class Enemy : Entity, IDamagable, IPoolable
     public override void OnAniamtorFinished()
     {
         stateMachine.currentState?.OnAnimFinished();
+    }
+
+    public void OnAnimatorAttackTrigger()
+    {
+        stateMachine.currentState?.OnAnimAttackTrigger();
     }
 
     public void Die()

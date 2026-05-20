@@ -11,18 +11,18 @@ public class EnemyIdleState : EnemyState
         base.OnEnter();
         cooldownThreshold = enemy.cooldownThreshold;
         cooldownTimer = cooldownThreshold;
-        rb.linearVelocity = Vector2.zero;
+        StopMovement();
     }
 
     public override void OnUpdate()
     {
-        cooldownTimer -= UnityEngine.Time.deltaTime;
+        cooldownTimer -= Time.deltaTime;
         if (cooldownTimer > 0f)
         {
             return;
         }
 
-        if (enemy.IsWallDetected())
+        if (IsWallInAttackRange())
         {
             stateMachine.ChangeState(enemy.attackState);
         }

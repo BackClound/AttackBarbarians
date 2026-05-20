@@ -18,7 +18,7 @@ public class PlayerShootState : PlayerState
 
     public override void OnUpdate()
     {
-        if (Controller == null || !Controller.CanEnterCombatState())
+        if (ShouldReturnToIdle())
         {
             stateMachine.ChangeState(player.idleState);
             return;
@@ -71,6 +71,9 @@ public class PlayerShootState : PlayerState
             shootSpeedMulti = 1f;
         }
 
-        anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
+        if (anim != null)
+        {
+            anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
+        }
     }
 }
