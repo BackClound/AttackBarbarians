@@ -1,43 +1,26 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
+/// <summary>
+/// 射击波次数据（预留多排弹道扩展）。
+/// </summary>
 [Serializable]
 public class ShootWaveData
 {
-    public List<SKillObject_Bullet> bulletList;
+    public List<ProjectileController> projectileList;
 
     private int shootLine = 1;
-    public int currentBulletIndex = 0;
+    public int currentProjectileIndex;
 
-    public ShootWaveData(List<SKillObject_Bullet> bulletList, int shootLine)
+    public ShootWaveData(List<ProjectileController> projectileList, int shootLine)
     {
-        this.bulletList = bulletList;
+        this.projectileList = projectileList;
         this.shootLine = shootLine;
     }
 
-    public void AddBullet(SKillObject_Bullet bullet)
+    public void AddProjectile(ProjectileController projectile)
     {
-        bulletList.Add(bullet);
-        currentBulletIndex++;
+        projectileList.Add(projectile);
+        currentProjectileIndex++;
     }
-
-    public void UpdateBulletListByLine(int shootLine, GameObject bullet)
-    {
-        this.shootLine = shootLine;
-        if (currentBulletIndex >= shootLine)
-        {
-            return;
-        }
-        else
-        {
-            for (int j = currentBulletIndex; j < shootLine; j++)
-            {
-                bullet.SetActive(false);
-                AddBullet(bullet.GetComponent<SKillObject_Bullet>());
-            }
-        }
-
-    }
-
 }

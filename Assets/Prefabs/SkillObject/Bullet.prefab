@@ -44,12 +44,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 483969735156635527}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f49324a82f8cd44bb88afe16bd5d4ca2, type: 3}
+  m_Script: {fileID: 11500000, guid: e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SKillObject_Bullet
-  canMove: 0
-  moveSpeed: 20
-  isStartAttacking: 0
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileController
+  dataOverride: {fileID: 0}
+  fallbackHitLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  useTriggerCollision: 1
 --- !u!50 &1025483329664979295
 Rigidbody2D:
   serializedVersion: 5

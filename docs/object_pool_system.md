@@ -63,7 +63,7 @@ void OnDespawn(); // 回池前
 
 | 类型 | 方式 | 说明 |
 |------|------|------|
-| `SKillObject_Bullet` | `IPoolable` + `Allocate` / `ReturnAllocated` | `SkillObject_BulletSpawn` 预创建列表；射击时 `OnSpawn` + `SetActive` |
+| `ProjectileController` | `IPoolable` + `Spawn` / `Despawn` | `ProjectileManager` 按射击从池取出；命中或超时后 `Release` |
 | `DamageNumber` | `IPoolable` + `Spawn` / `Despawn` | `DamageNumberController` 优先走池，无池时 Instantiate 回退 |
 | `Enemy` | `IPoolable` + `Spawn` / `Despawn` | `EnemyGenerateManager` 优先生成；`Die()` 回池 |
 

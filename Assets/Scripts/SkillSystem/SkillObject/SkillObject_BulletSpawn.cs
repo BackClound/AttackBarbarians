@@ -1,125 +1,87 @@
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 射击技能发射点：将目标与玩家攻击数值组装为 <see cref="ProjectileSpawnRequest"/> 并交给 <see cref="ProjectileManager"/>。
+/// </summary>
+/// <remarks>
+/// <para><b>是否需要挂载：</b>是。挂在 Player 射击波次子物体（如 <c>BulletSpawnPoint.prefab</c>）。</para>
+/// <para><b>不再负责：</b>子弹列表预创建、碰撞伤害、对象池借还（已迁移至 Projectile 模块）。</para>
+/// </remarks>
 public class SkillObject_BulletSpawn : MonoBehaviour
 {
+    [Header("弹道")]
+    [SerializeField] private int projectilesPerShot = 1;
+    [SerializeField] private float fanAngleDegrees = 10f;
+    [SerializeField] private ProjectileDataSO projectileData;
 
-    //TODO 这是Player当前的武器，可以是发射子弹/激光/或者其他的
-    [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private List<SKillObject_Bullet> bulletList;
-    [SerializeField] private int maxBullets = 1;
-
-    [Header("弹道信息")]
-    [SerializeField] private int shootLine = 1;
-    [SerializeField] private float shootAngle = 5;
-
-    [Header("多波次攻击")]
-    private float spaceBetweenBulletLine;
-    private float spaceBetweenBulletWave;
     private Player player;
 
-    public void SetupBulletSpawn(Player player, int maxBullets)
+    public void SetupBulletSpawn(Player owner, int bulletsPerShot)
     {
-        this.player = player;
-        this.maxBullets = maxBullets;
-        if (bulletList == null || bulletList.Count == 0)
-        {
-            bulletList = new List<SKillObject_Bullet>();
-            InitialBulletList();
-        }
+        player = owner;
+        projectilesPerShot = Mathf.Max(1, bulletsPerShot);
     }
 
-    private void InitialBulletList()
+    public void UpdateMaxBullets(int newCount)
     {
-        for (int i = 0; i < maxBullets; i++)
-        {
-            GameObject bullet = CreateBulletPre();
-            bullet.SetActive(false);
-            var bulletComponent = bullet.GetComponent<SKillObject_Bullet>();
-            bulletList.Add(bulletComponent);
-        }
-    }
-
-    private GameObject CreateBulletPre()
-    {
-        if (ServiceLocator.TryGet(out PoolManager poolManager))
-        {
-            GameObject pooled = poolManager.Allocate(
-                GameConstants.PoolKeys.Bullet,
-                transform.position,
-                Quaternion.identity,
-                transform);
-            if (pooled != null)
-            {
-                return pooled;
-            }
-        }
-
-        return Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-    }
-
-    public void UpdateMaxBullets(int newMaxBullets)
-    {
-        maxBullets = newMaxBullets;
-        if (bulletList.Count < maxBullets)
-        {
-            int bulletsToAdd = maxBullets - bulletList.Count;
-            for (int i = 0; i < bulletsToAdd; i++)
-            {
-                GameObject bullet = CreateBulletPre();
-                bullet.SetActive(false);
-                var bulletComponent = bullet.GetComponent<SKillObject_Bullet>();
-                bulletList.Add(bulletComponent);
-            }
-        }
-        else if (bulletList.Count > maxBullets)
-        {
-            int bulletsToRemove = bulletList.Count - maxBullets;
-            for (int i = 0; i < bulletsToRemove; i++)
-            {
-                var bulletToRemove = bulletList[bulletList.Count - 1];
-                bulletList.RemoveAt(bulletList.Count - 1);
-                ReleaseBulletInstance(bulletToRemove.gameObject);
-            }
-        }
+        projectilesPerShot = Mathf.Max(1, newCount);
     }
 
     public void ApplyBulletWithEnemy(Enemy enemy)
     {
-        //TODO 根据bulletIndexInLine和shootLine计算bullet的发射角度，调整bullet的朝向
-        int middleIndex = maxBullets / 2;
-
-        float batchOffset = bulletList.Count > 1 ? 10f : 0f;
-        Vector2 baseDirection = (enemy.transform.position - transform.position).normalized;
-        float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
-
-        for (int i = 0; i < bulletList.Count; i++)
+        if (enemy == null || player == null)
         {
-            Transform bullet = bulletList[i].transform;
-            float angleOffset = (i - middleIndex) * batchOffset;
-            float angle = baseAngle + angleOffset;
-            bullet.rotation = Quaternion.Euler(0, 0, angle);
-            Vector2 forwardDir = bullet.right;
-            bulletList[i].OnSpawn();
-            float baseDamage = player.player_Health.entity_Stats.GetBaseAttackDamage();
-            bulletList[i].SetupAttackObject(forwardDir, null, baseDamage);
-            bullet.gameObject.SetActive(true);
+            return;
         }
+
+        if (!ServiceLocator.TryGet(out ProjectileManager projectileManager))
+        {
+            Debug.LogWarning("[SkillObject_BulletSpawn] ProjectileManager 未注册，无法发射。");
+            return;
+        }
+
+        float baseDamage = player.player_Health.entity_Stats.GetBaseAttackDamage();
+        object source = player;
+        Vector2 spawnPos = transform.position;
+        Vector2 baseDirection = ((Vector2)enemy.transform.position - spawnPos).normalized;
+
+        ProjectileSpawnRequest template = ProjectileSpawnRequest.CreateStraight(
+            source,
+            enemy.gameObject,
+            spawnPos,
+            baseDirection,
+            baseDamage,
+            GameConstants.ConfigIds.SkillShoot,
+            ResolveProjectileData(projectileManager));
+
+        if (projectilesPerShot <= 1)
+        {
+            projectileManager.Spawn(template);
+            return;
+        }
+
+        ProjectileSpawnRequest fanTemplate = new ProjectileSpawnRequest(
+            template.Source,
+            template.Target,
+            template.SpawnPosition,
+            template.Direction,
+            template.DamageInfo,
+            template.Data,
+            ProjectileSpawnPattern.Fan,
+            projectilesPerShot,
+            fanAngleDegrees,
+            template.SkillId);
+
+        projectileManager.SpawnFan(fanTemplate, projectilesPerShot, fanAngleDegrees);
     }
 
-    private static void ReleaseBulletInstance(GameObject bulletObject)
+    private ProjectileDataSO ResolveProjectileData(ProjectileManager manager)
     {
-        if (bulletObject == null)
+        if (projectileData != null)
         {
-            return;
+            return projectileData;
         }
 
-        if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.IsManagedInstance(bulletObject))
-        {
-            poolManager.ReturnAllocated(bulletObject);
-            return;
-        }
-
-        Destroy(bulletObject);
+        return manager.DefaultData;
     }
 }

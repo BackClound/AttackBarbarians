@@ -44,8 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a2c4157ea3745f7b618a71ec7f7bfb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillObject_BulletSpawn
-  bulletPrefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
-  bulletList: []
-  maxBullets: 2
-  shootLine: 1
-  shootAngle: 5
+  projectilesPerShot: 2
+  fanAngleDegrees: 10
+  projectileData: {fileID: 11400000, guid: f1e2d3c4b5a69788796a5b4c3d2e1f00, type: 2}

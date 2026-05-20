@@ -34,6 +34,36 @@ public readonly struct DamageEventArgs
 }
 
 /// <summary>
+/// 投射物命中事件负载，通过 <see cref="GameConstants.EventKeys.ProjectileHit"/> 发布。
+/// </summary>
+/// <remarks>纯数据结构，无需挂载。伤害结算仍由 <see cref="DamageSystem"/> 完成，本事件用于特效/音效等表现层。</remarks>
+public readonly struct ProjectileHitEventArgs
+{
+    public GameObject ProjectileObject { get; }
+    public GameObject Target { get; }
+    public float DamageDealt { get; }
+    public bool IsCritical { get; }
+    public string SkillId { get; }
+    public ProjectileMotionType MotionType { get; }
+
+    public ProjectileHitEventArgs(
+        GameObject projectileObject,
+        GameObject target,
+        float damageDealt,
+        bool isCritical,
+        string skillId,
+        ProjectileMotionType motionType)
+    {
+        ProjectileObject = projectileObject;
+        Target = target;
+        DamageDealt = damageDealt;
+        IsCritical = isCritical;
+        SkillId = skillId ?? string.Empty;
+        MotionType = motionType;
+    }
+}
+
+/// <summary>
 /// 敌人相关事件负载（击杀、生成等）。
 /// </summary>
 /// <remarks>纯数据结构，无需挂载。订阅方优先使用 <see cref="EnemyObject"/> 与 <see cref="Position"/>，避免依赖具体 Enemy 子类。</remarks>

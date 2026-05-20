@@ -199,6 +199,19 @@ public static class GameEvents
 
     #endregion
 
+    #region Projectile
+
+    public static void RaiseProjectileHit(object sender, ProjectileHitEventArgs args) =>
+        Publish(GameConstants.EventKeys.ProjectileHit, sender, args);
+
+    public static void SubscribeProjectileHit(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.ProjectileHit, handler);
+
+    public static void UnsubscribeProjectileHit(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.ProjectileHit, handler);
+
+    #endregion
+
     #region Skill
 
     public static void RaiseSkillUsed(object sender, string skillId) =>

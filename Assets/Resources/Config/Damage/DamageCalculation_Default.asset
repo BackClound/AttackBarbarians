@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   armorDenominatorBase: 100
   defaultCritPower: 0.5
-  allowDotCritical: 0
+  allowDotCritical: 1
   elementStatScale: 1

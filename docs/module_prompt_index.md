@@ -39,6 +39,7 @@ Attack Barbarians 是 Unity 2D 竖屏无限防守 + Roguelike 游戏。核心循
 - `prompt_damage_system.md`
 - `damage_system.md`
 - `prompt_projectile_system.md`
+- `projectile_system.md`
 - `prompt_skill_system.md`
 - `prompt_buff_system.md`
 - `prompt_weapon_system.md`
