@@ -3,12 +3,18 @@ using UnityEngine;
 public class EntityAnimatorTrigger : MonoBehaviour
 {
     private Entity entity;
-    private EntityCombat entityCombat;
+    private PlayerCombatBridge playerCombatBridge;
+    private EnemyCombatBridge enemyCombatBridge;
+    private PlayerCombat legacyPlayerCombat;
+    private EnemyCombatManager legacyEnemyCombat;
 
     private void Awake()
     {
         entity = GetComponentInParent<Entity>();
-        entityCombat = GetComponentInParent<EntityCombat>();
+        playerCombatBridge = GetComponentInParent<PlayerCombatBridge>();
+        legacyPlayerCombat = GetComponentInParent<PlayerCombat>();
+        enemyCombatBridge = GetComponentInParent<EnemyCombatBridge>();
+        legacyEnemyCombat = GetComponentInParent<EnemyCombatManager>();
     }
 
     public virtual void OnAnimationFinished()
@@ -18,6 +24,39 @@ public class EntityAnimatorTrigger : MonoBehaviour
 
     public virtual void OnAttackTrigger()
     {
-        entityCombat.PerformAttack();
+        if (playerCombatBridge != null)
+        {
+            playerCombatBridge.PerformAttack();
+            return;
+        }
+
+        if (legacyPlayerCombat != null)
+        {
+            legacyPlayerCombat.PerformAttack();
+            return;
+        }
+
+        if (enemyCombatBridge != null)
+        {
+            enemyCombatBridge.PerformAttack();
+            return;
+        }
+
+        if (legacyEnemyCombat != null)
+        {
+            legacyEnemyCombat.PerformAttack();
+            return;
+        }
+
+        if (entity is Player player)
+        {
+            player.OnAnimatorAttackTrigger();
+            return;
+        }
+
+        if (entity is Enemy enemy && enemy.controller != null)
+        {
+            enemy.controller.ExecuteWallAttack();
+        }
     }
 }

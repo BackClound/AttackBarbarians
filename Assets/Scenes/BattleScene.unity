@@ -552,6 +552,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthBarView
   healthSlider: {fileID: 245381953}
+--- !u!1 &337168375
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 337168376}
+  - component: {fileID: 337168377}
+  m_Layer: 0
+  m_Name: CollisionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &337168376
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337168375}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812459356}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &337168377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337168375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7eb9e972ded19468e8bc60afa99d8c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollisionManager
+  dataOverride: {fileID: 11400000, guid: f5261478c17c24833a5c7fb30a058aed, type: 2}
+  configResourcePath: Config/Collision/CollisionData_Default
 --- !u!1 &342174645
 GameObject:
   m_ObjectHideFlags: 0
@@ -1441,15 +1487,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8c094a92179a410192cc0a225c1379e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
-  maxCheckDistance: 25
-  checkPosition: {fileID: 825728583}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  enemyTag: Enemy
-  enemyLayerName: Enemy
-  effectiveEnemys: []
-  canAttack: 0
 --- !u!114 &825728587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2550,6 +2587,8 @@ MonoBehaviour:
   enemySpawnerManager: {fileID: 0}
   waveManager: {fileID: 1406976025}
   damageSystem: {fileID: 0}
+  collisionManager: {fileID: 0}
+  projectileManager: {fileID: 0}
 --- !u!4 &1812459356
 Transform:
   m_ObjectHideFlags: 0
@@ -2571,6 +2610,7 @@ Transform:
   - {fileID: 529775583}
   - {fileID: 2008535171}
   - {fileID: 1951773201}
+  - {fileID: 337168376}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1855374631

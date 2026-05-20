@@ -26,7 +26,10 @@ public class EntityState
 
     public virtual void OnExit()
     {
-        anim.SetBool(animName, false);
+        if (anim != null)
+        {
+            anim.SetBool(animName, false);
+        }
     }
 
     public virtual void OnAnimFinished()

@@ -52,4 +52,4 @@ GC优化
 移动端优化
 Addressables
 
-重构Player和Enemy的StateMachine有限状态机以及shoot的旧逻辑代码，移除旧的更新血量，攻击以及受攻击的逻辑，使用现有的core framework框架进行实现
+重构 Player/Enemy 状态机：由 Controller 驱动（`IEntityStateMachineHost`）；攻击/扫描走 AutoAttack + Collision；血量/UI 走 GameEvents + DamageSystem。详见 `docs/collision_system.md`。

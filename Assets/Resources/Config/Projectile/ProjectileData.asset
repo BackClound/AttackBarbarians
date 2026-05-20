@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 685d9def6bb4a42e5b797c3e9eaa59e4, type: 3}
   m_Name: ProjectileData
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileDataSO
-  configId: 
-  displayName: 
-  icon: {fileID: 0}
+  configId: Projectile_Bullet
+  displayName: Bullet
+  icon: {fileID: 21300000, guid: 4ef69770c17cd47219e76038736e9e8f, type: 3}
   poolKey: Bullet
-  prefab: {fileID: 0}
+  prefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
   motionType: 0
   moveSpeed: 20
   homingTurnRate: 360
@@ -25,7 +25,7 @@ MonoBehaviour:
   hitRadius: 0.2
   hitLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   maxHitCount: 1
   pierceCount: 0
   bounceCount: 0

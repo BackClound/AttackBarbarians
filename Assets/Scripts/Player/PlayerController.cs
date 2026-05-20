@@ -11,7 +11,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Player))]
 [DefaultExecutionOrder(-40)]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IEntityStateMachineHost
 {
     [Header("Config")]
     [SerializeField] private string playerConfigId = GameConstants.ConfigIds.PlayerDefault;
@@ -60,12 +60,29 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        TickStateMachine(Time.deltaTime);
+
         if (!IsReady)
         {
             return;
         }
 
         runtimeStats.TickBuffs(Time.deltaTime);
+    }
+
+    public void TickStateMachine(float deltaTime)
+    {
+        if (player == null || player.stateMachine == null)
+        {
+            return;
+        }
+
+        player.stateMachine.UpdateState();
+    }
+
+    public void TickStateMachineFixed(float fixedDeltaTime)
+    {
+        player?.stateMachine?.FixedUpdateState();
     }
 
     private void OnDestroy()
@@ -218,14 +235,32 @@ public class PlayerController : MonoBehaviour
             ? ActiveData.TargetPolicy
             : PlayerTargetPolicy.NearestToWall;
 
+        LayerMask scanLayers = enemyLayer;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            scanLayers = collisionManager.GetPlayerEnemyScanLayers(enemyLayer);
+        }
+
         targetScanner.Configure(
             scanOrigin,
             radius,
-            enemyLayer,
+            scanLayers,
             enemyTag,
             policy,
             wallReference,
             wallFallback);
+    }
+
+    public bool CanEnterCombatState()
+    {
+        AutoAttackController autoAttack = AutoAttack;
+        if (autoAttack != null && autoAttack.IsReady)
+        {
+            return autoAttack.CanAttack;
+        }
+
+        return player != null && player.skillManager != null && player.skillManager.sKillShoot != null &&
+               player.skillManager.sKillShoot.CanUseShootSkill();
     }
 
     private bool TryResolvePlayerData(out PlayerDataSO data)

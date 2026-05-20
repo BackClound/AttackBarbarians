@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 玩家射程内敌人扫描与目标排序（NonAlloc 物理查询，供 Combat / Skill 共用）。
+/// 玩家射程内敌人扫描与目标排序（经 <see cref="CollisionQuery"/> NonAlloc 查询）。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否。由 <see cref="PlayerController"/> 持有并配置。</para>
@@ -10,9 +10,7 @@ using UnityEngine;
 public sealed class PlayerTargetScanner
 {
     private const int MaxOverlapResults = 48;
-   // 碰撞器缓冲区
     private readonly Collider2D[] overlapBuffer = new Collider2D[MaxOverlapResults];
-    // 结果列表
     private readonly List<Enemy> results = new List<Enemy>(24);
 
     private Vector2 scanOrigin;
@@ -51,7 +49,7 @@ public sealed class PlayerTargetScanner
         results.Clear();
         PrimaryTarget = null;
 
-        int hitCount = Physics2D.OverlapCircleNonAlloc(scanOrigin, scanRadius, overlapBuffer, enemyLayer);
+        int hitCount = CollisionQuery.OverlapCircleNonAlloc(scanOrigin, scanRadius, enemyLayer, overlapBuffer);
         for (int i = 0; i < hitCount; i++)
         {
             Collider2D collider = overlapBuffer[i];
@@ -60,13 +58,17 @@ public sealed class PlayerTargetScanner
                 continue;
             }
 
-            if (!string.IsNullOrEmpty(enemyTag) && !collider.CompareTag(enemyTag))
+            if (!CollisionQuery.TryResolveEnemy(collider, out Enemy enemy))
             {
                 continue;
             }
 
-            Enemy enemy = collider.GetComponent<Enemy>();
-            if (enemy == null || enemy.enemy_Health == null || !enemy.enemy_Health.CanBeDamage())
+            if (!string.IsNullOrEmpty(enemyTag) && !enemy.CompareTag(enemyTag))
+            {
+                continue;
+            }
+
+            if (enemy.enemy_Health == null || !enemy.enemy_Health.CanBeDamage())
             {
                 continue;
             }

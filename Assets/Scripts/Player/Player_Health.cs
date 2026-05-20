@@ -1,17 +1,17 @@
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// 玩家血量：仅负责数值与 <see cref="GameEvents"/> 发布，UI 由事件订阅方刷新。
+/// </summary>
 public class Player_Health : Entity_Health
 {
     private float currentHp;
     private float lastKnownMaxHp;
     private bool isDead;
-    private Slider healthBarSlider;
 
     public override void Awake()
     {
         base.Awake();
-        healthBarSlider = GetComponentInChildren<Slider>();
     }
 
     private void Start()
@@ -23,7 +23,7 @@ public class Player_Health : Entity_Health
         else
         {
             lastKnownMaxHp = entity_Stats.GetMaxHp();
-            UpdateHealthBar();
+            PublishHealthChanged(0f);
         }
     }
 
@@ -34,8 +34,7 @@ public class Player_Health : Entity_Health
         currentHp = maxHp;
         lastKnownMaxHp = maxHp;
         isDead = false;
-        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, 0f, null));
-        UpdateHealthBar();
+        PublishHealthChanged(0f);
     }
 
     public override bool CanBeDamage()
@@ -48,7 +47,7 @@ public class Player_Health : Entity_Health
         currentHp -= damage;
         float maxHp = entity_Stats.GetMaxHp();
         GameEvents.RaisePlayerDamaged(this, new PlayerHealthEventArgs(currentHp, maxHp, -damage, null));
-        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, -damage, null));
+        PublishHealthChanged(-damage);
 
         if (currentHp <= 0 && !isDead)
         {
@@ -56,16 +55,13 @@ public class Player_Health : Entity_Health
             currentHp = 0;
             Die();
         }
-        UpdateHealthBar();
     }
 
     public override void RaiseHp(float healing)
     {
-        var newHp = currentHp + healing;
         float maxHp = entity_Stats.GetMaxHp();
-        currentHp = Mathf.Min(newHp, maxHp);
-        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, healing, null));
-        UpdateHealthBar();
+        currentHp = Mathf.Min(currentHp + healing, maxHp);
+        PublishHealthChanged(healing);
     }
 
     /// <summary>最大生命等属性变更后按比例保持当前血量。</summary>
@@ -80,45 +76,41 @@ public class Player_Health : Entity_Health
         float ratio = lastKnownMaxHp > 0f ? Mathf.Clamp01(currentHp / lastKnownMaxHp) : 1f;
         lastKnownMaxHp = maxHp;
         currentHp = isDead ? 0f : Mathf.Clamp(ratio * maxHp, 1f, maxHp);
-
-        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, 0f, null));
-        UpdateHealthBar();
-    }
-
-    private void UpdateHealthBar()
-    {
-        // if (healthBarSlider == null)
-        // {
-        //     return;
-        // }
-
-        // float maxHp = entity_Stats.GetMaxHp();
-        // healthBarSlider.value = maxHp > 0f ? currentHp / maxHp : 0f;
+        PublishHealthChanged(0f);
     }
 
     public override void Die()
     {
-        if (isDead)
+        GameEvents.RaisePlayerDied(this);
+        Player.sInstance.Die();
+        if (ServiceLocator.TryGet(out GameManager gameManager))
         {
-            GameEvents.RaisePlayerDied(this);
-            Player.sInstance.Die();
-            if (ServiceLocator.TryGet(out GameManager gameManager))
-            {
-                gameManager.GameOver();
-            }
-            //show game over UI
+            gameManager.GameOver();
         }
     }
 
-    ///TODO:是否只有enemy在局内随时间生命上限进行提升， Player的生命上限受增益buff控制。
     public void ApplyMaxHpMultiplierFromBuff()
     {
-        if (entity_Stats == null) return;
-        var max = entity_Stats.GetMaxHp();
-        if (max <= 0) return;
-        var ratio = healthBarSlider != null ? healthBarSlider.value : currentHp / max;
+        if (entity_Stats == null)
+        {
+            return;
+        }
+
+        float max = entity_Stats.GetMaxHp();
+        if (max <= 0)
+        {
+            return;
+        }
+
+        float ratio = lastKnownMaxHp > 0f ? Mathf.Clamp01(currentHp / lastKnownMaxHp) : 1f;
         currentHp = Mathf.Clamp(ratio * max, 1f, max);
-        UpdateHealthBar();
+        lastKnownMaxHp = max;
+        PublishHealthChanged(0f);
     }
 
+    private void PublishHealthChanged(float delta)
+    {
+        float maxHp = entity_Stats.GetMaxHp();
+        GameEvents.RaisePlayerHealthChanged(this, new PlayerHealthEventArgs(currentHp, maxHp, delta, null));
+    }
 }

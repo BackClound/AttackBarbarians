@@ -10,7 +10,7 @@ using UnityEngine;
 [RequireComponent(typeof(Enemy))]
 [RequireComponent(typeof(Enemy_Health))]
 [RequireComponent(typeof(Entity_Stats))]
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 {
     [Header("Config")]
     [SerializeField] private string defaultConfigId = GameConstants.ConfigIds.EnemyBat;
@@ -22,7 +22,11 @@ public class EnemyController : MonoBehaviour
     private readonly EnemyRuntimeData runtimeData = new EnemyRuntimeData();
     private readonly StatRuntimeSnapshot scaledSnapshot = new StatRuntimeSnapshot();
     private IEnemyAbility[] abilities;
+    private CollisionProfile collisionProfile;
     private float waveStatMultiplier = 1f;
+    private float meleeDamage = 10f;
+    private float wallRayDistance = 1.5f;
+    private LayerMask wallLayerMask;
     private bool isInitialized;
 
     public Enemy Enemy => enemy;
@@ -36,6 +40,7 @@ public class EnemyController : MonoBehaviour
         enemyHealth = GetComponent<Enemy_Health>();
         entityStats = GetComponent<Entity_Stats>();
         abilities = GetComponents<IEnemyAbility>();
+        collisionProfile = GetComponentInChildren<CollisionProfile>();
     }
 
     /// <summary>由 <see cref="EnemySpawnerManager"/> 在池取出后调用。</summary>
@@ -77,7 +82,14 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (!isInitialized || abilities == null || abilities.Length == 0)
+        if (!isInitialized)
+        {
+            return;
+        }
+
+        TickStateMachine(Time.deltaTime);
+
+        if (abilities == null || abilities.Length == 0)
         {
             return;
         }
@@ -86,6 +98,64 @@ public class EnemyController : MonoBehaviour
         for (int i = 0; i < abilities.Length; i++)
         {
             abilities[i]?.OnUpdate(this, dt);
+        }
+    }
+
+    public void TickStateMachine(float deltaTime)
+    {
+        enemy?.stateMachine?.UpdateState();
+    }
+
+    public void TickStateMachineFixed(float fixedDeltaTime)
+    {
+        enemy?.stateMachine?.FixedUpdateState();
+    }
+
+    public bool IsWallInAttackRange()
+    {
+        if (enemy == null)
+        {
+            return false;
+        }
+
+        Vector2 origin = collisionProfile != null ? collisionProfile.ProbePosition : enemy.AttackProbe.position;
+        float distance = collisionProfile != null ? collisionProfile.RayDistance : enemy.AttackProbeDistance;
+        LayerMask mask = ResolveWallLayers();
+
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            return collisionManager.TryDetectWall(origin, distance, mask, out _, out _);
+        }
+
+        return CollisionQuery.Raycast(origin, Vector2.down, distance, mask, out _);
+    }
+
+    public float GetMeleeDamage() => meleeDamage;
+
+    /// <summary>动画攻击帧：对墙体射线命中后经 <see cref="DamagePipeline"/> 结算玩家伤害。</summary>
+    public void ExecuteWallAttack()
+    {
+        if (!isInitialized || enemy == null)
+        {
+            return;
+        }
+
+        Vector2 origin = collisionProfile != null ? collisionProfile.ProbePosition : enemy.AttackProbe.position;
+        float distance = collisionProfile != null ? collisionProfile.RayDistance : enemy.AttackProbeDistance;
+        LayerMask mask = ResolveWallLayers();
+
+        WallControlManager wall = null;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager) &&
+            collisionManager.TryDetectWall(origin, distance, mask, out _, out wall))
+        {
+            wall.TakeDamageFromEnemy(enemy, meleeDamage);
+            return;
+        }
+
+        if (CollisionQuery.Raycast(origin, Vector2.down, distance, mask, out RaycastHit2D hit) &&
+            CollisionQuery.TryResolveWall(hit, out wall))
+        {
+            wall.TakeDamageFromEnemy(enemy, meleeDamage);
         }
     }
 
@@ -121,6 +191,31 @@ public class EnemyController : MonoBehaviour
 
         enemy.moveSpeed = scaledSnapshot.Get(StatType.MoveSpeed);
         enemy.cooldownThreshold = data.AttackCooldown;
+        meleeDamage = data.ContactDamage > 0f
+            ? data.ContactDamage
+            : scaledSnapshot.Get(StatType.Damage);
+        wallRayDistance = data.AttackDistance;
+        enemy?.SetAttackProbeDistance(wallRayDistance);
+    }
+
+    private LayerMask ResolveWallLayers()
+    {
+        if (wallLayerMask.value != 0)
+        {
+            return wallLayerMask;
+        }
+
+        if (enemy != null && enemy.WallLayer.value != 0)
+        {
+            wallLayerMask = enemy.WallLayer;
+        }
+
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            wallLayerMask = collisionManager.GetEnemyWallLayers(wallLayerMask);
+        }
+
+        return wallLayerMask;
     }
 
     private void NotifyAbilitiesSpawn()

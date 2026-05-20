@@ -162,6 +162,11 @@ public class ProjectileController : MonoBehaviour, IPoolable
     private void BuildContactFilter()
     {
         LayerMask mask = activeData != null ? activeData.HitLayerMask : fallbackHitLayers;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            mask = collisionManager.GetProjectileEnemyLayers(mask);
+        }
+
         contactFilter = new ContactFilter2D
         {
             useLayerMask = true,
@@ -272,23 +277,26 @@ public class ProjectileController : MonoBehaviour, IPoolable
             return;
         }
 
-        GameObject hitObject = collider.attachedRigidbody != null
-            ? collider.attachedRigidbody.gameObject
-            : collider.gameObject;
-
-        if (!hitObject.CompareTag(GameConstants.Tags.Enemy))
+        Enemy enemy;
+        GameObject hitObject;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            if (!collisionManager.TryProcessProjectileHit(collider, out enemy, out hitObject))
+            {
+                return;
+            }
+        }
+        else if (!CollisionQuery.TryResolveEnemy(collider, out enemy))
         {
             return;
         }
-
-        if (!hitObject.TryGetComponent(out Enemy enemy))
+        else
         {
-            return;
-        }
-
-        if (!enemy.enemy_Health.CanBeDamage())
-        {
-            return;
+            hitObject = enemy.gameObject;
+            if (enemy.enemy_Health == null || !enemy.enemy_Health.CanBeDamage())
+            {
+                return;
+            }
         }
 
         int instanceId = hitObject.GetInstanceID();

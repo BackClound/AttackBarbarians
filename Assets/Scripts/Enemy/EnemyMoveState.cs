@@ -14,7 +14,7 @@ public class EnemyMoveState : EnemyState
 
     public override void OnUpdate()
     {
-        if (enemy.isWallDetected())
+        if (enemy.IsWallDetected())
         {
             stateMachine.ChangeState(enemy.idleState);
         }

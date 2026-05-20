@@ -3,8 +3,9 @@ using UnityEngine;
 public class EnemyState : EntityState
 {
     protected Enemy enemy;
-    [SerializeField] protected float cooldownThreshold;
-    [SerializeField] protected float cooldownTimer;
+    protected EnemyController Controller => enemy != null ? enemy.controller : null;
+    protected float cooldownThreshold;
+    protected float cooldownTimer;
 
     public EnemyState(Enemy enemy, StateMachine machine, string animName) : base(machine, animName)
     {

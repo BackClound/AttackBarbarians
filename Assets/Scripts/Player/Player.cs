@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 这个类应该控制Player本身的移动，动画，动效等行为
+/// 玩家实体：动画回调、状态实例与单例；状态机 Tick 由 <see cref="PlayerController"/> 驱动。
 /// </summary>
 public class Player : Entity
 {
@@ -16,7 +16,7 @@ public class Player : Entity
     public PlayerController controller { get; private set; }
     public Player_Health player_Health { get; private set; }
     public PlayerSkillManager skillManager { get; private set; }
-    public PlayerCombat playerCombatManager { get; private set; }
+    public PlayerCombatBridge combatBridge { get; private set; }
     #endregion
 
     #region Player State
@@ -41,7 +41,11 @@ public class Player : Entity
         controller = GetComponent<PlayerController>();
         player_Health = GetComponent<Player_Health>();
         skillManager = GetComponent<PlayerSkillManager>();
-        playerCombatManager = GetComponent<PlayerCombat>();
+        combatBridge = GetComponent<PlayerCombatBridge>();
+        if (combatBridge == null)
+        {
+            combatBridge = GetComponent<PlayerCombat>();
+        }
     }
 
     public override void Start()
@@ -49,21 +53,9 @@ public class Player : Entity
         stateMachine.InitialState(idleState);
     }
 
-    private void Update()
-    {
-        stateMachine.currentState?.OnUpdate();
-    }
-
-    private void FixedUpdate()
-    {
-        stateMachine.currentState?.OnFixedUpdate();
-    }
-
     public override void OnAniamtorFinished()
     {
-        // Debug.Log("Player trigger OnAniamtorFinished");
-
-        stateMachine.currentState.OnAnimFinished();
+        stateMachine.currentState?.OnAnimFinished();
     }
 
     public void Die()
@@ -73,8 +65,7 @@ public class Player : Entity
 
     public void OnAnimatorAttackTrigger()
     {
-        // Debug.Log("Player trigger OnAnimEventTrigger");
-        stateMachine.currentState.OnAnimAttackTrigger();
+        stateMachine.currentState?.OnAnimAttackTrigger();
     }
 
     private void OnDestroy()

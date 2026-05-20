@@ -110,7 +110,6 @@ public class SkillShoot : SkillBase
             return;
         }
 
-        //处于未攻击状态， 实时检测enemy
         if (!hasEffectiveEnemy)
         {
             CheckEnemyInRadiusWithSorted();
@@ -160,7 +159,6 @@ public class SkillShoot : SkillBase
             player.controller.AutoAttack.ExecuteAttack();
             if (!player.controller.AutoAttack.CanAttack)
             {
-                player.playerCombatManager.UpdateAttackStatus(false);
                 player.stateMachine.ChangeState(player.idleState);
             }
 
@@ -210,7 +208,6 @@ public class SkillShoot : SkillBase
         //6. 当没有敌人或者技能coolDown
         if (effectiveEnemys.Count <= 0 || currentAttackCount >= maxAttackCount)
         {
-            player.playerCombatManager.UpdateAttackStatus(false);
             player.stateMachine.ChangeState(player.idleState);
             return;
         }
@@ -249,26 +246,38 @@ public class SkillShoot : SkillBase
     private void ScanEnemiesLegacy()
     {
         Vector2 startPosition = checkPosition != null ? checkPosition.position : transform.position;
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(startPosition, maxCheckDistance, enemyLayer);
-        System.Array.Sort(colliders, (a, b) =>
+        LayerMask layers = enemyLayer;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
         {
-            float sqrDistanceA = (startPosition - (Vector2)a.transform.position).sqrMagnitude;
-            float sqrDistanceB = (startPosition - (Vector2)b.transform.position).sqrMagnitude;
-            return sqrDistanceA.CompareTo(sqrDistanceB);
-        });
+            layers = collisionManager.GetPlayerEnemyScanLayers(enemyLayer);
+        }
 
-        foreach (var coll in colliders)
+        Collider2D[] buffer = new Collider2D[32];
+        int hitCount = CollisionQuery.OverlapCircleNonAlloc(startPosition, maxCheckDistance, layers, buffer);
+        for (int i = 0; i < hitCount; i++)
         {
-            Enemy enemy = coll.GetComponent<Enemy>();
-            if (enemy != null && enemy.enemy_Health.CanBeDamage())
+            if (!CollisionQuery.TryResolveEnemy(buffer[i], out Enemy enemy))
+            {
+                continue;
+            }
+
+            if (enemy.enemy_Health != null && enemy.enemy_Health.CanBeDamage())
             {
                 effectiveEnemys.Add(enemy);
             }
         }
-        if (effectiveEnemys.Count > 0)
+
+        if (effectiveEnemys.Count > 1)
         {
-            hasEffectiveEnemy = true;
+            effectiveEnemys.Sort((a, b) =>
+            {
+                float distA = ((Vector2)a.transform.position - startPosition).sqrMagnitude;
+                float distB = ((Vector2)b.transform.position - startPosition).sqrMagnitude;
+                return distA.CompareTo(distB);
+            });
         }
+
+        hasEffectiveEnemy = effectiveEnemys.Count > 0;
     }
 
     [ContextMenu("Update Shoot Speed Anim Multi")]

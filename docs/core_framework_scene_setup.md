@@ -25,6 +25,8 @@
 | `ConfigDatabaseSO` | **否**（SO 资产） | `Assets/Resources/Config/ConfigDatabase.asset` | `ConfigManager.Database` |
 | `DamageSystem` | **是** | `GameSystems` 根或子物体 | `ServiceLocator.Get<DamageSystem>()` |
 | `DamageCalculationSO` | **否**（SO 资产） | `Assets/Resources/Config/Damage/DamageCalculation_Default.asset` | `DamageSystem.Rules` / Resources |
+| `CollisionManager` | **是** | `GameSystems` 根或子物体 | `ServiceLocator.Get<CollisionManager>()` |
+| `CollisionDataSO` | **否**（SO 资产） | `Assets/Resources/Config/Collision/Collision_Default.asset` | `CollisionManager.ActiveData` / Resources |
 
 **不要**将上述 Manager 挂在 Player、Enemy、Wall、UI Canvas、子弹 Prefab 上。
 

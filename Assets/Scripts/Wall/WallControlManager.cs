@@ -89,7 +89,7 @@ public class WallControlManager : MonoBehaviour
         return result;
     }
 
-    /// <summary>敌人攻击城墙时由 <see cref="EnemyCombatManager"/> 调用，转发至玩家血量并由 <see cref="DamageSystem"/> 结算。</summary>
+    /// <summary>敌人攻击城墙时由 <see cref="EnemyController.ExecuteWallAttack"/> 调用，转发至玩家血量并由 <see cref="DamageSystem"/> 结算。</summary>
     public void TakeDamageFromEnemy(Enemy enemy, float baseDamage)
     {
         GameObject target = ResolvePlayerTarget();

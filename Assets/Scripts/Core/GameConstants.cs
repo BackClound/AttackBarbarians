@@ -108,6 +108,7 @@ public static class GameConstants
         public const string DamageCalculation = "Config/Damage/DamageCalculation_Default";
         public const string ProjectileDefault = "Config/Projectile/Projectile_Default";
         public const string AutoAttackDefault = "Config/AutoAttack/AutoAttack_Default";
+        public const string CollisionDefault = "Config/Collision/Collision_Default";
     }
 
     public static class ConfigIds

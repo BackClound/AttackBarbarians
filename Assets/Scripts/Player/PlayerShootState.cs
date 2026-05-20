@@ -2,9 +2,8 @@ using UnityEngine;
 
 public class PlayerShootState : PlayerState
 {
-    private SkillShoot skillShoot;
     private AutoAttackController autoAttack;
-    private bool isStartShooting;
+    private bool attackFramePending;
     private float shootSpeedMulti;
 
     public PlayerShootState(Player player, StateMachine machine, string animName) : base(player, machine, animName) { }
@@ -12,60 +11,29 @@ public class PlayerShootState : PlayerState
     public override void OnEnter()
     {
         base.OnEnter();
-        skillShoot = player.skillManager.sKillShoot;
-        autoAttack = player.controller != null ? player.controller.AutoAttack : null;
-        isStartShooting = false;
+        autoAttack = Controller != null ? Controller.AutoAttack : null;
+        attackFramePending = false;
         ApplyShootSpeedFromSources();
-        if (skillShoot != null)
-        {
-            skillShoot.updateAttackSpeedMultiAction += ApplyShootSpeedMulti;
-        }
-    }
-
-    public override void OnExit()
-    {
-        if (skillShoot != null)
-        {
-            skillShoot.updateAttackSpeedMultiAction -= ApplyShootSpeedMulti;
-        }
-
-        base.OnExit();
     }
 
     public override void OnUpdate()
     {
-        if (!CanContinueShooting())
+        if (Controller == null || !Controller.CanEnterCombatState())
         {
             stateMachine.ChangeState(player.idleState);
             return;
         }
 
-        if (isStartShooting)
+        if (attackFramePending)
         {
-            isStartShooting = false;
+            attackFramePending = false;
             ExecuteShootAttack();
         }
     }
 
-    public void ApplyShootSpeedMulti(float multi)
-    {
-        shootSpeedMulti = multi;
-        anim.SetFloat("ShootSpeedMulti", shootSpeedMulti);
-    }
-
     public override void OnAnimAttackTrigger()
     {
-        isStartShooting = true;
-    }
-
-    private bool CanContinueShooting()
-    {
-        if (autoAttack != null && autoAttack.IsReady)
-        {
-            return autoAttack.CanAttack;
-        }
-
-        return skillShoot != null && skillShoot.CanUseShootSkill();
+        attackFramePending = true;
     }
 
     private void ExecuteShootAttack()
@@ -75,14 +43,13 @@ public class PlayerShootState : PlayerState
             autoAttack.ExecuteAttack();
             if (!autoAttack.CanAttack)
             {
-                player.playerCombatManager?.UpdateAttackStatus(false);
                 stateMachine.ChangeState(player.idleState);
             }
 
             return;
         }
 
-        skillShoot?.ActivateOneShootAttack();
+        player.skillManager?.sKillShoot?.ActivateOneShootAttack();
     }
 
     private void ApplyShootSpeedFromSources()
@@ -91,9 +58,13 @@ public class PlayerShootState : PlayerState
         {
             shootSpeedMulti = autoAttack.AnimSpeedMultiplier;
         }
-        else if (skillShoot != null)
+        else if (Controller != null && Controller.RuntimeStats.IsInitialized)
         {
-            shootSpeedMulti = skillShoot.shootSpeedAnimMulti;
+            shootSpeedMulti = Controller.RuntimeStats.Get(StatType.AttackSpeedMulti);
+        }
+        else if (player.player_Health != null && player.player_Health.entity_Stats != null)
+        {
+            shootSpeedMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
         }
         else
         {
