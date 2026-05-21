@@ -30,7 +30,7 @@ public static class SkillEffectFactory
     }
 }
 
-/// <summary>射击由动画驱动；自动释放仅用于外部同步。</summary>
+/// <summary>射击由动画驱动；释放委托 <see cref="ShootSkillController"/>。</summary>
 public sealed class ShootSkillEffect : ISkillEffect
 {
     public SkillType SkillType => SkillType.Shoot;
@@ -39,12 +39,12 @@ public sealed class ShootSkillEffect : ISkillEffect
 
     public void OnExternalCast(SkillContext context, SkillRuntime runtime)
     {
-        if (context?.Player?.skillManager?.sKillShoot == null)
+        if (context?.SkillManager == null)
         {
             return;
         }
 
-        context.Player.skillManager.sKillShoot.ActivateOneShootAttack();
+        context.SkillManager.ShootController?.ExecuteShoot();
     }
 }
 

@@ -38,10 +38,10 @@ public class PlayerShootState : PlayerState
 
     private void ExecuteShootAttack()
     {
-        if (autoAttack != null && autoAttack.IsReady)
+        if (player.skillManager != null)
         {
-            autoAttack.ExecuteAttack();
-            if (!autoAttack.CanAttack)
+            player.skillManager.ExecuteShoot();
+            if (!player.skillManager.CanShoot())
             {
                 stateMachine.ChangeState(player.idleState);
             }
@@ -49,7 +49,14 @@ public class PlayerShootState : PlayerState
             return;
         }
 
-        player.skillManager?.sKillShoot?.ActivateOneShootAttack();
+        if (autoAttack != null && autoAttack.IsReady)
+        {
+            autoAttack.ExecuteAttack();
+            if (!autoAttack.CanAttack)
+            {
+                stateMachine.ChangeState(player.idleState);
+            }
+        }
     }
 
     private void ApplyShootSpeedFromSources()

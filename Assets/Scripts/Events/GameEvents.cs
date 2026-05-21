@@ -78,6 +78,24 @@ public static class GameEvents
     public static void UnsubscribeUpgradeSelectionCompleted(Action<GameEventContext> handler) =>
         Unsubscribe(GameConstants.EventKeys.UpgradeSelectionCompleted, handler);
 
+    public static void RaiseUpgradeChoicesReady(object sender, UpgradeChoicesPayload payload) =>
+        Publish(GameConstants.EventKeys.UpgradeChoicesReady, sender, payload);
+
+    public static void SubscribeUpgradeChoicesReady(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UpgradeChoicesReady, handler);
+
+    public static void UnsubscribeUpgradeChoicesReady(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UpgradeChoicesReady, handler);
+
+    public static void RaiseUpgradeChoiceApplied(object sender, UpgradeChoiceAppliedPayload payload) =>
+        Publish(GameConstants.EventKeys.UpgradeChoiceApplied, sender, payload);
+
+    public static void SubscribeUpgradeChoiceApplied(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UpgradeChoiceApplied, handler);
+
+    public static void UnsubscribeUpgradeChoiceApplied(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UpgradeChoiceApplied, handler);
+
     #endregion
 
     #region Wave
@@ -115,6 +133,12 @@ public static class GameEvents
 
     public static void RaisePlayerLevelUp(object sender, int newLevel) =>
         Publish(GameConstants.EventKeys.PlayerLevelUp, sender, newLevel);
+
+    public static void SubscribePlayerLevelUp(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.PlayerLevelUp, handler);
+
+    public static void UnsubscribePlayerLevelUp(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.PlayerLevelUp, handler);
 
     public static void RaisePlayerAttackStarted(object sender, PlayerAttackEventArgs args) =>
         Publish(GameConstants.EventKeys.PlayerAttackStarted, sender, args);

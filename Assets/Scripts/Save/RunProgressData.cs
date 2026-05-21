@@ -17,6 +17,7 @@ public class RunProgressData
     public float currentHp;
     public float maxHp;
     public List<ConfigIdIntPair> activeBuffs = new List<ConfigIdIntPair>(8);
+    public List<ConfigIdIntPair> selectedUpgrades = new List<ConfigIdIntPair>(16);
 
     public static RunProgressData CreateDefault() => new RunProgressData();
 
@@ -28,5 +29,6 @@ public class RunProgressData
         currentHp = 0f;
         maxHp = 0f;
         activeBuffs?.Clear();
+        selectedUpgrades?.Clear();
     }
 }

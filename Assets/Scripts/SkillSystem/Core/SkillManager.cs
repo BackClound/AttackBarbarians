@@ -22,21 +22,38 @@ public class SkillManager : MonoBehaviour
     private readonly Dictionary<SkillType, SkillRuntime> runtimes = new Dictionary<SkillType, SkillRuntime>(8);
     private readonly Dictionary<SkillType, ISkillEffect> effects = new Dictionary<SkillType, ISkillEffect>(8);
     private readonly Dictionary<SkillType, int> buffStackCounts = new Dictionary<SkillType, int>(16);
+    // 
     private readonly List<SkillType> autoCastOrder = new List<SkillType>(8);
-
     private Player player;
     private PlayerController controller;
     private SkillContext context;
+    // 
+    private ShootBurstController shootBurst;
+    private ShootSkillController shootController;
     private float healMinuteTimer;
     private float healPeakTimer;
 
     public SkillContext Context => context;
+    public ShootBurstController ShootBurst => shootBurst;
+    public ShootSkillController ShootController => shootController;
     public IReadOnlyDictionary<SkillType, SkillRuntime> Runtimes => runtimes;
 
     private void Awake()
     {
         player = GetComponent<Player>();
         controller = GetComponent<PlayerController>();
+        shootBurst = GetComponent<ShootBurstController>();
+        if (shootBurst == null)
+        {
+            shootBurst = gameObject.AddComponent<ShootBurstController>();
+        }
+
+        shootController = GetComponent<ShootSkillController>();
+        if (shootController == null)
+        {
+            shootController = gameObject.AddComponent<ShootSkillController>();
+        }
+
         if (castOrigin == null)
         {
             castOrigin = transform;
@@ -62,6 +79,7 @@ public class SkillManager : MonoBehaviour
         }
 
         float dt = Time.deltaTime;
+        shootBurst?.Tick(dt);
         TickHealPassives(dt);
         if (!CanAutoCastNow())
         {
@@ -173,6 +191,29 @@ public class SkillManager : MonoBehaviour
         GameEvents.RaiseSkillLevelUp(this, data.ConfigId, runtime.BaseData.Level);
     }
 
+    public bool UpgradeSkillLevel(string configId, int delta = 1)
+    {
+        if (delta <= 0 || !ServiceLocator.TryGet(out ConfigManager configManager) ||
+            !configManager.TryGetSkill(configId, out SkillDataSO data))
+        {
+            return false;
+        }
+
+        SkillType type = data.SkillType;
+        if (!runtimes.TryGetValue(type, out SkillRuntime runtime) || !runtime.IsUnlocked)
+        {
+            UnlockSkill(data, 1);
+            runtime = runtimes[type];
+        }
+
+        int newLevel = Mathf.Min(data.MaxLevel, runtime.BaseData.Level + delta);
+        runtime.SetLevel(newLevel);
+        GameEvents.RaiseSkillLevelUp(this, data.ConfigId, newLevel);
+        return true;
+    }
+
+    public bool CanShootNow() => shootController != null && shootController.CanShoot();
+
     public void ApplySkillBuff(SkillBuffKind kind, int tier = 1)
     {
         if (kind == SkillBuffKind.None)
@@ -282,15 +323,7 @@ public class SkillManager : MonoBehaviour
 
     public void TriggerShootCast()
     {
-        if (runtimes.TryGetValue(SkillType.Shoot, out SkillRuntime runtime) &&
-            effects.TryGetValue(SkillType.Shoot, out ISkillEffect effect))
-        {
-            effect.OnExternalCast(context, runtime);
-        }
-        else if (player?.skillManager?.sKillShoot != null)
-        {
-            player.skillManager.sKillShoot.ActivateOneShootAttack();
-        }
+        shootController?.ExecuteShoot();
     }
 
     private void TickHealPassives(float deltaTime)

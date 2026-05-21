@@ -19,6 +19,8 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
     [SerializeField] private List<DropTableSO> dropTables = new List<DropTableSO>();
     [SerializeField] private List<AutoAttackDataSO> autoAttacks = new List<AutoAttackDataSO>();
+    [SerializeField] private List<UpgradeOptionSO> upgradeOptions = new List<UpgradeOptionSO>();
+    [SerializeField] private List<RewardPoolSO> rewardPools = new List<RewardPoolSO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -28,6 +30,8 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<BossDataSO> Bosses => bosses;
     public IReadOnlyList<DropTableSO> DropTables => dropTables;
     public IReadOnlyList<AutoAttackDataSO> AutoAttacks => autoAttacks;
+    public IReadOnlyList<UpgradeOptionSO> UpgradeOptions => upgradeOptions;
+    public IReadOnlyList<RewardPoolSO> RewardPools => rewardPools;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -52,6 +56,12 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetAutoAttack(string configId, out AutoAttackDataSO data) =>
         TryGet(autoAttacks, configId, out data);
+
+    public bool TryGetUpgradeOption(string configId, out UpgradeOptionSO data) =>
+        TryGet(upgradeOptions, configId, out data);
+
+    public bool TryGetRewardPool(string configId, out RewardPoolSO data) =>
+        TryGet(rewardPools, configId, out data);
 
     private static bool TryGet<T>(List<T> list, string configId, out T data) where T : ConfigDataBase
     {

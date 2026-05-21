@@ -81,6 +81,8 @@ public static class GameConstants
         // Upgrade
         public const string UpgradeSelectionOpened = "Upgrade.SelectionOpened";
         public const string UpgradeSelectionCompleted = "Upgrade.SelectionCompleted";
+        public const string UpgradeChoicesReady = "Upgrade.ChoicesReady";
+        public const string UpgradeChoiceApplied = "Upgrade.ChoiceApplied";
     }
 
     public static class UiPanelIds
@@ -109,6 +111,7 @@ public static class GameConstants
         public const string ProjectileDefault = "Config/Projectile/Projectile_Default";
         public const string AutoAttackDefault = "Config/AutoAttack/AutoAttack_Default";
         public const string CollisionDefault = "Config/Collision/Collision_Default";
+        public const string RewardPoolDefault = "Config/Upgrade/RewardPool_Default";
     }
 
     public static class ConfigIds
@@ -127,6 +130,11 @@ public static class GameConstants
         public const string BuffAttackUp = "buff.attack_up";
         public const string Wave01 = "wave.01";
         public const string DropTableCommon = "drop.common";
+        public const string RewardPoolDefault = "reward_pool.default";
+        public const string UpgradeAttackUp = "upgrade.attack_up";
+        public const string UpgradeShootPierce = "upgrade.shoot_pierce";
+        public const string UpgradeUnlockLightning = "upgrade.unlock_lightning";
+        public const string UpgradeGoldBonus = "upgrade.gold_bonus";
     }
 
     public static class PoolKeys

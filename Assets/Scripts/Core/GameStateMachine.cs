@@ -121,6 +121,7 @@ public sealed class GameStateMachine
             case GameState.Playing:
                 return to == GameState.Paused
                     || to == GameState.WaveTransition
+                    || to == GameState.UpgradeChoosing
                     || to == GameState.GameOver
                     || to == GameState.Exiting;
 

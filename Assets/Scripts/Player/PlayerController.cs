@@ -253,6 +253,11 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
 
     public bool CanEnterCombatState()
     {
+        if (player?.skillManager != null)
+        {
+            return player.skillManager.CanShoot();
+        }
+
         AutoAttackController autoAttack = AutoAttack;
         if (autoAttack != null && autoAttack.IsReady)
         {
