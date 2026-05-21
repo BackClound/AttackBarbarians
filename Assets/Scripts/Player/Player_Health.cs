@@ -57,11 +57,33 @@ public class Player_Health : Entity_Health
         }
     }
 
+    public float CurrentHp => currentHp;
+
+    public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : 0f;
+
     public override void RaiseHp(float healing)
     {
         float maxHp = entity_Stats.GetMaxHp();
         currentHp = Mathf.Min(currentHp + healing, maxHp);
         PublishHealthChanged(healing);
+    }
+
+    /// <summary>技能/ Buff 治疗入口。</summary>
+    public void Heal(float amount) => RaiseHp(amount);
+
+    /// <summary>一次性回满当前血量。</summary>
+    public void RestoreToFull()
+    {
+        if (entity_Stats == null)
+        {
+            return;
+        }
+
+        float maxHp = entity_Stats.GetMaxHp();
+        float delta = maxHp - currentHp;
+        currentHp = maxHp;
+        isDead = false;
+        PublishHealthChanged(delta);
     }
 
     /// <summary>最大生命等属性变更后按比例保持当前血量。</summary>

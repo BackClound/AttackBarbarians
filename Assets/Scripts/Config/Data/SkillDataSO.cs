@@ -13,7 +13,21 @@ public class SkillDataSO : ConfigDataBase
     [SerializeField] private GameObject skillPrefab;
 
     [Header("Combat")]
+    // TODO 需要考虑元素类型，元素类型会影响技能的属性，如伤害、冷却、范围、目标策略等
+    // 元素类型会影响技能的特效，如伤害、冷却、范围、目标策略等
+    // 元素类型会影响技能的特效，如伤害、冷却、范围、目标策略等
+    [SerializeField] private ElementType elementType = ElementType.Physical;
+    [SerializeField] private float baseDamage = 12f;
     [SerializeField] private float baseCooldown = 4f;
+    // TODO 需要考虑范围，范围会影响技能的攻击范围，如伤害、冷却、范围、目标策略等
+    // 范围会影响技能的特效，如伤害、冷却、范围、目标策略等
+    // 范围会影响技能的特效，如伤害、冷却、范围、目标策略等
+    // 范围会影响技能的特效，如伤害、冷却、范围、目标策略等
+    [SerializeField] private float areaRadius = 4f;
+    // TODO 需要考虑自动释放，自动释放会影响技能的释放，如伤害、冷却、范围、目标策略等
+    // 自动释放会影响技能的特效，如伤害、冷却、范围、目标策略等
+    // 自动释放会影响技能的特效，如伤害、冷却、范围、目标策略等
+    [SerializeField] private bool autoCast = true;
     [SerializeField] private int maxAttackCount = 10;
     [SerializeField] private int bulletsPerWave = 3;
     [SerializeField] private float checkRadius = 25f;
@@ -24,7 +38,11 @@ public class SkillDataSO : ConfigDataBase
     public SkillType SkillType => skillType;
     public int MaxLevel => Mathf.Max(1, maxLevel);
     public GameObject SkillPrefab => skillPrefab;
+    public ElementType ElementType => elementType;
+    public float BaseDamage => Mathf.Max(0f, baseDamage);
     public float BaseCooldown => Mathf.Max(0.05f, baseCooldown);
+    public float AreaRadius => Mathf.Max(0.5f, areaRadius);
+    public bool AutoCast => autoCast;
     public int MaxAttackCount => Mathf.Max(1, maxAttackCount);
     public int BulletsPerWave => Mathf.Max(1, bulletsPerWave);
     public float CheckRadius => Mathf.Max(1f, checkRadius);

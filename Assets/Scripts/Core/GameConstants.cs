@@ -116,6 +116,12 @@ public static class GameConstants
         public const string PlayerDefault = "player.default";
         public const string EnemyBat = "enemy.bat";
         public const string SkillShoot = "skill.shoot";
+        public const string SkillLightning = "skill.lightning";
+        public const string SkillThunder = "skill.thunder";
+        public const string SkillFireRain = "skill.fire_rain";
+        public const string SkillWaterWave = "skill.water_wave";
+        public const string SkillIce = "skill.ice";
+        public const string SkillHeal = "skill.heal";
         public const string AutoAttackDefault = "auto_attack.default";
         public const string ProjectileDefault = "projectile.default";
         public const string BuffAttackUp = "buff.attack_up";

@@ -40,6 +40,17 @@ public class EnemyState : EntityState
             speed = Controller.Enemy.moveSpeed;
         }
 
+        EnemyStatusController status = enemy.GetComponent<EnemyStatusController>();
+        if (status != null)
+        {
+            speed *= status.MoveSpeedMultiplier;
+            if (status.IsMovementBlocked)
+            {
+                enemy.SetVelocity(Vector2.zero);
+                return;
+            }
+        }
+
         enemy.SetVelocity(direction.normalized * speed);
     }
 

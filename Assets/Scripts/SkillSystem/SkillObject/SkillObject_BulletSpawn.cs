@@ -5,7 +5,6 @@ using UnityEngine;
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 Player 射击波次子物体（如 <c>BulletSpawnPoint.prefab</c>）。</para>
-/// <para><b>不再负责：</b>子弹列表预创建、碰撞伤害、对象池借还（已迁移至 Projectile 模块）。</para>
 /// </remarks>
 public class SkillObject_BulletSpawn : MonoBehaviour
 {
@@ -15,11 +14,13 @@ public class SkillObject_BulletSpawn : MonoBehaviour
     [SerializeField] private ProjectileDataSO projectileData;
 
     private Player player;
+    private SkillManager skillManager;
 
     public void SetupBulletSpawn(Player owner, int bulletsPerShot)
     {
         player = owner;
         projectilesPerShot = Mathf.Max(1, bulletsPerShot);
+        skillManager = owner != null ? owner.GetComponent<SkillManager>() : null;
     }
 
     public void UpdateMaxBullets(int newCount)
@@ -40,7 +41,20 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             return;
         }
 
+        SkillBuffProfile buff = skillManager != null
+            ? skillManager.GetBuffProfile(SkillType.Shoot)
+            : null;
+
+        int trajectoryLines = buff != null ? Mathf.Max(1, buff.TrajectoryLines) : 1;
+        int volley = buff != null ? Mathf.Max(1, buff.ShotsPerVolley) : projectilesPerShot;
+        float fan = trajectoryLines > 1 ? fanAngleDegrees : 0f;
+
         float baseDamage = player.player_Health.entity_Stats.GetBaseAttackDamage();
+        if (buff != null)
+        {
+            baseDamage *= buff.DamageMultiplier;
+        }
+
         object source = player;
         Vector2 spawnPos = transform.position;
         Vector2 baseDirection = ((Vector2)enemy.transform.position - spawnPos).normalized;
@@ -54,25 +68,24 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             GameConstants.ConfigIds.SkillShoot,
             ResolveProjectileData(projectileManager));
 
-        if (projectilesPerShot <= 1)
+        ProjectileRuntimeOverrides overrides = buff != null
+            ? ProjectileRuntimeOverrides.FromShootProfile(buff)
+            : default;
+
+        int total = trajectoryLines * volley;
+        if (total <= 1)
         {
-            projectileManager.Spawn(template);
+            projectileManager.Spawn(template, overrides);
             return;
         }
 
-        ProjectileSpawnRequest fanTemplate = new ProjectileSpawnRequest(
-            template.Source,
-            template.Target,
-            template.SpawnPosition,
-            template.Direction,
-            template.DamageInfo,
-            template.Data,
-            ProjectileSpawnPattern.Fan,
-            projectilesPerShot,
-            fanAngleDegrees,
-            template.SkillId);
-
-        projectileManager.SpawnFan(fanTemplate, projectilesPerShot, fanAngleDegrees);
+        int middle = total / 2;
+        for (int i = 0; i < total; i++)
+        {
+            float angleOffset = (i - middle) * fan;
+            Vector2 dir = Rotate(baseDirection, angleOffset);
+            projectileManager.Spawn(template.WithDirection(dir), overrides);
+        }
     }
 
     private ProjectileDataSO ResolveProjectileData(ProjectileManager manager)
@@ -83,5 +96,15 @@ public class SkillObject_BulletSpawn : MonoBehaviour
         }
 
         return manager.DefaultData;
+    }
+
+    private static Vector2 Rotate(Vector2 direction, float angleDegrees)
+    {
+        float rad = angleDegrees * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(rad);
+        float sin = Mathf.Sin(rad);
+        return new Vector2(
+            direction.x * cos - direction.y * sin,
+            direction.x * sin + direction.y * cos).normalized;
     }
 }

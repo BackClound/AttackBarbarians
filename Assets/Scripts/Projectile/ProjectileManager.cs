@@ -39,7 +39,7 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>按请求发射一枚投射物。</summary>
-    public ProjectileController Spawn(ProjectileSpawnRequest request)
+    public ProjectileController Spawn(ProjectileSpawnRequest request, ProjectileRuntimeOverrides overrides = default)
     {
         if (!isInitialized)
         {
@@ -59,7 +59,7 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
             return null;
         }
 
-        controller.BeginFlight(request, data);
+        controller.BeginFlight(request, data, overrides);
         return controller;
     }
 

@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5617618210259548225}
   - component: {fileID: 8584551330808589326}
   - component: {fileID: 6667559690746134196}
+  - component: {fileID: 7800627554236005921}
   m_Layer: 8
   m_Name: BatLevel_3
   m_TagString: Untagged
@@ -55,12 +56,12 @@ MonoBehaviour:
   coll: {fileID: 8584551330808589326}
   enemy_Health: {fileID: 0}
   isBoss: 0
-  moveSpeed: 7
   attackCheck: {fileID: 3233036758561666843}
   attackDistance: 0.6
   wallLayer:
     serializedVersion: 2
     m_Bits: 512
+  moveSpeed: 7
   cooldownThreshold: 2
 --- !u!114 &954799138948954777
 MonoBehaviour:
@@ -150,7 +151,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   enemyTag: 
-  enemyLayerName: 
 --- !u!50 &5617618210259548225
 Rigidbody2D:
   serializedVersion: 5
@@ -238,6 +238,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   defaultConfigId: enemy.bat
   dataOverride: {fileID: 0}
+--- !u!114 &7800627554236005921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 118330131270576344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12e26e6b7639e4e98a634ca34a6ffc8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStatusController
 --- !u!1 &3975127465069301962
 GameObject:
   m_ObjectHideFlags: 0

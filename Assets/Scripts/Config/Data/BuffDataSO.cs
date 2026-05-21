@@ -16,6 +16,12 @@ public class BuffDataSO : ConfigDataBase
     [Header("Modifiers")]
     [SerializeField] private List<StatModifierConfig> modifiers = new List<StatModifierConfig>();
 
+    [Header("Skill Buff (optional)")]
+    [SerializeField] private bool hasSkillBuff;
+    [SerializeField] private SkillBuffKind skillBuffKind;
+    [SerializeField] private SkillType skillBuffTarget = SkillType.None;
+    [SerializeField] private int skillBuffTier = 1;
+
     [Header("Presentation")]
     [SerializeField] private string description;
     [SerializeField] private Color tintColor = Color.white;
@@ -25,6 +31,10 @@ public class BuffDataSO : ConfigDataBase
     public int MaxStacks => Mathf.Max(1, maxStacks);
     public bool RefreshDurationOnStack => refreshDurationOnStack;
     public IReadOnlyList<StatModifierConfig> Modifiers => modifiers;
+    public bool HasSkillBuff => hasSkillBuff && skillBuffKind != SkillBuffKind.None;
+    public SkillBuffKind SkillBuffKind => skillBuffKind;
+    public SkillType SkillBuffTarget => skillBuffTarget;
+    public int SkillBuffTier => Mathf.Max(1, skillBuffTier);
     public string Description => description;
     public Color TintColor => tintColor;
 

@@ -30,7 +30,24 @@ public class ProjectileController : MonoBehaviour, IPoolable
     private int hitsApplied;
     private int piercesRemaining;
     private int bouncesRemaining;
+    // 分裂次数
+    private int splitsRemaining;
+    // 是否爆炸
+    private bool isExploding;
+    // 爆炸半径
+    private float explosionRadius;
+    // 爆炸冻结时间
+    private float explosionFreezeDuration;
+    // 爆炸伤害
+    private float explosionDamage;
     private bool isFlying;
+    // 是否触发半范围爆炸
+    private bool halfRangeExplosionTriggered;
+    // 初始生命周期
+    private float initialLifetime;
+    // 飞行覆盖参数
+    private ProjectileRuntimeOverrides flightOverrides;
+    // 对象池原始位置
     private Vector3 pooledOrigin;
 
     private readonly HashSet<int> hitInstanceIds = new HashSet<int>(8);
@@ -56,6 +73,15 @@ public class ProjectileController : MonoBehaviour, IPoolable
 
         float deltaTime = Time.deltaTime;
         lifetimeRemaining -= deltaTime;
+        if (flightOverrides.ExplodeAtHalfLifetime && !halfRangeExplosionTriggered
+            && initialLifetime > 0f && lifetimeRemaining <= initialLifetime * 0.5f)
+        {
+            halfRangeExplosionTriggered = true;
+            TriggerExplosion(flightOverrides.ExplosionRadius, flightOverrides.ExplosionFreezeDuration);
+            Recycle();
+            return;
+        }
+
         if (lifetimeRemaining <= 0f)
         {
             Recycle();
@@ -70,7 +96,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
     }
 
     /// <summary>由 <see cref="ProjectileManager"/> 在池 <see cref="IPoolable.OnSpawn"/> 之后调用。</summary>
-    public void BeginFlight(ProjectileSpawnRequest request, ProjectileDataSO data)
+    public void BeginFlight(ProjectileSpawnRequest request, ProjectileDataSO data, ProjectileRuntimeOverrides overrides = default)
     {
         activeRequest = request;
         activeData = data != null ? data : dataOverride;
@@ -89,9 +115,18 @@ public class ProjectileController : MonoBehaviour, IPoolable
         homingTarget = request.Target != null ? request.Target.transform : null;
         orbitCenter = request.SpawnPosition;
         orbitAngleDegrees = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+        flightOverrides = overrides;
         lifetimeRemaining = activeData.LifetimeSeconds;
-        piercesRemaining = activeData.PierceCount;
-        bouncesRemaining = activeData.BounceCount;
+        if (overrides.MaxLifetimeScale > 0f)
+        {
+            lifetimeRemaining *= overrides.MaxLifetimeScale;
+        }
+
+        initialLifetime = lifetimeRemaining;
+        piercesRemaining = activeData.PierceCount + overrides.PierceBonus;
+        bouncesRemaining = overrides.BounceCount > 0 ? overrides.BounceCount : activeData.BounceCount;
+        splitsRemaining = overrides.SplitOnHitCount;
+        halfRangeExplosionTriggered = false;
 
         float zAngle = orbitAngleDegrees;
         transform.rotation = Quaternion.Euler(0f, 0f, zAngle);
@@ -147,6 +182,10 @@ public class ProjectileController : MonoBehaviour, IPoolable
         hitsApplied = 0;
         piercesRemaining = 0;
         bouncesRemaining = 0;
+        splitsRemaining = 0;
+        halfRangeExplosionTriggered = false;
+        initialLifetime = 0f;
+        flightOverrides = default;
         lifetimeRemaining = 0f;
         hitInstanceIds.Clear();
         hitCooldownUntil.Clear();
@@ -258,9 +297,15 @@ public class ProjectileController : MonoBehaviour, IPoolable
 
     private void ScanHitsNonAlloc()
     {
+        float hitRadius = activeData.HitRadius;
+        if (flightOverrides.HitRadiusScale > 0f)
+        {
+            hitRadius *= Mathf.Max(0.5f, flightOverrides.HitRadiusScale);
+        }
+
         int count = Physics2D.OverlapCircle(
             transform.position,
-            activeData.HitRadius,
+            hitRadius,
             contactFilter,
             OverlapBuffer);
 
@@ -327,7 +372,17 @@ public class ProjectileController : MonoBehaviour, IPoolable
             return;
         }
 
+        ApplyStatusOnHit(enemy);
+        if (splitsRemaining > 0)
+        {
+            SpawnSplitProjectiles(hitObject.transform.position);
+            splitsRemaining = 0;
+        }
+
         hitsApplied++;
+        int maxHits = flightOverrides.MaxHitCountOverride > 0
+            ? flightOverrides.MaxHitCountOverride
+            : activeData.MaxHitCount;
         hitInstanceIds.Add(instanceId);
         if (activeData.HitCooldownPerTarget > 0f)
         {
@@ -345,7 +400,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
                 activeRequest.SkillId,
                 activeData.MotionType));
 
-        bool reachedHitLimit = hitsApplied >= activeData.MaxHitCount;
+        bool reachedHitLimit = hitsApplied >= maxHits;
         if (piercesRemaining > 0)
         {
             piercesRemaining--;
@@ -367,6 +422,86 @@ public class ProjectileController : MonoBehaviour, IPoolable
         {
             Instantiate(activeData.HitEffectPrefab, position, Quaternion.identity);
         }
+    }
+
+    private void ApplyStatusOnHit(Enemy enemy)
+    {
+        if (enemy == null)
+        {
+            return;
+        }
+
+        EnemyStatusController status = enemy.GetComponent<EnemyStatusController>();
+        if (status == null)
+        {
+            return;
+        }
+
+        if (flightOverrides.OnHitFreezeDuration > 0f)
+        {
+            status.ApplyFreeze(flightOverrides.OnHitFreezeDuration);
+        }
+    }
+
+    private void TriggerExplosion(float radius, float freezeDuration)
+    {
+        if (radius <= 0f)
+        {
+            return;
+        }
+
+        LayerMask layers = activeData != null ? activeData.HitLayerMask : fallbackHitLayers;
+        if (ServiceLocator.TryGet(out CollisionManager collisionManager))
+        {
+            layers = collisionManager.GetProjectileEnemyLayers(layers);
+        }
+        var contactLayerFilter = new ContactFilter2D
+        {
+            useLayerMask = true,
+            layerMask = layers,
+            useTriggers = true,
+        };
+        int count = Physics2D.OverlapCircle(transform.position, radius, contactLayerFilter, OverlapBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            if (!CollisionQuery.TryResolveEnemy(OverlapBuffer[i], out Enemy enemy))
+            {
+                continue;
+            }
+
+            DamageInfo info = activeRequest.DamageInfo.WithTarget(enemy.gameObject);
+            DamagePipeline.Apply(info);
+            if (freezeDuration > 0f)
+            {
+                enemy.GetComponent<EnemyStatusController>()?.ApplyFreeze(freezeDuration);
+            }
+        }
+    }
+
+    private void SpawnSplitProjectiles(Vector3 origin)
+    {
+        if (!ServiceLocator.TryGet(out ProjectileManager manager))
+        {
+            return;
+        }
+
+        const float splitAngle = 25f;
+        for (int i = -1; i <= 1; i += 2)
+        {
+            Vector2 dir = Rotate(moveDirection, splitAngle * i);
+            ProjectileSpawnRequest req = activeRequest.WithDirection(dir);
+            manager.Spawn(req, flightOverrides);
+        }
+    }
+
+    private static Vector2 Rotate(Vector2 direction, float angleDegrees)
+    {
+        float rad = angleDegrees * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(rad);
+        float sin = Mathf.Sin(rad);
+        return new Vector2(
+            direction.x * cos - direction.y * sin,
+            direction.x * sin + direction.y * cos).normalized;
     }
 
     private void Recycle()

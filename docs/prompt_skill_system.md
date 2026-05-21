@@ -48,3 +48,6 @@
 - 迁移期间必须保持旧 Prefab、Animator、Collider、Layer、Tag 和 Inspector 序列化字段不失效。
 - 删除旧代码前必须确认没有场景引用、Prefab 引用和运行时调用；无法确认时保留兼容层并标注后续清理任务。
 
+
+备注：
+闪电特效增加：随buff增益，闪电颜色加深变紫
