@@ -113,6 +113,11 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
             talentManager.ApplyToPlayer(this);
         }
 
+        if (ServiceLocator.TryGet(out EquipmentManager equipmentManager))
+        {
+            equipmentManager.ApplyToPlayer(this);
+        }
+
         RefreshEntityStats();
         ConfigureTargetScanner();
         IsReady = true;

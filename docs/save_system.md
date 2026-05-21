@@ -102,7 +102,7 @@ save.DeleteSave();
 ## 后续任务
 
 - `ResourceManager` / Shop 写入 `gold`、`diamonds`
-- Talent/Equipment Manager 读写 `talentLevels`、`equipmentLevels`
+- `TalentManager` 读写 `talentLevels`；`EquipmentManager` 读写 `equippedItems`、`equipmentLevels`
 - AudioManager 应用 `SettingsData` 音量
 - WaveManager 完成后填充 `RunProgressData` 与 Buff 列表
 - Achievement/DailyReward 写入签到字段

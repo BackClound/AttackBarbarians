@@ -13,7 +13,7 @@ using UnityEngine;
 /// <item><description>将同物体或子物体上的 <see cref="ConfigManager"/>、<see cref="SaveManager"/>、<see cref="PoolManager"/>、<see cref="GameManager"/> 拖入对应槽位；留空时会在 Awake 时自动查找或在本物体上 AddComponent。</description></item>
 /// <item><description><c>Dont Destroy On Load</c> 建议开启，保证跨场景保留引导流程（单例冲突时会销毁重复实例）。</description></item>
 /// </list>
-/// <para><b>启动顺序：</b>ConfigManager → SaveManager → TalentManager → EventBus → PoolManager → GameManager → GameFlowManager → RunSession/Settlement/Experience → Upgrade → DamageSystem → CollisionManager → ProjectileManager → EnemySpawner → WaveManager。</para>
+/// <para><b>启动顺序：</b>ConfigManager → SaveManager → TalentManager → EquipmentManager → EventBus → PoolManager → GameManager → …</para>
 /// <para><b>获取方式：</b><c>GameBootstrapper.Instance</c> 或 <c>ServiceLocator.Get&lt;GameBootstrapper&gt;()</c>（Bootstrap 完成后）。</para>
 /// </remarks>
 public class GameBootstrapper : MonoSingleton<GameBootstrapper>
@@ -26,6 +26,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private ConfigManager configManager;
     [SerializeField] private SaveManager saveManager;
     [SerializeField] private TalentManager talentManager;
+    [SerializeField] private EquipmentManager equipmentManager;
     [SerializeField] private PoolManager poolManager;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameFlowManager gameFlowManager;
@@ -105,6 +106,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         configManager = ResolveOrCreate(configManager);
         saveManager = ResolveOrCreate(saveManager);
         talentManager = ResolveOrCreate(talentManager);
+        equipmentManager = ResolveOrCreate(equipmentManager);
         poolManager = ResolveOrCreate(poolManager);
         gameManager = ResolveOrCreate(gameManager);
         gameFlowManager = ResolveOrCreate(gameFlowManager);
@@ -129,6 +131,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(configManager);
         ServiceLocator.Register(saveManager);
         ServiceLocator.Register(talentManager);
+        ServiceLocator.Register(equipmentManager);
         ServiceLocator.Register(eventBus);
         ServiceLocator.Register(poolManager);
         ServiceLocator.Register(gameManager);
@@ -147,6 +150,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(configManager);
         systems.Add(saveManager);
         systems.Add(talentManager);
+        systems.Add(equipmentManager);
         systems.Add(eventBus);
         systems.Add(poolManager);
         systems.Add(gameManager);

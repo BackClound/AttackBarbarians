@@ -326,6 +326,19 @@ public static class GameEvents
 
     #endregion
 
+    #region Equipment
+
+    public static void RaiseEquipmentChanged(object sender, EquipmentChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.EquipmentChanged, sender, args);
+
+    public static void SubscribeEquipmentChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.EquipmentChanged, handler);
+
+    public static void UnsubscribeEquipmentChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.EquipmentChanged, handler);
+
+    #endregion
+
     #region Bus access
 
     public static void Subscribe(string eventKey, Action<GameEventContext> handler)

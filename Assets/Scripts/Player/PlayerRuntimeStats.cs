@@ -14,6 +14,7 @@ public sealed class PlayerRuntimeStats
     private readonly List<BuffRuntimeData> activeBuffs = new List<BuffRuntimeData>(8);
     private readonly List<StatModifierConfig> extraModifiers = new List<StatModifierConfig>(16);
     private readonly List<StatModifierConfig> talentModifiers = new List<StatModifierConfig>(16);
+    private readonly List<StatModifierConfig> equipmentModifiers = new List<StatModifierConfig>(16);
 
     private PlayerDataSO sourceData;
     private float configuredAttackRadius = 25f;
@@ -61,6 +62,28 @@ public sealed class PlayerRuntimeStats
             if (modifier != null)
             {
                 talentModifiers.Add(modifier);
+            }
+        }
+
+        RebuildSnapshot();
+    }
+
+    /// <summary>装备系统入口：替换局外装备修正列表（由 <see cref="EquipmentManager"/> 驱动）。</summary>
+    public void SetEquipmentModifiers(IReadOnlyList<StatModifierConfig> modifiers)
+    {
+        equipmentModifiers.Clear();
+        if (modifiers == null)
+        {
+            RebuildSnapshot();
+            return;
+        }
+
+        for (int i = 0; i < modifiers.Count; i++)
+        {
+            StatModifierConfig modifier = modifiers[i];
+            if (modifier != null)
+            {
+                equipmentModifiers.Add(modifier);
             }
         }
 
@@ -159,9 +182,11 @@ public sealed class PlayerRuntimeStats
 
     private List<StatModifierConfig> CollectAllModifiers()
     {
-        var combined = new List<StatModifierConfig>(extraModifiers.Count + talentModifiers.Count + 8);
+        var combined = new List<StatModifierConfig>(
+            extraModifiers.Count + talentModifiers.Count + equipmentModifiers.Count + 8);
         combined.AddRange(extraModifiers);
         combined.AddRange(talentModifiers);
+        combined.AddRange(equipmentModifiers);
 
         for (int i = 0; i < activeBuffs.Count; i++)
         {

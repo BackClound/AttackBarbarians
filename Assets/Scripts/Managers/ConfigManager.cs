@@ -31,6 +31,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, UpgradeOptionSO> upgradeOptionsById = new Dictionary<string, UpgradeOptionSO>(32);
     private readonly Dictionary<string, RewardPoolSO> rewardPoolsById = new Dictionary<string, RewardPoolSO>(4);
     private readonly Dictionary<string, TalentDataSO> talentsById = new Dictionary<string, TalentDataSO>(16);
+    private readonly Dictionary<string, EquipmentDataSO> equipmentById = new Dictionary<string, EquipmentDataSO>(16);
     private readonly List<RewardPoolSO> rewardPoolList = new List<RewardPoolSO>(4);
 
     public bool IsInitialized { get; private set; }
@@ -108,6 +109,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     public bool TryGetTalent(string configId, out TalentDataSO data) =>
         TryGet(talentsById, configId, out data);
 
+    public bool TryGetEquipment(string configId, out EquipmentDataSO data) =>
+        TryGet(equipmentById, configId, out data);
+
     public IReadOnlyList<RewardPoolSO> GetAllRewardPools() => rewardPoolList;
 
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
@@ -178,6 +182,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.UpgradeOptions, upgradeOptionsById);
         IndexList(Database.RewardPools, rewardPoolsById);
         IndexList(Database.Talents, talentsById);
+        IndexList(Database.Equipment, equipmentById);
         rewardPoolList.Clear();
         if (Database.RewardPools != null)
         {
@@ -198,7 +203,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
                 $"Skill={skillsById.Count}, Buff={buffsById.Count}, Wave={wavesById.Count}, " +
                 $"Boss={bossesById.Count}, DropTable={dropTablesById.Count}, " +
                 $"AutoAttack={autoAttacksById.Count}, Upgrade={upgradeOptionsById.Count}, " +
-                $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}");
+                $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}, " +
+                $"Equipment={equipmentById.Count}");
         }
     }
 
@@ -234,6 +240,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         upgradeOptionsById.Clear();
         rewardPoolsById.Clear();
         talentsById.Clear();
+        equipmentById.Clear();
         rewardPoolList.Clear();
     }
 

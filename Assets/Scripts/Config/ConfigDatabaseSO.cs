@@ -22,6 +22,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<UpgradeOptionSO> upgradeOptions = new List<UpgradeOptionSO>();
     [SerializeField] private List<RewardPoolSO> rewardPools = new List<RewardPoolSO>();
     [SerializeField] private List<TalentDataSO> talents = new List<TalentDataSO>();
+    [SerializeField] private List<EquipmentDataSO> equipment = new List<EquipmentDataSO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -34,6 +35,7 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<UpgradeOptionSO> UpgradeOptions => upgradeOptions;
     public IReadOnlyList<RewardPoolSO> RewardPools => rewardPools;
     public IReadOnlyList<TalentDataSO> Talents => talents;
+    public IReadOnlyList<EquipmentDataSO> Equipment => equipment;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -67,6 +69,9 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetTalent(string configId, out TalentDataSO data) =>
         TryGet(talents, configId, out data);
+
+    public bool TryGetEquipment(string configId, out EquipmentDataSO data) =>
+        TryGet(equipment, configId, out data);
 
     private static bool TryGet<T>(List<T> list, string configId, out T data) where T : ConfigDataBase
     {

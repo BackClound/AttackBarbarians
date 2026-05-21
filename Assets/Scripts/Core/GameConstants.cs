@@ -86,6 +86,9 @@ public static class GameConstants
 
         // Talent
         public const string TalentChanged = "Talent.Changed";
+
+        // Equipment
+        public const string EquipmentChanged = "Equipment.Changed";
     }
 
     public static class UiPanelIds
@@ -140,6 +143,12 @@ public static class GameConstants
         public const string UpgradeGoldBonus = "upgrade.gold_bonus";
         public const string TalentMaxHp = "talent.max_hp";
         public const string TalentAttackDamage = "talent.attack_damage";
+
+        public const string EquipmentWeaponBattleAxe = "equipment.weapon.battle_axe";
+        public const string EquipmentHelmetLeatherCap = "equipment.helmet.leather_cap";
+        public const string EquipmentChestWarriorPlate = "equipment.chest.warrior_plate";
+        public const string EquipmentBootsWarriorBoots = "equipment.boots.warrior_boots";
+        public const string EquipmentSetWarrior = "set.warrior";
     }
 
     public static class PoolKeys

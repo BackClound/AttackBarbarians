@@ -23,6 +23,7 @@ public class SaveData
     public List<ConfigIdIntPair> permanentUpgrades = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> talentLevels = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> equipmentLevels = new List<ConfigIdIntPair>(8);
+    public List<EquipmentSlotSaveEntry> equippedItems = new List<EquipmentSlotSaveEntry>(6);
     public List<ConfigIdIntPair> skillLevels = new List<ConfigIdIntPair>(16);
 
     public SettingsData settings = new SettingsData();
@@ -42,6 +43,7 @@ public class SaveData
             permanentUpgrades = new List<ConfigIdIntPair>(4),
             talentLevels = new List<ConfigIdIntPair>(4),
             equipmentLevels = new List<ConfigIdIntPair>(4),
+            equippedItems = new List<EquipmentSlotSaveEntry>(4),
             skillLevels = new List<ConfigIdIntPair>(4),
             settings = SettingsData.CreateDefault(),
             statistics = SaveStatisticsData.CreateDefault(),
@@ -72,4 +74,10 @@ public class SaveData
 
     public void SetEquipmentLevel(string configId, int level) =>
         ConfigIdIntPairListUtility.SetValue(equipmentLevels, configId, level);
+
+    public string GetEquippedAt(EquipmentSlot slot) =>
+        EquipmentSlotSaveUtility.GetEquippedId(equippedItems, slot);
+
+    public void SetEquippedAt(EquipmentSlot slot, string equipmentConfigId) =>
+        EquipmentSlotSaveUtility.SetEquippedId(equippedItems, slot, equipmentConfigId);
 }

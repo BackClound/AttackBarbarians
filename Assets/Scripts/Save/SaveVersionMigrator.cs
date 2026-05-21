@@ -55,6 +55,7 @@ public static class SaveVersionMigrator
         data.permanentUpgrades ??= new List<ConfigIdIntPair>(4);
         data.talentLevels ??= new List<ConfigIdIntPair>(4);
         data.equipmentLevels ??= new List<ConfigIdIntPair>(4);
+        data.equippedItems ??= new List<EquipmentSlotSaveEntry>(4);
         data.skillLevels ??= new List<ConfigIdIntPair>(4);
         data.runProgress.activeBuffs ??= new List<ConfigIdIntPair>(4);
     }
