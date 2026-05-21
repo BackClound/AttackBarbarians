@@ -1164,9 +1164,52 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnerManager
   legacySpawner: {fileID: 186641249}
   disableLegacySpawnerOnInit: 1
-  spawnCamera: {fileID: 519420031}
-  viewportMin: {x: 0.1, y: 0.9}
-  viewportMax: {x: 0.9, y: 1.1}
+  spawnArea: {fileID: 0}
+--- !u!1 &530551914
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 530551915}
+  - component: {fileID: 530551916}
+  m_Layer: 0
+  m_Name: RandomRewardManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &530551915
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 530551914}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812459356}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &530551916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 530551914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf6f881e402f943beae2000c02e6fac3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RandomRewardManager
+  autoConfirmFirstChoiceForDebug: 0
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -1353,6 +1396,51 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!1 &671985557
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 671985558}
+  - component: {fileID: 671985559}
+  m_Layer: 0
+  m_Name: UpgradeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &671985558
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671985557}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1812459356}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &671985559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671985557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e2fc733a907942cd8378101282c0c8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeManager
+  defaultPoolConfigId: reward_pool.default
 --- !u!1 &825728580
 GameObject:
   m_ObjectHideFlags: 0
@@ -1371,6 +1459,9 @@ GameObject:
   - component: {fileID: 825728587}
   - component: {fileID: 825728582}
   - component: {fileID: 825728581}
+  - component: {fileID: 825728594}
+  - component: {fileID: 825728593}
+  - component: {fileID: 825728592}
   m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
@@ -1602,6 +1693,49 @@ MonoBehaviour:
   dataOverride: {fileID: 0}
   fireOrigin: {fileID: 839134032}
   combatEnabled: 1
+--- !u!114 &825728592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825728580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 452f2f611a2e04357ac1c7f93f7b90b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillManager
+  castOrigin: {fileID: 0}
+  enableAutoCast: 1
+  shootSkillConfigId: skill.shoot
+  unlockShootOnStart: 1
+--- !u!114 &825728593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825728580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ad390a732ce4605b02ab6f7d613160, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShootSkillController
+  castOrigin: {fileID: 0}
+  fanAngleDegrees: 10
+  projectileDataOverride: {fileID: 0}
+--- !u!114 &825728594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825728580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2b342074c2f54379912e3e54ce45bb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShootBurstController
 --- !u!1 &839134031
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,24 +1782,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillShoot
   bulletSpawnPrefab: {fileID: 1089714990345592040, guid: 9a00d02bca7be487d9717ab6aecfda17, type: 3}
   bulletSpawnPoint: {fileID: 839134032}
-  bulletWaveList: []
-  maxAttackCount: 10
-  currentAttackCount: 0
-  maxBulletPerWave: 3
-  attackInterval: 0.3
-  coolDownTimer: 0
-  cooldownThreshold: 4
-  maxCheckDistance: 25
   checkPosition: {fileID: 13335480}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
   enemyTag: Enemy
-  effectiveEnemys: []
-  shootLine: 1
-  shootAngle: 0
-  hasEffectiveEnemy: 0
-  isCoolDown: 0
 --- !u!1 &906468940
 GameObject:
   m_ObjectHideFlags: 0
@@ -2584,6 +2705,8 @@ MonoBehaviour:
   runSessionTracker: {fileID: 0}
   runRewardSettlementService: {fileID: 0}
   playerExperienceService: {fileID: 0}
+  upgradeManager: {fileID: 0}
+  randomRewardManager: {fileID: 0}
   enemySpawnerManager: {fileID: 0}
   waveManager: {fileID: 1406976025}
   damageSystem: {fileID: 0}
@@ -2611,6 +2734,8 @@ Transform:
   - {fileID: 2008535171}
   - {fileID: 1951773201}
   - {fileID: 337168376}
+  - {fileID: 530551915}
+  - {fileID: 671985558}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1855374631

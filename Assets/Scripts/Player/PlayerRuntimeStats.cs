@@ -13,6 +13,7 @@ public sealed class PlayerRuntimeStats
     private readonly StatRuntimeSnapshot workingSnapshot = new StatRuntimeSnapshot();
     private readonly List<BuffRuntimeData> activeBuffs = new List<BuffRuntimeData>(8);
     private readonly List<StatModifierConfig> extraModifiers = new List<StatModifierConfig>(16);
+    private readonly List<StatModifierConfig> talentModifiers = new List<StatModifierConfig>(16);
 
     private PlayerDataSO sourceData;
     private float configuredAttackRadius = 25f;
@@ -43,6 +44,28 @@ public sealed class PlayerRuntimeStats
     public float GetAttackRadius() => workingSnapshot.Get(StatType.AttackRadius);
 
     public float Get(StatType statType) => workingSnapshot.Get(statType);
+
+    /// <summary>天赋系统入口：替换局外天赋修正列表（由 <see cref="TalentManager"/> 驱动）。</summary>
+    public void SetTalentModifiers(IReadOnlyList<StatModifierConfig> modifiers)
+    {
+        talentModifiers.Clear();
+        if (modifiers == null)
+        {
+            RebuildSnapshot();
+            return;
+        }
+
+        for (int i = 0; i < modifiers.Count; i++)
+        {
+            StatModifierConfig modifier = modifiers[i];
+            if (modifier != null)
+            {
+                talentModifiers.Add(modifier);
+            }
+        }
+
+        RebuildSnapshot();
+    }
 
     /// <summary>Buff / Upgrade 系统入口：叠加单条属性修正。</summary>
     public void ApplyModifier(StatModifierConfig modifier)
@@ -136,8 +159,9 @@ public sealed class PlayerRuntimeStats
 
     private List<StatModifierConfig> CollectAllModifiers()
     {
-        var combined = new List<StatModifierConfig>(extraModifiers.Count + 8);
+        var combined = new List<StatModifierConfig>(extraModifiers.Count + talentModifiers.Count + 8);
         combined.AddRange(extraModifiers);
+        combined.AddRange(talentModifiers);
 
         for (int i = 0; i < activeBuffs.Count; i++)
         {

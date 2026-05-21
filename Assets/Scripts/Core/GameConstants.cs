@@ -83,6 +83,9 @@ public static class GameConstants
         public const string UpgradeSelectionCompleted = "Upgrade.SelectionCompleted";
         public const string UpgradeChoicesReady = "Upgrade.ChoicesReady";
         public const string UpgradeChoiceApplied = "Upgrade.ChoiceApplied";
+
+        // Talent
+        public const string TalentChanged = "Talent.Changed";
     }
 
     public static class UiPanelIds
@@ -135,6 +138,8 @@ public static class GameConstants
         public const string UpgradeShootPierce = "upgrade.shoot_pierce";
         public const string UpgradeUnlockLightning = "upgrade.unlock_lightning";
         public const string UpgradeGoldBonus = "upgrade.gold_bonus";
+        public const string TalentMaxHp = "talent.max_hp";
+        public const string TalentAttackDamage = "talent.attack_damage";
     }
 
     public static class PoolKeys

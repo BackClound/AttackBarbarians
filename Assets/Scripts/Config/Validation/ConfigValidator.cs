@@ -22,6 +22,7 @@ public static class ConfigValidator
         ValidateUniqueIds(database.Enemies, result);
         ValidateUniqueIds(database.Skills, result);
         ValidateUniqueIds(database.Buffs, result);
+        ValidateUniqueIds(database.Talents, result);
         ValidateUniqueIds(database.Waves, result);
         ValidateUniqueIds(database.Bosses, result);
         ValidateUniqueIds(database.DropTables, result);
@@ -30,6 +31,7 @@ public static class ConfigValidator
         ValidateEntries(database.Enemies, result);
         ValidateEntries(database.Skills, result);
         ValidateEntries(database.Buffs, result);
+        ValidateEntries(database.Talents, result);
         ValidateEntries(database.Waves, result);
         ValidateEntries(database.Bosses, result);
         ValidateEntries(database.DropTables, result);

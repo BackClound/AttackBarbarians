@@ -77,7 +77,7 @@ public class ShootSkillController : MonoBehaviour
             return false;
         }
 
-        if (burstController != null && !burstController.CanShoot(runtime))
+        if (!runtime.IsCooldownReady)
         {
             return false;
         }
@@ -122,7 +122,7 @@ public class ShootSkillController : MonoBehaviour
             return;
         }
 
-        burstController?.RecordShot(runtime);
+        runtime.StartCooldown();
         controller?.NotifyAttackStarted(runtime.Config?.ConfigId);
     }
 

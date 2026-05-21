@@ -37,3 +37,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}
   autoAttacks:
   - {fileID: 11400000, guid: e3f5a7b29c4d6e8f0a1b2c3d4e5f6a7b, type: 2}
+  talents:
+  - {fileID: 11400000, guid: 4180d52731d54c4bb61db158d29c9ccc, type: 2}
+  - {fileID: 11400000, guid: 1ec8a000cf5f47f0b46852019103a75b, type: 2}

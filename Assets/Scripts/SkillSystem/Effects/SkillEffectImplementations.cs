@@ -30,21 +30,49 @@ public static class SkillEffectFactory
     }
 }
 
-/// <summary>射击由动画驱动；释放委托 <see cref="ShootSkillController"/>。</summary>
+/// <summary>射击：与闪电/冰霜相同，由 <see cref="SkillManager"/> 冷却自动释放。</summary>
 public sealed class ShootSkillEffect : ISkillEffect
 {
+    private const float DefaultFanAngleDegrees = 10f;
+
     public SkillType SkillType => SkillType.Shoot;
 
-    public bool TryAutoCast(SkillContext context, SkillRuntime runtime) => false;
-
-    public void OnExternalCast(SkillContext context, SkillRuntime runtime)
+    public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
-        if (context?.SkillManager == null)
+        if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
         {
-            return;
+            return false;
         }
 
-        context.SkillManager.ShootController?.ExecuteShoot();
+        if (!context.TryGetPrimaryTarget(out Enemy primary))
+        {
+            return false;
+        }
+
+        Vector2 spawnPos = context.CastOrigin != null
+            ? context.CastOrigin.position
+            : context.Player.transform.position;
+
+        if (!ShootProjectileCaster.TryFireAtEnemy(
+                context,
+                runtime,
+                primary,
+                spawnPos,
+                DefaultFanAngleDegrees,
+                ResolveProjectileData()))
+        {
+            return false;
+        }
+
+        context.Controller?.NotifyAttackStarted(runtime.Config.ConfigId);
+        return true;
+    }
+
+    public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
+
+    private static ProjectileDataSO ResolveProjectileData()
+    {
+        return ServiceLocator.TryGet(out ProjectileManager manager) ? manager.DefaultData : null;
     }
 }
 

@@ -17,7 +17,7 @@
 ## 技能列表
 
 ### 1. 射击（Shoot）`SkillType.Shoot`
-- **释放**：玩家射击动画 → `SkillShoot.ActivateOneShootAttack` → `SkillObject_BulletSpawn`
+- **释放**：`SkillManager` 冷却自动释放 → `ShootSkillEffect.TryAutoCast` → `ShootProjectileCaster`（与闪电/冰霜同链路；不再依赖射击动画攻击帧）
 - **基础**：单发、单弹道，直线投射物 + `DamagePipeline`
 - **Buff**
   | Buff | Kind | Tier 效果 |

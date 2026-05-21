@@ -108,6 +108,11 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         }
 
         runtimeStats.Initialize(data, save);
+        if (ServiceLocator.TryGet(out TalentManager talentManager))
+        {
+            talentManager.ApplyToPlayer(this);
+        }
+
         RefreshEntityStats();
         ConfigureTargetScanner();
         IsReady = true;
@@ -253,6 +258,13 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
 
     public bool CanEnterCombatState()
     {
+        if (player?.skillManager?.SkillManager != null &&
+            player.skillManager.SkillManager.TryGetRuntime(SkillType.Shoot, out SkillRuntime shootRuntime) &&
+            shootRuntime.IsUnlocked)
+        {
+            return false;
+        }
+
         if (player?.skillManager != null)
         {
             return player.skillManager.CanShoot();

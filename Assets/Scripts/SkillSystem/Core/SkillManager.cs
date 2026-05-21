@@ -79,7 +79,6 @@ public class SkillManager : MonoBehaviour
         }
 
         float dt = Time.deltaTime;
-        shootBurst?.Tick(dt);
         TickHealPassives(dt);
         if (!CanAutoCastNow())
         {
@@ -89,10 +88,6 @@ public class SkillManager : MonoBehaviour
         for (int i = 0; i < autoCastOrder.Count; i++)
         {
             SkillType type = autoCastOrder[i];
-            if (type == SkillType.Shoot)
-            {
-                continue;
-            }
 
             if (!runtimes.TryGetValue(type, out SkillRuntime runtime) || !runtime.IsUnlocked)
             {
@@ -121,20 +116,7 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    private bool CanAutoCastNow()
-    {
-        if (controller == null || !controller.IsReady)
-        {
-            return true;
-        }
-
-        if (controller.AutoAttack != null && controller.AutoAttack.IsReady && controller.AutoAttack.CanAttack)
-        {
-            return false;
-        }
-
-        return true;
-    }
+    private bool CanAutoCastNow() => controller == null || controller.IsReady;
 
     private void RegisterEffectTypes()
     {

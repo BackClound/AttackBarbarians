@@ -313,6 +313,19 @@ public static class GameEvents
 
     #endregion
 
+    #region Talent
+
+    public static void RaiseTalentChanged(object sender, TalentChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.TalentChanged, sender, args);
+
+    public static void SubscribeTalentChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.TalentChanged, handler);
+
+    public static void UnsubscribeTalentChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.TalentChanged, handler);
+
+    #endregion
+
     #region Bus access
 
     public static void Subscribe(string eventKey, Action<GameEventContext> handler)
