@@ -80,7 +80,7 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public void SetVelocity(Vector2 velocity)
     {
-        rb.linearVelocity = velocity;
+        rb.velocity = velocity;
     }
 
     public override void OnAniamtorFinished()
@@ -110,7 +110,7 @@ public class Enemy : Entity, IDamagable, IPoolable
         {
             if (rb != null)
             {
-                rb.linearVelocity = Vector2.zero;
+                rb.velocity = Vector2.zero;
             }
 
             return;
@@ -120,7 +120,7 @@ public class Enemy : Entity, IDamagable, IPoolable
         moveSpeed = enemy_Health.entity_Stats.GetMoveSpeed();
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
         }
 
         stateMachine.InitialState(idleState);
@@ -132,7 +132,7 @@ public class Enemy : Entity, IDamagable, IPoolable
 
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
         }
 
         if (anim != null)

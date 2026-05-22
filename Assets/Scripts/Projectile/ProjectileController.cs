@@ -139,7 +139,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         ResetFlightState();
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
         }
     }
 
@@ -159,7 +159,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
 
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
         }
 
         CancelInvoke();
@@ -194,7 +194,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
 
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
         }
     }
 
@@ -292,7 +292,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
             return;
         }
 
-        rb.linearVelocity = moveDirection * activeData.MoveSpeed;
+        rb.velocity = moveDirection * activeData.MoveSpeed;
     }
 
     private void ScanHitsNonAlloc()
