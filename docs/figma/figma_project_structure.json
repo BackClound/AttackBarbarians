@@ -1,0 +1,128 @@
+{
+  "fileName": "AttackBarbarians_UI_Xianxia",
+  "canvasSize": { "width": 1080, "height": 1920 },
+  "style": "Chinese Xianxia mobile game UI",
+  "pages": [
+    {
+      "name": "00_DesignSystem",
+      "frames": [
+        { "name": "Tokens_Colors", "width": 1080, "height": 400 },
+        { "name": "Tokens_Typography", "width": 1080, "height": 600 },
+        { "name": "Components_Library", "width": 1080, "height": 3000 }
+      ]
+    },
+    {
+      "name": "01_MainMenu",
+      "frames": [
+        { "name": "MainMenu_Default", "panelId": "ui.main_menu" },
+        { "name": "MainMenu_StaminaEmpty", "panelId": "ui.stamina_empty" },
+        { "name": "MainMenu_EliteSelected", "panelId": null }
+      ]
+    },
+    {
+      "name": "02_Battle_HUD",
+      "frames": [
+        { "name": "HUD_Playing", "panelId": null },
+        { "name": "HUD_BossWarning", "panelId": null },
+        { "name": "HUD_EliteMode", "panelId": null }
+      ]
+    },
+    {
+      "name": "03_Roguelike_Flow",
+      "frames": [
+        { "name": "UpgradePanel_3Choices", "panelId": "ui.upgrade" },
+        { "name": "WaveTransition", "panelId": "ui.wave_transition" },
+        { "name": "PausePanel", "panelId": "ui.pause" },
+        { "name": "GameOver_Settlement", "panelId": "ui.game_over" }
+      ]
+    },
+    {
+      "name": "04_Meta_Growth",
+      "frames": [
+        { "name": "Growth_Attr", "panelId": "ui.growth" },
+        { "name": "Growth_Skill", "panelId": "ui.growth" },
+        { "name": "Growth_Talent", "panelId": "ui.growth" },
+        { "name": "Growth_Equipment", "panelId": "ui.growth" }
+      ]
+    },
+    {
+      "name": "05_Shop",
+      "frames": [
+        { "name": "Shop_Home", "panelId": "ui.shop" },
+        { "name": "Shop_PurchaseConfirm", "panelId": "ui.shop" },
+        { "name": "Shop_InsufficientCurrency", "panelId": "ui.shop" }
+      ]
+    },
+    {
+      "name": "06_Gacha",
+      "frames": [
+        { "name": "Gacha_Main", "panelId": "ui.gacha" },
+        { "name": "Gacha_Result_x1", "panelId": "ui.gacha" },
+        { "name": "Gacha_Result_x10", "panelId": "ui.gacha" },
+        { "name": "Gacha_ProbabilityDisclosure", "panelId": "ui.gacha" }
+      ]
+    },
+    {
+      "name": "07_SignIn",
+      "frames": [
+        { "name": "SignIn_7Day", "panelId": "ui.sign_in" },
+        { "name": "SignIn_AllClaimed", "panelId": "ui.sign_in" }
+      ]
+    },
+    {
+      "name": "08_Leaderboard",
+      "frames": [
+        { "name": "Leaderboard_Wave", "panelId": "ui.leaderboard" },
+        { "name": "Leaderboard_Time", "panelId": "ui.leaderboard" },
+        { "name": "Leaderboard_Power", "panelId": "ui.leaderboard" }
+      ]
+    },
+    {
+      "name": "09_Achievement",
+      "frames": [
+        { "name": "Achievement_List", "panelId": "ui.achievement" },
+        { "name": "Achievement_Detail", "panelId": "ui.achievement" }
+      ]
+    },
+    {
+      "name": "10_Settings",
+      "frames": [
+        { "name": "Settings", "panelId": "ui.settings" },
+        { "name": "Dialog_Confirm", "panelId": null },
+        { "name": "OfflinePatrol_Claim", "panelId": "ui.offline_patrol" }
+      ]
+    },
+    {
+      "name": "99_Export_Slices",
+      "frames": [
+        { "name": "Icons_Navigation", "export": "png_2x" },
+        { "name": "Icons_Currency", "export": "png_2x" },
+        { "name": "Icons_Skills", "export": "png_2x" },
+        { "name": "Icons_Buff_Equip", "export": "png_2x" },
+        { "name": "Icons_Shop_Gacha_SignIn", "export": "png_2x" },
+        { "name": "Panels_9Slice", "export": "png_2x" }
+      ]
+    }
+  ],
+  "components": [
+    "Btn/Primary",
+    "Btn/Secondary",
+    "Btn/Icon",
+    "Panel/Scroll",
+    "Panel/Modal",
+    "Bar/HP",
+    "Bar/EXP",
+    "Bar/Stamina",
+    "Chip/Currency",
+    "Card/BuffChoice",
+    "Card/ShopItem",
+    "Tab/BottomNav",
+    "IconFrame/Circle",
+    "Badge/RedDot"
+  ],
+  "linkedDocs": [
+    "docs/prompt_ui_xianxia_visual_design.md",
+    "docs/ui_wireframe_figma_spec.md",
+    "docs/ui_icon_export_manifest.md"
+  ]
+}

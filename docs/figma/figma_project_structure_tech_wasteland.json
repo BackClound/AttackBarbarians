@@ -1,0 +1,134 @@
+{
+  "fileName": "AttackBarbarians_UI_TechWasteland",
+  "style": "Tech Wasteland post-apocalyptic survival UI",
+  "canvasSize": { "width": 1080, "height": 1920 },
+  "designTokensRef": "docs/prompt_ui_tech_wasteland_visual_design.md",
+  "pages": [
+    {
+      "name": "00_DesignSystem",
+      "frames": [
+        { "name": "Tokens_Colors_Wasteland", "width": 1080, "height": 500 },
+        { "name": "Tokens_Typography_Mono", "width": 1080, "height": 600 },
+        { "name": "Components_Library", "width": 1080, "height": 3200 },
+        { "name": "Decor_Scanline_Hazard_Rivet", "width": 1080, "height": 400 }
+      ]
+    },
+    {
+      "name": "01_MainMenu",
+      "frames": [
+        { "name": "MainMenu_Deploy", "panelId": "ui.main_menu" },
+        { "name": "MainMenu_StaminaDepleted", "panelId": "ui.stamina_empty" },
+        { "name": "MainMenu_EliteHazard", "panelId": null }
+      ]
+    },
+    {
+      "name": "02_Battle_HUD",
+      "frames": [
+        { "name": "HUD_Survival_Active", "panelId": null },
+        { "name": "HUD_BossAlert", "panelId": null },
+        { "name": "HUD_EliteRadiation", "panelId": null }
+      ]
+    },
+    {
+      "name": "03_Roguelike_Flow",
+      "frames": [
+        { "name": "Upgrade_ModuleSelect_3", "panelId": "ui.upgrade" },
+        { "name": "WaveTransition_Inbound", "panelId": "ui.wave_transition" },
+        { "name": "Pause_Tactical", "panelId": "ui.pause" },
+        { "name": "GameOver_MissionReport", "panelId": "ui.game_over" }
+      ]
+    },
+    {
+      "name": "04_Meta_Growth",
+      "frames": [
+        { "name": "Growth_Stats_Implants", "panelId": "ui.growth" },
+        { "name": "Growth_Skill_Modules", "panelId": "ui.growth" },
+        { "name": "Growth_Talent_PCB", "panelId": "ui.growth" },
+        { "name": "Growth_Exosuit_Equip", "panelId": "ui.growth" }
+      ]
+    },
+    {
+      "name": "05_Shop",
+      "frames": [
+        { "name": "Shop_SupplyStation", "panelId": "ui.shop" },
+        { "name": "Shop_PurchaseConfirm", "panelId": "ui.shop" },
+        { "name": "Shop_InsufficientFunds", "panelId": "ui.shop" }
+      ]
+    },
+    {
+      "name": "06_Gacha",
+      "frames": [
+        { "name": "Gacha_DropPodBay", "panelId": "ui.gacha" },
+        { "name": "Gacha_Result_x1", "panelId": "ui.gacha" },
+        { "name": "Gacha_Result_x10", "panelId": "ui.gacha" },
+        { "name": "Gacha_ProbabilityTerminal", "panelId": "ui.gacha" }
+      ]
+    },
+    {
+      "name": "07_SignIn",
+      "frames": [
+        { "name": "SignIn_SupplyCalendar_7D", "panelId": "ui.sign_in" },
+        { "name": "SignIn_AllReceived", "panelId": "ui.sign_in" }
+      ]
+    },
+    {
+      "name": "08_Leaderboard",
+      "frames": [
+        { "name": "Leaderboard_Wave", "panelId": "ui.leaderboard" },
+        { "name": "Leaderboard_Time", "panelId": "ui.leaderboard" },
+        { "name": "Leaderboard_Power", "panelId": "ui.leaderboard" }
+      ]
+    },
+    {
+      "name": "09_Achievement",
+      "frames": [
+        { "name": "Achievement_Database", "panelId": "ui.achievement" },
+        { "name": "Achievement_EntryDetail", "panelId": "ui.achievement" }
+      ]
+    },
+    {
+      "name": "10_Settings",
+      "frames": [
+        { "name": "Settings_ControlPanel", "panelId": "ui.settings" },
+        { "name": "Dialog_Confirm", "panelId": null },
+        { "name": "OfflinePatrol_SalvageClaim", "panelId": "ui.offline_patrol" }
+      ]
+    },
+    {
+      "name": "99_Export_Slices",
+      "frames": [
+        { "name": "Icons_Navigation_Wasteland", "export": "png_2x" },
+        { "name": "Icons_Currency_Quantum", "export": "png_2x" },
+        { "name": "Icons_Skill_Modules", "export": "png_2x" },
+        { "name": "Icons_Buff_Equip_Scrap", "export": "png_2x" },
+        { "name": "Icons_Shop_Gacha_SignIn", "export": "png_2x" },
+        { "name": "Panels_Metal_9Slice", "export": "png_2x" }
+      ]
+    }
+  ],
+  "components": [
+    "Btn/Primary",
+    "Btn/Secondary",
+    "Btn/Danger",
+    "Btn/Icon",
+    "Panel/MetalPlate",
+    "Panel/Terminal",
+    "Panel/Modal",
+    "Bar/HP",
+    "Bar/EXP",
+    "Bar/Stamina",
+    "Chip/Currency",
+    "Card/BuffModule",
+    "Card/ShopCrate",
+    "Tab/BottomNav",
+    "IconFrame/Hex",
+    "Badge/AlertDot",
+    "Decor/HazardStripe",
+    "Decor/ScanlineOverlay"
+  ],
+  "linkedDocs": [
+    "docs/prompt_ui_tech_wasteland_visual_design.md",
+    "docs/ui_wireframe_figma_spec.md",
+    "docs/ui_icon_export_manifest.md"
+  ]
+}

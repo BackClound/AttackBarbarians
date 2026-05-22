@@ -53,6 +53,12 @@ Attack Barbarians 是 Unity 2D 竖屏无限防守 + Roguelike 游戏。核心循
 - `prompt_boss_system.md`
 - `prompt_upgrade_random_reward_system.md`
 - `prompt_ui_system.md`
+- `prompt_ui_tech_wasteland_visual_design.md`（**科技废土** UI 视觉 / Figma / AI 出图，当前推荐）
+- `prompt_ui_xianxia_visual_design.md`（仙侠 UI 视觉，备选风格）
+- `ui_wireframe_figma_spec.md`（全页面线框与 Figma 结构）
+- `ui_icon_export_manifest.md`（Icon 切图命名与导出）
+- `ui_implementation_checklist.md`（UI 待办与代码对齐）
+- `figma/figma_project_structure.json`（Figma 页面树）
 - `prompt_audio_system.md`
 - `prompt_save_system.md`
 - `prompt_economy_shop_system.md`
