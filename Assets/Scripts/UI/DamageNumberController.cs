@@ -43,12 +43,12 @@ public class DamageNumberController : GameEventSubscriberBase
         }
     }
 
-    protected override void RegisterHandlers(EventBus bus)
+    protected override void RegisterHandlers()
     {
         GameEvents.SubscribeDamageApplied(OnDamageApplied);
     }
 
-    protected override void UnregisterHandlers(EventBus bus)
+    protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribeDamageApplied(OnDamageApplied);
     }

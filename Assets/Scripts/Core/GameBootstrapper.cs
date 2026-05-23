@@ -37,6 +37,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private RandomRewardManager randomRewardManager;
     [SerializeField] private EnemySpawnerManager enemySpawnerManager;
     [SerializeField] private WaveManager waveManager;
+    [SerializeField] private BossRunStatsBridge bossRunStatsBridge;
     [SerializeField] private DamageSystem damageSystem;
     [SerializeField] private CollisionManager collisionManager;
     [SerializeField] private ProjectileManager projectileManager;
@@ -117,6 +118,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         randomRewardManager = ResolveOrCreate(randomRewardManager);
         enemySpawnerManager = ResolveOrCreate(enemySpawnerManager);
         waveManager = ResolveOrCreate(waveManager);
+        bossRunStatsBridge = ResolveOrCreate(bossRunStatsBridge);
         damageSystem = ResolveOrCreate(damageSystem);
         collisionManager = ResolveOrCreate(collisionManager);
         projectileManager = ResolveOrCreate(projectileManager);
@@ -143,6 +145,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(randomRewardManager);
         ServiceLocator.Register(enemySpawnerManager);
         ServiceLocator.Register(waveManager);
+        ServiceLocator.Register(bossRunStatsBridge);
         ServiceLocator.Register(damageSystem);
         ServiceLocator.Register(collisionManager);
         ServiceLocator.Register(projectileManager);
@@ -165,6 +168,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(projectileManager);
         systems.Add(enemySpawnerManager);
         systems.Add(waveManager);
+        systems.Add(bossRunStatsBridge);
     }
 
     private void InitializeSystems()
@@ -173,6 +177,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         {
             systems[i].Initialize();
         }
+
+        RunDifficultyBootstrap.ApplyFromGameConfig(configManager != null ? configManager.GameConfig : null);
     }
 
     private T ResolveOrCreate<T>(T current) where T : Component

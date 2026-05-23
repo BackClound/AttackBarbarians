@@ -25,6 +25,11 @@ public class WaveDataSO : ConfigDataBase
     [SerializeField] private float bossSpawnAtElapsed = 25f;
     [SerializeField] private bool requireBossDefeatToComplete = true;
 
+    [Header("Elite")]
+    [Tooltip("每成功生成一名普通敌人时，额外以该概率生成精英个体（0~1）。")]
+    [SerializeField] private float eliteSpawnChance;
+    [SerializeField] private bool pauseNormalSpawnsWhileBossAlive;
+
     [Header("Rewards")]
     [SerializeField] private string rewardTableId;
 
@@ -39,6 +44,8 @@ public class WaveDataSO : ConfigDataBase
     public string BossConfigId => bossConfigId;
     public float BossSpawnAtElapsed => Mathf.Max(0f, bossSpawnAtElapsed);
     public bool RequireBossDefeatToComplete => requireBossDefeatToComplete;
+    public float EliteSpawnChance => Mathf.Clamp01(eliteSpawnChance);
+    public bool PauseNormalSpawnsWhileBossAlive => pauseNormalSpawnsWhileBossAlive;
     public string RewardTableId => rewardTableId;
 
     public float GetStatMultiplierForWave(int currentWaveIndex)

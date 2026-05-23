@@ -151,11 +151,37 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
+        if (ShouldPauseSpawnsForBoss())
+        {
+            return;
+        }
+
         if (TrySpawnOne())
         {
             spawnedThisWave++;
             spawnTimer = 0f;
+            TrySpawnBonusElite();
         }
+    }
+
+    private bool ShouldPauseSpawnsForBoss()
+    {
+        return currentWaveData.PauseNormalSpawnsWhileBossAlive &&
+               currentWaveData.HasBoss &&
+               bossSpawned &&
+               spawner.AliveBossCount > 0;
+    }
+
+    private void TrySpawnBonusElite()
+    {
+        float chance = currentWaveData.EliteSpawnChance;
+        if (chance <= 0f || Random.value > chance)
+        {
+            return;
+        }
+
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: true);
     }
 
     private void TrySpawnBoss()
@@ -184,7 +210,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
     private bool TrySpawnOne()
     {
         float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
-        return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed);
+        return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: false);
     }
 
     private void TryCompleteWave()

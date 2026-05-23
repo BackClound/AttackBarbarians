@@ -71,7 +71,12 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         spawnSelector.Configure(waveData, configManager);
     }
 
-    public bool TrySpawnEnemy(string forcedConfigId, float statMultiplier, int waveIndex, float waveElapsedSeconds = 0f)
+    public bool TrySpawnEnemy(
+        string forcedConfigId,
+        float statMultiplier,
+        int waveIndex,
+        float waveElapsedSeconds = 0f,
+        bool markAsElite = false)
     {
         if (spawnArea == null || !spawnArea.IsReady)
         {
@@ -85,7 +90,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         }
 
         float entryMultiplier = spawnSelector.GetEntryStatMultiplier(configId, statMultiplier);
-        return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsBoss: false);
+        return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsElite);
     }
 
     public bool TrySpawnBoss(string bossConfigId, float statMultiplier, int waveIndex)
@@ -98,10 +103,51 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        return SpawnEnemyInternal(bossData.BaseEnemyConfigId, statMultiplier, waveIndex, markAsBoss: true);
+        return SpawnBossInternal(bossConfigId, bossData.BaseEnemyConfigId, statMultiplier, waveIndex);
     }
 
-    private bool SpawnEnemyInternal(string configId, float statMultiplier, int waveIndex, bool markAsBoss)
+    private bool SpawnBossInternal(
+        string bossConfigId,
+        string enemyConfigId,
+        float statMultiplier,
+        int waveIndex)
+    {
+        if (!spawnArea.TryGetRandomSpawnPosition(out Vector3 position))
+        {
+            return false;
+        }
+
+        if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
+            !configManager.TryGetEnemy(enemyConfigId, out EnemyDataSO enemyData))
+        {
+            Debug.LogWarning($"[EnemySpawnerManager] Boss 基础敌人配置缺失 configId={enemyConfigId}");
+            return false;
+        }
+
+        GameObject instance = SpawnFromPool(enemyData, position);
+        if (instance == null || !instance.TryGetComponent(out EnemyController controller))
+        {
+            return false;
+        }
+
+        if (instance.TryGetComponent(out Enemy enemy))
+        {
+            enemy.SetBossFlag(true);
+        }
+
+        controller.InitializeForSpawn(enemyConfigId, statMultiplier, waveIndex);
+        EnsureBossController(instance).Initialize(bossConfigId, statMultiplier);
+
+        AliveEnemyCount++;
+        AliveBossCount++;
+        return true;
+    }
+
+    private bool SpawnEnemyInternal(
+        string configId,
+        float statMultiplier,
+        int waveIndex,
+        bool markAsElite)
     {
         if (!spawnArea.TryGetRandomSpawnPosition(out Vector3 position))
         {
@@ -127,19 +173,40 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (markAsBoss && instance.TryGetComponent(out Enemy enemy))
+        if (markAsElite && instance.TryGetComponent(out Enemy enemy))
         {
-            enemy.SetBossFlag(true);
+            enemy.SetEliteFlag(true);
         }
 
-        controller.InitializeForSpawn(configId, statMultiplier, waveIndex);
+        controller.InitializeForSpawn(configId, statMultiplier, waveIndex, markAsElite);
+
+        if (markAsElite)
+        {
+            EnsureEliteController(instance).Initialize(configId, RunDifficultyContext.IsEliteMode);
+        }
+
         AliveEnemyCount++;
-        if (markAsBoss)
+        return true;
+    }
+
+    private static BossController EnsureBossController(GameObject instance)
+    {
+        if (!instance.TryGetComponent(out BossController controller))
         {
-            AliveBossCount++;
+            controller = instance.AddComponent<BossController>();
         }
 
-        return true;
+        return controller;
+    }
+
+    private static EliteController EnsureEliteController(GameObject instance)
+    {
+        if (!instance.TryGetComponent(out EliteController controller))
+        {
+            controller = instance.AddComponent<EliteController>();
+        }
+
+        return controller;
     }
 
     private GameObject SpawnFromPool(EnemyDataSO data, Vector3 position)

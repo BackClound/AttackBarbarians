@@ -48,6 +48,14 @@ public static class GameConstants
         public const string EnemySpawned = "Enemy.Spawned";
         public const string EnemyKilled = "Enemy.Killed";
 
+        // Boss
+        public const string BossSpawned = "Boss.Spawned";
+        public const string BossPhaseChanged = "Boss.PhaseChanged";
+        public const string BossDefeated = "Boss.Defeated";
+
+        // Elite
+        public const string EliteSpawned = "Elite.Spawned";
+
         // Run
         public const string RunRewardSettled = "Run.RewardSettled";
 
@@ -106,12 +114,17 @@ public static class GameConstants
         public const string MusicPaused = "audio.music.paused";
         public const string MusicGameOver = "audio.music.game_over";
         public const string MusicUpgrade = "audio.music.upgrade";
+        public const string MusicBoss = "audio.music.boss";
+        public const string SfxBossSpawn = "audio.sfx.boss_spawn";
+        public const string SfxBossPhase = "audio.sfx.boss_phase";
+        public const string SfxBossDefeat = "audio.sfx.boss_defeat";
     }
 
     public static class ResourcePaths
     {
         public const string GameConfig = "Config/GameConfig";
         public const string ConfigDatabase = "Config/ConfigDatabase";
+        public const string EliteModeConfig = "Config/Elite/EliteModeConfig_Default";
         public const string RunRewardSettlement = "Config/RunReward/RunRewardSettlement_Default";
         public const string DamageCalculation = "Config/Damage/DamageCalculation_Default";
         public const string ProjectileDefault = "Config/Projectile/Projectile_Default";
@@ -135,6 +148,9 @@ public static class GameConstants
         public const string ProjectileDefault = "projectile.default";
         public const string BuffAttackUp = "buff.attack_up";
         public const string Wave01 = "wave.01";
+        public const string BossBatKing = "boss.bat_king";
+        public const string BossSkillAreaSlam = "boss_skill.area_slam";
+        public const string BossSkillSummon = "boss_skill.summon_bats";
         public const string DropTableCommon = "drop.common";
         public const string RewardPoolDefault = "reward_pool.default";
         public const string UpgradeAttackUp = "upgrade.attack_up";

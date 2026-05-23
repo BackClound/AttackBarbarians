@@ -44,9 +44,13 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     }
 
     /// <summary>由 <see cref="EnemySpawnerManager"/> 在池取出后调用。</summary>
-    public void InitializeForSpawn(string configId, float statMultiplier, int waveIndex)
+    public void InitializeForSpawn(string configId, float statMultiplier, int waveIndex, bool markAsElite = false)
     {
         waveStatMultiplier = Mathf.Max(0.1f, statMultiplier);
+        if (enemy != null)
+        {
+            enemy.SetEliteFlag(markAsElite);
+        }
         if (!TryResolveData(configId, out EnemyDataSO data))
         {
             Debug.LogError($"[EnemyController] 未找到 EnemyData configId={configId}", this);
@@ -172,14 +176,36 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             return 0;
         }
 
-        return Mathf.Max(1, Mathf.RoundToInt(baseExp));
+        int reward = Mathf.Max(1, Mathf.RoundToInt(baseExp));
+        if (enemy != null && enemy.TryGetComponent(out BossController boss) && boss.IsReady)
+        {
+            reward += boss.BonusExperience;
+        }
+
+        return reward;
     }
 
     private void ApplyScaledStats()
     {
         scaledSnapshot.CopyFrom(runtimeData.Stats);
         EnemyStatScaling.ApplyMultiplier(scaledSnapshot, waveStatMultiplier);
+        ApplyEliteScaling();
         ConfigStatBridge.ApplyToEntityStats(scaledSnapshot, entityStats);
+    }
+
+    private void ApplyEliteScaling()
+    {
+        EliteModeConfigSO eliteConfig = RunDifficultyContext.EliteConfig;
+        if (eliteConfig == null)
+        {
+            return;
+        }
+
+        bool eliteEnemy = enemy != null && enemy.IsElite;
+        if (RunDifficultyContext.IsEliteMode || eliteEnemy)
+        {
+            eliteConfig.ApplyToSnapshot(scaledSnapshot, applyEliteEnemyBonus: eliteEnemy);
+        }
     }
 
     private void ApplyCombatFieldsFromConfig(EnemyDataSO data)
@@ -233,6 +259,11 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 
     public void NotifyDeath()
     {
+        if (TryGetComponent(out BossController bossController))
+        {
+            bossController.NotifyDefeated(null);
+        }
+
         if (abilities == null)
         {
             return;

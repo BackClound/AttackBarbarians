@@ -26,9 +26,9 @@ public abstract class GameEventSubscriberBase : MonoBehaviour
         UnsubscribeAll();
     }
 
-    protected abstract void RegisterHandlers(EventBus bus);
+    protected abstract void RegisterHandlers();
 
-    protected abstract void UnregisterHandlers(EventBus bus);
+    protected abstract void UnregisterHandlers();
 
     private void TrySubscribe()
     {
@@ -42,7 +42,7 @@ public abstract class GameEventSubscriberBase : MonoBehaviour
             return;
         }
 
-        RegisterHandlers(bus);
+        RegisterHandlers();
         isSubscribed = true;
     }
 
@@ -55,7 +55,7 @@ public abstract class GameEventSubscriberBase : MonoBehaviour
 
         if (ServiceLocator.TryGet(out EventBus bus))
         {
-            UnregisterHandlers(bus);
+            UnregisterHandlers();
         }
 
         isSubscribed = false;

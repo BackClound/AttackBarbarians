@@ -21,12 +21,12 @@ public class PlayerHealthBarView : GameEventSubscriberBase
         }
     }
 
-    protected override void RegisterHandlers(EventBus bus)
+    protected override void RegisterHandlers()
     {
         GameEvents.SubscribePlayerHealthChanged(OnPlayerHealthChanged);
     }
 
-    protected override void UnregisterHandlers(EventBus bus)
+    protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribePlayerHealthChanged(OnPlayerHealthChanged);
     }

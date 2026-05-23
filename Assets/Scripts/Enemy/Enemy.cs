@@ -7,10 +7,14 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     [Header("Classification")]
     [SerializeField] private bool isBoss;
+    [SerializeField] private bool isElite;
 
     public bool IsBoss => isBoss;
+    public bool IsElite => isElite;
 
     public void SetBossFlag(bool value) => isBoss = value;
+
+    public void SetEliteFlag(bool value) => isElite = value;
 
     [Header("Attack probe (legacy Inspector fields)")]
     [SerializeField] protected Transform attackCheck;
@@ -128,7 +132,14 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public void OnDespawn()
     {
+        SetBossFlag(false);
+        SetEliteFlag(false);
         controller?.OnPoolDespawn();
+
+        if (GetComponent<EliteController>() is EliteController eliteController)
+        {
+            eliteController.ResetForPool();
+        }
 
         if (rb != null)
         {

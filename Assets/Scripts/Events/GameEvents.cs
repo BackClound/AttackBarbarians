@@ -197,6 +197,50 @@ public static class GameEvents
 
     #endregion
 
+    #region Boss
+
+    public static void RaiseBossSpawned(object sender, BossSpawnedEventArgs args) =>
+        Publish(GameConstants.EventKeys.BossSpawned, sender, args);
+
+    public static void RaiseBossPhaseChanged(object sender, BossPhaseChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.BossPhaseChanged, sender, args);
+
+    public static void RaiseBossDefeated(object sender, BossDefeatedEventArgs args) =>
+        Publish(GameConstants.EventKeys.BossDefeated, sender, args);
+
+    public static void SubscribeBossSpawned(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.BossSpawned, handler);
+
+    public static void UnsubscribeBossSpawned(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.BossSpawned, handler);
+
+    public static void SubscribeBossPhaseChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.BossPhaseChanged, handler);
+
+    public static void UnsubscribeBossPhaseChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.BossPhaseChanged, handler);
+
+    public static void SubscribeBossDefeated(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.BossDefeated, handler);
+
+    public static void UnsubscribeBossDefeated(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.BossDefeated, handler);
+
+    #endregion
+
+    #region Elite
+
+    public static void RaiseEliteSpawned(object sender, EliteSpawnedEventArgs args) =>
+        Publish(GameConstants.EventKeys.EliteSpawned, sender, args);
+
+    public static void SubscribeEliteSpawned(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.EliteSpawned, handler);
+
+    public static void UnsubscribeEliteSpawned(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.EliteSpawned, handler);
+
+    #endregion
+
     #region Run
 
     public static void RaiseRunRewardSettled(object sender, RunRewardSettledEventArgs args) =>

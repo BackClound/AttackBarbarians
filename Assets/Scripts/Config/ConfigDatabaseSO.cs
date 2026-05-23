@@ -17,6 +17,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<BuffDataSO> buffs = new List<BuffDataSO>();
     [SerializeField] private List<WaveDataSO> waves = new List<WaveDataSO>();
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
+    [SerializeField] private List<BossSkillDataSO> bossSkills = new List<BossSkillDataSO>();
     [SerializeField] private List<DropTableSO> dropTables = new List<DropTableSO>();
     [SerializeField] private List<AutoAttackDataSO> autoAttacks = new List<AutoAttackDataSO>();
     [SerializeField] private List<UpgradeOptionSO> upgradeOptions = new List<UpgradeOptionSO>();
@@ -30,6 +31,7 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<BuffDataSO> Buffs => buffs;
     public IReadOnlyList<WaveDataSO> Waves => waves;
     public IReadOnlyList<BossDataSO> Bosses => bosses;
+    public IReadOnlyList<BossSkillDataSO> BossSkills => bossSkills;
     public IReadOnlyList<DropTableSO> DropTables => dropTables;
     public IReadOnlyList<AutoAttackDataSO> AutoAttacks => autoAttacks;
     public IReadOnlyList<UpgradeOptionSO> UpgradeOptions => upgradeOptions;
@@ -54,6 +56,9 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetBoss(string configId, out BossDataSO data) =>
         TryGet(bosses, configId, out data);
+
+    public bool TryGetBossSkill(string configId, out BossSkillDataSO data) =>
+        TryGet(bossSkills, configId, out data);
 
     public bool TryGetDropTable(string configId, out DropTableSO data) =>
         TryGet(dropTables, configId, out data);

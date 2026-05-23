@@ -24,6 +24,9 @@ public class GameConfig : ScriptableObject
     [Header("Config")]
     [SerializeField] private ConfigDatabaseSO configDatabase;
     [SerializeField] private bool validateConfigOnBootstrap = true;
+    [SerializeField] private EliteModeConfigSO eliteModeConfig;
+    [Tooltip("调试：开局启用精英模式全局倍率。")]
+    [SerializeField] private bool startWithEliteMode;
 
     [Header("Pool")]
     [SerializeField] private int defaultPoolPrewarmCount = 8;
@@ -40,6 +43,8 @@ public class GameConfig : ScriptableObject
     public float DefaultWaveTransitionSeconds => Mathf.Max(0f, defaultWaveTransitionSeconds);
     public ConfigDatabaseSO ConfigDatabase => configDatabase;
     public bool ValidateConfigOnBootstrap => validateConfigOnBootstrap;
+    public EliteModeConfigSO EliteModeConfig => eliteModeConfig;
+    public bool StartWithEliteMode => startWithEliteMode;
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);
     public bool AllowPoolGrowth => allowPoolGrowth;
     public string SaveFileName => string.IsNullOrWhiteSpace(saveFileName)

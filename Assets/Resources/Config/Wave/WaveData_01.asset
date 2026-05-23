@@ -21,4 +21,10 @@ MonoBehaviour:
   maxSpawnCount: 20
   enemyConfigIds:
   - enemy.bat
+  hasBoss: 1
+  bossConfigId: boss.bat_king
+  bossSpawnAtElapsed: 20
+  requireBossDefeatToComplete: 1
+  eliteSpawnChance: 0.08
+  pauseNormalSpawnsWhileBossAlive: 1
 

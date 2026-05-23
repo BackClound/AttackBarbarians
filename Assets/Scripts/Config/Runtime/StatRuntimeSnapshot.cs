@@ -80,4 +80,38 @@ public sealed class StatRuntimeSnapshot
             values[pair.Key] = pair.Value;
         }
     }
+
+    /// <summary>从场景内 <see cref="Entity_Stats"/> 读取当前基础值。</summary>
+    public void CopyFromEntityStats(Entity_Stats entityStats)
+    {
+        values.Clear();
+        if (entityStats == null)
+        {
+            return;
+        }
+
+        if (entityStats.majorStats != null)
+        {
+            Set(StatType.MaxHp, entityStats.majorStats.maxHp.GetValue());
+            Set(StatType.MoveSpeed, entityStats.majorStats.moveSpeed.GetValue());
+            Set(StatType.AttackSpeed, entityStats.majorStats.attackSpeed.GetValue());
+            Set(StatType.AttackSpeedMulti, entityStats.majorStats.attackSpeedMulti.GetValue());
+        }
+
+        if (entityStats.offenseStats != null)
+        {
+            Set(StatType.Damage, entityStats.offenseStats.damage.GetValue());
+            Set(StatType.CritChance, entityStats.offenseStats.critChance.GetValue());
+            Set(StatType.CritPower, entityStats.offenseStats.critPower.GetValue());
+            Set(StatType.FireDamage, entityStats.offenseStats.fireDamage.GetValue());
+            Set(StatType.IceDamage, entityStats.offenseStats.iceDamage.GetValue());
+            Set(StatType.LightningDamage, entityStats.offenseStats.lightingDamage.GetValue());
+        }
+
+        if (entityStats.defenseStats != null)
+        {
+            Set(StatType.Armor, entityStats.defenseStats.armor.GetValue());
+            Set(StatType.ArmorReduce, entityStats.defenseStats.armorReduce.GetValue());
+        }
+    }
 }

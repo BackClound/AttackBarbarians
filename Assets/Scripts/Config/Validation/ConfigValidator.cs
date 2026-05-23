@@ -26,6 +26,7 @@ public static class ConfigValidator
         ValidateUniqueIds(database.Equipment, result);
         ValidateUniqueIds(database.Waves, result);
         ValidateUniqueIds(database.Bosses, result);
+        ValidateUniqueIds(database.BossSkills, result);
         ValidateUniqueIds(database.DropTables, result);
 
         ValidateEntries(database.Players, result);
@@ -36,10 +37,12 @@ public static class ConfigValidator
         ValidateEntries(database.Equipment, result);
         ValidateEntries(database.Waves, result);
         ValidateEntries(database.Bosses, result);
+        ValidateEntries(database.BossSkills, result);
         ValidateEntries(database.DropTables, result);
 
         ValidateWaveReferences(database, result);
         ValidateBossReferences(database, result);
+        ValidateBossSkillReferences(database, result);
         ValidateDropReferences(database, result);
 
         return result;
@@ -187,6 +190,40 @@ public static class ConfigValidator
             {
                 result.AddError(boss.name, $"BaseEnemyConfigId 不存在: {boss.BaseEnemyConfigId}");
             }
+
+            IReadOnlyList<string> skills = boss.SkillConfigIds;
+            if (skills == null)
+            {
+                continue;
+            }
+
+            for (int s = 0; s < skills.Count; s++)
+            {
+                string skillId = skills[s];
+                if (!string.IsNullOrWhiteSpace(skillId) && !database.TryGetBossSkill(skillId, out _))
+                {
+                    result.AddError(boss.name, $"引用了不存在的 Boss 技能 configId: {skillId}");
+                }
+            }
+        }
+    }
+
+    private static void ValidateBossSkillReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.BossSkills == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.BossSkills.Count; i++)
+        {
+            BossSkillDataSO skill = database.BossSkills[i];
+            if (skill == null)
+            {
+                continue;
+            }
+
+            skill.CollectValidationErrors(result);
         }
     }
 
