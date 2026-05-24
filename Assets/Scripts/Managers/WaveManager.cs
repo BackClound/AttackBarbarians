@@ -161,7 +161,20 @@ public class WaveManager : MonoBehaviour, IGameSystem
             spawnedThisWave++;
             spawnTimer = 0f;
             TrySpawnBonusElite();
+            TrySpawnBonusSpecial();
         }
+    }
+
+    private void TrySpawnBonusSpecial()
+    {
+        float chance = currentWaveData.SpecialSpawnChance;
+        if (chance <= 0f || Random.value > chance)
+        {
+            return;
+        }
+
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        spawner.TrySpawnBonusSpecial(multiplier, currentWaveIndex);
     }
 
     private bool ShouldPauseSpawnsForBoss()

@@ -49,6 +49,29 @@ public class Enemy_Health : Entity_Health
         }
     }
 
+    public override void ApplyResolvedDamage(DamageResult result, DamageInfo info)
+    {
+        if (result.FinalDamage <= 0f || !CanBeDamage())
+        {
+            return;
+        }
+
+        float finalDamage = result.FinalDamage;
+        float mitigated = result.MitigatedAmount;
+        if (TryGetComponent(out EnemyDamageShield shield) && shield.IsActive)
+        {
+            float absorbed = finalDamage - shield.AbsorbDamage(finalDamage);
+            mitigated += absorbed;
+        }
+
+        var adjusted = new DamageResult(finalDamage, mitigated, result.IsCritical, result.IsKill, result.TriggeredTags);
+        OnBeforeDamageApplied(info, adjusted);
+        if (finalDamage > 0f)
+        {
+            ReduceHp(finalDamage);
+        }
+    }
+
     protected override void ReduceHp(float damage)
     {
         currentHp -= damage;

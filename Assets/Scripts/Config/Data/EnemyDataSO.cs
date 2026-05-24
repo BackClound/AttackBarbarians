@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -21,6 +22,9 @@ public class EnemyDataSO : ConfigDataBase
 
     [Header("Classification")]
     [SerializeField] private EnemyAbilityTag abilityTags = EnemyAbilityTag.Normal;
+    [SerializeField] private List<SpecialEnemyAbilityBinding> abilityBindings = new List<SpecialEnemyAbilityBinding>();
+    [Tooltip("击杀特殊敌人时额外经验（由 SpecialEnemyController 读取）。")]
+    [SerializeField] private int specialBonusExperience = 3;
 
     [Header("Rewards")]
     [Tooltip("击杀时授予玩家经验；金币/钻石仅在局末结算，死亡不掉落。")]
@@ -28,6 +32,25 @@ public class EnemyDataSO : ConfigDataBase
 
     public StatBlockConfig BaseStats => baseStats;
     public EnemyAbilityTag AbilityTags => abilityTags;
+    public IReadOnlyList<SpecialEnemyAbilityBinding> AbilityBindings => abilityBindings;
+    public int SpecialBonusExperience => Mathf.Max(0, specialBonusExperience);
+
+    public string TryGetAbilityConfigId(EnemyAbilityTag tag)
+    {
+        if (abilityBindings != null)
+        {
+            for (int i = 0; i < abilityBindings.Count; i++)
+            {
+                SpecialEnemyAbilityBinding binding = abilityBindings[i];
+                if (binding != null && binding.Tag == tag && !string.IsNullOrWhiteSpace(binding.AbilityConfigId))
+                {
+                    return binding.AbilityConfigId;
+                }
+            }
+        }
+
+        return string.Empty;
+    }
     public float AttackDistance => Mathf.Max(0.1f, attackDistance);
     public float ContactDamage => Mathf.Max(0f, contactDamage);
     public float AttackCooldown => Mathf.Max(0.05f, attackCooldown);

@@ -241,6 +241,28 @@ public static class GameEvents
 
     #endregion
 
+    #region Special Enemy
+
+    public static void RaiseSpecialEnemySpawned(object sender, SpecialEnemySpawnedEventArgs args) =>
+        Publish(GameConstants.EventKeys.SpecialEnemySpawned, sender, args);
+
+    public static void RaiseSpecialEnemyAbilityUsed(object sender, SpecialEnemyAbilityUsedEventArgs args) =>
+        Publish(GameConstants.EventKeys.SpecialEnemyAbilityUsed, sender, args);
+
+    public static void SubscribeSpecialEnemySpawned(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.SpecialEnemySpawned, handler);
+
+    public static void UnsubscribeSpecialEnemySpawned(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.SpecialEnemySpawned, handler);
+
+    public static void SubscribeSpecialEnemyAbilityUsed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.SpecialEnemyAbilityUsed, handler);
+
+    public static void UnsubscribeSpecialEnemyAbilityUsed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.SpecialEnemyAbilityUsed, handler);
+
+    #endregion
+
     #region Run
 
     public static void RaiseRunRewardSettled(object sender, RunRewardSettledEventArgs args) =>

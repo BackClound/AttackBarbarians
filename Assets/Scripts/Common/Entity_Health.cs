@@ -12,7 +12,7 @@ public class Entity_Health : MonoBehaviour
     }
 
     /// <summary>由 <see cref="DamageSystem"/> 或 <see cref="DamagePipeline"/> 在结算后调用。</summary>
-    public void ApplyResolvedDamage(DamageResult result, DamageInfo info)
+    public virtual void ApplyResolvedDamage(DamageResult result, DamageInfo info)
     {
         if (result.FinalDamage <= 0f)
         {

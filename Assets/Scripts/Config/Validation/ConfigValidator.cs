@@ -27,6 +27,7 @@ public static class ConfigValidator
         ValidateUniqueIds(database.Waves, result);
         ValidateUniqueIds(database.Bosses, result);
         ValidateUniqueIds(database.BossSkills, result);
+        ValidateUniqueIds(database.SpecialEnemyAbilities, result);
         ValidateUniqueIds(database.DropTables, result);
 
         ValidateEntries(database.Players, result);
@@ -38,11 +39,14 @@ public static class ConfigValidator
         ValidateEntries(database.Waves, result);
         ValidateEntries(database.Bosses, result);
         ValidateEntries(database.BossSkills, result);
+        ValidateEntries(database.SpecialEnemyAbilities, result);
         ValidateEntries(database.DropTables, result);
 
         ValidateWaveReferences(database, result);
         ValidateBossReferences(database, result);
         ValidateBossSkillReferences(database, result);
+        ValidateSpecialEnemyAbilityReferences(database, result);
+        ValidateEnemySpecialAbilityReferences(database, result);
         ValidateDropReferences(database, result);
 
         return result;
@@ -140,6 +144,41 @@ public static class ConfigValidator
             {
                 result.AddError(wave.name, $"引用了不存在的 Boss configId: {wave.BossConfigId}");
             }
+
+            ValidateWaveSpecialEnemyIdList(wave, wave.SpecialEnemyConfigIds, database, result);
+        }
+    }
+
+    private static void ValidateWaveSpecialEnemyIdList(
+        WaveDataSO wave,
+        IReadOnlyList<string> enemyIds,
+        ConfigDatabaseSO database,
+        ConfigValidationResult result)
+    {
+        if (enemyIds == null)
+        {
+            return;
+        }
+
+        for (int j = 0; j < enemyIds.Count; j++)
+        {
+            string enemyId = enemyIds[j];
+            if (string.IsNullOrWhiteSpace(enemyId))
+            {
+                result.AddWarning(wave.name, $"SpecialEnemyConfigIds[{j}] 为空。");
+                continue;
+            }
+
+            if (!database.TryGetEnemy(enemyId, out EnemyDataSO enemyData))
+            {
+                result.AddError(wave.name, $"引用了不存在的特殊敌人 configId: {enemyId}");
+                continue;
+            }
+
+            if (!SpecialEnemyRules.HasMechanics(enemyData.AbilityTags))
+            {
+                result.AddWarning(wave.name, $"SpecialEnemyConfigIds[{j}]={enemyId} 未配置特殊能力标签。");
+            }
         }
     }
 
@@ -224,6 +263,69 @@ public static class ConfigValidator
             }
 
             skill.CollectValidationErrors(result);
+        }
+    }
+
+    private static void ValidateSpecialEnemyAbilityReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.SpecialEnemyAbilities == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.SpecialEnemyAbilities.Count; i++)
+        {
+            SpecialEnemyAbilityDataSO ability = database.SpecialEnemyAbilities[i];
+            if (ability == null)
+            {
+                continue;
+            }
+
+            ability.CollectValidationErrors(result);
+
+            if ((ability.AbilityTag == EnemyAbilityTag.Summon || ability.AbilityTag == EnemyAbilityTag.Split) &&
+                !string.IsNullOrWhiteSpace(ability.SummonEnemyConfigId) &&
+                !database.TryGetEnemy(ability.SummonEnemyConfigId, out _))
+            {
+                result.AddError(ability.name, $"summonEnemyConfigId 不存在: {ability.SummonEnemyConfigId}");
+            }
+        }
+    }
+
+    private static void ValidateEnemySpecialAbilityReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.Enemies == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.Enemies.Count; i++)
+        {
+            EnemyDataSO enemy = database.Enemies[i];
+            if (enemy == null || !SpecialEnemyRules.HasMechanics(enemy.AbilityTags))
+            {
+                continue;
+            }
+
+            IReadOnlyList<SpecialEnemyAbilityBinding> bindings = enemy.AbilityBindings;
+            if (bindings == null)
+            {
+                continue;
+            }
+
+            for (int b = 0; b < bindings.Count; b++)
+            {
+                SpecialEnemyAbilityBinding binding = bindings[b];
+                if (binding == null || string.IsNullOrWhiteSpace(binding.AbilityConfigId))
+                {
+                    continue;
+                }
+
+                if (!database.TryGetSpecialEnemyAbility(binding.AbilityConfigId, out _))
+                {
+                    result.AddError(enemy.name, $"abilityBindings[{b}] 引用了不存在的能力: {binding.AbilityConfigId}");
+                }
+            }
         }
     }
 

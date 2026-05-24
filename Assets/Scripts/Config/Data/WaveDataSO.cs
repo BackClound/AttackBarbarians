@@ -30,6 +30,11 @@ public class WaveDataSO : ConfigDataBase
     [SerializeField] private float eliteSpawnChance;
     [SerializeField] private bool pauseNormalSpawnsWhileBossAlive;
 
+    [Header("Special Enemy")]
+    [Tooltip("每成功生成一名普通敌人时，额外以该概率从 specialEnemyConfigIds 中刷一只特殊怪（0~1）。")]
+    [SerializeField] private float specialSpawnChance;
+    [SerializeField] private List<string> specialEnemyConfigIds = new List<string>();
+
     [Header("Rewards")]
     [SerializeField] private string rewardTableId;
 
@@ -46,6 +51,8 @@ public class WaveDataSO : ConfigDataBase
     public bool RequireBossDefeatToComplete => requireBossDefeatToComplete;
     public float EliteSpawnChance => Mathf.Clamp01(eliteSpawnChance);
     public bool PauseNormalSpawnsWhileBossAlive => pauseNormalSpawnsWhileBossAlive;
+    public float SpecialSpawnChance => Mathf.Clamp01(specialSpawnChance);
+    public IReadOnlyList<string> SpecialEnemyConfigIds => specialEnemyConfigIds;
     public string RewardTableId => rewardTableId;
 
     public float GetStatMultiplierForWave(int currentWaveIndex)

@@ -27,4 +27,11 @@ MonoBehaviour:
   requireBossDefeatToComplete: 1
   eliteSpawnChance: 0.08
   pauseNormalSpawnsWhileBossAlive: 1
+  specialSpawnChance: 0.12
+  specialEnemyConfigIds:
+  - enemy.bat_charge
+  - enemy.bat_shield
+  - enemy.bat_split
+  - enemy.bat_summoner
+  - enemy.bat_ranged
 

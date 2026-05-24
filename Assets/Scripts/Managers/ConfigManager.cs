@@ -27,6 +27,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, WaveDataSO> wavesById = new Dictionary<string, WaveDataSO>(8);
     private readonly Dictionary<string, BossDataSO> bossesById = new Dictionary<string, BossDataSO>(4);
     private readonly Dictionary<string, BossSkillDataSO> bossSkillsById = new Dictionary<string, BossSkillDataSO>(8);
+    private readonly Dictionary<string, SpecialEnemyAbilityDataSO> specialEnemyAbilitiesById =
+        new Dictionary<string, SpecialEnemyAbilityDataSO>(8);
     private readonly Dictionary<string, DropTableSO> dropTablesById = new Dictionary<string, DropTableSO>(8);
     private readonly Dictionary<string, AutoAttackDataSO> autoAttacksById = new Dictionary<string, AutoAttackDataSO>(4);
     private readonly Dictionary<string, UpgradeOptionSO> upgradeOptionsById = new Dictionary<string, UpgradeOptionSO>(32);
@@ -97,6 +99,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
 
     public bool TryGetBossSkill(string configId, out BossSkillDataSO data) =>
         TryGet(bossSkillsById, configId, out data);
+
+    public bool TryGetSpecialEnemyAbility(string configId, out SpecialEnemyAbilityDataSO data) =>
+        TryGet(specialEnemyAbilitiesById, configId, out data);
 
     public bool TryGetDropTable(string configId, out DropTableSO data) =>
         TryGet(dropTablesById, configId, out data);
@@ -182,6 +187,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.Waves, wavesById);
         IndexList(Database.Bosses, bossesById);
         IndexList(Database.BossSkills, bossSkillsById);
+        IndexList(Database.SpecialEnemyAbilities, specialEnemyAbilitiesById);
         IndexList(Database.DropTables, dropTablesById);
         IndexList(Database.AutoAttacks, autoAttacksById);
         IndexList(Database.UpgradeOptions, upgradeOptionsById);
@@ -206,7 +212,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
             Debug.Log(
                 $"[ConfigManager] 已加载配置：Player={playersById.Count}, Enemy={enemiesById.Count}, " +
                 $"Skill={skillsById.Count}, Buff={buffsById.Count}, Wave={wavesById.Count}, " +
-                $"Boss={bossesById.Count}, BossSkill={bossSkillsById.Count}, DropTable={dropTablesById.Count}, " +
+                $"Boss={bossesById.Count}, BossSkill={bossSkillsById.Count}, " +
+                $"SpecialAbility={specialEnemyAbilitiesById.Count}, DropTable={dropTablesById.Count}, " +
                 $"AutoAttack={autoAttacksById.Count}, Upgrade={upgradeOptionsById.Count}, " +
                 $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}, " +
                 $"Equipment={equipmentById.Count}");
@@ -241,6 +248,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         wavesById.Clear();
         bossesById.Clear();
         bossSkillsById.Clear();
+        specialEnemyAbilitiesById.Clear();
         dropTablesById.Clear();
         autoAttacksById.Clear();
         upgradeOptionsById.Clear();

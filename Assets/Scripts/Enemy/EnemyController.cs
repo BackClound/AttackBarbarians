@@ -44,12 +44,19 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     }
 
     /// <summary>由 <see cref="EnemySpawnerManager"/> 在池取出后调用。</summary>
-    public void InitializeForSpawn(string configId, float statMultiplier, int waveIndex, bool markAsElite = false)
+    public void InitializeForSpawn(
+        string configId,
+        float statMultiplier,
+        int waveIndex,
+        bool markAsElite = false,
+        bool markAsSpecial = false)
     {
         waveStatMultiplier = Mathf.Max(0.1f, statMultiplier);
+        SpecialEnemySpawnContext.Set(waveIndex, statMultiplier);
         if (enemy != null)
         {
             enemy.SetEliteFlag(markAsElite);
+            enemy.SetSpecialFlag(markAsSpecial);
         }
         if (!TryResolveData(configId, out EnemyDataSO data))
         {
@@ -67,6 +74,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             enemy.stateMachine.InitialState(enemy.idleState);
         }
 
+        SetupSpecialEnemyMechanics(data, markAsSpecial);
         NotifyAbilitiesSpawn();
         isInitialized = true;
 
@@ -182,7 +190,46 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             reward += boss.BonusExperience;
         }
 
+        if (enemy != null && enemy.TryGetComponent(out SpecialEnemyController special) && special.IsSpecialSpawn)
+        {
+            reward += special.BonusExperience;
+        }
+
         return reward;
+    }
+
+    private void SetupSpecialEnemyMechanics(EnemyDataSO data, bool markAsSpecial)
+    {
+        bool hasMechanics = data != null && SpecialEnemyRules.HasMechanics(data.AbilityTags);
+        if (!hasMechanics)
+        {
+            return;
+        }
+
+        SpecialEnemyAbilityFactory.EnsureAbilities(this, data);
+        abilities = GetComponents<IEnemyAbility>();
+
+        bool shouldMarkSpecial = markAsSpecial || hasMechanics;
+        if (!shouldMarkSpecial || enemy == null)
+        {
+            return;
+        }
+
+        enemy.SetSpecialFlag(true);
+        EnsureSpecialEnemyController().Initialize(
+            runtimeData.ConfigId,
+            runtimeData.AbilityTags,
+            data.SpecialBonusExperience);
+    }
+
+    private SpecialEnemyController EnsureSpecialEnemyController()
+    {
+        if (!TryGetComponent(out SpecialEnemyController controller))
+        {
+            controller = gameObject.AddComponent<SpecialEnemyController>();
+        }
+
+        return controller;
     }
 
     private void ApplyScaledStats()

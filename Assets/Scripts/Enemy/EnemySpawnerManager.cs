@@ -16,6 +16,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
     [SerializeField] private SpawnAreaController spawnArea;
 
     private readonly WaveSpawnSelector spawnSelector = new WaveSpawnSelector();
+    private readonly WaveSpecialEnemySelector specialSelector = new WaveSpecialEnemySelector();
     private WaveDataSO activeWaveData;
 
     private bool isInitialized;
@@ -69,6 +70,18 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         }
 
         spawnSelector.Configure(waveData, configManager);
+        specialSelector.Configure(waveData, configManager);
+    }
+
+    public bool TrySpawnSpecialEnemy(string configId, float statMultiplier, int waveIndex)
+    {
+        if (string.IsNullOrEmpty(configId))
+        {
+            return false;
+        }
+
+        SpecialEnemySpawnContext.Set(waveIndex, statMultiplier);
+        return SpawnEnemyInternal(configId, statMultiplier, waveIndex, markAsElite: false, markAsSpecial: true);
     }
 
     public bool TrySpawnEnemy(
@@ -90,7 +103,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         }
 
         float entryMultiplier = spawnSelector.GetEntryStatMultiplier(configId, statMultiplier);
-        return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsElite);
+        return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsElite, markAsSpecial: false);
     }
 
     public bool TrySpawnBoss(string bossConfigId, float statMultiplier, int waveIndex)
@@ -143,11 +156,23 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    public bool TrySpawnBonusSpecial(float statMultiplier, int waveIndex)
+    {
+        if (!specialSelector.TryPick(out string configId))
+        {
+            return false;
+        }
+
+        float entryMultiplier = spawnSelector.GetEntryStatMultiplier(configId, statMultiplier);
+        return TrySpawnSpecialEnemy(configId, entryMultiplier, waveIndex);
+    }
+
     private bool SpawnEnemyInternal(
         string configId,
         float statMultiplier,
         int waveIndex,
-        bool markAsElite)
+        bool markAsElite,
+        bool markAsSpecial)
     {
         if (!spawnArea.TryGetRandomSpawnPosition(out Vector3 position))
         {
@@ -178,7 +203,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             enemy.SetEliteFlag(true);
         }
 
-        controller.InitializeForSpawn(configId, statMultiplier, waveIndex, markAsElite);
+        controller.InitializeForSpawn(configId, statMultiplier, waveIndex, markAsElite, markAsSpecial);
 
         if (markAsElite)
         {

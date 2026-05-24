@@ -56,6 +56,10 @@ public static class GameConstants
         // Elite
         public const string EliteSpawned = "Elite.Spawned";
 
+        // Special Enemy
+        public const string SpecialEnemySpawned = "SpecialEnemy.Spawned";
+        public const string SpecialEnemyAbilityUsed = "SpecialEnemy.AbilityUsed";
+
         // Run
         public const string RunRewardSettled = "Run.RewardSettled";
 
@@ -118,6 +122,8 @@ public static class GameConstants
         public const string SfxBossSpawn = "audio.sfx.boss_spawn";
         public const string SfxBossPhase = "audio.sfx.boss_phase";
         public const string SfxBossDefeat = "audio.sfx.boss_defeat";
+        public const string SfxSpecialEnemySpawn = "audio.sfx.special_enemy_spawn";
+        public const string SfxSpecialEnemyAbility = "audio.sfx.special_enemy_ability";
     }
 
     public static class ResourcePaths
@@ -151,6 +157,16 @@ public static class GameConstants
         public const string BossBatKing = "boss.bat_king";
         public const string BossSkillAreaSlam = "boss_skill.area_slam";
         public const string BossSkillSummon = "boss_skill.summon_bats";
+        public const string SpecialAbilityCharge = "special_ability.charge";
+        public const string SpecialAbilityShield = "special_ability.shield";
+        public const string SpecialAbilitySplit = "special_ability.split";
+        public const string SpecialAbilitySummon = "special_ability.summon";
+        public const string SpecialAbilityRanged = "special_ability.ranged";
+        public const string EnemyBatCharge = "enemy.bat_charge";
+        public const string EnemyBatShield = "enemy.bat_shield";
+        public const string EnemyBatSplit = "enemy.bat_split";
+        public const string EnemyBatSummoner = "enemy.bat_summoner";
+        public const string EnemyBatRanged = "enemy.bat_ranged";
         public const string DropTableCommon = "drop.common";
         public const string RewardPoolDefault = "reward_pool.default";
         public const string UpgradeAttackUp = "upgrade.attack_up";

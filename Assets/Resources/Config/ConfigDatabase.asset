@@ -20,6 +20,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 972f0d94f88bc4c7a90d2f41656899ba, type: 2}
   - {fileID: 11400000, guid: ddf2b8b507e4f4572ba22a165830f741, type: 2}
   - {fileID: 11400000, guid: 5fcab54c4d994457f85fc6abeac56214, type: 2}
+  - {fileID: 11400000, guid: 68d8b4b9f6524ff9ad288206a692f0cc, type: 2}
+  - {fileID: 11400000, guid: be768b8dead946d2a3f056517e452247, type: 2}
+  - {fileID: 11400000, guid: 82489c77f6cb4dde8e623a3f3669115d, type: 2}
+  - {fileID: 11400000, guid: 8e157596874e41a083017e64adae3248, type: 2}
+  - {fileID: 11400000, guid: 99f010de4f41458999ef80aa9353ec30, type: 2}
   skills:
   - {fileID: 11400000, guid: f7415046b87e49f0b74755b50e875dab, type: 2}
   - {fileID: 11400000, guid: 88ebcc46538224c9ab3fb5766606e5e7, type: 2}
@@ -37,6 +42,12 @@ MonoBehaviour:
   bossSkills:
   - {fileID: 11400000, guid: 9dbf4cd7b78244b67aa3025a7d98cfbc, type: 2}
   - {fileID: 11400000, guid: 07f9050bbaef94886bc4491d38ec8438, type: 2}
+  specialEnemyAbilities:
+  - {fileID: 11400000, guid: e551592524f4461e847bb9693b15c5e7, type: 2}
+  - {fileID: 11400000, guid: b94984ac7fdb4faa89f6915c565a0acc, type: 2}
+  - {fileID: 11400000, guid: 3522fbf9b69f4942b715f9feb580004d, type: 2}
+  - {fileID: 11400000, guid: c73d2488726e484187bd451720437956, type: 2}
+  - {fileID: 11400000, guid: 8d406ec80b88482895ffaacb2cd4f909, type: 2}
   dropTables:
   - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}
   autoAttacks:
