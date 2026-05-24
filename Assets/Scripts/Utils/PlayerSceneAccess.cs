@@ -65,6 +65,19 @@ public static class PlayerSceneAccess
         return skillManager != null;
     }
 
+    /// <summary>尝试获取 Player_Health。</summary>
+    public static bool TryGetHealth(out Player_Health health)
+    {
+        health = null;
+        if (!TryGetPlayer(out Player player))
+        {
+            return false;
+        }
+
+        health = player.GetComponent<Player_Health>();
+        return health != null;
+    }
+
     /// <summary>对就绪的 PlayerController 执行回调。</summary>
     public static void WithReadyController(System.Action<PlayerController> action)
     {

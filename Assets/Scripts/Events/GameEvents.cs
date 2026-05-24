@@ -354,6 +354,18 @@ public static class GameEvents
     public static void RaiseUiPanelClosed(object sender, string panelId) =>
         Publish(GameConstants.EventKeys.UiPanelClosed, sender, panelId);
 
+    public static void SubscribeUiPanelOpened(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UiPanelOpened, handler);
+
+    public static void UnsubscribeUiPanelOpened(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UiPanelOpened, handler);
+
+    public static void SubscribeUiPanelClosed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UiPanelClosed, handler);
+
+    public static void UnsubscribeUiPanelClosed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UiPanelClosed, handler);
+
     #endregion
 
     #region Audio
