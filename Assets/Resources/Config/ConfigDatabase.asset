@@ -33,6 +33,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2f71c103b9b6a405780875dafbd6aa33, type: 2}
   - {fileID: 11400000, guid: f2f8f5ef5c4dd43309bae25644bd1184, type: 2}
   - {fileID: 11400000, guid: 65d855f82482b4009b006a7391325a29, type: 2}
+  skillUnlockTable: {fileID: 0}
   buffs:
   - {fileID: 11400000, guid: b580748b14654bbba284a7b69c187cbd, type: 2}
   waves:
@@ -43,11 +44,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9dbf4cd7b78244b67aa3025a7d98cfbc, type: 2}
   - {fileID: 11400000, guid: 07f9050bbaef94886bc4491d38ec8438, type: 2}
   specialEnemyAbilities:
-  - {fileID: 11400000, guid: e551592524f4461e847bb9693b15c5e7, type: 2}
+  - {fileID: 11400000, guid: 86a14d6c787114b4c880bdb67c446105, type: 2}
+  - {fileID: 11400000, guid: 8d406ec80b88482895ffaacb2cd4f909, type: 2}
   - {fileID: 11400000, guid: b94984ac7fdb4faa89f6915c565a0acc, type: 2}
   - {fileID: 11400000, guid: 3522fbf9b69f4942b715f9feb580004d, type: 2}
   - {fileID: 11400000, guid: c73d2488726e484187bd451720437956, type: 2}
-  - {fileID: 11400000, guid: 8d406ec80b88482895ffaacb2cd4f909, type: 2}
   dropTables:
   - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}
   autoAttacks:

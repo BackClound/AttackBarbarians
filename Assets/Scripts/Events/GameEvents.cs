@@ -310,6 +310,15 @@ public static class GameEvents
     public static void RaiseSkillLevelUp(object sender, string skillId, int newLevel) =>
         Publish(GameConstants.EventKeys.SkillLevelUp, sender, new SkillLevelUpPayload(skillId, newLevel));
 
+    public static void RaiseSkillUnlocked(object sender, string skillId) =>
+        Publish(GameConstants.EventKeys.SkillUnlocked, sender, skillId);
+
+    public static void SubscribeSkillUnlocked(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.SkillUnlocked, handler);
+
+    public static void UnsubscribeSkillUnlocked(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.SkillUnlocked, handler);
+
     public static void SubscribeSkillUsed(Action<GameEventContext> handler) =>
         Subscribe(GameConstants.EventKeys.SkillUsed, handler);
 

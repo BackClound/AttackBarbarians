@@ -10,6 +10,7 @@ public sealed class SkillContext
 
     private readonly List<Enemy> targetBuffer = new List<Enemy>(32);
     private readonly List<Enemy> chainBuffer = new List<Enemy>(16);
+    private readonly HashSet<int> chainUsedIds = new HashSet<int>(16);
 
     public Player Player { get; }
     public PlayerController Controller { get; }
@@ -87,7 +88,8 @@ public sealed class SkillContext
         TryCopyTargets(targetBuffer);
         chainBuffer.Add(start);
         Vector2 cursor = start.transform.position;
-        var used = new HashSet<int> { start.gameObject.GetInstanceID() };
+        chainUsedIds.Clear();
+        chainUsedIds.Add(start.gameObject.GetInstanceID());
 
         while (chainBuffer.Count < maxCount && targetBuffer.Count > 0)
         {
@@ -102,7 +104,7 @@ public sealed class SkillContext
                 }
 
                 int id = candidate.gameObject.GetInstanceID();
-                if (used.Contains(id))
+                if (chainUsedIds.Contains(id))
                 {
                     continue;
                 }
@@ -121,7 +123,7 @@ public sealed class SkillContext
             }
 
             chainBuffer.Add(best);
-            used.Add(best.gameObject.GetInstanceID());
+            chainUsedIds.Add(best.gameObject.GetInstanceID());
             cursor = best.transform.position;
         }
 

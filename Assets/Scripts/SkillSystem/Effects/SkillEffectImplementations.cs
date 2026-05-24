@@ -79,6 +79,7 @@ public sealed class ShootSkillEffect : ISkillEffect
 public sealed class LightningSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(16);
+    private readonly List<Enemy> explosionScratch = new List<Enemy>(16);
 
     public SkillType SkillType => SkillType.Lightning;
 
@@ -112,6 +113,7 @@ public sealed class LightningSkillEffect : ISkillEffect
                 }
 
                 Vector2 to = target.transform.position;
+                SkillCastVfxPlayer.PlayLightningSegment(from, to, chainLen);
                 DamageInfo info = context.BuildDamageInfo(runtime, target.gameObject);
                 DamagePipeline.Apply(info);
 
@@ -127,10 +129,10 @@ public sealed class LightningSkillEffect : ISkillEffect
                 }
                 else if (buff.LightningEndExplosion)
                 {
-                    context.QueryEnemiesInCircle(to, buff.LightningExplosionRadius, scratch);
-                    for (int e = 0; e < scratch.Count; e++)
+                    context.QueryEnemiesInCircle(to, buff.LightningExplosionRadius, explosionScratch);
+                    for (int e = 0; e < explosionScratch.Count; e++)
                     {
-                        DamagePipeline.Apply(context.BuildDamageInfo(runtime, scratch[e].gameObject, 0.6f));
+                        DamagePipeline.Apply(context.BuildDamageInfo(runtime, explosionScratch[e].gameObject, 0.6f));
                     }
                 }
             }
@@ -145,7 +147,8 @@ public sealed class LightningSkillEffect : ISkillEffect
 
 public sealed class ThunderSkillEffect : ISkillEffect
 {
-    private readonly List<Enemy> scratch = new List<Enemy>(24);
+    private readonly List<Enemy> anchorTargets = new List<Enemy>(24);
+    private readonly List<Enemy> areaScratch = new List<Enemy>(24);
 
     public SkillType SkillType => SkillType.Thunder;
 
@@ -156,7 +159,7 @@ public sealed class ThunderSkillEffect : ISkillEffect
             return false;
         }
 
-        if (!context.TryCopyTargets(scratch) || scratch.Count == 0)
+        if (!context.TryCopyTargets(anchorTargets) || anchorTargets.Count == 0)
         {
             return false;
         }
@@ -167,12 +170,12 @@ public sealed class ThunderSkillEffect : ISkillEffect
 
         for (int s = 0; s < strikes; s++)
         {
-            Enemy anchor = scratch[Random.Range(0, scratch.Count)];
+            Enemy anchor = anchorTargets[Random.Range(0, anchorTargets.Count)];
             Vector2 center = anchor.transform.position;
-            context.QueryEnemiesInCircle(center, radius, scratch);
-            for (int i = 0; i < scratch.Count; i++)
+            context.QueryEnemiesInCircle(center, radius, areaScratch);
+            for (int i = 0; i < areaScratch.Count; i++)
             {
-                Enemy enemy = scratch[i];
+                Enemy enemy = areaScratch[i];
                 DamagePipeline.Apply(context.BuildDamageInfo(runtime, enemy.gameObject, 1.1f));
                 if (buff.ThunderStunAllInArea)
                 {
@@ -203,6 +206,7 @@ public sealed class ThunderSkillEffect : ISkillEffect
 public sealed class FireRainSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(24);
+    private readonly List<Enemy> chainScratch = new List<Enemy>(8);
 
     public SkillType SkillType => SkillType.FireRain;
 
@@ -229,7 +233,7 @@ public sealed class FireRainSkillEffect : ISkillEffect
             context.QueryEnemiesInCircle(center, radius, scratch);
             for (int i = 0; i < scratch.Count; i++)
             {
-                ApplyFireHit(context, runtime, scratch[i], buff);
+                ApplyFireHit(context, runtime, scratch[i], buff, chainScratch);
             }
         }
 
@@ -237,7 +241,12 @@ public sealed class FireRainSkillEffect : ISkillEffect
         return true;
     }
 
-    private static void ApplyFireHit(SkillContext context, SkillRuntime runtime, Enemy enemy, SkillBuffProfile buff)
+    private static void ApplyFireHit(
+        SkillContext context,
+        SkillRuntime runtime,
+        Enemy enemy,
+        SkillBuffProfile buff,
+        List<Enemy> chainBuffer)
     {
         if (enemy == null)
         {
@@ -245,19 +254,19 @@ public sealed class FireRainSkillEffect : ISkillEffect
         }
 
         DamageResult result = DamagePipeline.Apply(context.BuildDamageInfo(runtime, enemy.gameObject, 0.85f));
-        if (result.IsKill && buff.FireRainChainOnKill > 0)
+        if (result.IsKill && buff.FireRainChainOnKill > 0 && chainBuffer != null)
         {
-            List<Enemy> chainScratch = new List<Enemy>(8);
-            context.QueryEnemiesInCircle(enemy.transform.position, runtime.Config.AreaRadius, chainScratch);
+            chainBuffer.Clear();
+            context.QueryEnemiesInCircle(enemy.transform.position, runtime.Config.AreaRadius, chainBuffer);
             int chained = 0;
-            for (int i = 0; i < chainScratch.Count && chained < buff.FireRainChainOnKill; i++)
+            for (int i = 0; i < chainBuffer.Count && chained < buff.FireRainChainOnKill; i++)
             {
-                if (chainScratch[i] == enemy)
+                if (chainBuffer[i] == enemy)
                 {
                     continue;
                 }
 
-                DamagePipeline.Apply(context.BuildDamageInfo(runtime, chainScratch[i].gameObject, 0.7f));
+                DamagePipeline.Apply(context.BuildDamageInfo(runtime, chainBuffer[i].gameObject, 0.7f));
                 chained++;
             }
         }

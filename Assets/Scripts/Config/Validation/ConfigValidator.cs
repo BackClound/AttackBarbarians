@@ -48,8 +48,39 @@ public static class ConfigValidator
         ValidateSpecialEnemyAbilityReferences(database, result);
         ValidateEnemySpecialAbilityReferences(database, result);
         ValidateDropReferences(database, result);
+        ValidateSkillUnlockTable(database, result);
 
         return result;
+    }
+
+    private static void ValidateSkillUnlockTable(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        SkillUnlockTableSO table = database.SkillUnlockTable;
+        if (table == null)
+        {
+            result.AddWarning("ConfigDatabase", "未配置 SkillUnlockTable，运行时将使用内置默认解锁阈值。");
+            return;
+        }
+
+        table.CollectValidationErrors(result);
+        if (database.Skills == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < table.Entries.Count; i++)
+        {
+            SkillUnlockEntryConfig entry = table.Entries[i];
+            if (entry == null || string.IsNullOrWhiteSpace(entry.SkillConfigId))
+            {
+                continue;
+            }
+
+            if (!database.TryGetSkill(entry.SkillConfigId, out _))
+            {
+                result.AddError(table.name, $"解锁表引用了不存在的技能: {entry.SkillConfigId}");
+            }
+        }
     }
 
     private static void ValidateUniqueIds<T>(IReadOnlyList<T> entries, ConfigValidationResult result) where T : ConfigDataBase

@@ -58,7 +58,10 @@ public class SaveData
         ConfigIdIntPairListUtility.SetValue(permanentUpgrades, configId, level);
 
     public int GetSkillLevel(string configId) =>
-        ConfigIdIntPairListUtility.GetValue(skillLevels, configId, 1);
+        ConfigIdIntPairListUtility.GetValue(skillLevels, configId, 0);
+
+    public bool IsSkillUnlocked(string configId) =>
+        configId == GameConstants.ConfigIds.SkillShoot || GetSkillLevel(configId) > 0;
 
     public void SetSkillLevel(string configId, int level) =>
         ConfigIdIntPairListUtility.SetValue(skillLevels, configId, level);

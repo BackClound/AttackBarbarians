@@ -72,6 +72,7 @@ public static class GameConstants
         // Skill
         public const string SkillUsed = "Skill.Used";
         public const string SkillLevelUp = "Skill.LevelUp";
+        public const string SkillUnlocked = "Skill.Unlocked";
 
         // Buff
         public const string BuffApplied = "Buff.Applied";
@@ -137,6 +138,7 @@ public static class GameConstants
         public const string AutoAttackDefault = "Config/AutoAttack/AutoAttack_Default";
         public const string CollisionDefault = "Config/Collision/Collision_Default";
         public const string RewardPoolDefault = "Config/Upgrade/RewardPool_Default";
+        public const string SkillUnlockTable = "Config/Skill/SkillUnlockTable_Default";
     }
 
     public static class ConfigIds
@@ -172,6 +174,13 @@ public static class GameConstants
         public const string UpgradeAttackUp = "upgrade.attack_up";
         public const string UpgradeShootPierce = "upgrade.shoot_pierce";
         public const string UpgradeUnlockLightning = "upgrade.unlock_lightning";
+        public const string UpgradeUnlockThunder = "upgrade.unlock_thunder";
+        public const string UpgradeUnlockFireRain = "upgrade.unlock_fire_rain";
+        public const string UpgradeUnlockWaterWave = "upgrade.unlock_water_wave";
+        public const string UpgradeUnlockIce = "upgrade.unlock_ice";
+        public const string UpgradeUnlockHeal = "upgrade.unlock_heal";
+        public const string UpgradeLightningChain = "upgrade.lightning_chain";
+        public const string UpgradeThunderRadius = "upgrade.thunder_radius";
         public const string UpgradeGoldBonus = "upgrade.gold_bonus";
         public const string TalentMaxHp = "talent.max_hp";
         public const string TalentAttackDamage = "talent.attack_damage";

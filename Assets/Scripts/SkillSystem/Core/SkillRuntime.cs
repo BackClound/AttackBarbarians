@@ -16,7 +16,8 @@ public sealed class SkillRuntime
     public float LastCastTime { get; set; }
     public int CastCount { get; private set; }
 
-    public bool IsCooldownReady => Time.time >= LastCastTime + CooldownSeconds;
+    public bool IsCooldownReady =>
+        Time.time >= LastCastTime + buffProfile.GetEffectiveCooldown(CooldownSeconds);
 
     public void Initialize(SkillDataSO config, int level = 1, bool unlocked = true)
     {

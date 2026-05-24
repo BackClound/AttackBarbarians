@@ -84,6 +84,11 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         saveManager.MarkDirty();
         saveManager.SaveImmediate();
 
+        if (ServiceLocator.TryGet(out SkillUnlockService skillUnlockService))
+        {
+            skillUnlockService.RefreshMetaUnlocks();
+        }
+
         if (ServiceLocator.TryGet(out ConfigManager config) && config.ShouldLog())
         {
             Debug.Log(

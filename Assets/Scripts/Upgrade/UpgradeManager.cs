@@ -153,6 +153,11 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
             return false;
         }
 
+        if (!IsSkillEffectOptionAvailable(option))
+        {
+            return false;
+        }
+
         IReadOnlyList<string> prerequisites = option.PrerequisiteOptionIds;
         if (prerequisites != null)
         {
@@ -172,6 +177,54 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     private void OnGameStarted(GameEventContext ctx)
     {
         ReapplySavedUpgrades();
+    }
+
+    private static bool IsSkillEffectOptionAvailable(UpgradeOptionSO option)
+    {
+        if (option == null)
+        {
+            return false;
+        }
+
+        PlayerSkillManager skillManager = ResolvePlayerSkillManager();
+        SkillManager manager = skillManager?.SkillManager;
+
+        switch (option.EffectType)
+        {
+            case UpgradeEffectType.SkillUnlock:
+                if (string.IsNullOrWhiteSpace(option.SkillConfigId))
+                {
+                    return false;
+                }
+
+                if (ServiceLocator.TryGet(out SkillUnlockService unlockService) &&
+                    !unlockService.IsMetaUnlocked(option.SkillConfigId))
+                {
+                    return false;
+                }
+
+                return manager == null || !manager.IsSkillUnlocked(option.SkillConfigId);
+
+            case UpgradeEffectType.SkillBuff:
+            case UpgradeEffectType.WeaponEnhance:
+                if (manager == null)
+                {
+                    return true;
+                }
+
+                SkillType target = option.SkillBuffKind != SkillBuffKind.None
+                    ? SkillBuffCatalog.GetTargetSkill(option.SkillBuffKind)
+                    : SkillType.None;
+                if (target == SkillType.None)
+                {
+                    return true;
+                }
+
+                return manager.IsSkillUnlocked(target);
+
+            default:
+                return true;
+        }
     }
 
     private void ReapplySavedUpgrades()

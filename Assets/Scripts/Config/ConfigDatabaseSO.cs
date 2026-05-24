@@ -14,6 +14,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<PlayerDataSO> players = new List<PlayerDataSO>();
     [SerializeField] private List<EnemyDataSO> enemies = new List<EnemyDataSO>();
     [SerializeField] private List<SkillDataSO> skills = new List<SkillDataSO>();
+    [SerializeField] private SkillUnlockTableSO skillUnlockTable;
     [SerializeField] private List<BuffDataSO> buffs = new List<BuffDataSO>();
     [SerializeField] private List<WaveDataSO> waves = new List<WaveDataSO>();
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
@@ -29,6 +30,7 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
     public IReadOnlyList<SkillDataSO> Skills => skills;
+    public SkillUnlockTableSO SkillUnlockTable => skillUnlockTable;
     public IReadOnlyList<BuffDataSO> Buffs => buffs;
     public IReadOnlyList<WaveDataSO> Waves => waves;
     public IReadOnlyList<BossDataSO> Bosses => bosses;

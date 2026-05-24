@@ -52,6 +52,6 @@ PlayerDataSO + SaveData.permanentUpgrades + BuffRuntimeData
 ## 未迁移边界
 
 - `SkillShoot` 仍使用自有 `bulletWaveList` 与 `Instantiate` 弹道（对象池迁移属 Projectile 阶段）。
-- 多技能（闪电、落雷等）尚未接入，仅射击闭环。
+- 多技能（闪电、落雷、火雨等）由 `SkillManager` + `ISkillEffect` 自动释放；元进度解锁见 `more_skills_system.md`。
 - `PlayerCombat.FixedUpdate` 中旧扫描逻辑仍注释；实战由 `SkillShoot.Update` 驱动。
 - Boss 通过 `Enemy.isBoss` 标记，无独立 Boss 子类。

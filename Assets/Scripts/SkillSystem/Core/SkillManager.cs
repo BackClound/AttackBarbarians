@@ -69,6 +69,11 @@ public class SkillManager : MonoBehaviour
         {
             UnlockSkill(shootSkillConfigId, 1);
         }
+
+        if (ServiceLocator.TryGet(out SkillUnlockService unlockService))
+        {
+            unlockService.ApplyUnlocksToPlayerSkillManager();
+        }
     }
 
     private void Update()
@@ -139,6 +144,21 @@ public class SkillManager : MonoBehaviour
 
     public bool TryGetRuntime(SkillType type, out SkillRuntime runtime) => runtimes.TryGetValue(type, out runtime);
 
+    public bool IsSkillUnlocked(SkillType type) =>
+        runtimes.TryGetValue(type, out SkillRuntime runtime) && runtime.IsUnlocked;
+
+    public bool IsSkillUnlocked(string configId)
+    {
+        if (string.IsNullOrWhiteSpace(configId) ||
+            !ServiceLocator.TryGet(out ConfigManager configManager) ||
+            !configManager.TryGetSkill(configId, out SkillDataSO data))
+        {
+            return false;
+        }
+
+        return IsSkillUnlocked(data.SkillType);
+    }
+
     public void UnlockSkill(string configId, int level = 1)
     {
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
@@ -170,6 +190,7 @@ public class SkillManager : MonoBehaviour
         }
 
         runtime.Initialize(data, level, true);
+        PersistUnlock(data.ConfigId, runtime.BaseData.Level);
         GameEvents.RaiseSkillLevelUp(this, data.ConfigId, runtime.BaseData.Level);
     }
 
@@ -335,6 +356,26 @@ public class SkillManager : MonoBehaviour
                 controller.ApplyModifier(new StatModifierConfig(
                     StatType.MaxHp, ConfigModifierType.PercentAdd, 0.1f));
             }
+        }
+    }
+
+    private static void PersistUnlock(string configId, int level)
+    {
+        if (string.IsNullOrWhiteSpace(configId) || level <= 0)
+        {
+            return;
+        }
+
+        if (!ServiceLocator.TryGet(out SaveManager saveManager) || saveManager.Current == null)
+        {
+            return;
+        }
+
+        int existing = saveManager.Current.GetSkillLevel(configId);
+        if (level > existing)
+        {
+            saveManager.Current.SetSkillLevel(configId, level);
+            saveManager.MarkDirty();
         }
     }
 
