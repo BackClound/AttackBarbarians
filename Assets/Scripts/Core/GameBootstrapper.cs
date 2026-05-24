@@ -46,6 +46,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private MapManager mapManager;
     [SerializeField] private GameplayEventManager gameplayEventManager;
     [SerializeField] private GameplayEventDebugBridge gameplayEventDebugBridge;
+    [SerializeField] private AudioManager audioManager;
 
     private readonly List<IGameSystem> systems = new List<IGameSystem>(16);
     private EventBus eventBus;
@@ -132,6 +133,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         mapManager = ResolveOrCreate(mapManager);
         gameplayEventManager = ResolveOrCreate(gameplayEventManager);
         gameplayEventDebugBridge = ResolveOrCreate(gameplayEventDebugBridge);
+        audioManager = ResolveOrCreate(audioManager);
         eventBus = new EventBus();
     }
 
@@ -163,6 +165,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(contentRegistry);
         ServiceLocator.Register(mapManager);
         ServiceLocator.Register(gameplayEventManager);
+        ServiceLocator.Register(audioManager);
 
         systems.Add(configManager);
         systems.Add(saveManager);
@@ -184,6 +187,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(contentRegistry);
         systems.Add(mapManager);
         systems.Add(gameplayEventManager);
+        systems.Add(audioManager);
         systems.Add(gameplayEventDebugBridge);
         systems.Add(enemySpawnerManager);
         systems.Add(waveManager);

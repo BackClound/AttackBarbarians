@@ -146,6 +146,12 @@ public static class GameEvents
     public static void RaisePlayerSkillCast(object sender, string skillId) =>
         Publish(GameConstants.EventKeys.PlayerSkillCast, sender, skillId);
 
+    public static void SubscribePlayerSkillCast(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.PlayerSkillCast, handler);
+
+    public static void UnsubscribePlayerSkillCast(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.PlayerSkillCast, handler);
+
     public static void RaisePlayerStatsChanged(object sender, PlayerStatsChangedEventArgs args) =>
         Publish(GameConstants.EventKeys.PlayerStatsChanged, sender, args);
 
@@ -373,8 +379,20 @@ public static class GameEvents
     public static void RaiseAudioPlaySfx(object sender, string sfxId) =>
         Publish(GameConstants.EventKeys.AudioPlaySfx, sender, sfxId);
 
+    public static void SubscribeAudioPlaySfx(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AudioPlaySfx, handler);
+
+    public static void UnsubscribeAudioPlaySfx(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AudioPlaySfx, handler);
+
     public static void RaiseAudioPlayMusic(object sender, string musicId) =>
         Publish(GameConstants.EventKeys.AudioPlayMusic, sender, musicId);
+
+    public static void SubscribeAudioPlayMusic(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AudioPlayMusic, handler);
+
+    public static void UnsubscribeAudioPlayMusic(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AudioPlayMusic, handler);
 
     #endregion
 

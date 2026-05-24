@@ -132,6 +132,13 @@ public static class GameConstants
         public const string SfxBossDefeat = "audio.sfx.boss_defeat";
         public const string SfxSpecialEnemySpawn = "audio.sfx.special_enemy_spawn";
         public const string SfxSpecialEnemyAbility = "audio.sfx.special_enemy_ability";
+        public const string SfxUiClick = "audio.sfx.ui_click";
+        public const string SfxUiConfirm = "audio.sfx.ui_confirm";
+        public const string SfxPlayerHurt = "audio.sfx.player_hurt";
+        public const string SfxEnemyHit = "audio.sfx.enemy_hit";
+        public const string SfxEnemyKill = "audio.sfx.enemy_kill";
+        public const string SfxSkillCast = "audio.sfx.skill_cast";
+        public const string MusicGameplay = "audio.music.gameplay";
     }
 
     public static class ResourcePaths
@@ -147,6 +154,7 @@ public static class GameConstants
         public const string RewardPoolDefault = "Config/Upgrade/RewardPool_Default";
         public const string SkillUnlockTable = "Config/Skill/SkillUnlockTable_Default";
         public const string MapDefault = "Config/Map/MapData_Default";
+        public const string AudioDatabase = "Config/Audio/AudioDatabase";
     }
 
     public static class ConfigIds

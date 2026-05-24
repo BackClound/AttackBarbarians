@@ -12,6 +12,7 @@ public class SettingsData
     public float masterVolume = 1f;
     public float musicVolume = 1f;
     public float sfxVolume = 1f;
+    public float uiVolume = 1f;
 
     /// <summary>-1 表示跟随系统默认画质档位。</summary>
     public int graphicsQualityLevel = -1;
