@@ -22,6 +22,14 @@ public class SpawnAreaController : MonoBehaviour
 
     public bool IsReady => boundsReady;
 
+    public void ApplyMapConfig(MapSpawnAreaConfig config)
+    {
+        viewportMin = config.ViewportMin;
+        viewportMax = config.ViewportMax;
+        initializeDelaySeconds = config.InitializeDelaySeconds;
+        BeginInitialize();
+    }
+
     private void Awake()
     {
         if (spawnCamera == null)

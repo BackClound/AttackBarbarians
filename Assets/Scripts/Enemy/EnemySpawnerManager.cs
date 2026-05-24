@@ -47,7 +47,11 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             legacySpawner.SetAutoSpawnEnabled(false);
         }
 
-        spawnArea.BeginInitialize();
+        bool mapConfigured = ServiceLocator.TryGet(out MapManager mapManager) && mapManager.IsMapLoaded;
+        if (!mapConfigured)
+        {
+            spawnArea.BeginInitialize();
+        }
         GameEvents.SubscribeEnemyKilled(OnEnemyKilled);
         isInitialized = true;
     }

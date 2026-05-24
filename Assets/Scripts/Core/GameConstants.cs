@@ -102,6 +102,13 @@ public static class GameConstants
 
         // Equipment
         public const string EquipmentChanged = "Equipment.Changed";
+
+        // Map
+        public const string MapLoaded = "Map.Loaded";
+
+        // Gameplay Event
+        public const string GameplayEventStarted = "GameplayEvent.Started";
+        public const string GameplayEventEnded = "GameplayEvent.Ended";
     }
 
     public static class UiPanelIds
@@ -139,10 +146,12 @@ public static class GameConstants
         public const string CollisionDefault = "Config/Collision/Collision_Default";
         public const string RewardPoolDefault = "Config/Upgrade/RewardPool_Default";
         public const string SkillUnlockTable = "Config/Skill/SkillUnlockTable_Default";
+        public const string MapDefault = "Config/Map/MapData_Default";
     }
 
     public static class ConfigIds
     {
+        public const string MapDefault = "map.default";
         public const string PlayerDefault = "player.default";
         public const string EnemyBat = "enemy.bat";
         public const string SkillShoot = "skill.shoot";
@@ -190,6 +199,8 @@ public static class GameConstants
         public const string EquipmentChestWarriorPlate = "equipment.chest.warrior_plate";
         public const string EquipmentBootsWarriorBoots = "equipment.boots.warrior_boots";
         public const string EquipmentSetWarrior = "set.warrior";
+
+        public const string GameplayEventSwarm = "gameplay_event.swarm";
     }
 
     public static class PoolKeys

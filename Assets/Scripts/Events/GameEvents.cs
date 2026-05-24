@@ -414,6 +414,41 @@ public static class GameEvents
 
     #endregion
 
+    #region Map
+
+    public static void RaiseMapLoaded(object sender, MapLoadedEventArgs args) =>
+        Publish(GameConstants.EventKeys.MapLoaded, sender, args);
+
+    public static void SubscribeMapLoaded(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.MapLoaded, handler);
+
+    public static void UnsubscribeMapLoaded(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.MapLoaded, handler);
+
+    #endregion
+
+    #region Gameplay Event
+
+    public static void RaiseGameplayEventStarted(object sender, GameplayEventArgs args) =>
+        Publish(GameConstants.EventKeys.GameplayEventStarted, sender, args);
+
+    public static void RaiseGameplayEventEnded(object sender, GameplayEventArgs args) =>
+        Publish(GameConstants.EventKeys.GameplayEventEnded, sender, args);
+
+    public static void SubscribeGameplayEventStarted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.GameplayEventStarted, handler);
+
+    public static void UnsubscribeGameplayEventStarted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.GameplayEventStarted, handler);
+
+    public static void SubscribeGameplayEventEnded(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.GameplayEventEnded, handler);
+
+    public static void UnsubscribeGameplayEventEnded(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.GameplayEventEnded, handler);
+
+    #endregion
+
     #region Bus access
 
     public static void Subscribe(string eventKey, Action<GameEventContext> handler)

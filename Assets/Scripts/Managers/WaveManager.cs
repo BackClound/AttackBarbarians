@@ -146,12 +146,12 @@ public class WaveManager : MonoBehaviour, IGameSystem
 
     private void TrySpawnByInterval()
     {
-        if (spawnedThisWave >= currentWaveData.MaxSpawnCount || spawnTimer < currentWaveData.SpawnInterval)
+        if (spawnedThisWave >= GetEffectiveMaxSpawnCount() || spawnTimer < GetEffectiveSpawnInterval())
         {
             return;
         }
 
-        if (ShouldPauseSpawnsForBoss())
+        if (ShouldPauseSpawnsForBoss() || MapRuntimeContext.PauseSpawns)
         {
             return;
         }
@@ -173,7 +173,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
+                           MapRuntimeContext.EnemyStatMultiplier;
         spawner.TrySpawnBonusSpecial(multiplier, currentWaveIndex);
     }
 
@@ -193,7 +194,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
+                           MapRuntimeContext.EnemyStatMultiplier;
         spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: true);
     }
 
@@ -209,7 +211,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
+                           MapRuntimeContext.EnemyStatMultiplier;
         if (spawner.TrySpawnBoss(currentWaveData.BossConfigId, multiplier, currentWaveIndex))
         {
             bossSpawned = true;
@@ -222,8 +225,20 @@ public class WaveManager : MonoBehaviour, IGameSystem
 
     private bool TrySpawnOne()
     {
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex);
+        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
+                           MapRuntimeContext.EnemyStatMultiplier;
         return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: false);
+    }
+
+    private float GetEffectiveSpawnInterval()
+    {
+        return currentWaveData.SpawnInterval * MapRuntimeContext.SpawnIntervalMultiplier;
+    }
+
+    private int GetEffectiveMaxSpawnCount()
+    {
+        return Mathf.Max(1, Mathf.RoundToInt(
+            currentWaveData.MaxSpawnCount * MapRuntimeContext.MaxSpawnCountMultiplier));
     }
 
     private void TryCompleteWave()
@@ -233,7 +248,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        bool allSpawned = spawnedThisWave >= currentWaveData.MaxSpawnCount;
+        bool allSpawned = spawnedThisWave >= GetEffectiveMaxSpawnCount();
         bool noAlive = spawner.AliveEnemyCount <= 0;
         bool timedOut = waveElapsed >= currentWaveData.WaveDuration;
         bool bossCleared = !currentWaveData.HasBoss || !currentWaveData.RequireBossDefeatToComplete ||

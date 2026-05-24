@@ -202,3 +202,35 @@ public readonly struct PlayerAttackEventArgs
         SkillId = skillId ?? string.Empty;
     }
 }
+
+/// <summary>
+/// 地图加载完成事件负载。
+/// </summary>
+public readonly struct MapLoadedEventArgs
+{
+    public string MapConfigId { get; }
+    public int RecommendedDifficulty { get; }
+
+    public MapLoadedEventArgs(string mapConfigId, int recommendedDifficulty)
+    {
+        MapConfigId = mapConfigId ?? string.Empty;
+        RecommendedDifficulty = recommendedDifficulty;
+    }
+}
+
+/// <summary>
+/// 局内随机事件负载。
+/// </summary>
+public readonly struct GameplayEventArgs
+{
+    public string EventConfigId { get; }
+    public int WaveIndex { get; }
+    public float DurationSeconds { get; }
+
+    public GameplayEventArgs(string eventConfigId, int waveIndex, float durationSeconds)
+    {
+        EventConfigId = eventConfigId ?? string.Empty;
+        WaveIndex = waveIndex;
+        DurationSeconds = durationSeconds;
+    }
+}

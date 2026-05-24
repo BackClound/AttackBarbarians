@@ -24,6 +24,8 @@ public static class ConfigValidator
         ValidateUniqueIds(database.Buffs, result);
         ValidateUniqueIds(database.Talents, result);
         ValidateUniqueIds(database.Equipment, result);
+        ValidateUniqueIds(database.Maps, result);
+        ValidateUniqueIds(database.GameplayEvents, result);
         ValidateUniqueIds(database.Waves, result);
         ValidateUniqueIds(database.Bosses, result);
         ValidateUniqueIds(database.BossSkills, result);
@@ -36,6 +38,8 @@ public static class ConfigValidator
         ValidateEntries(database.Buffs, result);
         ValidateEntries(database.Talents, result);
         ValidateEntries(database.Equipment, result);
+        ValidateEntries(database.Maps, result);
+        ValidateEntries(database.GameplayEvents, result);
         ValidateEntries(database.Waves, result);
         ValidateEntries(database.Bosses, result);
         ValidateEntries(database.BossSkills, result);
@@ -49,8 +53,110 @@ public static class ConfigValidator
         ValidateEnemySpecialAbilityReferences(database, result);
         ValidateDropReferences(database, result);
         ValidateSkillUnlockTable(database, result);
+        ValidateGameplayEventReferences(database, result);
+        ValidateMapReferences(database, result);
 
         return result;
+    }
+
+    private static void ValidateMapReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.Maps == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.Maps.Count; i++)
+        {
+            MapDataSO map = database.Maps[i];
+            if (map == null)
+            {
+                continue;
+            }
+
+            IReadOnlyList<string> linkedEvents = map.LinkedGameplayEventIds;
+            if (linkedEvents != null)
+            {
+                for (int j = 0; j < linkedEvents.Count; j++)
+                {
+                    string eventId = linkedEvents[j];
+                    if (string.IsNullOrWhiteSpace(eventId))
+                    {
+                        result.AddWarning(map.name, $"linkedGameplayEventIds[{j}] 为空。");
+                        continue;
+                    }
+
+                    if (!database.TryGetGameplayEvent(eventId, out _))
+                    {
+                        result.AddError(map.name, $"引用了不存在的局内事件: {eventId}");
+                    }
+                }
+            }
+
+            IReadOnlyList<string> preferredEnemies = map.PreferredEnemyConfigIds;
+            if (preferredEnemies == null)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < preferredEnemies.Count; j++)
+            {
+                string enemyId = preferredEnemies[j];
+                if (string.IsNullOrWhiteSpace(enemyId))
+                {
+                    continue;
+                }
+
+                if (!database.TryGetEnemy(enemyId, out _))
+                {
+                    result.AddError(map.name, $"preferredEnemyConfigIds 引用了不存在的敌人: {enemyId}");
+                }
+            }
+        }
+    }
+
+    private static void ValidateGameplayEventReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.GameplayEvents == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.GameplayEvents.Count; i++)
+        {
+            GameplayEventDataSO eventData = database.GameplayEvents[i];
+            if (eventData == null)
+            {
+                continue;
+            }
+
+            IReadOnlyList<GameplayEventEffectConfig> effects = eventData.Effects;
+            if (effects == null)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < effects.Count; j++)
+            {
+                GameplayEventEffectConfig effect = effects[j];
+                if (effect.EffectType != GameplayEventEffectType.ApplyPlayerBuff)
+                {
+                    continue;
+                }
+
+                string buffId = effect.StringParam;
+                if (string.IsNullOrWhiteSpace(buffId))
+                {
+                    result.AddWarning(eventData.name, $"effects[{j}] ApplyPlayerBuff 未配置 buffId。");
+                    continue;
+                }
+
+                if (!database.TryGetBuff(buffId, out _))
+                {
+                    result.AddError(eventData.name, $"effects[{j}] 引用了不存在的 Buff: {buffId}");
+                }
+            }
+        }
     }
 
     private static void ValidateSkillUnlockTable(ConfigDatabaseSO database, ConfigValidationResult result)
