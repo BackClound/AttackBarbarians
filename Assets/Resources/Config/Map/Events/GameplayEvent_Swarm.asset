@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9206b67504bd4afdb8c9d5d0a15929d, type: 3}
+  m_Name: GameplayEvent_Swarm
+  m_EditorClassIdentifier: 
+  configId: gameplay_event.swarm
+  displayName: event.swarm
+  icon: {fileID: 0}
+  trigger:
+    triggerType: 0
+    minWaveIndex: 0
+    maxWaveIndex: 0
+    triggerChance: 0
+  durationSeconds: 10
+  endsOnWaveComplete: 0
+  effects: []

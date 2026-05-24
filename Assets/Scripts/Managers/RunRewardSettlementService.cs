@@ -64,9 +64,12 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         int difficulty = ResolveDifficulty(saveManager.Current);
         float duration = sessionTracker != null ? sessionTracker.SessionDurationSeconds : 0f;
         RunRewardResult result = settlementConfig.Calculate(duration, difficulty);
+        float rewardMultiplier = MapRuntimeContext.RewardMultiplier;
+        long goldGranted = (long)Mathf.Max(0, Mathf.Round(result.Gold * rewardMultiplier));
+        long diamondsGranted = (long)Mathf.Max(0, Mathf.Round(result.Diamonds * rewardMultiplier));
 
-        saveManager.Current.gold += result.Gold;
-        saveManager.Current.diamonds += result.Diamonds;
+        saveManager.Current.gold += goldGranted;
+        saveManager.Current.diamonds += diamondsGranted;
 
         if (saveManager.Current.statistics != null)
         {
@@ -78,8 +81,8 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
             duration,
             result.Tier,
             difficulty,
-            result.Gold,
-            result.Diamonds));
+            goldGranted,
+            diamondsGranted));
 
         saveManager.MarkDirty();
         saveManager.SaveImmediate();
@@ -93,7 +96,8 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         {
             Debug.Log(
                 $"[RunRewardSettlement] tier={result.Tier} duration={duration:F1}s " +
-                $"difficulty={difficulty} gold+={result.Gold} diamonds+={result.Diamonds}");
+                $"difficulty={difficulty} eventRewardMult={rewardMultiplier:F2} " +
+                $"gold+={goldGranted} diamonds+={diamondsGranted}");
         }
     }
 

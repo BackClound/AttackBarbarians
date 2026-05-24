@@ -18,12 +18,17 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
 
     [SerializeField] private bool enableRandomEvents = true;
 
+    private const float RandomDuringWaveCheckIntervalSeconds = 8f;
+
     private readonly List<ActiveEvent> activeEvents = new List<ActiveEvent>(4);
     private readonly List<GameplayEventDataSO> scratchEvents = new List<GameplayEventDataSO>(4);
 
     private ContentRegistry contentRegistry;
     private MapManager mapManager;
     private ConfigManager configManager;
+    private int currentWaveIndex = 1;
+    private bool waveActive;
+    private float randomDuringWaveTimer;
     private bool isInitialized;
 
     public bool IsInitialized => isInitialized;
@@ -40,11 +45,24 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         GameEvents.SubscribeWaveCompleted(OnWaveCompleted);
 
         isInitialized = true;
+
+        if (mapManager != null && mapManager.IsMapLoaded)
+        {
+            TryTriggerEventsForType(GameplayEventTriggerType.OnMapLoad, waveIndex: 1);
+            TryTriggerLinkedMapEvents();
+        }
     }
 
     public void Tick(float deltaTime)
     {
-        if (!isInitialized || !enableRandomEvents || activeEvents.Count == 0)
+        if (!isInitialized || !enableRandomEvents)
+        {
+            return;
+        }
+
+        TickRandomDuringWave(deltaTime);
+
+        if (activeEvents.Count == 0)
         {
             return;
         }
@@ -73,6 +91,9 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
 
         activeEvents.Clear();
         MapRuntimeContext.ResetEventModifiers();
+        currentWaveIndex = 1;
+        waveActive = false;
+        randomDuringWaveTimer = 0f;
         isInitialized = false;
     }
 
@@ -89,7 +110,16 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
 
     private void OnWaveStarted(GameEventContext ctx)
     {
-        if (!enableRandomEvents || ctx.Payload is not WaveEventArgs args)
+        if (ctx.Payload is not WaveEventArgs args)
+        {
+            return;
+        }
+
+        currentWaveIndex = args.WaveIndex;
+        waveActive = true;
+        randomDuringWaveTimer = RandomDuringWaveCheckIntervalSeconds;
+
+        if (!enableRandomEvents)
         {
             return;
         }
@@ -99,7 +129,14 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
 
     private void OnWaveCompleted(GameEventContext ctx)
     {
-        if (!enableRandomEvents || ctx.Payload is not WaveEventArgs args)
+        if (ctx.Payload is not WaveEventArgs args)
+        {
+            return;
+        }
+
+        waveActive = false;
+
+        if (!enableRandomEvents)
         {
             return;
         }
@@ -113,6 +150,23 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
                 EndEventAt(i);
             }
         }
+    }
+
+    private void TickRandomDuringWave(float deltaTime)
+    {
+        if (!waveActive)
+        {
+            return;
+        }
+
+        randomDuringWaveTimer -= deltaTime;
+        if (randomDuringWaveTimer > 0f)
+        {
+            return;
+        }
+
+        randomDuringWaveTimer = RandomDuringWaveCheckIntervalSeconds;
+        TryTriggerEventsForType(GameplayEventTriggerType.RandomDuringWave, currentWaveIndex);
     }
 
     private void TryTriggerLinkedMapEvents()

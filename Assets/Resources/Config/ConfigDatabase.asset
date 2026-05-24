@@ -63,3 +63,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2a3b4c5d6e7f4890a1b2c3d4e5f67890, type: 2}
   - {fileID: 11400000, guid: 3b3da0ab99ea74d078df64106ded1aab, type: 2}
   - {fileID: 11400000, guid: 07212a296b94a4715a3b28c401c4b8c0, type: 2}
+  maps:
+  - {fileID: 11400000, guid: aabbccddeeff00112233445566778899, type: 2}
+  gameplayEvents:
+  - {fileID: 11400000, guid: bbccddeeff0011223344556677889900, type: 2}

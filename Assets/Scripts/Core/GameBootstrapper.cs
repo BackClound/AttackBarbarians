@@ -45,6 +45,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private ContentRegistry contentRegistry;
     [SerializeField] private MapManager mapManager;
     [SerializeField] private GameplayEventManager gameplayEventManager;
+    [SerializeField] private GameplayEventDebugBridge gameplayEventDebugBridge;
 
     private readonly List<IGameSystem> systems = new List<IGameSystem>(16);
     private EventBus eventBus;
@@ -130,6 +131,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         contentRegistry = ResolveOrCreate(contentRegistry);
         mapManager = ResolveOrCreate(mapManager);
         gameplayEventManager = ResolveOrCreate(gameplayEventManager);
+        gameplayEventDebugBridge = ResolveOrCreate(gameplayEventDebugBridge);
         eventBus = new EventBus();
     }
 
@@ -159,8 +161,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(projectileManager);
         ServiceLocator.Register(skillUnlockService);
         ServiceLocator.Register(contentRegistry);
-        ServiceLocator.Register(gameplayEventManager);
         ServiceLocator.Register(mapManager);
+        ServiceLocator.Register(gameplayEventManager);
 
         systems.Add(configManager);
         systems.Add(saveManager);
@@ -180,8 +182,9 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(projectileManager);
         systems.Add(skillUnlockService);
         systems.Add(contentRegistry);
-        systems.Add(gameplayEventManager);
         systems.Add(mapManager);
+        systems.Add(gameplayEventManager);
+        systems.Add(gameplayEventDebugBridge);
         systems.Add(enemySpawnerManager);
         systems.Add(waveManager);
         systems.Add(bossRunStatsBridge);

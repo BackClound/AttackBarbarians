@@ -76,6 +76,20 @@
 
 ---
 
+## Map / Gameplay Event
+
+| Key | Raise 方法 | 发布者 | 典型订阅者 | 触发时机 |
+|-----|------------|--------|------------|----------|
+| `Map.Loaded` | `RaiseMapLoaded` | `MapManager` | `GameplayEventManager` | 地图配置应用完成 |
+| `GameplayEvent.Started` | `RaiseGameplayEventStarted` | `GameplayEventManager` | UI、`GameplayEventDebugBridge` | 局内随机事件开始 |
+| `GameplayEvent.Ended` | `RaiseGameplayEventEnded` | `GameplayEventManager` | UI、调试 | 事件到时或波次结束 |
+
+**Payload**：`MapLoadedEventArgs`；`GameplayEventArgs`（EventConfigId、WaveIndex、DurationSeconds）
+
+详见 `docs/gameplay_events_system.md`。
+
+---
+
 ## Skill / Buff / UI / Audio / Save
 
 已定义 Key 与 `RaiseXxx`，待对应模块实现时接入。参见 `GameEvents.cs` 各分区。
