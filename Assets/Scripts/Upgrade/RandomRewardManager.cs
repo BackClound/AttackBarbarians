@@ -181,8 +181,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
 
     private static int ResolvePlayerLevel()
     {
-        PlayerController controller = FindFirstObjectByType<PlayerController>();
-        if (controller != null && controller.IsReady && controller.RuntimeStats.IsInitialized)
+        if (PlayerSceneAccess.TryGetController(out PlayerController controller) &&
+            controller.RuntimeStats.IsInitialized)
         {
             return Mathf.Max(1, controller.RuntimeStats.Data.CurrentLevel);
         }

@@ -338,118 +338,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1812459356}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &186641248
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 7
-  m_Component:
-  - component: {fileID: 186641251}
-  - component: {fileID: 186641249}
-  - component: {fileID: 186641250}
-  m_Layer: 0
-  m_HasEditorInfo: 1
-  m_Name: EnemyGenerateManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &186641249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 186641248}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6623c562aa89c4071828be5ccdfe82f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyGenerateManager
-  spawnCoolDownTimer: 0
-  canAutoGenerateEnenmy: 0
-  spawnInterval: 3
-  _baseSpawnInterval: 0
-  enemyPrefabs:
-  - {fileID: 4766495136149570709, guid: 596b7f02da43d4abdacdecccf30e580d, type: 3}
-  - {fileID: 5449595325056827577, guid: 2b33b0e95a9864bf6a6f14d534998d15, type: 3}
-  - {fileID: 118330131270576344, guid: 9f6b051d5a862442ea116d94a92ff1e2, type: 3}
-  - {fileID: 5407043206690283361, guid: e2d22e09fce3a4ac6a6950480f62c35a, type: 3}
-  - {fileID: 6325858709102536717, guid: 45f8a8aaf912d4486867c2dd23fd6877, type: 3}
-  enemyPoolKeys: []
---- !u!212 &186641250
-SpriteRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 186641248}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_virtualGeometry: 0
-  m_ShadingRate: 0
-  m_ForceDisableGRD: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
---- !u!4 &186641251
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 186641248}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.65, y: 20.61, z: 0}
-  m_LocalScale: {x: 32.666862, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &245381951
 GameObject:
   m_ObjectHideFlags: 0
@@ -1173,7 +1061,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3cc4c880afc4f75b2ec8cbcaecd708, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnerManager
-  legacySpawner: {fileID: 186641249}
+  legacySpawner: {fileID: 0}
   disableLegacySpawnerOnInit: 1
   spawnArea: {fileID: 0}
 --- !u!1 &530551914
@@ -1513,7 +1401,6 @@ GameObject:
   - component: {fileID: 825728590}
   - component: {fileID: 825728591}
   - component: {fileID: 825728588}
-  - component: {fileID: 825728585}
   - component: {fileID: 825728589}
   - component: {fileID: 825728587}
   - component: {fileID: 825728582}
@@ -1626,18 +1513,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   rb: {fileID: 825728582}
   coll: {fileID: 825728581}
---- !u!114 &825728585
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 825728580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8c094a92179a410192cc0a225c1379e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
 --- !u!114 &825728587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2827,6 +2702,10 @@ MonoBehaviour:
   collisionManager: {fileID: 0}
   projectileManager: {fileID: 0}
   skillUnlockService: {fileID: 0}
+  contentRegistry: {fileID: 0}
+  mapManager: {fileID: 0}
+  gameplayEventManager: {fileID: 0}
+  gameplayEventDebugBridge: {fileID: 0}
 --- !u!4 &1812459356
 Transform:
   m_ObjectHideFlags: 0
@@ -3687,7 +3566,6 @@ SceneRoots:
   - {fileID: 2010092266}
   - {fileID: 1869007418}
   - {fileID: 825728583}
-  - {fileID: 186641251}
   - {fileID: 1560055431}
   - {fileID: 1225729130}
   - {fileID: 1812459356}

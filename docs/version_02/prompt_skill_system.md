@@ -1,0 +1,76 @@
+# Skill System 模块需求提示词
+
+> **版本 v2** | 架构层级见 `architecture_design.md` | 工作流见 `.cursor/rules/work_flow.md`
+
+## v2 架构约束（必读）
+- **分层依赖**：本模块所属层级不得反向引用高层模块（见 `architecture_design.md` §2）。
+- **属性唯一真相源**：`PlayerRuntimeStats` → `ConfigStatBridge` → `Entity_Stats`；禁止直接修改 Entity_Stats 做 Buff。
+- **Player 查找**：统一使用 `PlayerSceneAccess`，禁止 `FindObjectOfType<Player*>`。
+- **跨模块通信**：优先 `GameEvents`；Manager 之间通过 `ServiceLocator` 或事件，不直接持有场景实体。
+- **对象池**：敌人/子弹/特效/飘字必须走 `PoolManager`。
+- **Legacy 禁止扩展**：不新增对 `EnemyGenerateManager`、`PlayerCombat`、`EnemyCombatManager` 的依赖。
+
+# Skill System 模块需求提示词
+
+## 目标
+实现数据驱动技能系统，支持自动释放、多段伤害、DOT、范围伤害、连锁、穿透、弹射、暴击、属性伤害、技能进化和等级成长。
+
+## 当前基础
+已有 `PlayerSkillManager`、`SkillBase`、`SkillShoot`、技能等级数据和子弹生成逻辑。当前技能主要围绕射击技能，技能冷却、目标扫描和弹道参数还未完全配置化。
+
+## 输出要求
+- 生成 `SkillDataSO`：ID、名称、图标、技能类型、元素、冷却、范围、目标策略、等级数据。
+- 生成 `SkillRuntime`：运行时冷却、等级、释放次数、临时 Modifier。
+- 生成 `SkillManager`：持有已解锁技能、自动释放、升级、进化。
+- 生成技能效果接口：`ISkillEffect`，支持伤害、DOT、召唤、护盾、治疗。
+- 支持技能等级表和进化条件。
+
+## 实现流程
+1. 先把 `SkillShoot` 配置化，作为标准技能模板。
+2. 将目标选择抽离给 Targeting System。
+3. 技能释放只生成 `DamageInfo` 和 `ProjectileSpawnRequest`，不直接扣血。
+4. 技能升级由 Upgrade/Buff 系统修改 RuntimeData。
+5. 技能释放、命中、升级、进化全部发布事件。
+
+## 技能流
+冷却就绪 -> 选择目标 -> 创建释放请求 -> 生成投射物/范围效果 -> DamageSystem 结算 -> Buff/DOT 附加 -> UI 刷新。
+
+## 验收标准
+- 新增技能只需新增配置和效果类，不修改 `SkillManager` 主流程。
+- 技能可以被 Buff 改变伤害、范围、冷却、弹道数和持续时间。
+- 自动释放不会每帧产生 GC。
+
+## 验收标准补充
+- 本模块完成后必须形成最小可运行闭环，可以在当前 Unity 场景中通过手动挂载或现有入口验证核心流程。
+- 相关配置、运行时数据、事件发布和事件订阅必须有明确入口，异常或缺失配置时要给出可定位的问题表现。
+- 高频逻辑不得引入明显 GC 分配；涉及生成、销毁、特效、投射物、敌人或 UI 飘字时必须优先接入对象池。
+- 完成实现后必须说明受影响脚本、Prefab/Scene 挂载要求、测试步骤和未迁移的旧逻辑边界。
+
+## 模块依赖边界
+- 本模块只能依赖已完成或同阶段明确约定的公共接口、配置数据和事件 Key，不直接依赖后续阶段的具体实现类。
+- 跨模块通信优先通过 `EventBus`、`IGameSystem`、`ServiceLocator`、ScriptableObject 配置或明确的 Controller API 完成。
+- 禁止从低层模块反向引用高层模块；例如 Damage、Pool、Config 不应依赖 UI、Upgrade、Shop 等外围系统。
+- 禁止在核心逻辑中散落 `FindObjectOfType`、硬编码场景路径或直接访问无关单例；必须通过启动流程、序列化引用或服务注册注入依赖。
+- 数据结构与事件 Payload 必须保持小而稳定，避免为了单个功能暴露整个 Manager 或运行时对象内部状态。
+
+## 旧逻辑兼容与迁移约束
+- 保持当前可运行逻辑，不一次性删除或重写现有 `Player`、`Enemy`、`SkillShoot`、`EnemyGenerateManager` 等已在场景中使用的脚本。
+- 新系统先以适配器、旁路入口或可切换开关接入；确认新流程可运行后，再逐步迁移旧职责。
+- 每次迁移只替换一个清晰职责，例如目标选择、伤害结算、对象生成、UI 刷新或配置读取，避免跨系统大改。
+- 迁移期间必须保持旧 Prefab、Animator、Collider、Layer、Tag 和 Inspector 序列化字段不失效。
+- 删除旧代码前必须确认没有场景引用、Prefab 引用和运行时调用；无法确认时保留兼容层并标注后续清理任务。
+
+
+备注：
+闪电特效增加：随buff增益，闪电颜色加深变紫
+
+## v2 验收标准补充
+- 完成后须验证与 `architecture_design.md` 中本模块的数据流、事件流一致。
+- 列出受影响脚本、Prefab/Scene 挂载、ContextMenu 或手动测试步骤。
+- 标注仍依赖的 Legacy 代码及后续清理计划。
+- 新类推荐 namespace：`AttackBarbarians.{Layer}.{Module}`（迁移期可与全局类并存）。
+
+## v2 模块依赖边界
+- 仅依赖 architecture_design.md 中本层及以下层的公共接口、配置 SO、Event Key。
+- 禁止从低层模块反向引用 UI、Shop、Upgrade 等 unless 本模块即为该层。
+- Event Payload 保持小而稳定；禁止暴露 Manager 内部可变状态。

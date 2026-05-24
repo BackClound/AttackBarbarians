@@ -8,8 +8,6 @@ using UnityEngine;
 /// </remarks>
 public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 {
-    [Header("Legacy")]
-    [SerializeField] private EnemyGenerateManager legacySpawner;
     [SerializeField] private bool disableLegacySpawnerOnInit = true;
 
     [Header("Spawn Area")]
@@ -35,16 +33,6 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         if (spawnArea == null)
         {
             spawnArea = gameObject.AddComponent<SpawnAreaController>();
-        }
-
-        if (legacySpawner == null)
-        {
-            legacySpawner = FindFirstObjectByType<EnemyGenerateManager>();
-        }
-
-        if (disableLegacySpawnerOnInit && legacySpawner != null)
-        {
-            legacySpawner.SetAutoSpawnEnabled(false);
         }
 
         bool mapConfigured = ServiceLocator.TryGet(out MapManager mapManager) && mapManager.IsMapLoaded;

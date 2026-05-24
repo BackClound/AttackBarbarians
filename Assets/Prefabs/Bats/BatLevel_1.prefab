@@ -1,23 +1,23 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!1 &4766495136149570709
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 8344809219264004464}
   - component: {fileID: 8789040610686946338}
   - component: {fileID: 1519419517830280383}
   - component: {fileID: 2640175899680227429}
-  - component: {fileID: 5335459097766836919}
   - component: {fileID: 7093294223847605618}
   - component: {fileID: 5981320913119421051}
   - component: {fileID: -2286195224503263689}
   - component: {fileID: 9162782018375110162}
   m_Layer: 8
+  m_HasEditorInfo: 1
   m_Name: BatLevel_1
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -56,6 +56,8 @@ MonoBehaviour:
   coll: {fileID: 5981320913119421051}
   enemy_Health: {fileID: 0}
   isBoss: 0
+  isElite: 0
+  isSpecial: 0
   attackCheck: {fileID: 8344809219264004464}
   attackDistance: 0.6
   wallLayer:
@@ -133,27 +135,9 @@ MonoBehaviour:
   currentHp: 0
   realHp: 0
   isDead: 0
---- !u!114 &5335459097766836919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4766495136149570709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0c6a65982db54e938fdbe5a539b0e76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombatManager
-  maxCheckDistance: 1
-  checkPosition: {fileID: 8344809219264004464}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  enemyTag: Wall
 --- !u!50 &7093294223847605618
 Rigidbody2D:
-  serializedVersion: 5
+  serializedVersion: 4
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -164,8 +148,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -211,7 +195,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
-  m_CompositeOrder: 0
+  m_CompositeLayer: 0
   m_Offset: {x: -0.35471576, y: 0.07996905}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,13 +240,14 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  serializedVersion: 7
   m_Component:
   - component: {fileID: 5046940210035928353}
   - component: {fileID: 5453781551670332340}
   - component: {fileID: 1249317012298295962}
   - component: {fileID: 7476000976746983689}
   m_Layer: 8
+  m_HasEditorInfo: 1
   m_Name: Animator
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -286,7 +271,6 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5453781551670332340
 SpriteRenderer:
-  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -302,11 +286,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
+  m_virtualGeometry: 0
+  m_ShadingRate: 0
+  m_ForceDisableGRD: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -328,11 +310,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 285576527
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 5de99547a24b8a04f956cf245ee48f33, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -342,10 +322,11 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!95 &1249317012298295962
 Animator:
-  serializedVersion: 7
+  serializedVersion: 6
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -356,10 +337,11 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 1315fb6c7b5538646a3f38eb569d4aa5, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
+  m_UpdateFrequencyMode: 0
+  m_UpdateFrequency: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1

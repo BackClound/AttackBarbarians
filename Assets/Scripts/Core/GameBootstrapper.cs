@@ -188,6 +188,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(enemySpawnerManager);
         systems.Add(waveManager);
         systems.Add(bossRunStatsBridge);
+
+        ServiceLocator.Register(gameplayEventDebugBridge);
     }
 
     private void InitializeSystems()

@@ -42,10 +42,6 @@ public class Player : Entity
         player_Health = GetComponent<Player_Health>();
         skillManager = GetComponent<PlayerSkillManager>();
         combatBridge = GetComponent<PlayerCombatBridge>();
-        if (combatBridge == null)
-        {
-            combatBridge = GetComponent<PlayerCombat>();
-        }
     }
 
     public override void Start()

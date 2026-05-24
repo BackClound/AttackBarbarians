@@ -15,7 +15,7 @@ public class PlayerExperienceService : MonoBehaviour, IGameSystem
 
     public void Initialize()
     {
-        playerController = FindFirstObjectByType<PlayerController>();
+        PlayerSceneAccess.TryGetController(out playerController);
         GameEvents.SubscribeEnemyKilled(OnEnemyKilled);
         isInitialized = true;
     }
@@ -37,7 +37,7 @@ public class PlayerExperienceService : MonoBehaviour, IGameSystem
 
         if (playerController == null)
         {
-            playerController = FindFirstObjectByType<PlayerController>();
+            PlayerSceneAccess.TryGetController(out playerController);
         }
 
         if (playerController == null || !playerController.IsReady)

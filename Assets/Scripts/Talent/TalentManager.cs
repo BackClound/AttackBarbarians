@@ -157,8 +157,7 @@ public class TalentManager : MonoBehaviour, IGameSystem
 
     public void TryApplyToScenePlayer()
     {
-        PlayerController controller = FindFirstObjectByType<PlayerController>();
-        if (controller == null || !controller.IsReady)
+        if (!PlayerSceneAccess.TryGetController(out PlayerController controller))
         {
             return;
         }

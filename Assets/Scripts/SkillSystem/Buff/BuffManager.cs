@@ -75,7 +75,7 @@ public class BuffManager : MonoBehaviour
 
             if (skillManager == null)
             {
-                skillManager = FindAnyObjectByType<SkillManager>();
+                PlayerSceneAccess.TryGetSkillSystem(out skillManager);
             }
         }
 
@@ -87,7 +87,12 @@ public class BuffManager : MonoBehaviour
                 player = skillManager.GetComponent<Player>();
             }
 
-            playerController = player != null ? player.GetComponent<PlayerController>() : null;
+            if (player == null)
+            {
+                PlayerSceneAccess.TryGetPlayer(out player);
+            }
+
+            playerController = player != null ? player.controller : null;
         }
     }
 }
