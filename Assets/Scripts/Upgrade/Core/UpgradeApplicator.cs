@@ -116,17 +116,47 @@ public static class UpgradeApplicator
             return false;
         }
 
-        if (gold > 0)
+        bool applied = false;
+        if (ServiceLocator.TryGet(out ResourceManager resourceManager))
         {
-            saveManager.Current.gold += gold;
+            if (gold > 0)
+            {
+                applied |= resourceManager.TryAdd(
+                    CurrencyType.Gold,
+                    gold,
+                    ResourceChangeReason.UpgradeReward,
+                    out _);
+            }
+
+            if (diamonds > 0)
+            {
+                applied |= resourceManager.TryAdd(
+                    CurrencyType.Diamond,
+                    diamonds,
+                    ResourceChangeReason.UpgradeReward,
+                    out _);
+            }
+        }
+        else
+        {
+            if (gold > 0)
+            {
+                saveManager.Current.gold += gold;
+                applied = true;
+            }
+
+            if (diamonds > 0)
+            {
+                saveManager.Current.diamonds += diamonds;
+                applied = true;
+            }
         }
 
-        if (diamonds > 0)
+        if (applied)
         {
-            saveManager.Current.diamonds += diamonds;
+            saveManager.MarkDirty();
         }
 
-        saveManager.MarkDirty();
-        return gold > 0 || diamonds > 0;
+        return applied;
     }
 }

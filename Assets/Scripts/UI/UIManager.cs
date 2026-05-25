@@ -29,8 +29,9 @@ public class UIManager : GameEventSubscriberBase
     [SerializeField] private GameOverPanelUI gameOverPanel;
     [SerializeField] private UpgradePanelUI upgradePanel;
     [SerializeField] private WaveTransitionPanelUI waveTransitionPanel;
+    [SerializeField] private ShopPanelUI shopPanel;
 
-    private readonly Dictionary<string, UiPanelBase> panelById = new Dictionary<string, UiPanelBase>(8);
+    private readonly Dictionary<string, UiPanelBase> panelById = new Dictionary<string, UiPanelBase>(12);
     private GameManager gameManager;
 
     private void Awake()
@@ -68,6 +69,7 @@ public class UIManager : GameEventSubscriberBase
         GameEvents.SubscribeWaveStarted(OnWaveStarted);
         GameEvents.SubscribeWaveCompleted(OnWaveCompleted);
         GameEvents.SubscribeGameStarted(OnGameStarted);
+        GameEvents.SubscribeResourceChanged(OnResourceChanged);
     }
 
     protected override void UnregisterHandlers()
@@ -78,6 +80,7 @@ public class UIManager : GameEventSubscriberBase
         GameEvents.UnsubscribeWaveStarted(OnWaveStarted);
         GameEvents.UnsubscribeWaveCompleted(OnWaveCompleted);
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
+        GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
     public void UpdateHealthDisplay(float current, float max)
@@ -127,6 +130,7 @@ public class UIManager : GameEventSubscriberBase
         RegisterPanel(GameConstants.UiPanelIds.GameOver, gameOverPanel);
         RegisterPanel(GameConstants.UiPanelIds.Upgrade, upgradePanel);
         RegisterPanel(GameConstants.UiPanelIds.WaveTransition, waveTransitionPanel);
+        RegisterPanel(GameConstants.UiPanelIds.Shop, shopPanel);
     }
 
     private void RegisterPanel(string panelId, UiPanelBase panel)
@@ -152,6 +156,12 @@ public class UIManager : GameEventSubscriberBase
         }
 
         ApplyState(gameManager.CurrentState, gameManager.PreviousState);
+    }
+
+    private void OnResourceChanged(GameEventContext ctx)
+    {
+        gameplayHud?.RefreshAll();
+        mainMenuPanel?.RefreshMetaDisplay();
     }
 
     private void OnGameStarted(GameEventContext ctx)
@@ -224,6 +234,7 @@ public class UIManager : GameEventSubscriberBase
 
             case GameState.Playing:
                 mainMenuPanel?.Hide();
+                shopPanel?.Hide();
                 pausePanel?.Hide();
                 gameOverPanel?.Hide();
                 upgradePanel?.Hide();
@@ -263,6 +274,7 @@ public class UIManager : GameEventSubscriberBase
     private void HideAllGameplayPanels()
     {
         mainMenuPanel?.Hide();
+        shopPanel?.Hide();
         pausePanel?.Hide();
         gameOverPanel?.Hide();
         upgradePanel?.Hide();

@@ -38,6 +38,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, MapDataSO> mapsById = new Dictionary<string, MapDataSO>(4);
     private readonly Dictionary<string, GameplayEventDataSO> gameplayEventsById =
         new Dictionary<string, GameplayEventDataSO>(8);
+    private readonly Dictionary<string, ShopItemSO> shopItemsById = new Dictionary<string, ShopItemSO>(16);
     private readonly List<RewardPoolSO> rewardPoolList = new List<RewardPoolSO>(4);
 
     public bool IsInitialized { get; private set; }
@@ -130,6 +131,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     public bool TryGetGameplayEvent(string configId, out GameplayEventDataSO data) =>
         TryGet(gameplayEventsById, configId, out data);
 
+    public bool TryGetShopItem(string configId, out ShopItemSO data) =>
+        TryGet(shopItemsById, configId, out data);
+
     public IReadOnlyList<RewardPoolSO> GetAllRewardPools() => rewardPoolList;
 
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
@@ -205,6 +209,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.Equipment, equipmentById);
         IndexList(Database.Maps, mapsById);
         IndexList(Database.GameplayEvents, gameplayEventsById);
+        IndexList(Database.ShopItems, shopItemsById);
         rewardPoolList.Clear();
         if (Database.RewardPools != null)
         {
@@ -228,7 +233,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
                 $"AutoAttack={autoAttacksById.Count}, Upgrade={upgradeOptionsById.Count}, " +
                 $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}, " +
                 $"Equipment={equipmentById.Count}, Map={mapsById.Count}, " +
-                $"GameplayEvent={gameplayEventsById.Count}");
+                $"GameplayEvent={gameplayEventsById.Count}, ShopItem={shopItemsById.Count}");
         }
     }
 
@@ -269,6 +274,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         equipmentById.Clear();
         mapsById.Clear();
         gameplayEventsById.Clear();
+        shopItemsById.Clear();
         rewardPoolList.Clear();
     }
 

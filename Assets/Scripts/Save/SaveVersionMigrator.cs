@@ -58,6 +58,8 @@ public static class SaveVersionMigrator
         data.equippedItems ??= new List<EquipmentSlotSaveEntry>(4);
         data.skillLevels ??= new List<ConfigIdIntPair>(4);
         data.runProgress.activeBuffs ??= new List<ConfigIdIntPair>(4);
+        data.shopPurchaseCounts ??= new List<ConfigIdIntPair>(4);
+        data.shopLastPurchaseUtcTicks ??= new List<ConfigIdLongPair>(4);
 
         if (data.settings != null && data.settings.uiVolume <= 0f)
         {

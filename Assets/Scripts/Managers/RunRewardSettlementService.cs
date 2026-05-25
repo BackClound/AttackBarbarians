@@ -68,8 +68,23 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         long goldGranted = (long)Mathf.Max(0, Mathf.Round(result.Gold * rewardMultiplier));
         long diamondsGranted = (long)Mathf.Max(0, Mathf.Round(result.Diamonds * rewardMultiplier));
 
-        saveManager.Current.gold += goldGranted;
-        saveManager.Current.diamonds += diamondsGranted;
+        if (ServiceLocator.TryGet(out ResourceManager resourceManager))
+        {
+            if (goldGranted > 0)
+            {
+                resourceManager.TryAdd(CurrencyType.Gold, goldGranted, ResourceChangeReason.RunSettlement, out _);
+            }
+
+            if (diamondsGranted > 0)
+            {
+                resourceManager.TryAdd(CurrencyType.Diamond, diamondsGranted, ResourceChangeReason.RunSettlement, out _);
+            }
+        }
+        else
+        {
+            saveManager.Current.gold += goldGranted;
+            saveManager.Current.diamonds += diamondsGranted;
+        }
 
         if (saveManager.Current.statistics != null)
         {

@@ -19,6 +19,10 @@ public class SaveData
 
     public int dailyRewardStreak;
     public long lastDailyRewardClaimUtcTicks;
+    public long lastFreeDiamondClaimUtcTicks;
+
+    public List<ConfigIdIntPair> shopPurchaseCounts = new List<ConfigIdIntPair>(8);
+    public List<ConfigIdLongPair> shopLastPurchaseUtcTicks = new List<ConfigIdLongPair>(8);
 
     public List<ConfigIdIntPair> permanentUpgrades = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> talentLevels = new List<ConfigIdIntPair>(16);
@@ -40,6 +44,9 @@ public class SaveData
             diamonds = 0,
             dailyRewardStreak = 0,
             lastDailyRewardClaimUtcTicks = 0,
+            lastFreeDiamondClaimUtcTicks = 0,
+            shopPurchaseCounts = new List<ConfigIdIntPair>(4),
+            shopLastPurchaseUtcTicks = new List<ConfigIdLongPair>(4),
             permanentUpgrades = new List<ConfigIdIntPair>(4),
             talentLevels = new List<ConfigIdIntPair>(4),
             equipmentLevels = new List<ConfigIdIntPair>(4),
@@ -83,4 +90,10 @@ public class SaveData
 
     public void SetEquippedAt(EquipmentSlot slot, string equipmentConfigId) =>
         EquipmentSlotSaveUtility.SetEquippedId(equippedItems, slot, equipmentConfigId);
+
+    public int GetShopPurchaseCount(string configId) =>
+        ConfigIdIntPairListUtility.GetValue(shopPurchaseCounts, configId);
+
+    public void SetShopPurchaseCount(string configId, int count) =>
+        ConfigIdIntPairListUtility.SetValue(shopPurchaseCounts, configId, count);
 }

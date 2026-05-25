@@ -457,6 +457,45 @@ public static class GameEvents
 
     #endregion
 
+    #region Economy
+
+    public static void RaiseResourceChanged(object sender, ResourceChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.ResourceChanged, sender, args);
+
+    public static void SubscribeResourceChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.ResourceChanged, handler);
+
+    public static void UnsubscribeResourceChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.ResourceChanged, handler);
+
+    #endregion
+
+    #region Shop
+
+    public static void RaiseShopPurchased(object sender, ShopPurchaseEventArgs args) =>
+        Publish(GameConstants.EventKeys.ShopPurchased, sender, args);
+
+    public static void RaiseShopPurchaseFailed(
+        object sender,
+        string itemConfigId,
+        ShopPurchaseFailedReason reason,
+        string message) =>
+        Publish(GameConstants.EventKeys.ShopPurchaseFailed, sender, new ShopPurchaseFailedEventArgs(itemConfigId, reason, message));
+
+    public static void SubscribeShopPurchased(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.ShopPurchased, handler);
+
+    public static void UnsubscribeShopPurchased(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.ShopPurchased, handler);
+
+    public static void SubscribeShopPurchaseFailed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.ShopPurchaseFailed, handler);
+
+    public static void UnsubscribeShopPurchaseFailed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.ShopPurchaseFailed, handler);
+
+    #endregion
+
     #region Gameplay Event
 
     public static void RaiseGameplayEventStarted(object sender, GameplayEventArgs args) =>

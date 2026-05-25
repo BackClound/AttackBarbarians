@@ -109,6 +109,13 @@ public static class GameConstants
         // Gameplay Event
         public const string GameplayEventStarted = "GameplayEvent.Started";
         public const string GameplayEventEnded = "GameplayEvent.Ended";
+
+        // Economy
+        public const string ResourceChanged = "Economy.ResourceChanged";
+
+        // Shop
+        public const string ShopPurchased = "Shop.Purchased";
+        public const string ShopPurchaseFailed = "Shop.PurchaseFailed";
     }
 
     public static class UiPanelIds
@@ -118,6 +125,7 @@ public static class GameConstants
         public const string GameOver = "ui.game_over";
         public const string WaveTransition = "ui.wave_transition";
         public const string Upgrade = "ui.upgrade";
+        public const string Shop = "ui.shop";
     }
 
     public static class AudioIds
@@ -155,6 +163,7 @@ public static class GameConstants
         public const string SkillUnlockTable = "Config/Skill/SkillUnlockTable_Default";
         public const string MapDefault = "Config/Map/MapData_Default";
         public const string AudioDatabase = "Config/Audio/AudioDatabase";
+        public const string ShopCatalog = "Config/Shop/ShopCatalog_Default";
     }
 
     public static class ConfigIds
@@ -209,6 +218,11 @@ public static class GameConstants
         public const string EquipmentSetWarrior = "set.warrior";
 
         public const string GameplayEventSwarm = "gameplay_event.swarm";
+
+        public const string ShopGoldPackSmall = "shop.gold_pack_small";
+        public const string ShopGoldPackLarge = "shop.gold_pack_large";
+        public const string ShopDiamondPack = "shop.diamond_pack";
+        public const string ShopFreeDiamond = "shop.free_diamond";
     }
 
     public static class PoolKeys

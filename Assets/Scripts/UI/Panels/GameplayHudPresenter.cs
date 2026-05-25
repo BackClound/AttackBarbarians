@@ -56,6 +56,7 @@ public class GameplayHudPresenter : MonoBehaviour
         GameEvents.SubscribeBuffChanged(OnBuffChanged);
         GameEvents.SubscribeGameStarted(OnGameStarted);
         GameEvents.SubscribeRunRewardSettled(OnRunRewardSettled);
+        GameEvents.SubscribeResourceChanged(OnResourceChanged);
 
         RefreshAll();
     }
@@ -69,6 +70,7 @@ public class GameplayHudPresenter : MonoBehaviour
         GameEvents.UnsubscribeBuffChanged(OnBuffChanged);
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
         GameEvents.UnsubscribeRunRewardSettled(OnRunRewardSettled);
+        GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
     private void Update()
@@ -280,12 +282,21 @@ public class GameplayHudPresenter : MonoBehaviour
             return;
         }
 
-        if (ServiceLocator.TryGet(out SaveManager save) && save.Current != null)
+        long gold = 0;
+        if (ServiceLocator.TryGet(out ResourceManager resources))
         {
-            goldText.text = save.Current.gold.ToString();
-            goldText.color = UiTechWastelandPalette.AccentAmber;
+            gold = resources.GetAmount(CurrencyType.Gold);
         }
+        else if (ServiceLocator.TryGet(out SaveManager save) && save.Current != null)
+        {
+            gold = save.Current.gold;
+        }
+
+        goldText.text = gold.ToString();
+        goldText.color = UiTechWastelandPalette.AccentAmber;
     }
+
+    private void OnResourceChanged(GameEventContext ctx) => RefreshGold();
 
     private void RefreshKillCount()
     {

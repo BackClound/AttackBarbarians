@@ -180,9 +180,13 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         }
 
         long cost = data.GetEnhanceCostForLevel(current + 1);
-        if (saveManager.Gold < cost)
+        if (!ServiceLocator.TryGet(out ResourceManager resourceManager) ||
+            !resourceManager.CanAfford(CurrencyType.Gold, cost))
         {
-            failureReason = $"金币不足（需要 {cost}）";
+            long goldBalance = resourceManager != null
+                ? resourceManager.GetAmount(CurrencyType.Gold)
+                : saveManager.Gold;
+            failureReason = ResourceManager.FormatInsufficientFunds(CurrencyType.Gold, cost, goldBalance);
             return false;
         }
 
@@ -203,7 +207,13 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         int next = previous + 1;
         long cost = data.GetEnhanceCostForLevel(next);
 
-        saveManager.Gold -= cost;
+        if (!ServiceLocator.TryGet(out ResourceManager resourceManager) &&
+            !resourceManager.TrySpend(CurrencyType.Gold, cost, ResourceChangeReason.EquipmentEnhance, out string spendFailure))
+        {
+            LogFailure(configId, spendFailure);
+            return false;
+        }
+
         saveManager.Current.SetEquipmentLevel(configId, next);
         saveManager.MarkDirty();
 

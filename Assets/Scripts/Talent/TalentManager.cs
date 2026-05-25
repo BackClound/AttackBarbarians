@@ -84,9 +84,13 @@ public class TalentManager : MonoBehaviour, IGameSystem
         }
 
         long cost = data.GetUpgradeCostForLevel(current + 1);
-        if (saveManager.Gold < cost)
+        if (!ServiceLocator.TryGet(out ResourceManager resourceManager) ||
+            !resourceManager.CanAfford(CurrencyType.Gold, cost))
         {
-            failureReason = $"金币不足（需要 {cost}）";
+            long goldBalance = resourceManager != null
+                ? resourceManager.GetAmount(CurrencyType.Gold)
+                : saveManager.Gold;
+            failureReason = ResourceManager.FormatInsufficientFunds(CurrencyType.Gold, cost, goldBalance);
             return false;
         }
 
@@ -111,7 +115,17 @@ public class TalentManager : MonoBehaviour, IGameSystem
         int next = previous + 1;
         long cost = data.GetUpgradeCostForLevel(next);
 
-        saveManager.Gold -= cost;
+        if (!ServiceLocator.TryGet(out ResourceManager resourceManager) &&
+            !resourceManager.TrySpend(CurrencyType.Gold, cost, ResourceChangeReason.TalentUpgrade, out string spendFailure))
+        {
+            if (!string.IsNullOrEmpty(spendFailure) && configManager != null && configManager.ShouldLog())
+            {
+                Debug.LogWarning($"[TalentManager] 扣费失败 {configId}: {spendFailure}");
+            }
+
+            return false;
+        }
+
         saveManager.Current.SetTalentLevel(configId, next);
         saveManager.MarkDirty();
 

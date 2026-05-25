@@ -14,6 +14,7 @@ public class MainMenuPanelUI : UiPanelBase
     [SerializeField] private Button deployButton;
     [SerializeField] private Button eliteModeButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button shopButton;
 
     [Header("Display")]
     [SerializeField] private TMP_Text titleText;
@@ -37,6 +38,21 @@ public class MainMenuPanelUI : UiPanelBase
         {
             settingsButton.onClick.AddListener(OnSettingsClicked);
         }
+
+        if (shopButton != null)
+        {
+            shopButton.onClick.AddListener(OnShopClicked);
+        }
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.SubscribeResourceChanged(OnResourceChanged);
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
     protected override void OnShow()
@@ -49,22 +65,30 @@ public class MainMenuPanelUI : UiPanelBase
         }
     }
 
-    private void RefreshMetaDisplay()
+    public void RefreshMetaDisplay()
     {
-        if (!ServiceLocator.TryGet(out SaveManager save) || save.Current == null)
+        long gold = 0;
+        long diamonds = 0;
+        if (ServiceLocator.TryGet(out ResourceManager resources))
         {
-            return;
+            gold = resources.GetAmount(CurrencyType.Gold);
+            diamonds = resources.GetAmount(CurrencyType.Diamond);
+        }
+        else if (ServiceLocator.TryGet(out SaveManager save) && save.Current != null)
+        {
+            gold = save.Current.gold;
+            diamonds = save.Current.diamonds;
         }
 
         if (goldText != null)
         {
-            goldText.text = save.Current.gold.ToString();
+            goldText.text = gold.ToString();
             goldText.color = UiTechWastelandPalette.TextTerminal;
         }
 
         if (diamondText != null)
         {
-            diamondText.text = save.Current.diamonds.ToString();
+            diamondText.text = diamonds.ToString();
             diamondText.color = UiTechWastelandPalette.PrimaryCyan;
         }
 
@@ -101,4 +125,16 @@ public class MainMenuPanelUI : UiPanelBase
         PlayUiSfx("audio.sfx.ui_click");
         Debug.Log("[MainMenuPanelUI] 设置面板待扩展 ui.settings。");
     }
+
+    private void OnShopClicked()
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.Shop);
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowPanel(GameConstants.UiPanelIds.Shop);
+        }
+    }
+
+    private void OnResourceChanged(GameEventContext ctx) => RefreshMetaDisplay();
 }

@@ -28,6 +28,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<EquipmentDataSO> equipment = new List<EquipmentDataSO>();
     [SerializeField] private List<MapDataSO> maps = new List<MapDataSO>();
     [SerializeField] private List<GameplayEventDataSO> gameplayEvents = new List<GameplayEventDataSO>();
+    [SerializeField] private List<ShopItemSO> shopItems = new List<ShopItemSO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -46,6 +47,7 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<EquipmentDataSO> Equipment => equipment;
     public IReadOnlyList<MapDataSO> Maps => maps;
     public IReadOnlyList<GameplayEventDataSO> GameplayEvents => gameplayEvents;
+    public IReadOnlyList<ShopItemSO> ShopItems => shopItems;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -94,6 +96,9 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetGameplayEvent(string configId, out GameplayEventDataSO data) =>
         TryGet(gameplayEvents, configId, out data);
+
+    public bool TryGetShopItem(string configId, out ShopItemSO data) =>
+        TryGet(shopItems, configId, out data);
 
     private static bool TryGet<T>(List<T> list, string configId, out T data) where T : ConfigDataBase
     {
