@@ -1,0 +1,17 @@
+{
+    "name": "AB.Combat",
+    "rootNamespace": "AttackBarbarians.Combat",
+    "references": [
+        "AB.Core",
+        "AB.Config"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

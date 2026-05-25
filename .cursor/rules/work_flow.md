@@ -164,7 +164,7 @@ PlayerRuntimeStats → ConfigStatBridge → Entity_Stats
 - [ ] `DamagePipeline.ApplyLegacy` 仅测试环境
 - [ ] 全部 `FindObjectOfType<Player*>` → `PlayerSceneAccess`
 - [ ] AutoAttack 不独立发弹，驱动 SkillManager
-- [ ] asmdef: AB.Core → AB.Combat → AB.Skills → AB.Gameplay
+- [ ] asmdef 分阶段 Apply 至 Phase 10（工具已就绪，见 `docs/version_02/asmdef_migration.md`）
 - [ ] Wall 代理层文档化（敌人伤害 → Player 血量）
 
 ---

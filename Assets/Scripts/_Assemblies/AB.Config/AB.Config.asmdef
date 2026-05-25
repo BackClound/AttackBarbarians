@@ -1,0 +1,16 @@
+{
+    "name": "AB.Config",
+    "rootNamespace": "AttackBarbarians.Config",
+    "references": [
+        "AB.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

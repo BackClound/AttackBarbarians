@@ -79,6 +79,6 @@
 - ✅ BuffManager 去除 FindAnyObjectByType
 - ✅ GameBootstrapper systems 顺序对齐
 - ✅ docs/version_02 prompt 文件
-- ⏳ asmdef 分阶段（文档化，代码后续）
+- ✅ asmdef 分阶段（`_Assemblies` + `AssemblyMigrationCatalog` + Editor 菜单；默认 Phase 0，需 Unity 内逐阶段 Apply）
 - ⏳ Legacy 代码删除（需场景验证后）
 - ⏳ Namespace 迁移（新代码先行）

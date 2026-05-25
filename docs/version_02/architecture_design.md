@@ -223,7 +223,7 @@ Assets/Scripts/
 | `AB.UI` | UI | AB.Meta |
 | `AB.Editor` | Editor/* | All |
 
-> **当前状态**：全部在 `Assembly-CSharp`；v2 先完成逻辑边界，再逐步拆 asmdef。
+> **当前状态**：默认仍在 `Assembly-CSharp`；程序集定义与分阶段工具已落地（`Assets/Scripts/_Assemblies/`、`AssemblyMigrationCatalog`、菜单 `Attack Barbarians/Assembly/*`）。在 Unity 中按 `docs/version_02/asmdef_migration.md` 从 Phase 1 逐步 Apply。
 
 ---
 

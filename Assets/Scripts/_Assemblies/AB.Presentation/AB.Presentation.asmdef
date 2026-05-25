@@ -1,0 +1,21 @@
+{
+    "name": "AB.Presentation",
+    "rootNamespace": "AttackBarbarians.Presentation",
+    "references": [
+        "AB.Core",
+        "AB.Config",
+        "AB.Combat",
+        "AB.Skills",
+        "AB.Gameplay",
+        "AB.Meta"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

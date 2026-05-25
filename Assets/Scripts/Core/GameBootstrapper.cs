@@ -220,10 +220,38 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     {
         for (int i = 0; i < systems.Count; i++)
         {
+            if (systems[i] is PoolManager)
+            {
+                ApplyPoolRuntimePolicy();
+            }
+
             systems[i].Initialize();
         }
 
         RunDifficultyBootstrap.ApplyFromGameConfig(configManager != null ? configManager.GameConfig : null);
+    }
+
+    private void ApplyPoolRuntimePolicy()
+    {
+        if (poolManager == null || configManager == null)
+        {
+            return;
+        }
+
+        GameConfig gameConfig = configManager.GameConfig;
+        if (gameConfig == null)
+        {
+            gameConfig = Resources.Load<GameConfig>(GameConstants.ResourcePaths.GameConfig);
+        }
+
+        if (gameConfig == null)
+        {
+            return;
+        }
+
+        poolManager.ConfigureRuntimePolicy(
+            gameConfig.DefaultPoolPrewarmCount,
+            gameConfig.AllowPoolGrowth);
     }
 
     private T ResolveOrCreate<T>(T current) where T : Component

@@ -1,0 +1,25 @@
+{
+    "name": "AB.Editor",
+    "rootNamespace": "AttackBarbarians.Editor",
+    "references": [
+        "AB.Core",
+        "AB.Config",
+        "AB.Combat",
+        "AB.Skills",
+        "AB.Gameplay",
+        "AB.Meta",
+        "AB.Presentation",
+        "AB.App"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

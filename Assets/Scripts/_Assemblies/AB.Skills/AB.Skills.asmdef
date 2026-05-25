@@ -1,0 +1,18 @@
+{
+    "name": "AB.Skills",
+    "rootNamespace": "AttackBarbarians.Skills",
+    "references": [
+        "AB.Core",
+        "AB.Config",
+        "AB.Combat"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

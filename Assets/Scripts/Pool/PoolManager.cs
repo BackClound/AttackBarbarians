@@ -17,8 +17,19 @@ public class PoolManager : MonoBehaviour, IGameSystem
     [SerializeField] private List<PoolEntry> inspectorPools = new List<PoolEntry>();
 
     private readonly Dictionary<string, GameObjectPoolHandle> pools = new Dictionary<string, GameObjectPoolHandle>(32);
+    private int runtimeDefaultPrewarm;
+    private bool runtimeAllowPoolGrowth = true;
 
     public bool IsInitialized { get; private set; }
+
+    /// <summary>
+    /// 由 Bootstrap 在 <see cref="Initialize"/> 前注入，避免 Pool 程序集反向依赖 Config。
+    /// </summary>
+    public void ConfigureRuntimePolicy(int defaultPrewarm, bool allowPoolGrowth)
+    {
+        runtimeDefaultPrewarm = Mathf.Max(0, defaultPrewarm);
+        runtimeAllowPoolGrowth = allowPoolGrowth;
+    }
 
     public void Initialize()
     {
@@ -153,17 +164,12 @@ public class PoolManager : MonoBehaviour, IGameSystem
 
         Transform parent = entry.Parent != null ? entry.Parent : transform;
         int prewarm = entry.InitialCount;
-        ConfigManager configManager = ServiceLocator.TryGet(out ConfigManager manager) ? manager : null;
-        if (prewarm <= 0 && configManager != null && configManager.GameConfig != null)
+        if (prewarm <= 0)
         {
-            prewarm = configManager.GameConfig.DefaultPoolPrewarmCount;
+            prewarm = runtimeDefaultPrewarm;
         }
 
-        bool canExpand = entry.CanExpand;
-        if (configManager != null && configManager.GameConfig != null && !configManager.GameConfig.AllowPoolGrowth)
-        {
-            canExpand = false;
-        }
+        bool canExpand = entry.CanExpand && runtimeAllowPoolGrowth;
 
         var pool = new ObjectPool<Transform>(
             entry.Prefab.transform,
