@@ -159,9 +159,9 @@ PlayerRuntimeStats → ConfigStatBridge → Entity_Stats
 
 ## 重构检查清单（v2 技术债）
 
-- [ ] 删除 `EnemyGenerateManager` 场景引用
-- [ ] 删除 `PlayerCombat` / `EnemyCombatManager`
-- [ ] `DamagePipeline.ApplyLegacy` 仅测试环境
+- [x] 删除 `EnemyGenerateManager` 场景引用
+- [x] 删除 `PlayerCombat` / `EnemyCombatManager`
+- [x] `DamagePipeline.ApplyLegacy` 已移除（Bootstrap 未就绪时告警并跳过）
 - [ ] 全部 `FindObjectOfType<Player*>` → `PlayerSceneAccess`
 - [ ] AutoAttack 不独立发弹，驱动 SkillManager
 - [ ] asmdef 分阶段 Apply 至 Phase 10（工具已就绪，见 `docs/version_02/asmdef_migration.md`）

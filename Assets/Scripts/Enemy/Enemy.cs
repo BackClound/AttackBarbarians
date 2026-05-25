@@ -20,7 +20,7 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public void SetSpecialFlag(bool value) => isSpecial = value;
 
-    [Header("Attack probe (legacy Inspector fields)")]
+    [Header("Attack probe (Inspector)")]
     [SerializeField] protected Transform attackCheck;
     [SerializeField] protected float attackDistance;
     [SerializeField] protected LayerMask wallLayer;
@@ -177,7 +177,7 @@ public class Enemy : Entity, IDamagable, IPoolable
 
     public override void TakeDamage(float damage)
     {
-        TakeDamage(DamageInfo.FromLegacy(damage, gameObject));
+        TakeDamage(DamageInfo.FromFloat(damage, gameObject));
     }
 
     public override DamageResult TakeDamage(DamageInfo info)

@@ -4,12 +4,10 @@ using UnityEngine;
 /// 敌人生成：由 <see cref="WaveManager"/> 驱动，从对象池取出并初始化 <see cref="EnemyController"/>。
 /// </summary>
 /// <remarks>
-/// <para><b>是否需要挂载：</b>是。推荐挂在 <c>GameSystems</c> 或场景 <c>EnemyGenerateManager</c> 同级物体。</para>
+/// <para><b>是否需要挂载：</b>是。推荐挂在 <c>GameSystems</c> 下（与 <see cref="WaveManager"/> 同级）。</para>
 /// </remarks>
 public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 {
-    [SerializeField] private bool disableLegacySpawnerOnInit = true;
-
     [Header("Spawn Area")]
     [SerializeField] private SpawnAreaController spawnArea;
 

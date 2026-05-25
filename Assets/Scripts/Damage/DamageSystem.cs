@@ -100,8 +100,8 @@ public class DamageSystem : MonoBehaviour, IGameSystem
 
         if ((info.Tags & DamageTag.SkipCalculation) != 0)
         {
-            float legacy = info.BaseDamage * info.SkillMultiplier;
-            return new DamageResult(legacy, 0f, false, false, info.Tags);
+            float rawDamage = info.BaseDamage * info.SkillMultiplier;
+            return new DamageResult(rawDamage, 0f, false, false, info.Tags);
         }
 
         Entity_Stats attackerStats = ResolveAttackerStats(info.Source);

@@ -11,7 +11,7 @@ public class SkillShoot : SkillBase
 {
     public Action<float> updateAttackSpeedMultiAction;
 
-    [Header("Legacy Prefab References (Inspector only)")]
+    [Header("Prefab References (Inspector / migration)")]
     [SerializeField] private GameObject bulletSpawnPrefab;
     [SerializeField] private Transform bulletSpawnPoint;
     [SerializeField] private Transform checkPosition;

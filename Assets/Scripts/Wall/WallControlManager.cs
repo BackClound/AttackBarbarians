@@ -72,7 +72,7 @@ public class WallControlManager : MonoBehaviour
     /// <param name="damage"></param>
     public void TakeDamage(float damage)
     {
-        ApplyDamageToPlayer(DamageInfo.FromLegacy(damage, ResolvePlayerTarget(), null));
+        ApplyDamageToPlayer(DamageInfo.FromFloat(damage, ResolvePlayerTarget(), null));
     }
 
     private DamageResult ApplyDamageToPlayer(DamageInfo info)

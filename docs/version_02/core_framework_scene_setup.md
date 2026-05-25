@@ -38,8 +38,9 @@ GameSystems                    ← 空物体，挂 GameBootstrapper（可同挂 
 │   ├── Pool_Enemy             ← 可选，作敌人池 Parent
 │   ├── Pool_Bullet
 │   └── Pool_DamageNumber
+├── EnemySpawnerManager        ← 与 WaveManager 同级，由 Bootstrap 注册
+├── WaveManager
 ├── Player                     ← 已有玩法物体，保持原样
-├── EnemyGenerateManager       ← 旧逻辑，暂不删除
 └── …（相机、UI 等）
 ```
 
@@ -94,8 +95,8 @@ GameEvents.SubscribeGameStateChanged(OnGameStateChanged);
 
 ## 与旧逻辑的关系
 
-- `Player`、`EnemyGenerateManager`、`SkillShoot` 等**保持原场景引用**，不要求迁到 `GameSystems`。
-- 新系统通过 `ServiceLocator` / `EventBus` 旁路接入；迁移完成后再逐步下线旧入口。
+- `Player`、`SkillShoot` 等玩法物体**保持原场景引用**，不要求迁到 `GameSystems`。
+- 刷怪由 `EnemySpawnerManager` + `WaveManager` 驱动；已下线 `EnemyGenerateManager` / `PlayerCombat` / `EnemyCombatManager`。
 
 ## 单例框架
 

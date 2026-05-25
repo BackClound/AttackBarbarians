@@ -19,7 +19,7 @@ public class Entity : MonoBehaviour, IDamagable
 
     public virtual void TakeDamage(float damage)
     {
-        TakeDamage(DamageInfo.FromLegacy(damage, gameObject));
+        TakeDamage(DamageInfo.FromFloat(damage, gameObject));
     }
 
     public virtual DamageResult TakeDamage(DamageInfo info)

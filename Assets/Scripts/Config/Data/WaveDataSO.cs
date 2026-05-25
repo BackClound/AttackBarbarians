@@ -76,8 +76,8 @@ public class WaveDataSO : ConfigDataBase
         }
 
         bool hasEntries = enemyEntries != null && enemyEntries.Count > 0;
-        bool hasLegacyIds = enemyConfigIds != null && enemyConfigIds.Count > 0;
-        if (!hasEntries && !hasLegacyIds)
+        bool hasFlatConfigIds = enemyConfigIds != null && enemyConfigIds.Count > 0;
+        if (!hasEntries && !hasFlatConfigIds)
         {
             result.AddWarning(name, "未配置 enemyEntries 或 enemyConfigIds。");
         }

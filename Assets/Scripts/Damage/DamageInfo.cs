@@ -65,8 +65,8 @@ public readonly struct DamageInfo
             knockbackForce);
     }
 
-    /// <summary>兼容旧 <c>TakeDamage(float)</c> 入口。</summary>
-    public static DamageInfo FromLegacy(float damage, GameObject target, object source = null)
+    /// <summary>由 <c>TakeDamage(float)</c> 等简单数值入口构造，默认跳过完整公式链。</summary>
+    public static DamageInfo FromFloat(float damage, GameObject target, object source = null)
     {
         return new DamageInfo(
             source,

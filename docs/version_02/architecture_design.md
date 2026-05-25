@@ -254,7 +254,7 @@ Assets/Scripts/
 | 双属性真相源（Entity_Stats vs PlayerRuntimeStats） | 伤害与 Buff 不同步 | **唯一真相**：`PlayerRuntimeStats` → `ConfigStatBridge` → `Entity_Stats`；禁止直接改 Entity_Stats |
 | Talent/Equipment 重复代码 | 维护成本高 | 抽取 `PlayerSceneAccess` + 共享 modifier 构建模式 |
 | BuffManager FindAnyObjectByType | 性能/耦合 | 序列化引用 + `Player.HasInstance` |
-| 遗留 EnemyGenerateManager / PlayerCombat | 双路径 | 标记 Obsolete，Bootstrap 禁用 legacy spawner |
+| ~~遗留 EnemyGenerateManager / PlayerCombat~~ | 已下线 | `EnemySpawnerManager` + `DamagePipeline` → `DamageSystem` |
 | 无 asmdef | 编译边界模糊 | 文档化目标结构，分阶段引入 |
 | 无 namespace | 全局污染 | 新代码使用 `AttackBarbarians.{Layer}.{Module}`，旧代码迁移时批量加 |
 | AutoAttack 与 ShootSkill 双入口 | 射速冲突 | AutoAttack 作为 SkillManager 的节拍驱动，不独立发弹 |

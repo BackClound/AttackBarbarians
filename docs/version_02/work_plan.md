@@ -17,8 +17,8 @@
 | 任务 | 依赖 | 验收 |
 |------|------|------|
 | 引入 AB.Core asmdef | Phase 0 | Core/Events/Pool 独立编译 |
-| Legacy 伤害管线标记与隔离 | Damage | 仅 DamagePipeline 入口 |
-| 禁用 EnemyGenerateManager 场景引用 | Enemy | 无 legacy 刷怪 |
+| Legacy 伤害管线标记与隔离 | Damage | ✅ 仅 DamagePipeline → DamageSystem |
+| 禁用 EnemyGenerateManager 场景引用 | Enemy | ✅ 已移除 legacy 刷怪脚本与场景字段 |
 | ConfigStatBridge 单一路径文档化 | Player | Buff 后 Entity_Stats 同步测试 |
 | core_framework_scene_setup v2 | Bootstrap | Hierarchy 清单 |
 

@@ -1061,8 +1061,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3cc4c880afc4f75b2ec8cbcaecd708, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnerManager
-  legacySpawner: {fileID: 0}
-  disableLegacySpawnerOnInit: 1
   spawnArea: {fileID: 0}
 --- !u!1 &530551914
 GameObject:

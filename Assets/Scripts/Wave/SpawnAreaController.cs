@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 根据相机视口计算敌人生成矩形区域（与旧 <see cref="EnemyGenerateManager"/> 算法一致）。
+/// 根据相机视口计算敌人生成矩形区域。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 <c>GameSystems</c> 或 <see cref="EnemySpawnerManager"/> 同物体。</para>

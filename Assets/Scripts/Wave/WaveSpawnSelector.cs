@@ -39,7 +39,7 @@ public sealed class WaveSpawnSelector
             return;
         }
 
-        BuildLegacyPool(wave.EnemyConfigIds, configManager);
+        BuildPoolFromConfigIds(wave.EnemyConfigIds, configManager);
     }
 
     public string PickEnemyId(float waveElapsedSeconds)
@@ -108,7 +108,7 @@ public sealed class WaveSpawnSelector
         return weightedIds[Random.Range(0, weightedIds.Count)];
     }
 
-    private void BuildLegacyPool(IReadOnlyList<string> enemyConfigIds, ConfigManager configManager)
+    private void BuildPoolFromConfigIds(IReadOnlyList<string> enemyConfigIds, ConfigManager configManager)
     {
         if (enemyConfigIds == null || configManager == null)
         {

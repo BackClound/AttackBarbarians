@@ -21,8 +21,8 @@
 | Pool System | ★★★☆☆ | 中等 | 底层 + Manager 双层，部分特效未接入 |
 | Save System | ★★★★☆ | 良好 | 版本迁移、自动保存 |
 | Player | ★★★★☆ | 良好 | Controller 驱动状态机 |
-| Enemy | ★★★☆☆ | 中等 | 新旧 Spawner 并存 |
-| Damage | ★★★☆☆ | 中等 | Legacy 管线未清理 |
+| Enemy | ★★★★☆ | 良好 | Wave/Pool 驱动 Spawner |
+| Damage | ★★★★☆ | 良好 | 统一 DamagePipeline → DamageSystem |
 | Skill/Buff | ★★★☆☆ | 中等 | 多层门面，部分技能未实现 |
 | Wave | ★★★☆☆ | 中等 | 基础波次可用 |
 | Upgrade | ★★★☆☆ | 中等 | 三选一逻辑有，UI 不完整 |
@@ -36,7 +36,7 @@
 
 ### 3.1 高优先级
 1. **属性双真相源**：`Stat.GetFinalValue()` 不叠 modifier；战斗读 `Entity_Stats`，成长写 `PlayerRuntimeStats`。
-2. **遗留代码未清理**：`EnemyGenerateManager`, `PlayerCombat`, `EnemyCombatManager`, `DamagePipeline.ApplyLegacy`。
+2. ~~**遗留代码未清理**~~：已移除 `EnemyGenerateManager` / `PlayerCombat` / `EnemyCombatManager`；伤害统一 `DamagePipeline` → `DamageSystem`。
 3. **FindObject 散落**：Talent/Equipment/Buff/Experience 等 10+ 处。
 4. **无模块编译边界**：231 文件同一程序集。
 
@@ -80,5 +80,5 @@
 - ✅ GameBootstrapper systems 顺序对齐
 - ✅ docs/version_02 prompt 文件
 - ✅ asmdef 分阶段（`_Assemblies` + `AssemblyMigrationCatalog` + Editor 菜单；默认 Phase 0，需 Unity 内逐阶段 Apply）
-- ⏳ Legacy 代码删除（需场景验证后）
+- ✅ Legacy 代码删除（`EnemyGenerateManager` / `PlayerCombat` / `EnemyCombatManager` 已下线；`DamagePipeline.ApplyLegacy` 已移除）
 - ⏳ Namespace 迁移（新代码先行）

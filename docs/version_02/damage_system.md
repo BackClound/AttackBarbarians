@@ -62,7 +62,7 @@ SkillObject / EnemyCombat
 
 | 保留旧逻辑 | 说明 |
 |------------|------|
-| `TakeDamage(float)` | 转 `DamageInfo.FromLegacy` |
+| `TakeDamage(float)` | 转 `DamageInfo.FromFloat` → `DamagePipeline.Apply` |
 | `Entity_Stats.GetTotalDamage()` | 标记旧 API，内部仍可用 |
 | `AttackInfo`（StatType/value） | 未接入元素映射，后续 Projectile/Skill 模块对接 |
 | Buff 减伤 / 元素抗性 | 公式预留，未读 Buff 目标侧修正 |

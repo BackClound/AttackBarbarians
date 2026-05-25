@@ -140,7 +140,7 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         return targetScanner.Scan() > 0;
     }
 
-    /// <summary>将 scanner 结果复制到外部列表（兼容 PlayerCombat / SkillShoot）。</summary>
+    /// <summary>将 scanner 结果复制到外部列表（供 SkillShoot 等消费）。</summary>
     public bool CopyCombatTargetsTo(System.Collections.Generic.List<Enemy> destination)
     {
         if (destination == null)

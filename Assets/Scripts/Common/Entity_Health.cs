@@ -8,7 +8,7 @@ public class Entity_Health : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        ApplyResolvedDamage(new DamageResult(damage, 0f, false, false), DamageInfo.FromLegacy(damage, gameObject));
+        DamagePipeline.Apply(DamageInfo.FromFloat(damage, gameObject));
     }
 
     /// <summary>由 <see cref="DamageSystem"/> 或 <see cref="DamagePipeline"/> 在结算后调用。</summary>
