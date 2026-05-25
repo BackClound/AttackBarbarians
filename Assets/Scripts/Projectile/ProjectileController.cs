@@ -420,7 +420,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
     {
         if (activeData.HitEffectPrefab != null)
         {
-            Instantiate(activeData.HitEffectPrefab, position, Quaternion.identity);
+            CombatEffectSpawner.TrySpawnHitEffect(activeData.HitEffectPrefab, position, Quaternion.identity);
         }
     }
 

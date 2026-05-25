@@ -122,16 +122,32 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
+        if (ServiceLocator.TryGet(out PerformanceManager performance) &&
+            !performance.TryAcquire(PerformanceBudgetCategory.Enemy))
+        {
+            return false;
+        }
+
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
             !configManager.TryGetEnemy(enemyConfigId, out EnemyDataSO enemyData))
         {
-            Debug.LogWarning($"[EnemySpawnerManager] Boss 基础敌人配置缺失 configId={enemyConfigId}");
+            if (ServiceLocator.TryGet(out PerformanceManager perfRollback))
+            {
+                perfRollback.Release(PerformanceBudgetCategory.Enemy);
+            }
+
+            GameDebug.LogWarning($"[EnemySpawnerManager] Boss 基础敌人配置缺失 configId={enemyConfigId}");
             return false;
         }
 
         GameObject instance = SpawnFromPool(enemyData, position);
         if (instance == null || !instance.TryGetComponent(out EnemyController controller))
         {
+            if (ServiceLocator.TryGet(out PerformanceManager perfFail))
+            {
+                perfFail.Release(PerformanceBudgetCategory.Enemy);
+            }
+
             return false;
         }
 
@@ -171,22 +187,42 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return false;
         }
 
+        if (ServiceLocator.TryGet(out PerformanceManager performance) &&
+            !performance.TryAcquire(PerformanceBudgetCategory.Enemy))
+        {
+            return false;
+        }
+
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
             !configManager.TryGetEnemy(configId, out EnemyDataSO enemyData))
         {
-            Debug.LogWarning($"[EnemySpawnerManager] 无法生成敌人，配置缺失 configId={configId}");
+            if (ServiceLocator.TryGet(out PerformanceManager perfRollback))
+            {
+                perfRollback.Release(PerformanceBudgetCategory.Enemy);
+            }
+            GameDebug.LogWarning($"[EnemySpawnerManager] 无法生成敌人，配置缺失 configId={configId}");
             return false;
         }
 
         GameObject instance = SpawnFromPool(enemyData, position);
         if (instance == null)
         {
+            if (ServiceLocator.TryGet(out PerformanceManager perfFail))
+            {
+                perfFail.Release(PerformanceBudgetCategory.Enemy);
+            }
+
             return false;
         }
 
         if (!instance.TryGetComponent(out EnemyController controller))
         {
-            Debug.LogWarning($"[EnemySpawnerManager] Prefab 缺少 EnemyController configId={configId}", instance);
+            if (ServiceLocator.TryGet(out PerformanceManager perfMissing))
+            {
+                perfMissing.Release(PerformanceBudgetCategory.Enemy);
+            }
+
+            GameDebug.LogWarning($"[EnemySpawnerManager] Prefab 缺少 EnemyController configId={configId}", instance);
             return false;
         }
 
@@ -236,7 +272,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 
         if (data.Prefab != null)
         {
-            Debug.LogWarning($"[EnemySpawnerManager] 对象池缺失，直接实例化敌人 configId={data.ConfigId} poolKey={poolKey}");
+            GameDebug.LogWarning($"[EnemySpawnerManager] 对象池缺失，直接实例化敌人 configId={data.ConfigId} poolKey={poolKey}");
             return Instantiate(data.Prefab, position, Quaternion.identity);
         }
 

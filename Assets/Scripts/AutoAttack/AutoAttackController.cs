@@ -248,9 +248,15 @@ public class AutoAttackController : MonoBehaviour
         }
 
         RefreshTargets(force: true);
-        scanTimer = hasValidTarget
-            ? activeData.ScanIntervalWhileEngaged
-            : activeData.ScanIntervalWhileIdle;
+        float idleInterval = activeData.ScanIntervalWhileIdle;
+        float engagedInterval = activeData.ScanIntervalWhileEngaged;
+        if (ServiceLocator.TryGet(out PerformanceManager performance) && performance.ActiveBudget != null)
+        {
+            idleInterval = performance.ActiveBudget.TargetScanIntervalIdle;
+            engagedInterval = performance.ActiveBudget.TargetScanIntervalEngaged;
+        }
+
+        scanTimer = hasValidTarget ? engagedInterval : idleInterval;
     }
 
     /// <summary>开始连发休整。</summary>

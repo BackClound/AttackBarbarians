@@ -71,6 +71,11 @@ public class DamageNumber : MonoBehaviour, IPoolable
 
     private void DisableNumberComponent()
     {
+        if (ServiceLocator.TryGet(out PerformanceManager performance))
+        {
+            performance.Release(PerformanceBudgetCategory.DamageNumber);
+        }
+
         if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.IsManagedInstance(gameObject))
         {
             poolManager.Despawn(gameObject);

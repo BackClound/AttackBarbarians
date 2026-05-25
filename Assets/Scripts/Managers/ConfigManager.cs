@@ -45,6 +45,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
 
     public bool IsInitialized { get; private set; }
     public GameConfig GameConfig => gameConfig;
+    public PerformanceBudgetSO PerformanceBudget =>
+        gameConfig != null ? gameConfig.PerformanceBudget : null;
     public ConfigDatabaseSO Database { get; private set; }
     public ConfigValidationResult LastValidation { get; private set; }
 
@@ -68,6 +70,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         LastValidation = ConfigValidator.ValidateDatabase(Database);
         LogValidationResult();
 
+        GameDebug.SyncFromConfig();
         IsInitialized = true;
     }
 

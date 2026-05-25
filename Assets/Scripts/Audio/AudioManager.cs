@@ -56,6 +56,11 @@ public class AudioManager : MonoBehaviour, IGameSystem
             enableLogs = config.GameConfig.EnableRuntimeLogs;
         }
 
+        if (ServiceLocator.TryGet(out PerformanceManager performance))
+        {
+            maxConcurrentSfx = performance.GetMaxConcurrentSfx();
+        }
+
         EnsureHierarchy();
         LoadDatabase();
         BuildConfigIndex();

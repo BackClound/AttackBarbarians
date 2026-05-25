@@ -99,6 +99,15 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             return;
         }
 
+        if (ServiceLocator.TryGet(out PerformanceManager performance))
+        {
+            bool highPriority = enemy != null && (enemy.IsBoss || enemy.IsElite || enemy.IsSpecial);
+            if (!performance.ShouldRunEnemyUpdateThisFrame(transform, highPriority))
+            {
+                return;
+            }
+        }
+
         TickStateMachine(Time.deltaTime);
 
         if (abilities == null || abilities.Length == 0)

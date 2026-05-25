@@ -33,6 +33,9 @@ public class GameConfig : ScriptableObject
     [SerializeField] private int defaultPoolPrewarmCount = 8;
     [SerializeField] private bool allowPoolGrowth = true;
 
+    [Header("Performance")]
+    [SerializeField] private PerformanceBudgetSO performanceBudget;
+
     [Header("Save")]
     [SerializeField] private string saveFileName = SaveConstants.DefaultSaveFileName;
     [SerializeField] private bool enableAutoSave = true;
@@ -51,6 +54,7 @@ public class GameConfig : ScriptableObject
     public bool StartWithEliteMode => startWithEliteMode;
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);
     public bool AllowPoolGrowth => allowPoolGrowth;
+    public PerformanceBudgetSO PerformanceBudget => performanceBudget;
     public string SaveFileName => string.IsNullOrWhiteSpace(saveFileName)
         ? SaveConstants.DefaultSaveFileName
         : saveFileName;

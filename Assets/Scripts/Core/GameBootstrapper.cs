@@ -31,6 +31,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private DailyRewardManager dailyRewardManager;
     [SerializeField] private TalentManager talentManager;
     [SerializeField] private EquipmentManager equipmentManager;
+    [SerializeField] private PerformanceManager performanceManager;
     [SerializeField] private PoolManager poolManager;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameFlowManager gameFlowManager;
@@ -122,6 +123,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         dailyRewardManager = ResolveOrCreate(dailyRewardManager);
         talentManager = ResolveOrCreate(talentManager);
         equipmentManager = ResolveOrCreate(equipmentManager);
+        performanceManager = ResolveOrCreate(performanceManager);
         poolManager = ResolveOrCreate(poolManager);
         gameManager = ResolveOrCreate(gameManager);
         gameFlowManager = ResolveOrCreate(gameFlowManager);
@@ -159,6 +161,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ServiceLocator.Register(talentManager);
         ServiceLocator.Register(equipmentManager);
         ServiceLocator.Register(eventBus);
+        ServiceLocator.Register(performanceManager);
         ServiceLocator.Register(poolManager);
         ServiceLocator.Register(gameManager);
         ServiceLocator.Register(gameFlowManager);
@@ -188,6 +191,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(talentManager);
         systems.Add(equipmentManager);
         systems.Add(eventBus);
+        systems.Add(performanceManager);
         systems.Add(poolManager);
         systems.Add(gameManager);
         systems.Add(gameFlowManager);

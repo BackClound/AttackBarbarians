@@ -53,9 +53,20 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
             return null;
         }
 
+        if (ServiceLocator.TryGet(out PerformanceManager performance) &&
+            !performance.TryAcquire(PerformanceBudgetCategory.Projectile))
+        {
+            return null;
+        }
+
         ProjectileController controller = SpawnInstance(request.SpawnPosition, request.Direction, data);
         if (controller == null)
         {
+            if (ServiceLocator.TryGet(out PerformanceManager perfRollback))
+            {
+                perfRollback.Release(PerformanceBudgetCategory.Projectile);
+            }
+
             return null;
         }
 
@@ -131,6 +142,11 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         if (controller == null)
         {
             return;
+        }
+
+        if (ServiceLocator.TryGet(out PerformanceManager performance))
+        {
+            performance.Release(PerformanceBudgetCategory.Projectile);
         }
 
         if (ServiceLocator.TryGet(out PoolManager poolManager)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ public sealed class PlayerTargetScanner
     private const int MaxOverlapResults = 48;
     private readonly Collider2D[] overlapBuffer = new Collider2D[MaxOverlapResults];
     private readonly List<Enemy> results = new List<Enemy>(24);
+    private readonly EnemyTargetComparer targetComparer = new EnemyTargetComparer();
 
     private Vector2 scanOrigin;
     private float scanRadius = 25f;
@@ -98,10 +100,31 @@ public sealed class PlayerTargetScanner
     private void SortByPolicy(List<Enemy> enemies)
     {
         Vector2 wallPoint = wallReference != null ? (Vector2)wallReference.position : fallbackWallPoint;
+        targetComparer.Configure(policy, wallPoint, scanOrigin);
+        enemies.Sort(targetComparer);
+    }
 
-        enemies.Sort((a, b) =>
+    private sealed class EnemyTargetComparer : IComparer<Enemy>
+    {
+        private PlayerTargetPolicy activePolicy;
+        private Vector2 wallPoint;
+        private Vector2 origin;
+
+        public void Configure(PlayerTargetPolicy targetPolicy, Vector2 wall, Vector2 scanOrigin)
         {
-            if (policy == PlayerTargetPolicy.BossFirst)
+            activePolicy = targetPolicy;
+            wallPoint = wall;
+            origin = scanOrigin;
+        }
+
+        public int Compare(Enemy a, Enemy b)
+        {
+            if (a == null || b == null)
+            {
+                return a == null ? (b == null ? 0 : -1) : 1;
+            }
+
+            if (activePolicy == PlayerTargetPolicy.BossFirst)
             {
                 int bossCompare = b.IsBoss.CompareTo(a.IsBoss);
                 if (bossCompare != 0)
@@ -110,7 +133,7 @@ public sealed class PlayerTargetScanner
                 }
             }
 
-            switch (policy)
+            switch (activePolicy)
             {
                 case PlayerTargetPolicy.LowestHealth:
                     return a.enemy_Health.CurrentHp.CompareTo(b.enemy_Health.CurrentHp);
@@ -123,10 +146,10 @@ public sealed class PlayerTargetScanner
 
                 case PlayerTargetPolicy.Nearest:
                 default:
-                    float nearA = ((Vector2)a.transform.position - scanOrigin).sqrMagnitude;
-                    float nearB = ((Vector2)b.transform.position - scanOrigin).sqrMagnitude;
+                    float nearA = ((Vector2)a.transform.position - origin).sqrMagnitude;
+                    float nearB = ((Vector2)b.transform.position - origin).sqrMagnitude;
                     return nearA.CompareTo(nearB);
             }
-        });
+        }
     }
 }

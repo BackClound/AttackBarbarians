@@ -178,6 +178,7 @@ public static class GameConstants
         public const string ShopCatalog = "Config/Shop/ShopCatalog_Default";
         public const string AchievementCatalog = "Config/Achievement/AchievementCatalog_Default";
         public const string DailyRewardCatalog = "Config/DailyReward/DailyRewardCatalog_Default";
+        public const string PerformanceBudget = "Config/Performance/PerformanceBudget_Default";
     }
 
     public static class ConfigIds
@@ -252,5 +253,6 @@ public static class GameConstants
         public const string Enemy = "Enemy";
         public const string Bullet = "Bullet";
         public const string DamageNumber = "DamageNumber";
+        public const string CombatVfx = "CombatVfx";
     }
 }

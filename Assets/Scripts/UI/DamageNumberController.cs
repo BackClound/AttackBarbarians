@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// 伤害飘字控制器：订阅 <see cref="GameConstants.EventKeys.DamageApplied"/> 显示数字。
@@ -35,14 +34,6 @@ public class DamageNumberController : GameEventSubscriberBase
         SingletonHost<DamageNumberController>.Release(this);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            ShowDamageNumber(10, Vector3.one);
-        }
-    }
-
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribeDamageApplied(OnDamageApplied);
@@ -71,6 +62,12 @@ public class DamageNumberController : GameEventSubscriberBase
 
     private DamageNumber GetDamageNumber()
     {
+        if (ServiceLocator.TryGet(out PerformanceManager performance) &&
+            !performance.TryAcquire(PerformanceBudgetCategory.DamageNumber))
+        {
+            return null;
+        }
+
         if (ServiceLocator.TryGet(out PoolManager poolManager) && poolManager.HasPool(GameConstants.PoolKeys.DamageNumber))
         {
             DamageNumber pooled = poolManager.Spawn<DamageNumber>(
@@ -78,7 +75,10 @@ public class DamageNumberController : GameEventSubscriberBase
                 Vector3.zero,
                 Quaternion.identity,
                 numberCanvas);
-            return pooled;
+            if (pooled != null)
+            {
+                return pooled;
+            }
         }
 
         if (availableDamageNumbers.Count == 0)
@@ -91,9 +91,17 @@ public class DamageNumberController : GameEventSubscriberBase
             }
         }
 
-        return availableDamageNumbers.Count > 0 && availableDamageNumbers.TryDequeue(out DamageNumber damageNumber)
-            ? damageNumber
-            : null;
+        if (availableDamageNumbers.Count > 0 && availableDamageNumbers.TryDequeue(out DamageNumber damageNumber))
+        {
+            return damageNumber;
+        }
+
+        if (ServiceLocator.TryGet(out PerformanceManager performanceRollback))
+        {
+            performanceRollback.Release(PerformanceBudgetCategory.DamageNumber);
+        }
+
+        return null;
     }
 
     private DamageNumber CreateFallbackDamageNumber()
