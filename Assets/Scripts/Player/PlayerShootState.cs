@@ -1,18 +1,15 @@
 using UnityEngine;
 
+/// <summary>
+/// 射击动画状态（仅表现）。发弹由 <see cref="SkillShoot"/> 按敌人检测触发，不经过 <see cref="OnAnimAttackTrigger"/>。
+/// </summary>
 public class PlayerShootState : PlayerState
 {
-    private AutoAttackController autoAttack;
-    private bool attackFramePending;
-    private float shootSpeedMulti;
-
     public PlayerShootState(Player player, StateMachine machine, string animName) : base(player, machine, animName) { }
 
     public override void OnEnter()
     {
         base.OnEnter();
-        autoAttack = Controller != null ? Controller.AutoAttack : null;
-        attackFramePending = false;
         ApplyShootSpeedFromSources();
     }
 
@@ -21,49 +18,20 @@ public class PlayerShootState : PlayerState
         if (ShouldReturnToIdle())
         {
             stateMachine.ChangeState(player.idleState);
-            return;
-        }
-
-        if (attackFramePending)
-        {
-            attackFramePending = false;
-            ExecuteShootAttack();
         }
     }
 
     public override void OnAnimAttackTrigger()
     {
-        attackFramePending = true;
-    }
-
-    private void ExecuteShootAttack()
-    {
-        if (player.skillManager != null)
-        {
-            player.skillManager.ExecuteShoot();
-            if (!player.skillManager.CanShoot())
-            {
-                stateMachine.ChangeState(player.idleState);
-            }
-
-            return;
-        }
-
-        if (autoAttack != null && autoAttack.IsReady)
-        {
-            autoAttack.ExecuteAttack();
-            if (!autoAttack.CanAttack)
-            {
-                stateMachine.ChangeState(player.idleState);
-            }
-        }
+        // 射击改由 SkillShoot 检测驱动，忽略动画攻击帧。
     }
 
     private void ApplyShootSpeedFromSources()
     {
-        if (autoAttack != null && autoAttack.IsReady)
+        float shootSpeedMulti = 1f;
+        if (player.skillManager?.ShootController != null)
         {
-            shootSpeedMulti = autoAttack.AnimSpeedMultiplier;
+            shootSpeedMulti = player.skillManager.ShootController.GetAnimSpeedMultiplier();
         }
         else if (Controller != null && Controller.RuntimeStats.IsInitialized)
         {
@@ -72,10 +40,6 @@ public class PlayerShootState : PlayerState
         else if (player.player_Health != null && player.player_Health.entity_Stats != null)
         {
             shootSpeedMulti = player.player_Health.entity_Stats.GetAttackSpeedMultiplier();
-        }
-        else
-        {
-            shootSpeedMulti = 1f;
         }
 
         if (anim != null)

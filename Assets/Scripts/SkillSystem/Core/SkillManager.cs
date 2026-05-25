@@ -84,6 +84,7 @@ public class SkillManager : MonoBehaviour
         }
 
         float dt = Time.deltaTime;
+        shootBurst?.Tick(dt);
         TickHealPassives(dt);
         if (!CanAutoCastNow())
         {
@@ -93,6 +94,12 @@ public class SkillManager : MonoBehaviour
         for (int i = 0; i < autoCastOrder.Count; i++)
         {
             SkillType type = autoCastOrder[i];
+
+            // 射击由 SkillShoot 敌人检测驱动，避免与 SkillManager 自动施法双发。
+            if (type == SkillType.Shoot)
+            {
+                continue;
+            }
 
             if (!runtimes.TryGetValue(type, out SkillRuntime runtime) || !runtime.IsUnlocked)
             {

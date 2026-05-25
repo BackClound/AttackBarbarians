@@ -263,13 +263,6 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
 
     public bool CanEnterCombatState()
     {
-        if (player?.skillManager?.SkillManager != null &&
-            player.skillManager.SkillManager.TryGetRuntime(SkillType.Shoot, out SkillRuntime shootRuntime) &&
-            shootRuntime.IsUnlocked)
-        {
-            return false;
-        }
-
         if (player?.skillManager != null)
         {
             return player.skillManager.CanShoot();
@@ -281,8 +274,7 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
             return autoAttack.CanAttack;
         }
 
-        return player != null && player.skillManager != null && player.skillManager.sKillShoot != null &&
-               player.skillManager.sKillShoot.CanUseShootSkill();
+        return false;
     }
 
     private bool TryResolvePlayerData(out PlayerDataSO data)

@@ -163,7 +163,7 @@ PlayerRuntimeStats → ConfigStatBridge → Entity_Stats
 - [x] 删除 `PlayerCombat` / `EnemyCombatManager`
 - [x] `DamagePipeline.ApplyLegacy` 已移除（Bootstrap 未就绪时告警并跳过）
 - [ ] 全部 `FindObjectOfType<Player*>` → `PlayerSceneAccess`
-- [ ] AutoAttack 不独立发弹，驱动 SkillManager
+- [x] AutoAttack 不独立发弹，驱动 SkillManager（扫描/休整 → ShootSkillController → SkillManager）
 - [ ] asmdef 分阶段 Apply 至 Phase 10（工具已就绪，见 `docs/version_02/asmdef_migration.md`）
 - [ ] Wall 代理层文档化（敌人伤害 → Player 血量）
 

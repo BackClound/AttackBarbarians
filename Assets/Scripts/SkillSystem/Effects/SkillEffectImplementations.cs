@@ -30,7 +30,7 @@ public static class SkillEffectFactory
     }
 }
 
-/// <summary>射击：与闪电/冰霜相同，由 <see cref="SkillManager"/> 冷却自动释放。</summary>
+/// <summary>射击：由 <see cref="SkillShoot"/> 敌人检测驱动；不在 <see cref="SkillManager"/> 自动施法循环中触发。</summary>
 public sealed class ShootSkillEffect : ISkillEffect
 {
     private const float DefaultFanAngleDegrees = 10f;

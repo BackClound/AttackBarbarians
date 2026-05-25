@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 射击技能统一入口：目标扫描、连发休整、投射物发射与 AutoAttack 兼容。
+/// 射击技能统一入口：由 <see cref="SkillShoot"/> 敌人检测驱动，经 <see cref="SkillManager"/> 发弹。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 Player 上，与 <see cref="SkillManager"/> 同物体。</para>
@@ -20,7 +20,6 @@ public class ShootSkillController : MonoBehaviour
 
     private Player player;
     private PlayerController controller;
-    private AutoAttackController autoAttack;
     private SkillManager skillManager;
     private ShootBurstController burstController;
 
@@ -30,7 +29,6 @@ public class ShootSkillController : MonoBehaviour
     {
         player = GetComponent<Player>();
         controller = GetComponent<PlayerController>();
-        autoAttack = GetComponent<AutoAttackController>();
         skillManager = GetComponent<SkillManager>();
         burstController = GetComponent<ShootBurstController>();
         if (castOrigin == null)
@@ -39,56 +37,26 @@ public class ShootSkillController : MonoBehaviour
         }
     }
 
-    /// <summary>是否可进入射击 / 释放一发。</summary>
+    /// <summary>是否可进入射击 / 释放一发（连发未休整、有目标、射击技能已解锁）。</summary>
     public bool CanShoot()
     {
-        if (PreferSkillShootPipeline())
+        if (!TryGetShootRuntime(out SkillRuntime runtime))
         {
-            return CanShootViaSkillRuntime();
+            return false;
         }
 
-        if (autoAttack != null && autoAttack.IsReady)
+        if (burstController == null || !burstController.CanShoot(runtime))
         {
-            return autoAttack.CanAttack;
+            return false;
         }
 
-        return false;
+        return TryCopyValidTargets();
     }
 
-    /// <summary>动画攻击帧或 AutoAttack 调用：向目标发射并推进连发计数。</summary>
+    /// <summary><see cref="SkillShoot"/> 或 <see cref="AutoAttackController"/> 调用：经技能管线发射一发。</summary>
     public void ExecuteShoot()
     {
-        if (PreferSkillShootPipeline())
-        {
-            ExecuteShootViaSkillRuntime();
-            return;
-        }
-
-        if (autoAttack != null && autoAttack.IsReady)
-        {
-            autoAttack.ExecuteAttack();
-        }
-    }
-
-    private bool CanShootViaSkillRuntime()
-    {
-        if (!skillManager.TryGetRuntime(SkillType.Shoot, out SkillRuntime runtime) || !runtime.IsUnlocked)
-        {
-            return false;
-        }
-
-        if (!runtime.IsCooldownReady)
-        {
-            return false;
-        }
-
-        return controller != null && controller.CopyCombatTargetsTo(targetScratch);
-    }
-
-    private void ExecuteShootViaSkillRuntime()
-    {
-
-        if (!CanShootViaSkillRuntime() || !skillManager.TryGetRuntime(SkillType.Shoot, out SkillRuntime runtime))
+        if (!CanShoot() || !TryGetShootRuntime(out SkillRuntime runtime))
         {
             return;
         }
@@ -122,17 +90,15 @@ public class ShootSkillController : MonoBehaviour
             return;
         }
 
-        runtime.StartCooldown();
-        controller?.NotifyAttackStarted(runtime.Config?.ConfigId);
+        burstController?.RecordShot(runtime);
+
+        string skillId = runtime.Config != null ? runtime.Config.ConfigId : GameConstants.ConfigIds.SkillShoot;
+        controller?.NotifyAttackStarted(skillId);
+        controller?.NotifySkillCast(skillId);
     }
 
     public float GetAnimSpeedMultiplier()
     {
-        if (autoAttack != null && autoAttack.IsReady)
-        {
-            return autoAttack.AnimSpeedMultiplier;
-        }
-
         if (controller != null && controller.RuntimeStats.IsInitialized)
         {
             return Mathf.Max(0.1f, controller.RuntimeStats.Get(StatType.AttackSpeedMulti));
@@ -143,10 +109,11 @@ public class ShootSkillController : MonoBehaviour
             : 1f;
     }
 
-    private bool PreferSkillShootPipeline()
+    private bool TryGetShootRuntime(out SkillRuntime runtime)
     {
+        runtime = null;
         return skillManager != null &&
-               skillManager.TryGetRuntime(SkillType.Shoot, out SkillRuntime runtime) &&
+               skillManager.TryGetRuntime(SkillType.Shoot, out runtime) &&
                runtime.IsUnlocked;
     }
 

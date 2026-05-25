@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 自动攻击（基础武器射击）数值与弹道配置。
+/// 自动攻击节拍配置：扫描间隔与连发休整（发弹参数以 <see cref="SkillDataSO"/> 为准）。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否（ScriptableObject）。</para>
