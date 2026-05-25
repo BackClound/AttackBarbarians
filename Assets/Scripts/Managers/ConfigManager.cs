@@ -39,6 +39,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, GameplayEventDataSO> gameplayEventsById =
         new Dictionary<string, GameplayEventDataSO>(8);
     private readonly Dictionary<string, ShopItemSO> shopItemsById = new Dictionary<string, ShopItemSO>(16);
+    private readonly Dictionary<string, AchievementDataSO> achievementsById = new Dictionary<string, AchievementDataSO>(16);
+    private readonly Dictionary<int, DailyRewardEntrySO> dailyRewardsByDay = new Dictionary<int, DailyRewardEntrySO>(8);
     private readonly List<RewardPoolSO> rewardPoolList = new List<RewardPoolSO>(4);
 
     public bool IsInitialized { get; private set; }
@@ -134,6 +136,12 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     public bool TryGetShopItem(string configId, out ShopItemSO data) =>
         TryGet(shopItemsById, configId, out data);
 
+    public bool TryGetAchievement(string configId, out AchievementDataSO data) =>
+        TryGet(achievementsById, configId, out data);
+
+    public bool TryGetDailyRewardEntry(int dayIndex, out DailyRewardEntrySO data) =>
+        dailyRewardsByDay.TryGetValue(dayIndex, out data);
+
     public IReadOnlyList<RewardPoolSO> GetAllRewardPools() => rewardPoolList;
 
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
@@ -210,6 +218,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.Maps, mapsById);
         IndexList(Database.GameplayEvents, gameplayEventsById);
         IndexList(Database.ShopItems, shopItemsById);
+        IndexList(Database.Achievements, achievementsById);
+        IndexDailyRewardEntries(Database.DailyRewardEntries);
         rewardPoolList.Clear();
         if (Database.RewardPools != null)
         {
@@ -233,7 +243,28 @@ public class ConfigManager : MonoBehaviour, IGameSystem
                 $"AutoAttack={autoAttacksById.Count}, Upgrade={upgradeOptionsById.Count}, " +
                 $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}, " +
                 $"Equipment={equipmentById.Count}, Map={mapsById.Count}, " +
-                $"GameplayEvent={gameplayEventsById.Count}, ShopItem={shopItemsById.Count}");
+                $"GameplayEvent={gameplayEventsById.Count}, ShopItem={shopItemsById.Count}, " +
+                $"Achievement={achievementsById.Count}, DailyReward={dailyRewardsByDay.Count}");
+        }
+    }
+
+    private void IndexDailyRewardEntries(IReadOnlyList<DailyRewardEntrySO> list)
+    {
+        dailyRewardsByDay.Clear();
+        if (list == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            DailyRewardEntrySO entry = list[i];
+            if (entry == null)
+            {
+                continue;
+            }
+
+            dailyRewardsByDay[entry.DayIndex] = entry;
         }
     }
 
@@ -275,6 +306,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         mapsById.Clear();
         gameplayEventsById.Clear();
         shopItemsById.Clear();
+        achievementsById.Clear();
+        dailyRewardsByDay.Clear();
         rewardPoolList.Clear();
     }
 

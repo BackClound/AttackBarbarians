@@ -15,6 +15,12 @@ public class MainMenuPanelUI : UiPanelBase
     [SerializeField] private Button eliteModeButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button shopButton;
+    [SerializeField] private Button signInButton;
+    [SerializeField] private Button achievementButton;
+
+    [Header("Red Dot")]
+    [SerializeField] private GameObject signInRedDot;
+    [SerializeField] private GameObject achievementRedDot;
 
     [Header("Display")]
     [SerializeField] private TMP_Text titleText;
@@ -43,21 +49,38 @@ public class MainMenuPanelUI : UiPanelBase
         {
             shopButton.onClick.AddListener(OnShopClicked);
         }
+
+        if (signInButton != null)
+        {
+            signInButton.onClick.AddListener(OnSignInClicked);
+        }
+
+        if (achievementButton != null)
+        {
+            achievementButton.onClick.AddListener(OnAchievementClicked);
+        }
     }
 
     private void OnEnable()
     {
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
+        GameEvents.SubscribeDailyRewardStateChanged(OnDailyRewardStateChanged);
+        GameEvents.SubscribeAchievementProgressChanged(OnAchievementProgressChanged);
+        GameEvents.SubscribeAchievementClaimed(OnAchievementClaimed);
     }
 
     private void OnDisable()
     {
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
+        GameEvents.UnsubscribeDailyRewardStateChanged(OnDailyRewardStateChanged);
+        GameEvents.UnsubscribeAchievementProgressChanged(OnAchievementProgressChanged);
+        GameEvents.UnsubscribeAchievementClaimed(OnAchievementClaimed);
     }
 
     protected override void OnShow()
     {
         RefreshMetaDisplay();
+        RefreshRedDots();
         if (titleText != null)
         {
             titleText.text = "启动防线";
@@ -136,5 +159,50 @@ public class MainMenuPanelUI : UiPanelBase
         }
     }
 
-    private void OnResourceChanged(GameEventContext ctx) => RefreshMetaDisplay();
+    private void OnSignInClicked()
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.SignIn);
+        UIManager.Instance?.ShowPanel(GameConstants.UiPanelIds.SignIn);
+    }
+
+    private void OnAchievementClicked()
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.Achievement);
+        UIManager.Instance?.ShowPanel(GameConstants.UiPanelIds.Achievement);
+    }
+
+    private void RefreshRedDots()
+    {
+        bool canSignIn = ServiceLocator.TryGet(out DailyRewardManager daily) && daily.CanClaimToday();
+        bool canClaimAchievement = ServiceLocator.TryGet(out AchievementManager achievements) &&
+                                   achievements.HasClaimableRewards();
+
+        if (signInRedDot != null)
+        {
+            signInRedDot.SetActive(canSignIn);
+        }
+
+        if (achievementRedDot != null)
+        {
+            achievementRedDot.SetActive(canClaimAchievement);
+        }
+    }
+
+    private void OnResourceChanged(GameEventContext ctx)
+    {
+        RefreshMetaDisplay();
+        RefreshRedDots();
+    }
+
+    private void OnDailyRewardStateChanged(GameEventContext ctx) => RefreshRedDots();
+
+    private void OnAchievementProgressChanged(GameEventContext ctx) => RefreshRedDots();
+
+    private void OnAchievementClaimed(GameEventContext ctx)
+    {
+        RefreshMetaDisplay();
+        RefreshRedDots();
+    }
 }

@@ -29,6 +29,8 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<MapDataSO> maps = new List<MapDataSO>();
     [SerializeField] private List<GameplayEventDataSO> gameplayEvents = new List<GameplayEventDataSO>();
     [SerializeField] private List<ShopItemSO> shopItems = new List<ShopItemSO>();
+    [SerializeField] private List<AchievementDataSO> achievements = new List<AchievementDataSO>();
+    [SerializeField] private List<DailyRewardEntrySO> dailyRewardEntries = new List<DailyRewardEntrySO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -48,6 +50,8 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<MapDataSO> Maps => maps;
     public IReadOnlyList<GameplayEventDataSO> GameplayEvents => gameplayEvents;
     public IReadOnlyList<ShopItemSO> ShopItems => shopItems;
+    public IReadOnlyList<AchievementDataSO> Achievements => achievements;
+    public IReadOnlyList<DailyRewardEntrySO> DailyRewardEntries => dailyRewardEntries;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -99,6 +103,30 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetShopItem(string configId, out ShopItemSO data) =>
         TryGet(shopItems, configId, out data);
+
+    public bool TryGetAchievement(string configId, out AchievementDataSO data) =>
+        TryGet(achievements, configId, out data);
+
+    public bool TryGetDailyRewardEntryByDay(int dayIndex, out DailyRewardEntrySO data)
+    {
+        data = null;
+        if (dailyRewardEntries == null || dayIndex < 1)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < dailyRewardEntries.Count; i++)
+        {
+            DailyRewardEntrySO entry = dailyRewardEntries[i];
+            if (entry != null && entry.DayIndex == dayIndex)
+            {
+                data = entry;
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static bool TryGet<T>(List<T> list, string configId, out T data) where T : ConfigDataBase
     {

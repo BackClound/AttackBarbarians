@@ -21,6 +21,8 @@ public enum ResourceChangeReason
     ShopFreeDiamond = 6,
     // 签到奖励 金币 水晶
     DailyReward = 7,
+    // 成就奖励 金币 水晶
+    AchievementReward = 10,
     // 抽奖奖励 金币 水晶
     Lottery = 8,
     // 游戏时长奖励 金币 水晶

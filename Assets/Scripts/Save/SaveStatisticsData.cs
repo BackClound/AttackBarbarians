@@ -12,6 +12,9 @@ public class SaveStatisticsData
     public int totalRuns;
     public int highestWave;
     public long totalKills;
+    public long totalBossDefeats;
+    public long totalWavesCompleted;
+    public long totalGoldEarned;
     public long totalPlayTimeSeconds;
 
     public static SaveStatisticsData CreateDefault() => new SaveStatisticsData();

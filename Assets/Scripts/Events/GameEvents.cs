@@ -496,6 +496,68 @@ public static class GameEvents
 
     #endregion
 
+    #region Achievement
+
+    public static void RaiseAchievementProgressChanged(object sender, AchievementProgressChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AchievementProgressChanged, sender, args);
+
+    public static void RaiseAchievementClaimed(object sender, AchievementClaimedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AchievementClaimed, sender, args);
+
+    public static void RaiseAchievementClaimFailed(object sender, AchievementClaimFailedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AchievementClaimFailed, sender, args);
+
+    public static void SubscribeAchievementProgressChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AchievementProgressChanged, handler);
+
+    public static void UnsubscribeAchievementProgressChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AchievementProgressChanged, handler);
+
+    public static void SubscribeAchievementClaimed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AchievementClaimed, handler);
+
+    public static void UnsubscribeAchievementClaimed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AchievementClaimed, handler);
+
+    public static void SubscribeAchievementClaimFailed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AchievementClaimFailed, handler);
+
+    public static void UnsubscribeAchievementClaimFailed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AchievementClaimFailed, handler);
+
+    #endregion
+
+    #region Daily Reward
+
+    public static void RaiseDailyRewardClaimed(object sender, DailyRewardClaimedEventArgs args) =>
+        Publish(GameConstants.EventKeys.DailyRewardClaimed, sender, args);
+
+    public static void RaiseDailyRewardClaimFailed(object sender, DailyRewardClaimFailedEventArgs args) =>
+        Publish(GameConstants.EventKeys.DailyRewardClaimFailed, sender, args);
+
+    public static void RaiseDailyRewardStateChanged(object sender, DailyRewardStateChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.DailyRewardStateChanged, sender, args);
+
+    public static void SubscribeDailyRewardClaimed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.DailyRewardClaimed, handler);
+
+    public static void UnsubscribeDailyRewardClaimed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.DailyRewardClaimed, handler);
+
+    public static void SubscribeDailyRewardClaimFailed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.DailyRewardClaimFailed, handler);
+
+    public static void UnsubscribeDailyRewardClaimFailed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.DailyRewardClaimFailed, handler);
+
+    public static void SubscribeDailyRewardStateChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.DailyRewardStateChanged, handler);
+
+    public static void UnsubscribeDailyRewardStateChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.DailyRewardStateChanged, handler);
+
+    #endregion
+
     #region Gameplay Event
 
     public static void RaiseGameplayEventStarted(object sender, GameplayEventArgs args) =>

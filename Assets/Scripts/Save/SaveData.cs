@@ -24,6 +24,9 @@ public class SaveData
     public List<ConfigIdIntPair> shopPurchaseCounts = new List<ConfigIdIntPair>(8);
     public List<ConfigIdLongPair> shopLastPurchaseUtcTicks = new List<ConfigIdLongPair>(8);
 
+    public List<ConfigIdIntPair> achievementProgress = new List<ConfigIdIntPair>(16);
+    public List<ConfigIdIntPair> achievementClaimed = new List<ConfigIdIntPair>(16);
+
     public List<ConfigIdIntPair> permanentUpgrades = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> talentLevels = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> equipmentLevels = new List<ConfigIdIntPair>(8);
@@ -47,6 +50,8 @@ public class SaveData
             lastFreeDiamondClaimUtcTicks = 0,
             shopPurchaseCounts = new List<ConfigIdIntPair>(4),
             shopLastPurchaseUtcTicks = new List<ConfigIdLongPair>(4),
+            achievementProgress = new List<ConfigIdIntPair>(4),
+            achievementClaimed = new List<ConfigIdIntPair>(4),
             permanentUpgrades = new List<ConfigIdIntPair>(4),
             talentLevels = new List<ConfigIdIntPair>(4),
             equipmentLevels = new List<ConfigIdIntPair>(4),

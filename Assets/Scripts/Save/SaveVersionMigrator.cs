@@ -60,6 +60,8 @@ public static class SaveVersionMigrator
         data.runProgress.activeBuffs ??= new List<ConfigIdIntPair>(4);
         data.shopPurchaseCounts ??= new List<ConfigIdIntPair>(4);
         data.shopLastPurchaseUtcTicks ??= new List<ConfigIdLongPair>(4);
+        data.achievementProgress ??= new List<ConfigIdIntPair>(4);
+        data.achievementClaimed ??= new List<ConfigIdIntPair>(4);
 
         if (data.settings != null && data.settings.uiVolume <= 0f)
         {

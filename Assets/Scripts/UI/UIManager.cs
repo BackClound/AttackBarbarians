@@ -30,8 +30,10 @@ public class UIManager : GameEventSubscriberBase
     [SerializeField] private UpgradePanelUI upgradePanel;
     [SerializeField] private WaveTransitionPanelUI waveTransitionPanel;
     [SerializeField] private ShopPanelUI shopPanel;
+    [SerializeField] private DailyRewardPanelUI dailyRewardPanel;
+    [SerializeField] private AchievementPanelUI achievementPanel;
 
-    private readonly Dictionary<string, UiPanelBase> panelById = new Dictionary<string, UiPanelBase>(12);
+    private readonly Dictionary<string, UiPanelBase> panelById = new Dictionary<string, UiPanelBase>(16);
     private GameManager gameManager;
 
     private void Awake()
@@ -131,6 +133,8 @@ public class UIManager : GameEventSubscriberBase
         RegisterPanel(GameConstants.UiPanelIds.Upgrade, upgradePanel);
         RegisterPanel(GameConstants.UiPanelIds.WaveTransition, waveTransitionPanel);
         RegisterPanel(GameConstants.UiPanelIds.Shop, shopPanel);
+        RegisterPanel(GameConstants.UiPanelIds.SignIn, dailyRewardPanel);
+        RegisterPanel(GameConstants.UiPanelIds.Achievement, achievementPanel);
     }
 
     private void RegisterPanel(string panelId, UiPanelBase panel)
@@ -235,6 +239,8 @@ public class UIManager : GameEventSubscriberBase
             case GameState.Playing:
                 mainMenuPanel?.Hide();
                 shopPanel?.Hide();
+                dailyRewardPanel?.Hide();
+                achievementPanel?.Hide();
                 pausePanel?.Hide();
                 gameOverPanel?.Hide();
                 upgradePanel?.Hide();
@@ -275,6 +281,8 @@ public class UIManager : GameEventSubscriberBase
     {
         mainMenuPanel?.Hide();
         shopPanel?.Hide();
+        dailyRewardPanel?.Hide();
+        achievementPanel?.Hide();
         pausePanel?.Hide();
         gameOverPanel?.Hide();
         upgradePanel?.Hide();

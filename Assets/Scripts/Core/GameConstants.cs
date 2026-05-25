@@ -116,6 +116,16 @@ public static class GameConstants
         // Shop
         public const string ShopPurchased = "Shop.Purchased";
         public const string ShopPurchaseFailed = "Shop.PurchaseFailed";
+
+        // Achievement
+        public const string AchievementProgressChanged = "Achievement.ProgressChanged";
+        public const string AchievementClaimed = "Achievement.Claimed";
+        public const string AchievementClaimFailed = "Achievement.ClaimFailed";
+
+        // Daily Reward
+        public const string DailyRewardClaimed = "DailyReward.Claimed";
+        public const string DailyRewardClaimFailed = "DailyReward.ClaimFailed";
+        public const string DailyRewardStateChanged = "DailyReward.StateChanged";
     }
 
     public static class UiPanelIds
@@ -126,6 +136,8 @@ public static class GameConstants
         public const string WaveTransition = "ui.wave_transition";
         public const string Upgrade = "ui.upgrade";
         public const string Shop = "ui.shop";
+        public const string SignIn = "ui.sign_in";
+        public const string Achievement = "ui.achievement";
     }
 
     public static class AudioIds
@@ -164,6 +176,8 @@ public static class GameConstants
         public const string MapDefault = "Config/Map/MapData_Default";
         public const string AudioDatabase = "Config/Audio/AudioDatabase";
         public const string ShopCatalog = "Config/Shop/ShopCatalog_Default";
+        public const string AchievementCatalog = "Config/Achievement/AchievementCatalog_Default";
+        public const string DailyRewardCatalog = "Config/DailyReward/DailyRewardCatalog_Default";
     }
 
     public static class ConfigIds
@@ -223,6 +237,14 @@ public static class GameConstants
         public const string ShopGoldPackLarge = "shop.gold_pack_large";
         public const string ShopDiamondPack = "shop.diamond_pack";
         public const string ShopFreeDiamond = "shop.free_diamond";
+
+        public const string AchievementFirstBlood = "achievement.first_blood";
+        public const string AchievementWave5 = "achievement.wave_5";
+        public const string AchievementBossSlayer = "achievement.boss_slayer";
+        public const string AchievementGoldCollector = "achievement.gold_collector";
+
+        public const string DailyRewardDay1 = "daily_reward.day_1";
+        public const string DailyRewardDay7 = "daily_reward.day_7";
     }
 
     public static class PoolKeys
