@@ -1,5 +1,7 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -11,6 +13,7 @@ public class PausePanelUI : UiPanelBase
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button mainMenuButton;
+    [SerializeField] private string mainSceneName = "MainScene";
 
     private void Awake()
     {
@@ -69,5 +72,21 @@ public class PausePanelUI : UiPanelBase
         {
             gameManager.OpenMainMenu();
         }
+
+        if (!string.IsNullOrWhiteSpace(mainSceneName))
+        {
+            StartCoroutine(LoadMainSceneAfterBootstrapShutdown());
+        }
+    }
+
+    private IEnumerator LoadMainSceneAfterBootstrapShutdown()
+    {
+        if (GameBootstrapper.HasInstance)
+        {
+            Destroy(GameBootstrapper.Instance.gameObject);
+            yield return null;
+        }
+
+        SceneManager.LoadScene(mainSceneName);
     }
 }

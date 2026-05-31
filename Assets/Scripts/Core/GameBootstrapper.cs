@@ -9,6 +9,14 @@ public enum BootstrapPostFlow
     None = 3,
 }
 
+public enum BootstrapManagerSet
+{
+    AutoByPostFlow = 0,
+    MainScene = 1,
+    BattleScene = 2,
+    All = 3,
+}
+
 /// <summary>
 /// 游戏启动引导器，负责在场景加载后按固定顺序初始化各 Manager 并注册到 <see cref="ServiceLocator"/>。
 /// </summary>
@@ -30,6 +38,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private bool initializeOnAwake = true;
     [SerializeField] private bool dontDestroyOnLoad = true;
     [SerializeField] private BootstrapPostFlow postBootstrapFlow = BootstrapPostFlow.UseGameConfig;
+    [SerializeField] private BootstrapManagerSet managerSet = BootstrapManagerSet.AutoByPostFlow;
 
     [Header("Managers")]
     [SerializeField] private ConfigManager configManager;
@@ -147,6 +156,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
 
     private void ResolveManagers()
     {
+        bool includeBattleManagers = IncludesBattleManagers();
+
         configManager = ResolveOrCreate(configManager);
         saveManager = ResolveOrCreate(saveManager);
         resourceManager = ResolveOrCreate(resourceManager);
@@ -158,24 +169,29 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         performanceManager = ResolveOrCreate(performanceManager);
         poolManager = ResolveOrCreate(poolManager);
         gameManager = ResolveOrCreate(gameManager);
-        gameFlowManager = ResolveOrCreate(gameFlowManager);
-        runSessionTracker = ResolveOrCreate(runSessionTracker);
-        runRewardSettlementService = ResolveOrCreate(runRewardSettlementService);
-        playerExperienceService = ResolveOrCreate(playerExperienceService);
-        upgradeManager = ResolveOrCreate(upgradeManager);
-        randomRewardManager = ResolveOrCreate(randomRewardManager);
-        enemySpawnerManager = ResolveOrCreate(enemySpawnerManager);
-        waveManager = ResolveOrCreate(waveManager);
-        bossRunStatsBridge = ResolveOrCreate(bossRunStatsBridge);
-        damageSystem = ResolveOrCreate(damageSystem);
-        collisionManager = ResolveOrCreate(collisionManager);
-        projectileManager = ResolveOrCreate(projectileManager);
         skillUnlockService = ResolveOrCreate(skillUnlockService);
         contentRegistry = ResolveOrCreate(contentRegistry);
-        mapManager = ResolveOrCreate(mapManager);
-        gameplayEventManager = ResolveOrCreate(gameplayEventManager);
-        gameplayEventDebugBridge = ResolveOrCreate(gameplayEventDebugBridge);
         audioManager = ResolveOrCreate(audioManager);
+
+        if (includeBattleManagers)
+        {
+            gameFlowManager = ResolveOrCreate(gameFlowManager);
+            runSessionTracker = ResolveOrCreate(runSessionTracker);
+            runRewardSettlementService = ResolveOrCreate(runRewardSettlementService);
+            playerExperienceService = ResolveOrCreate(playerExperienceService);
+            upgradeManager = ResolveOrCreate(upgradeManager);
+            randomRewardManager = ResolveOrCreate(randomRewardManager);
+            enemySpawnerManager = ResolveOrCreate(enemySpawnerManager);
+            waveManager = ResolveOrCreate(waveManager);
+            bossRunStatsBridge = ResolveOrCreate(bossRunStatsBridge);
+            damageSystem = ResolveOrCreate(damageSystem);
+            collisionManager = ResolveOrCreate(collisionManager);
+            projectileManager = ResolveOrCreate(projectileManager);
+            mapManager = ResolveOrCreate(mapManager);
+            gameplayEventManager = ResolveOrCreate(gameplayEventManager);
+            gameplayEventDebugBridge = ResolveOrCreate(gameplayEventDebugBridge);
+        }
+
         eventBus = new EventBus();
     }
 
@@ -184,68 +200,50 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Clear();
 
         ServiceLocator.Register(this);
-        ServiceLocator.Register(configManager);
-        ServiceLocator.Register(saveManager);
-        ServiceLocator.Register(resourceManager);
-        ServiceLocator.Register(shopManager);
-        ServiceLocator.Register(achievementManager);
-        ServiceLocator.Register(dailyRewardManager);
-        ServiceLocator.Register(talentManager);
-        ServiceLocator.Register(equipmentManager);
-        ServiceLocator.Register(eventBus);
-        ServiceLocator.Register(performanceManager);
-        ServiceLocator.Register(poolManager);
-        ServiceLocator.Register(gameManager);
-        ServiceLocator.Register(gameFlowManager);
-        ServiceLocator.Register(runSessionTracker);
-        ServiceLocator.Register(runRewardSettlementService);
-        ServiceLocator.Register(playerExperienceService);
-        ServiceLocator.Register(upgradeManager);
-        ServiceLocator.Register(randomRewardManager);
-        ServiceLocator.Register(enemySpawnerManager);
-        ServiceLocator.Register(waveManager);
-        ServiceLocator.Register(bossRunStatsBridge);
-        ServiceLocator.Register(damageSystem);
-        ServiceLocator.Register(collisionManager);
-        ServiceLocator.Register(projectileManager);
-        ServiceLocator.Register(skillUnlockService);
-        ServiceLocator.Register(contentRegistry);
-        ServiceLocator.Register(mapManager);
-        ServiceLocator.Register(gameplayEventManager);
-        ServiceLocator.Register(audioManager);
+        RegisterSystem(configManager);
+        RegisterSystem(saveManager);
+        RegisterSystem(resourceManager);
+        RegisterSystem(shopManager);
+        RegisterSystem(achievementManager);
+        RegisterSystem(dailyRewardManager);
+        RegisterSystem(talentManager);
+        RegisterSystem(equipmentManager);
+        RegisterSystem(eventBus);
+        RegisterSystem(performanceManager);
+        RegisterSystem(poolManager);
+        RegisterSystem(gameManager);
 
-        systems.Add(configManager);
-        systems.Add(saveManager);
-        systems.Add(resourceManager);
-        systems.Add(shopManager);
-        systems.Add(achievementManager);
-        systems.Add(dailyRewardManager);
-        systems.Add(talentManager);
-        systems.Add(equipmentManager);
-        systems.Add(eventBus);
-        systems.Add(performanceManager);
-        systems.Add(poolManager);
-        systems.Add(gameManager);
-        systems.Add(gameFlowManager);
-        systems.Add(runSessionTracker);
-        systems.Add(runRewardSettlementService);
-        systems.Add(playerExperienceService);
-        systems.Add(upgradeManager);
-        systems.Add(randomRewardManager);
-        systems.Add(damageSystem);
-        systems.Add(collisionManager);
-        systems.Add(projectileManager);
-        systems.Add(skillUnlockService);
-        systems.Add(contentRegistry);
-        systems.Add(mapManager);
-        systems.Add(gameplayEventManager);
-        systems.Add(audioManager);
-        systems.Add(gameplayEventDebugBridge);
-        systems.Add(enemySpawnerManager);
-        systems.Add(waveManager);
-        systems.Add(bossRunStatsBridge);
+        if (IncludesBattleManagers())
+        {
+            RegisterSystem(gameFlowManager);
+            RegisterSystem(runSessionTracker);
+            RegisterSystem(runRewardSettlementService);
+            RegisterSystem(playerExperienceService);
+            RegisterSystem(upgradeManager);
+            RegisterSystem(randomRewardManager);
+            RegisterSystem(damageSystem);
+            RegisterSystem(collisionManager);
+            RegisterSystem(projectileManager);
+        }
 
-        ServiceLocator.Register(gameplayEventDebugBridge);
+        RegisterSystem(skillUnlockService);
+        RegisterSystem(contentRegistry);
+
+        if (IncludesBattleManagers())
+        {
+            RegisterSystem(mapManager);
+            RegisterSystem(gameplayEventManager);
+        }
+
+        RegisterSystem(audioManager);
+
+        if (IncludesBattleManagers())
+        {
+            RegisterSystem(gameplayEventDebugBridge);
+            RegisterSystem(enemySpawnerManager);
+            RegisterSystem(waveManager);
+            RegisterSystem(bossRunStatsBridge);
+        }
     }
 
     private void InitializeSystems()
@@ -284,6 +282,30 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         poolManager.ConfigureRuntimePolicy(
             gameConfig.DefaultPoolPrewarmCount,
             gameConfig.AllowPoolGrowth);
+    }
+
+    private bool IncludesBattleManagers()
+    {
+        BootstrapManagerSet effectiveSet = managerSet;
+        if (effectiveSet == BootstrapManagerSet.AutoByPostFlow)
+        {
+            effectiveSet = postBootstrapFlow == BootstrapPostFlow.OpenMainMenu
+                ? BootstrapManagerSet.MainScene
+                : BootstrapManagerSet.BattleScene;
+        }
+
+        return effectiveSet == BootstrapManagerSet.BattleScene || effectiveSet == BootstrapManagerSet.All;
+    }
+
+    private void RegisterSystem<T>(T system) where T : class, IGameSystem
+    {
+        if (system == null)
+        {
+            return;
+        }
+
+        ServiceLocator.Register(system);
+        systems.Add(system);
     }
 
     private T ResolveOrCreate<T>(T current) where T : Component

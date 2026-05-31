@@ -66,6 +66,7 @@ public static class MainSceneBuilder
         serializedBootstrapper.FindProperty("initializeOnAwake").boolValue = true;
         serializedBootstrapper.FindProperty("dontDestroyOnLoad").boolValue = false;
         serializedBootstrapper.FindProperty("postBootstrapFlow").enumValueIndex = (int)BootstrapPostFlow.OpenMainMenu;
+        serializedBootstrapper.FindProperty("managerSet").enumValueIndex = (int)BootstrapManagerSet.MainScene;
         serializedBootstrapper.ApplyModifiedPropertiesWithoutUndo();
     }
 

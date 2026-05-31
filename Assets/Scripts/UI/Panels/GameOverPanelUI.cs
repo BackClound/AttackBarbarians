@@ -1,5 +1,7 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -15,6 +17,7 @@ public class GameOverPanelUI : UiPanelBase
     [SerializeField] private TMP_Text diamondRewardText;
     [SerializeField] private Button redeployButton;
     [SerializeField] private Button baseButton;
+    [SerializeField] private string mainSceneName = "MainScene";
 
     private int sessionKills;
     private RunRewardSettledEventArgs lastSettlement;
@@ -162,5 +165,21 @@ public class GameOverPanelUI : UiPanelBase
         {
             gameManager.OpenMainMenu();
         }
+
+        if (!string.IsNullOrWhiteSpace(mainSceneName))
+        {
+            StartCoroutine(LoadMainSceneAfterBootstrapShutdown());
+        }
+    }
+
+    private IEnumerator LoadMainSceneAfterBootstrapShutdown()
+    {
+        if (GameBootstrapper.HasInstance)
+        {
+            Destroy(GameBootstrapper.Instance.gameObject);
+            yield return null;
+        }
+
+        SceneManager.LoadScene(mainSceneName);
     }
 }
