@@ -30,52 +30,6 @@ public static class SkillEffectFactory
     }
 }
 
-/// <summary>射击：由 <see cref="SkillShoot"/> 敌人检测驱动；不在 <see cref="SkillManager"/> 自动施法循环中触发。</summary>
-public sealed class ShootSkillEffect : ISkillEffect
-{
-    private const float DefaultFanAngleDegrees = 10f;
-
-    public SkillType SkillType => SkillType.Shoot;
-
-    public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
-    {
-        if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
-        {
-            return false;
-        }
-
-        if (!context.TryGetPrimaryTarget(out Enemy primary))
-        {
-            return false;
-        }
-
-        Vector2 spawnPos = context.CastOrigin != null
-            ? context.CastOrigin.position
-            : context.Player.transform.position;
-
-        if (!ShootProjectileCaster.TryFireAtEnemy(
-                context,
-                runtime,
-                primary,
-                spawnPos,
-                DefaultFanAngleDegrees,
-                ResolveProjectileData()))
-        {
-            return false;
-        }
-
-        context.Controller?.NotifyAttackStarted(runtime.Config.ConfigId);
-        return true;
-    }
-
-    public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
-
-    private static ProjectileDataSO ResolveProjectileData()
-    {
-        return ServiceLocator.TryGet(out ProjectileManager manager) ? manager.DefaultData : null;
-    }
-}
-
 public sealed class LightningSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(16);

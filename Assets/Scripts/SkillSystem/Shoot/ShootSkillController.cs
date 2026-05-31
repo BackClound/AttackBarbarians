@@ -50,24 +50,23 @@ public class ShootSkillController : MonoBehaviour
             return false;
         }
 
-        return TryCopyValidTargets();
+        return TrySelectTarget(out _);
     }
 
     /// <summary><see cref="SkillShoot"/> 或 <see cref="AutoAttackController"/> 调用：经技能管线发射一发。</summary>
     public void ExecuteShoot()
     {
-        if (!CanShoot() || !TryGetShootRuntime(out SkillRuntime runtime))
+        if (!TryGetShootRuntime(out SkillRuntime runtime))
         {
             return;
         }
 
-        if (!TryCopyValidTargets() || targetScratch.Count == 0)
+        if (burstController == null || !burstController.CanShoot(runtime))
         {
             return;
         }
 
-        Enemy target = SelectTarget(targetScratch);
-        if (target == null)
+        if (!TrySelectTarget(out Enemy target))
         {
             return;
         }
@@ -94,7 +93,6 @@ public class ShootSkillController : MonoBehaviour
 
         string skillId = runtime.Config != null ? runtime.Config.ConfigId : GameConstants.ConfigIds.SkillShoot;
         controller?.NotifyAttackStarted(skillId);
-        controller?.NotifySkillCast(skillId);
     }
 
     public float GetAnimSpeedMultiplier()
@@ -127,6 +125,18 @@ public class ShootSkillController : MonoBehaviour
 
         PruneInvalidTargets(targetScratch);
         return targetScratch.Count > 0;
+    }
+
+    private bool TrySelectTarget(out Enemy target)
+    {
+        target = null;
+        if (!TryCopyValidTargets())
+        {
+            return false;
+        }
+
+        target = SelectTarget(targetScratch);
+        return target != null;
     }
 
     private static void PruneInvalidTargets(List<Enemy> targets)

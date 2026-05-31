@@ -1,0 +1,22 @@
+{
+    "name": "AB.App",
+    "rootNamespace": "AttackBarbarians.App",
+    "references": [
+        "AB.Core",
+        "AB.Config",
+        "AB.Combat",
+        "AB.Skills",
+        "AB.Gameplay",
+        "AB.Meta",
+        "AB.Presentation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

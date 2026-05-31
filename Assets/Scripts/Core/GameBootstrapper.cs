@@ -1,6 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum BootstrapPostFlow
+{
+    UseGameConfig = 0,
+    StartGame = 1,
+    OpenMainMenu = 2,
+    None = 3,
+}
+
 /// <summary>
 /// 游戏启动引导器，负责在场景加载后按固定顺序初始化各 Manager 并注册到 <see cref="ServiceLocator"/>。
 /// </summary>
@@ -21,6 +29,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [Header("Lifecycle")]
     [SerializeField] private bool initializeOnAwake = true;
     [SerializeField] private bool dontDestroyOnLoad = true;
+    [SerializeField] private BootstrapPostFlow postBootstrapFlow = BootstrapPostFlow.UseGameConfig;
 
     [Header("Managers")]
     [SerializeField] private ConfigManager configManager;
@@ -106,6 +115,29 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         InitializeSystems();
 
         isBootstrapped = true;
+
+        ApplyPostBootstrapFlow();
+    }
+
+    private void ApplyPostBootstrapFlow()
+    {
+        switch (postBootstrapFlow)
+        {
+            case BootstrapPostFlow.OpenMainMenu:
+                gameManager.OpenMainMenu();
+                return;
+
+            case BootstrapPostFlow.StartGame:
+                gameManager.StartGame();
+                return;
+
+            case BootstrapPostFlow.None:
+                return;
+
+            case BootstrapPostFlow.UseGameConfig:
+            default:
+                break;
+        }
 
         if (configManager.GameConfig == null || configManager.GameConfig.StartGameOnBootstrap)
         {

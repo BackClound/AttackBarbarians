@@ -74,6 +74,8 @@ mono_crash.*
 *.unitypackage
 *.unitypackage.meta
 *.app
+!Assets/Scripts/_Assemblies/AB.App/
+!Assets/Scripts/_Assemblies/AB.App/**
 
 # Crashlytics generated file
 # Logs
