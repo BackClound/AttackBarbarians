@@ -1,0 +1,19 @@
+---
+description: Preload UI prompts before creating or modifying Unity UI scripts
+alwaysApply: true
+---
+
+# UI Prompt Preload
+
+When creating or modifying Unity UI scripts, read these first:
+
+- `docs/version_02/prompt_ui_system.md`
+- `docs/version_02/prompt_main_scene_ui.md`
+- `docs/version_02/ui_architecture_workflow.md`
+- `docs/version_02/prompt_ui_tech_wasteland_visual_design.md`
+
+Apply the MainScene UI pattern for page scripts:
+
+- Reserve Inspector fields for `Image`, `TMP_Text`, `Slider`, `Button`, `Canvas`, and related Unity UI controls.
+- Keep page scripts as Presenters: refresh display, red dots, and button callbacks only.
+- Do not implement Icon Buttons as plain generated text; bind `Button + Image + TMP_Text + redDot`.

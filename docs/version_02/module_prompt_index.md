@@ -94,6 +94,9 @@ Player [Player, PlayerController, PlayerSkillManager, SkillManager, BuffManager,
 | 文件 | 模块 |
 |------|------|
 | `prompt_ui_system.md` | UI Presenter 模式 |
+| `ui_architecture_workflow.md` | UI 分层、通用组件、搭建流程 |
+| `main_scene_ui_architecture_refactor.md` | MainScene 场景层级与重构说明 |
+| `prompt_main_scene_ui.md` | MainScene 主页面 UI |
 | `prompt_ui_tech_wasteland_visual_design.md` | 科技废土视觉（推荐） |
 | `prompt_ui_xianxia_visual_design.md` | 仙侠视觉（备选） |
 | `prompt_audio_system.md` | AudioManager |
