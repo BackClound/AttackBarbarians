@@ -50,6 +50,8 @@ public class MainSceneRewardPanel : MonoBehaviour
 
     public void Refresh(bool canClaimDaily, bool canClaimFreeDiamond)
     {
+        // 刷新在线奖励 
+        //TODO 这应该是一个CoroutineScope，因为需要时时根据时间更新状态
         onlineReward?.SetDisplay(
             "在线奖励",
             canClaimDaily ? "00:00:00" : "00:15:30",
