@@ -83,7 +83,14 @@ public static class MainSceneBuilder
 
     private static void CreateMainSceneUi()
     {
-        GameObject canvasObject = new GameObject("MainSceneUI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(MainSceneView));
+        GameObject canvasObject = new GameObject(
+            "MainSceneUI",
+            typeof(RectTransform),
+            typeof(Canvas),
+            typeof(CanvasScaler),
+            typeof(GraphicRaycaster),
+            typeof(UiTmpChineseFontBootstrap),
+            typeof(MainSceneView));
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
@@ -369,6 +376,13 @@ public static class MainSceneBuilder
         label.color = color;
         label.alignment = alignment;
         label.raycastTarget = false;
+
+        TMP_FontAsset chineseFont = UiChineseTmpFontBuilder.CreateOrLoadChineseFontAsset();
+        if (chineseFont != null)
+        {
+            label.font = chineseFont;
+        }
+
         return label;
     }
 
