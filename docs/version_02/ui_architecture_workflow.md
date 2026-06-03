@@ -21,7 +21,7 @@ Editor 菜单（如 `MainSceneBuilder`）仅作**初始场景样板**，正式�
 页面根 Presenter (MainSceneView / GameplayHudPresenter)
     ├── 子 Panel (MainSceneCardPanel, MainSceneResourcePanel, …)
     │       └── 通用 Widget (GeneralCardPanel, UI_ItemSlot, GeneralRewardCardPanel)
-    └── 共享 Core (UiPanelBase, UiCanvasScalerSetup, UiTechWastelandPalette)
+    └── 共享 Core (UiPanelBase, UiCanvasScalerSetup, UiSafeAreaFitter, UiRectLayout, UiTechWastelandPalette)
 ```
 
 | 层级 | 命名建议 | 职责 |
@@ -48,7 +48,7 @@ flowchart TD
 
 ### 步骤说明
 
-1. **定义页面根**：在 Canvas 或全屏 Panel 上挂 `MainSceneView`，配置 `Canvas`、`CanvasScaler`（参考 1080×1920）。
+1. **定义页面根**：在 Canvas 上挂 `MainSceneView` + `UiCanvasScalerSetup`（1080×1920）；其下建 `SafeAreaRoot` + `UiSafeAreaFitter`，详见 `ui_mobile_adaptation_design.md`。
 2. **划分子区域**：按设计稿建空节点，例如 `TopProfile`、`TopResources`、`LeftSideIcons`、`RewardRow`、`BottomNav`。
 3. **子 Panel 脚本**：每个区域挂对应 `MainScene*Panel`，字段只包含该区域控件或 Widget 数组。
 4. **通用 Prefab**：复制 `GeneralCardPanel`（图标按钮）、`UI_ItemSlot`（资源条）、`GeneralRewardCardPanel`（奖励条）。

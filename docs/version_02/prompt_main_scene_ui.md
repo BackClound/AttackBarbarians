@@ -19,6 +19,7 @@
 
 ## 布局规范
 - 竖屏移动端，Canvas Scaler 使用 `Scale With Screen Size`，参考分辨率 `1080 x 1920`。
+- **移动端适配**：必读 `docs/version_02/ui_mobile_adaptation_design.md`；交互 UI 挂在 `SafeAreaRoot`（`UiSafeAreaFitter`）下，分区用 `UiRectLayout` 边锚点，禁止中心锚点 + 绝对像素模拟贴边。
 - 重要入口区域：顶部账号/资源、左右活动入口、中部主视觉、底部奖励与开始按钮、底部导航。
 - 所有可点击入口必须有明确 `MainSceneAction`，未接入功能也要输出可定位状态提示。
 

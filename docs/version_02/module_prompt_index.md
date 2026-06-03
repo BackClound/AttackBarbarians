@@ -99,6 +99,7 @@ Player [Player, PlayerController, PlayerSkillManager, SkillManager, BuffManager,
 | `prompt_main_scene_ui.md` | MainScene 主页面 UI |
 | `prompt_ui_tech_wasteland_visual_design.md` | 科技废土视觉（推荐） |
 | `prompt_ui_xianxia_visual_design.md` | 仙侠视觉（备选） |
+| `ui_mobile_adaptation_design.md` | 移动端 UI 适配架构与原理 |
 | `prompt_audio_system.md` | AudioManager |
 
 ### L5 Meta
