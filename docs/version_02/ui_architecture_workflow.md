@@ -6,6 +6,8 @@
 
 | 原则 | 说明 |
 |------|------|
+| 页面壳结构 | 每个全屏页：`PageRoot` → `PageBackground` + `SafeAreaRoot`（`UiSafeAreaFitter` + 底栏预留 inset）；公共 `BottomNav` 挂在 Canvas 根且 `SetAsLastSibling`，**不得**放入 ScrollView |
+| Editor 公用 | 新页搭建使用 `UiPageStructureEditorUtility.CreatePageShell` / `PinBottomNavToCanvas`（见 `Assets/Editor/UiPageStructureEditorUtility.cs`） |
 | Inspector 优先 | 使用 Unity 自带 `Image` / `TMP_Text` / `Slider` / `Button` / `Canvas`，在 Inspector 拖拽绑定，**运行时不用代码 `new GameObject` 搭 UI** |
 | 页面 Presenter | 每个页面一个根脚本（如 `MainSceneView`），只负责编排、事件订阅、调用 Manager |
 | 子区域 Panel | 按布局区域拆子 Panel（如 `MainSceneResourcePanel`），各自 `Refresh` |
@@ -80,7 +82,23 @@ flowchart TD
 - 结构：同卡片按钮，额外 `timerText`、`statusText`。
 - API：`SetRewardDisplay(title, timer, status)`、`SetRedDot`。
 
-## 5. MainScene 区域映射
+## 5. MainScene 页面层级（当前）
+
+```
+MainSceneUI [MainSceneView]
+├── BattlePagePanelRoot [MainSceneBattlePageView]
+│   ├── SpaceCityBackground
+│   └── SafeAreaRoot
+├── ShopPageRoot [ShopSceneView]
+│   ├── ShopPageBackground
+│   └── SafeAreaRoot
+│       ├── ShopTopBar
+│       ├── ShopScrollHost → ScrollRect（仅内容区滚动）
+│       └── ShopStatusBar
+└── BottomNav [MainSceneCardPanel]
+```
+
+## 6. MainScene 区域映射
 
 | 设计区域 | 子 Panel | 使用的 Widget |
 |----------|----------|----------------|
@@ -92,14 +110,14 @@ flowchart TD
 
 详见 `main_scene_ui_architecture_refactor.md`。
 
-## 6. 与 Manager / 事件
+## 7. 与 Manager / 事件
 
 - 读档：`ResourceManager` / `SaveManager`。
 - 签到/离线：`DailyRewardManager`、`ShopManager`。
 - 订阅：`GameEvents` 资源、签到、成就、商店；`OnDisable` 必须反订阅。
 - 禁止：在 UI 中 `FindObjectOfType`、直接改战斗实体、每帧 `RefreshAll`。
 
-## 7. 验收清单
+## 8. 验收清单
 
 - [ ] 打开 MainScene，默认数据与红点显示正常。
 - [ ] 资源变化、签到、商店事件触发后 UI 刷新。
@@ -107,7 +125,7 @@ flowchart TD
 - [ ] 所有入口有 `MainSceneAction`，未接入功能有状态栏提示。
 - [ ] Inspector 可单独替换某个 `GeneralCardPanel` Prefab 而不改代码。
 
-## 8. 扩展新页面
+## 9. 扩展新页面
 
 1. 新建 `XxxSceneView` + `prompt_xxx_scene_ui.md`（可选）。
 2. 复制通用 Widget Prefab，只做布局差异部分自定义 Panel。

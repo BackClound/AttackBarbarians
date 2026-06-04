@@ -49,6 +49,7 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             CurrencyType.Gold => saveManager.Gold,
             CurrencyType.Diamond => saveManager.Diamonds,
             CurrencyType.Energy => 0,
+            CurrencyType.TechPoint => saveManager.Current.techPoints,
             _ => 0,
         };
     }
@@ -133,6 +134,7 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             CurrencyType.Gold => "废料金",
             CurrencyType.Diamond => "量子钻",
             CurrencyType.Energy => "体力",
+            CurrencyType.TechPoint => "科技点",
             _ => currency.ToString(),
         };
 
@@ -149,6 +151,9 @@ public class ResourceManager : MonoBehaviour, IGameSystem
                 break;
             case CurrencyType.Diamond:
                 saveManager.Diamonds = amount;
+                break;
+            case CurrencyType.TechPoint:
+                saveManager.Current.techPoints = amount;
                 break;
             default:
                 Debug.LogWarning($"[ResourceManager] 暂不支持的资源类型: {currency}");

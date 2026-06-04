@@ -1,0 +1,203 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// <summary>
+/// 商城页面 Presenter：编排资源条、补给区、广告券兑换与状态提示。
+/// </summary>
+/// <remarks>
+/// <para><b>层级：</b><c>ShopPageRoot</c> → <c>PageBackground</c> + <c>SafeAreaRoot</c>（交互 UI，可滚动区仅在 ShopScrollHost 内）。</para>
+/// <para>BottomNav 挂在 <c>MainSceneUI</c> 下，不随本页 ScrollView 滚动。</para>
+/// </remarks>
+public class ShopSceneView : MonoBehaviour
+{
+    [Header("Root")]
+    [SerializeField] private Image backgroundImage;
+
+    [Header("Sub Panels")]
+    [SerializeField] private ShopResourcePanel resourcePanel;
+    [SerializeField] private ShopSupplySectionPanel supplySection;
+    [SerializeField] private ShopAdTicketExchangePanel exchangePanel;
+    [SerializeField] private TMP_Text statusText;
+
+    private bool isSubscribed;
+
+    private void OnEnable()
+    {
+        TrySubscribeEvents();
+        RefreshAll();
+    }
+
+    private void OnDisable()
+    {
+        if (!isSubscribed)
+        {
+            return;
+        }
+
+        GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
+        GameEvents.UnsubscribeShopPurchased(OnShopPurchased);
+        GameEvents.UnsubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        isSubscribed = false;
+    }
+
+    private void Awake()
+    {
+        if (resourcePanel != null)
+        {
+            resourcePanel.AddClicked += OnResourceAddClicked;
+        }
+
+        if (supplySection != null)
+        {
+            supplySection.PurchaseRequested += OnPurchaseRequested;
+            supplySection.AdFreeRequested += OnAdFreeRequested;
+        }
+
+        if (exchangePanel != null)
+        {
+            exchangePanel.ExchangeRequested += OnExchangeRequested;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (resourcePanel != null)
+        {
+            resourcePanel.AddClicked -= OnResourceAddClicked;
+        }
+
+        if (supplySection != null)
+        {
+            supplySection.PurchaseRequested -= OnPurchaseRequested;
+            supplySection.AdFreeRequested -= OnAdFreeRequested;
+        }
+
+        if (exchangePanel != null)
+        {
+            exchangePanel.ExchangeRequested -= OnExchangeRequested;
+        }
+    }
+
+    public void RefreshAll()
+    {
+        resourcePanel?.Refresh();
+        supplySection?.Refresh();
+        exchangePanel?.Refresh();
+    }
+
+    private void TrySubscribeEvents()
+    {
+        if (isSubscribed || !ServiceLocator.TryGet(out EventBus _))
+        {
+            return;
+        }
+
+        GameEvents.SubscribeResourceChanged(OnResourceChanged);
+        GameEvents.SubscribeShopPurchased(OnShopPurchased);
+        GameEvents.SubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        isSubscribed = true;
+    }
+
+    private void OnResourceAddClicked(CurrencyType currency)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        string message = currency switch
+        {
+            CurrencyType.Diamond => "水晶补充入口待接入",
+            CurrencyType.Gold => "金币补充入口待接入",
+            CurrencyType.Energy => "体力补充入口待接入",
+            _ => "科技点补充入口待接入",
+        };
+        SetStatus(message);
+    }
+
+    private void OnPurchaseRequested(string configId)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        if (!ServiceLocator.TryGet(out ShopManager shop))
+        {
+            SetStatus("商店未就绪");
+            return;
+        }
+
+        shop.TryPurchase(configId);
+    }
+
+    private void OnAdFreeRequested(string configId)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
+        if (!ServiceLocator.TryGet(out ShopManager shop))
+        {
+            SetStatus("商店未就绪");
+            return;
+        }
+
+        shop.TryClaimAdFreeSupply(configId);
+    }
+
+    private void OnExchangeRequested(string configId)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        if (!ServiceLocator.TryGet(out ShopManager shop))
+        {
+            SetStatus("商店未就绪");
+            return;
+        }
+
+        shop.TryExchangeAdTickets(configId);
+    }
+
+    private void OnResourceChanged(GameEventContext ctx) => RefreshAll();
+
+    private void OnShopPurchased(GameEventContext ctx)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
+        RefreshAll();
+        if (ctx.Payload is ShopPurchaseEventArgs args)
+        {
+            SetStatus($"获得 {args.RewardAmount} {FormatReward(args.RewardType)}");
+        }
+    }
+
+    private void OnShopPurchaseFailed(GameEventContext ctx)
+    {
+        RefreshAll();
+        if (ctx.Payload is ShopPurchaseFailedEventArgs args)
+        {
+            SetStatus(args.Message);
+        }
+    }
+
+    private void SetStatus(string message)
+    {
+        if (statusText == null)
+        {
+            return;
+        }
+
+        statusText.text = message ?? string.Empty;
+        statusText.color = string.IsNullOrEmpty(message)
+            ? UiTechWastelandPalette.TextSecondary
+            : UiTechWastelandPalette.HazardYellow;
+    }
+
+    private void PlayUiSfx(string sfxId)
+    {
+        if (!string.IsNullOrWhiteSpace(sfxId))
+        {
+            GameEvents.RaiseAudioPlaySfx(this, sfxId);
+        }
+    }
+
+    private static string FormatReward(ShopRewardType reward) =>
+        reward switch
+        {
+            ShopRewardType.Gold => "金币",
+            ShopRewardType.Diamond => "水晶",
+            ShopRewardType.Energy => "体力",
+            ShopRewardType.AdTicket => "广告券",
+            ShopRewardType.TechPoint => "科技点",
+            _ => reward.ToString(),
+        };
+}

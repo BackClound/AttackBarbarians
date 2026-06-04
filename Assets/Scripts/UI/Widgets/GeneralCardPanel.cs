@@ -25,8 +25,21 @@ public class GeneralCardPanel : MonoBehaviour
 
     public event Action<MainSceneAction> Clicked;
 
+    private Color defaultBackgroundColor;
+    private Color defaultTitleColor;
+
     private void Awake()
     {
+        if (backgroundImage != null)
+        {
+            defaultBackgroundColor = backgroundImage.color;
+        }
+
+        if (titleText != null)
+        {
+            defaultTitleColor = titleText.color;
+        }
+
         if (button != null)
         {
             button.onClick.AddListener(OnButtonClick);
@@ -63,9 +76,14 @@ public class GeneralCardPanel : MonoBehaviour
             return;
         }
 
-        Color color = backgroundImage.color;
-        color.a = selected ? 1f : 0.92f;
-        backgroundImage.color = color;
+        backgroundImage.color = selected
+            ? Color.Lerp(defaultBackgroundColor, UiTechWastelandPalette.PrimaryCyan, 0.4f)
+            : defaultBackgroundColor;
+
+        if (titleText != null)
+        {
+            titleText.color = selected ? UiTechWastelandPalette.TextPrimary : defaultTitleColor;
+        }
     }
 
     private void OnButtonClick()

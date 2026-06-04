@@ -55,8 +55,19 @@ public class MainSceneCardPanel : MonoBehaviour
 
     public void SetBattleTabSelected(bool battleSelected)
     {
-        GeneralCardPanel battle = FindCard(MainSceneAction.Battle);
-        battle?.SetSelectedHighlight(battleSelected);
+        SetNavTabSelected(battleSelected ? MainSceneAction.Battle : MainSceneAction.Shop);
+    }
+
+    public void SetNavTabSelected(MainSceneAction selectedAction)
+    {
+        for (int i = 0; i < cardList.Count; i++)
+        {
+            GeneralCardPanel card = cardList[i];
+            if (card != null)
+            {
+                card.SetSelectedHighlight(card.Action == selectedAction);
+            }
+        }
     }
 
     private void RebuildCache()

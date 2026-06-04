@@ -16,6 +16,8 @@ public class SaveData
 
     public long gold;
     public long diamonds;
+    public int adTickets;
+    public long techPoints;
 
     public int dailyRewardStreak;
     public long lastDailyRewardClaimUtcTicks;
@@ -45,6 +47,8 @@ public class SaveData
             lastSavedUtcTicks = DateTime.UtcNow.Ticks,
             gold = 0,
             diamonds = 0,
+            adTickets = 0,
+            techPoints = 0,
             dailyRewardStreak = 0,
             lastDailyRewardClaimUtcTicks = 0,
             lastFreeDiamondClaimUtcTicks = 0,

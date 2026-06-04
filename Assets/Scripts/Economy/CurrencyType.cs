@@ -9,4 +9,5 @@ public enum CurrencyType
     Gold = 0,
     Diamond = 1,
     Energy = 2,
+    TechPoint = 3,
 }

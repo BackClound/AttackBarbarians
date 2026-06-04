@@ -101,59 +101,78 @@ public static class MainSceneBuilder
         scaler.matchWidthOrHeight = 0.5f;
 
         RectTransform root = canvasObject.GetComponent<RectTransform>();
-        Image background = CreatePanel(root, "SpaceCityBackground", Vector2.zero, ReferenceResolution, Hex("#06112F"));
+
+        GameObject battleRootGo = new GameObject("BattlePagePanelRoot", typeof(RectTransform), typeof(MainSceneBattlePageView));
+        battleRootGo.transform.SetParent(root, false);
+        StretchToParent(battleRootGo.GetComponent<RectTransform>());
+        MainSceneBattlePageView battlePage = battleRootGo.GetComponent<MainSceneBattlePageView>();
+
+        Image background = CreatePanel(battleRootGo.transform as RectTransform, "SpaceCityBackground", Vector2.zero, ReferenceResolution, Hex("#06112F"));
         StretchToParent(background.rectTransform);
 
-        MainSceneView view = canvasObject.GetComponent<MainSceneView>();
-        SerializedObject serializedView = new SerializedObject(view);
-        serializedView.FindProperty("battleSceneName").stringValue = "BattleScene";
-        serializedView.FindProperty("loadBattleSceneOnStart").boolValue = true;
-        serializedView.FindProperty("canvas").objectReferenceValue = canvas;
-        serializedView.FindProperty("backgroundImage").objectReferenceValue = background;
+        GameObject safeAreaGo = new GameObject("SafeAreaRoot", typeof(RectTransform), typeof(UiSafeAreaFitter), typeof(UiRectLayout));
+        safeAreaGo.transform.SetParent(battleRootGo.transform, false);
+        StretchToParent(safeAreaGo.GetComponent<RectTransform>());
+        UiPageStructureEditorUtility.SetLayout(
+            safeAreaGo.GetComponent<UiRectLayout>(),
+            UiRectLayout.LayoutPreset.FullStretch,
+            new RectOffset(0, 0, 0, UiPageStructureEditorUtility.SafeAreaBottomInset));
+        RectTransform safeArea = safeAreaGo.GetComponent<RectTransform>();
 
-        RectTransform profileRoot = CreatePanelHost(root, "TopProfile", Vector2.zero, Vector2.zero);
+        RectTransform profileRoot = CreatePanelHost(safeArea, "TopProfile", Vector2.zero, Vector2.zero);
         MainSceneProfilePanel profilePanel = profileRoot.gameObject.AddComponent<MainSceneProfilePanel>();
         CreateProfile(profileRoot, profilePanel);
 
-        RectTransform resourceRoot = CreatePanelHost(root, "TopResources", Vector2.zero, Vector2.zero);
+        RectTransform resourceRoot = CreatePanelHost(safeArea, "TopResources", Vector2.zero, Vector2.zero);
         MainSceneResourcePanel resourcePanel = resourceRoot.gameObject.AddComponent<MainSceneResourcePanel>();
         CreateTopResources(resourceRoot, resourcePanel);
 
-        MainSceneCardPanel topSystemPanel = CreateCardPanelHost(root, "TopSystemIcons");
+        MainSceneCardPanel topSystemPanel = CreateCardPanelHost(safeArea, "TopSystemIcons");
         CreateTopButtons(topSystemPanel);
 
-        MainSceneCardPanel promotionPanel = CreateCardPanelHost(root, "PromotionIcons");
+        MainSceneCardPanel promotionPanel = CreateCardPanelHost(safeArea, "PromotionIcons");
         CreatePromotionArea(promotionPanel);
 
-        CreateCenterVisual(root);
+        CreateCenterVisual(safeArea);
 
-        MainSceneCardPanel leftPanel = CreateCardPanelHost(root, "LeftSideIcons");
+        MainSceneCardPanel leftPanel = CreateCardPanelHost(safeArea, "LeftSideIcons");
         CreateLeftSideButtons(leftPanel);
 
-        MainSceneCardPanel rightPanel = CreateCardPanelHost(root, "RightSideIcons");
+        MainSceneCardPanel rightPanel = CreateCardPanelHost(safeArea, "RightSideIcons");
         CreateRightSideButtons(rightPanel);
 
-        RectTransform rewardRoot = CreatePanelHost(root, "RewardRow", Vector2.zero, Vector2.zero);
+        RectTransform rewardRoot = CreatePanelHost(safeArea, "RewardRow", Vector2.zero, Vector2.zero);
         MainSceneRewardPanel rewardPanel = rewardRoot.gameObject.AddComponent<MainSceneRewardPanel>();
         CreateRewardPanels(rewardRoot, rewardPanel);
 
-        GeneralCardPanel startBattle = CreatePrimaryAction(root);
+        GeneralCardPanel startBattle = CreatePrimaryAction(safeArea);
+
+        TMP_Text status = CreateText(safeArea, "StatusText", "准备开始战斗", 24, TextWhite, TextAlignmentOptions.Center, new Vector2(0f, -610f), new Vector2(720f, 48f));
 
         MainSceneCardPanel bottomPanel = CreateCardPanelHost(root, "BottomNav");
         CreateBottomNavigation(bottomPanel);
+        UiPageStructureEditorUtility.PinBottomNavToCanvas(root, bottomPanel.transform);
 
-        serializedView.FindProperty("profilePanel").objectReferenceValue = profilePanel;
-        serializedView.FindProperty("resourcePanel").objectReferenceValue = resourcePanel;
-        serializedView.FindProperty("topSystemCardPanel").objectReferenceValue = topSystemPanel;
-        serializedView.FindProperty("promotionCardPanel").objectReferenceValue = promotionPanel;
-        serializedView.FindProperty("leftSideCardPanel").objectReferenceValue = leftPanel;
-        serializedView.FindProperty("rightSideCardPanel").objectReferenceValue = rightPanel;
+        SerializedObject battleSo = new SerializedObject(battlePage);
+        battleSo.FindProperty("battleSceneName").stringValue = "BattleScene";
+        battleSo.FindProperty("loadBattleSceneOnStart").boolValue = true;
+        battleSo.FindProperty("backgroundImage").objectReferenceValue = background;
+        battleSo.FindProperty("statusText").objectReferenceValue = status;
+        battleSo.FindProperty("profilePanel").objectReferenceValue = profilePanel;
+        battleSo.FindProperty("resourcePanel").objectReferenceValue = resourcePanel;
+        battleSo.FindProperty("topSystemCardPanel").objectReferenceValue = topSystemPanel;
+        battleSo.FindProperty("promotionCardPanel").objectReferenceValue = promotionPanel;
+        battleSo.FindProperty("leftSideCardPanel").objectReferenceValue = leftPanel;
+        battleSo.FindProperty("rightSideCardPanel").objectReferenceValue = rightPanel;
+        battleSo.FindProperty("startBattleCard").objectReferenceValue = startBattle;
+        battleSo.FindProperty("rewardPanel").objectReferenceValue = rewardPanel;
+        battleSo.ApplyModifiedPropertiesWithoutUndo();
+
+        MainSceneView view = canvasObject.GetComponent<MainSceneView>();
+        SerializedObject serializedView = new SerializedObject(view);
+        serializedView.FindProperty("canvas").objectReferenceValue = canvas;
+        serializedView.FindProperty("battlePage").objectReferenceValue = battlePage;
         serializedView.FindProperty("bottomNavCardPanel").objectReferenceValue = bottomPanel;
-        serializedView.FindProperty("startBattleCard").objectReferenceValue = startBattle;
-        serializedView.FindProperty("rewardPanel").objectReferenceValue = rewardPanel;
-
-        TMP_Text status = CreateText(root, "StatusText", "准备开始战斗", 24, TextWhite, TextAlignmentOptions.Center, new Vector2(0f, -610f), new Vector2(720f, 48f));
-        serializedView.FindProperty("statusText").objectReferenceValue = status;
         serializedView.ApplyModifiedPropertiesWithoutUndo();
     }
 

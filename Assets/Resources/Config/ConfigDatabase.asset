@@ -67,3 +67,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aabbccddeeff00112233445566778899, type: 2}
   gameplayEvents:
   - {fileID: 11400000, guid: bbccddeeff0011223344556677889900, type: 2}
+  shopItems:
+  - {fileID: 11400000, guid: 61aa3a4694e0740adbb4786c267e3da9, type: 2}
+  - {fileID: 11400000, guid: c722bc002b39f4867b5c9e8e62a97512, type: 2}
+  - {fileID: 11400000, guid: 93235a6cb1ce74d2fb2c6df4d0684508, type: 2}
+  - {fileID: 11400000, guid: 9d11221579c9f4d14a520dcf7771c73c, type: 2}
+  - {fileID: 11400000, guid: 0d089a31720494a64b46bd9448ebd5a0, type: 2}
+  - {fileID: 11400000, guid: 2f3795b97b80945a691224de7fa0f490, type: 2}
+  - {fileID: 11400000, guid: f2aa742f2c3454607aa5fa4331e5f004, type: 2}
+  - {fileID: 11400000, guid: b51ac615515664b0f8a43c118a84a509, type: 2}
+  - {fileID: 11400000, guid: 783a0e610c60e4b999ad4b0dc419125b, type: 2}
+  - {fileID: 11400000, guid: 76b43551ff3894cd2908b38f820b9288, type: 2}
+  - {fileID: 11400000, guid: 546707489b68b4fbe8199ae43964f41e, type: 2}
+  achievements: []
+  dailyRewardEntries: []

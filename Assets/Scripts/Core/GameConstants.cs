@@ -239,6 +239,27 @@ public static class GameConstants
         public const string ShopDiamondPack = "shop.diamond_pack";
         public const string ShopFreeDiamond = "shop.free_diamond";
 
+        public const string ShopCrateCommonSingle = "shop.crate_common_single";
+        public const string ShopCrateCommonTen = "shop.crate_common_ten";
+        public const string ShopCratePremiumSingle = "shop.crate_premium_single";
+        public const string ShopCratePremiumTen = "shop.crate_premium_ten";
+        public const string ShopGoldSupplyLowSingle = "shop.gold_supply_low_single";
+        public const string ShopGoldSupplyLowTen = "shop.gold_supply_low_ten";
+        public const string ShopGoldSupplyStdSingle = "shop.gold_supply_std_single";
+        public const string ShopGoldSupplyStdTen = "shop.gold_supply_std_ten";
+        public const string ShopAdCrateCommon = "shop.ad_crate_common";
+        public const string ShopAdCratePremium = "shop.ad_crate_premium";
+        public const string ShopAdGoldSupply = "shop.ad_gold_supply";
+
+        public const string ShopExchangeDiamond1 = "shop.exchange_diamond_1";
+        public const string ShopExchangeDiamond2 = "shop.exchange_diamond_2";
+        public const string ShopExchangeDiamond3 = "shop.exchange_diamond_3";
+        public const string ShopExchangeDiamond4 = "shop.exchange_diamond_4";
+        public const string ShopExchangeGold1 = "shop.exchange_gold_1";
+        public const string ShopExchangeGold2 = "shop.exchange_gold_2";
+        public const string ShopExchangeGold3 = "shop.exchange_gold_3";
+        public const string ShopExchangeGold4 = "shop.exchange_gold_4";
+
         public const string AchievementFirstBlood = "achievement.first_blood";
         public const string AchievementWave5 = "achievement.wave_5";
         public const string AchievementBossSlayer = "achievement.boss_slayer";

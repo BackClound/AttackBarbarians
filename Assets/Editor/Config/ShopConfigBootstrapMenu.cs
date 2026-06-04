@@ -48,6 +48,86 @@ public static class ShopConfigBootstrapMenu
             purchaseLimit: 5,
             ShopRefreshPeriod.None);
 
+        ShopItemSO crateCommonSingle = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopCrateCommonSingle,
+            "普通补给箱·单抽",
+            CurrencyType.Diamond,
+            100,
+            ShopRewardType.Gold,
+            800,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO crateCommonTen = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopCrateCommonTen,
+            "普通补给箱·十连",
+            CurrencyType.Diamond,
+            900,
+            ShopRewardType.Gold,
+            8000,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO cratePremiumSingle = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopCratePremiumSingle,
+            "高级补给箱·单抽",
+            CurrencyType.Diamond,
+            300,
+            ShopRewardType.Diamond,
+            10,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO cratePremiumTen = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopCratePremiumTen,
+            "高级补给箱·十连",
+            CurrencyType.Diamond,
+            2700,
+            ShopRewardType.Diamond,
+            100,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO goldLowSingle = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopGoldSupplyLowSingle,
+            "低级金币补给·单抽",
+            CurrencyType.Gold,
+            10000,
+            ShopRewardType.Gold,
+            5000,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO goldLowTen = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopGoldSupplyLowTen,
+            "低级金币补给·十连",
+            CurrencyType.Gold,
+            90000,
+            ShopRewardType.Gold,
+            50000,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO goldStdSingle = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopGoldSupplyStdSingle,
+            "标准金币补给·单抽",
+            CurrencyType.Gold,
+            50000,
+            ShopRewardType.Gold,
+            25000,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
+        ShopItemSO goldStdTen = CreateOrUpdateItem(
+            GameConstants.ConfigIds.ShopGoldSupplyStdTen,
+            "标准金币补给·十连",
+            CurrencyType.Gold,
+            450000,
+            ShopRewardType.Gold,
+            250000,
+            purchaseLimit: 0,
+            ShopRefreshPeriod.None);
+
         ShopCatalogSO catalog = CreateOrLoadCatalog();
         SerializedObject catalogSo = new SerializedObject(catalog);
         SerializedProperty itemsProp = catalogSo.FindProperty("items");
@@ -55,12 +135,31 @@ public static class ShopConfigBootstrapMenu
         AddItemRef(itemsProp, goldSmall);
         AddItemRef(itemsProp, goldLarge);
         AddItemRef(itemsProp, diamondPack);
+        AddItemRef(itemsProp, crateCommonSingle);
+        AddItemRef(itemsProp, crateCommonTen);
+        AddItemRef(itemsProp, cratePremiumSingle);
+        AddItemRef(itemsProp, cratePremiumTen);
+        AddItemRef(itemsProp, goldLowSingle);
+        AddItemRef(itemsProp, goldLowTen);
+        AddItemRef(itemsProp, goldStdSingle);
+        AddItemRef(itemsProp, goldStdTen);
         catalogSo.FindProperty("freeDiamondCooldownHours").floatValue = 12f;
         catalogSo.FindProperty("freeDiamondGrantAmount").longValue = 5;
         catalogSo.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(catalog);
 
-        RegisterInDatabase(goldSmall, goldLarge, diamondPack);
+        RegisterInDatabase(
+            goldSmall,
+            goldLarge,
+            diamondPack,
+            crateCommonSingle,
+            crateCommonTen,
+            cratePremiumSingle,
+            cratePremiumTen,
+            goldLowSingle,
+            goldLowTen,
+            goldStdSingle,
+            goldStdTen);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();

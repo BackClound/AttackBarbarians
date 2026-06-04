@@ -270,20 +270,219 @@ public class ShopManager : MonoBehaviour, IGameSystem
         return true;
     }
 
-    private bool GrantReward(ShopItemSO item)
+    public int GetAdTicketCount()
     {
-        CurrencyType currency = MapRewardToCurrency(item.RewardType);
-        if (currency == CurrencyType.Energy)
+        return saveManager?.Current?.adTickets ?? 0;
+    }
+
+    public long GetTechPoints()
+    {
+        return saveManager?.Current?.techPoints ?? 0;
+    }
+
+    public bool TryGetItemDisplay(string configId, out string costText, out string rewardText)
+    {
+        costText = string.Empty;
+        rewardText = string.Empty;
+        if (!TryResolveItem(configId, out ShopItemSO item))
         {
-            Debug.LogWarning($"[ShopManager] 体力奖励暂未实现 item={item.ConfigId}");
             return false;
         }
 
-        return resourceManager.TryAdd(
-            currency,
-            item.RewardAmount,
-            ResourceChangeReason.ShopPurchase,
-            out _);
+        costText = FormatPullCost(item);
+        rewardText = $"{item.RewardAmount} {FormatRewardLabel(item.RewardType)}";
+        return true;
+    }
+
+    public bool CanClaimAdFreeSupply(string configId, out string failureReason)
+    {
+        failureReason = null;
+        if (!isInitialized || saveManager?.Current == null)
+        {
+            failureReason = "商店未就绪";
+            return false;
+        }
+
+        if (!TryResolveAdFreeSupply(configId, out AdFreeSupplyRule rule))
+        {
+            failureReason = "未找到广告补给配置";
+            return false;
+        }
+
+        if (GetEffectivePurchaseCount(configId, ShopRefreshPeriod.Daily) >= rule.DailyLimit)
+        {
+            failureReason = "今日次数已用完";
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool TryClaimAdFreeSupply(string configId)
+    {
+        if (!CanClaimAdFreeSupply(configId, out string failureReason))
+        {
+            GameEvents.RaiseShopPurchaseFailed(
+                this,
+                configId,
+                ShopPurchaseFailedReason.PurchaseLimitReached,
+                failureReason);
+            return false;
+        }
+
+        if (!TryResolveAdFreeSupply(configId, out AdFreeSupplyRule rule))
+        {
+            return false;
+        }
+
+        if (!GrantRewardType(rule.RewardType, rule.RewardAmount))
+        {
+            GameEvents.RaiseShopPurchaseFailed(
+                this,
+                configId,
+                ShopPurchaseFailedReason.InvalidConfiguration,
+                "发放奖励失败");
+            return false;
+        }
+
+        RecordAdFreeClaim(configId);
+        GameEvents.RaiseShopPurchased(
+            this,
+            new ShopPurchaseEventArgs(configId, rule.RewardType, rule.RewardAmount, CurrencyType.Diamond, 0));
+        return true;
+    }
+
+    public bool CanExchangeAdTickets(string configId, out string failureReason, out ShopPurchaseFailedReason reason)
+    {
+        failureReason = null;
+        reason = ShopPurchaseFailedReason.None;
+
+        if (!isInitialized || saveManager?.Current == null)
+        {
+            failureReason = "商店未就绪";
+            reason = ShopPurchaseFailedReason.NotInitialized;
+            return false;
+        }
+
+        if (!TryResolveExchange(configId, out ExchangeRule rule))
+        {
+            failureReason = "未找到兑换配置";
+            reason = ShopPurchaseFailedReason.ItemNotFound;
+            return false;
+        }
+
+        if (saveManager.Current.adTickets < rule.TicketCost)
+        {
+            failureReason = $"广告券不足（需要 {rule.TicketCost}，当前 {saveManager.Current.adTickets}）";
+            reason = ShopPurchaseFailedReason.InsufficientFunds;
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool TryExchangeAdTickets(string configId)
+    {
+        if (!CanExchangeAdTickets(configId, out string failureReason, out ShopPurchaseFailedReason reason))
+        {
+            GameEvents.RaiseShopPurchaseFailed(this, configId, reason, failureReason);
+            return false;
+        }
+
+        if (!TryResolveExchange(configId, out ExchangeRule rule))
+        {
+            return false;
+        }
+
+        saveManager.Current.adTickets -= rule.TicketCost;
+        if (!GrantRewardType(rule.RewardType, rule.RewardAmount))
+        {
+            saveManager.Current.adTickets += rule.TicketCost;
+            GameEvents.RaiseShopPurchaseFailed(
+                this,
+                configId,
+                ShopPurchaseFailedReason.InvalidConfiguration,
+                "兑换发奖失败");
+            return false;
+        }
+
+        saveManager.MarkDirty();
+        GameEvents.RaiseShopPurchased(
+            this,
+            new ShopPurchaseEventArgs(configId, rule.RewardType, rule.RewardAmount, CurrencyType.Diamond, 0));
+        return true;
+    }
+
+    public bool TryGetExchangeDisplay(string configId, out string ticketCostText, out string rewardPreviewText)
+    {
+        ticketCostText = string.Empty;
+        rewardPreviewText = string.Empty;
+        if (!TryResolveExchange(configId, out ExchangeRule rule))
+        {
+            return false;
+        }
+
+        ticketCostText = $"{rule.TicketCost} 券";
+        rewardPreviewText = FormatExchangeReward(rule.RewardType, rule.RewardAmount);
+        return true;
+    }
+
+    private bool GrantReward(ShopItemSO item)
+    {
+        return GrantRewardType(item.RewardType, item.RewardAmount);
+    }
+
+    private bool GrantRewardType(ShopRewardType rewardType, long amount)
+    {
+        switch (rewardType)
+        {
+            case ShopRewardType.AdTicket:
+                return TryAddAdTickets((int)amount);
+            case ShopRewardType.TechPoint:
+                return TryAddTechPoints(amount);
+            default:
+                CurrencyType currency = MapRewardToCurrency(rewardType);
+                if (currency == CurrencyType.Energy)
+                {
+                    Debug.LogWarning("[ShopManager] 体力奖励暂未实现");
+                    return false;
+                }
+
+                return resourceManager.TryAdd(currency, amount, ResourceChangeReason.ShopPurchase, out _);
+        }
+    }
+
+    private bool TryAddAdTickets(int amount)
+    {
+        if (saveManager?.Current == null || amount <= 0)
+        {
+            return false;
+        }
+
+        saveManager.Current.adTickets += amount;
+        saveManager.MarkDirty();
+        return true;
+    }
+
+    private bool TryAddTechPoints(long amount)
+    {
+        if (saveManager?.Current == null || amount <= 0)
+        {
+            return false;
+        }
+
+        saveManager.Current.techPoints += amount;
+        saveManager.MarkDirty();
+        return true;
+    }
+
+    private void RecordAdFreeClaim(string configId)
+    {
+        SaveData save = saveManager.Current;
+        int count = GetEffectivePurchaseCount(configId, ShopRefreshPeriod.Daily) + 1;
+        ConfigIdIntPairListUtility.SetValue(save.shopPurchaseCounts, configId, count);
+        ConfigIdLongPairListUtility.SetValue(save.shopLastPurchaseUtcTicks, configId, DateTime.UtcNow.Ticks);
+        saveManager.MarkDirty();
     }
 
     private void RecordPurchase(ShopItemSO item)
@@ -323,6 +522,39 @@ public class ShopManager : MonoBehaviour, IGameSystem
             _ => CurrencyType.Gold,
         };
 
+    private static string FormatPullCost(ShopItemSO item)
+    {
+        string currencyLabel = item.PriceCurrency switch
+        {
+            CurrencyType.Gold => "金币",
+            CurrencyType.Diamond => "水晶",
+            _ => item.PriceCurrency.ToString(),
+        };
+
+        return item.PriceAmount >= 10000
+            ? $"{item.PriceAmount / 1000}k {currencyLabel}"
+            : $"{item.PriceAmount} {currencyLabel}";
+    }
+
+    private static string FormatRewardLabel(ShopRewardType rewardType) =>
+        rewardType switch
+        {
+            ShopRewardType.Gold => "金币",
+            ShopRewardType.Diamond => "水晶",
+            ShopRewardType.Energy => "体力",
+            ShopRewardType.AdTicket => "广告券",
+            ShopRewardType.TechPoint => "科技点",
+            _ => rewardType.ToString(),
+        };
+
+    private static string FormatExchangeReward(ShopRewardType rewardType, long amount) =>
+        rewardType switch
+        {
+            ShopRewardType.Gold => amount >= 1000 ? $"{amount / 1000}k 金币" : $"{amount} 金币",
+            ShopRewardType.Diamond => $"{amount} 水晶",
+            _ => $"{amount} {FormatRewardLabel(rewardType)}",
+        };
+
     private static string FormatCooldown(TimeSpan span)
     {
         if (span.TotalHours >= 1d)
@@ -331,6 +563,59 @@ public class ShopManager : MonoBehaviour, IGameSystem
         }
 
         return $"{Mathf.CeilToInt((float)span.TotalMinutes)} 分钟";
+    }
+
+    private static bool TryResolveAdFreeSupply(string configId, out AdFreeSupplyRule rule)
+    {
+        rule = default;
+        switch (configId)
+        {
+            case GameConstants.ConfigIds.ShopAdCrateCommon:
+                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 500, 1);
+                return true;
+            case GameConstants.ConfigIds.ShopAdCratePremium:
+                rule = new AdFreeSupplyRule(ShopRewardType.Diamond, 5, 1);
+                return true;
+            case GameConstants.ConfigIds.ShopAdGoldSupply:
+                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 2000, 1);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static bool TryResolveExchange(string configId, out ExchangeRule rule)
+    {
+        rule = default;
+        switch (configId)
+        {
+            case GameConstants.ConfigIds.ShopExchangeDiamond1:
+                rule = new ExchangeRule(1, ShopRewardType.Diamond, 10);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeDiamond2:
+                rule = new ExchangeRule(2, ShopRewardType.Diamond, 30);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeDiamond3:
+                rule = new ExchangeRule(3, ShopRewardType.Diamond, 80);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeDiamond4:
+                rule = new ExchangeRule(4, ShopRewardType.Diamond, 150);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeGold1:
+                rule = new ExchangeRule(1, ShopRewardType.Gold, 10000);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeGold2:
+                rule = new ExchangeRule(2, ShopRewardType.Gold, 30000);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeGold3:
+                rule = new ExchangeRule(3, ShopRewardType.Gold, 80000);
+                return true;
+            case GameConstants.ConfigIds.ShopExchangeGold4:
+                rule = new ExchangeRule(4, ShopRewardType.Gold, 150000);
+                return true;
+            default:
+                return false;
+        }
     }
 
     private void LogFailure(string configId, string message, ShopPurchaseFailedReason reason)
@@ -356,6 +641,40 @@ public class ShopManager : MonoBehaviour, IGameSystem
         if (resourceManager != null)
         {
             resourceManager.TryAdd(CurrencyType.Gold, 5000, ResourceChangeReason.Debug, out _);
+        }
+    }
+
+    [ContextMenu("Debug/Grant Test Ad Tickets")]
+    private void DebugGrantAdTickets()
+    {
+        TryAddAdTickets(12);
+    }
+
+    private readonly struct AdFreeSupplyRule
+    {
+        public ShopRewardType RewardType { get; }
+        public long RewardAmount { get; }
+        public int DailyLimit { get; }
+
+        public AdFreeSupplyRule(ShopRewardType rewardType, long rewardAmount, int dailyLimit)
+        {
+            RewardType = rewardType;
+            RewardAmount = rewardAmount;
+            DailyLimit = dailyLimit;
+        }
+    }
+
+    private readonly struct ExchangeRule
+    {
+        public int TicketCost { get; }
+        public ShopRewardType RewardType { get; }
+        public long RewardAmount { get; }
+
+        public ExchangeRule(int ticketCost, ShopRewardType rewardType, long rewardAmount)
+        {
+            TicketCost = ticketCost;
+            RewardType = rewardType;
+            RewardAmount = rewardAmount;
         }
     }
 }
