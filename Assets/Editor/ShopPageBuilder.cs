@@ -13,6 +13,20 @@ public static class ShopPageBuilder
 {
     private const string MainScenePath = "Assets/Scenes/MainScene.unity";
 
+    private const float ShopTopBarHeight = 88f;
+    private const float ShopTopBarPaddingTop = 8f;
+    private const float ShopStatusBarHeight = 44f;
+    private const float ShopStatusBarPaddingBottom = 8f;
+    private const float ShopScrollSectionSpacing = 16f;
+    private const float SupplyRowHeight = 820f;
+    private const float ExchangeSectionHeight = 520f;
+
+    private static int ShopScrollHostPaddingTop =>
+        Mathf.RoundToInt(ShopTopBarHeight + ShopTopBarPaddingTop);
+
+    private static int ShopScrollHostPaddingBottom =>
+        Mathf.RoundToInt(ShopStatusBarHeight + ShopStatusBarPaddingBottom);
+
     private static readonly Vector2 ReferenceResolution = new Vector2(1080f, 1920f);
     private static readonly Color PanelBlue = Hex("#0C2A5A");
     private static readonly Color PanelDeep = Hex("#071632");
@@ -50,6 +64,106 @@ public static class ShopPageBuilder
         Debug.Log("[ShopPageBuilder] 商城页面已搭建并绑定到 MainScene。");
     }
 
+    [MenuItem("Attack Barbarians/UI/Fix Shop Scroll Layout In MainScene")]
+    public static void FixShopScrollLayoutInMainScene()
+    {
+        Scene scene = EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
+        Transform scrollHost = FindChildRecursive(Object.FindObjectOfType<MainSceneView>()?.transform, "ShopScrollHost");
+        if (scrollHost == null)
+        {
+            Debug.LogError("[ShopPageBuilder] 未找到 ShopScrollHost，请先执行 Build Shop Page。");
+            return;
+        }
+
+        UiRectLayout hostLayout = scrollHost.GetComponent<UiRectLayout>();
+        if (hostLayout != null)
+        {
+            SetLayout(hostLayout, UiRectLayout.LayoutPreset.FullStretch,
+                new RectOffset(8, 8, ShopScrollHostPaddingTop, ShopScrollHostPaddingBottom));
+        }
+
+        Transform contentTransform = scrollHost.Find("ShopScroll/Viewport/Content");
+        if (contentTransform == null)
+        {
+            contentTransform = FindChildRecursive(scrollHost, "Content");
+        }
+
+        if (contentTransform == null)
+        {
+            Debug.LogError("[ShopPageBuilder] 未找到 ShopScroll Content。");
+            return;
+        }
+
+        ApplyScrollContentLayout(contentTransform as RectTransform);
+        ApplyScrollSectionLayout(FindChildRecursive(contentTransform, "SupplyRow") as RectTransform, SupplyRowHeight);
+        ApplyScrollSectionLayout(FindChildRecursive(contentTransform, "ExchangeSection") as RectTransform, ExchangeSectionHeight);
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("[ShopPageBuilder] ShopScrollHost 布局已修复：内容自顶向下排列，顶栏/底栏固定不滚动。");
+    }
+
+    private static void ApplyScrollContentLayout(RectTransform content)
+    {
+        if (content == null)
+        {
+            return;
+        }
+
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = new Vector2(0f, 0f);
+
+        VerticalLayoutGroup layout = content.GetComponent<VerticalLayoutGroup>();
+        if (layout == null)
+        {
+            layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
+        }
+
+        layout.childAlignment = TextAnchor.UpperCenter;
+        layout.spacing = ShopScrollSectionSpacing;
+        layout.padding = new RectOffset(0, 0, 4, 12);
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+
+        ContentSizeFitter fitter = content.GetComponent<ContentSizeFitter>();
+        if (fitter == null)
+        {
+            fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+        }
+
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+    }
+
+    private static void ApplyScrollSectionLayout(RectTransform section, float height)
+    {
+        if (section == null)
+        {
+            return;
+        }
+
+        section.anchorMin = new Vector2(0f, 1f);
+        section.anchorMax = new Vector2(1f, 1f);
+        section.pivot = new Vector2(0.5f, 1f);
+        section.anchoredPosition = Vector2.zero;
+        section.sizeDelta = new Vector2(0f, height);
+
+        LayoutElement element = section.GetComponent<LayoutElement>();
+        if (element == null)
+        {
+            element = section.gameObject.AddComponent<LayoutElement>();
+        }
+
+        element.minHeight = height;
+        element.preferredHeight = height;
+        element.flexibleWidth = 1f;
+    }
+
     private static ShopSceneView CreateShopPage(RectTransform canvasRoot)
     {
         UiPageStructureEditorUtility.PageShell shell = UiPageStructureEditorUtility.CreatePageShell(
@@ -73,8 +187,8 @@ public static class ShopPageBuilder
             safeArea,
             "ShopTopBar",
             UiRectLayout.LayoutPreset.TopStretch,
-            new RectOffset(12, 12, 8, 0),
-            new Vector2(0f, 88f));
+            new RectOffset(12, 12, (int)ShopTopBarPaddingTop, 0),
+            new Vector2(0f, ShopTopBarHeight));
         ShopResourcePanel resourcePanel = topBar.gameObject.AddComponent<ShopResourcePanel>();
         CreateShopResources(topBar, resourcePanel);
 
@@ -82,11 +196,11 @@ public static class ShopPageBuilder
             safeArea,
             "ShopScrollHost",
             UiRectLayout.LayoutPreset.FullStretch,
-            new RectOffset(8, 8, 100, 56),
+            new RectOffset(8, 8, ShopScrollHostPaddingTop, ShopScrollHostPaddingBottom),
             Vector2.zero);
         ScrollRect scroll = CreateScrollArea(scrollHost);
 
-        RectTransform supplyRow = CreatePanelHost(scroll.content, "SupplyRow", new Vector2(0f, -420f), new Vector2(1040f, 820f));
+        RectTransform supplyRow = CreateScrollSection(scroll.content, "SupplyRow", SupplyRowHeight);
         ShopSupplySectionPanel supplyPanel = supplyRow.gameObject.AddComponent<ShopSupplySectionPanel>();
         ShopCrateWidget commonCrate = CreateCrateWidget(supplyRow, "CommonCrate", new Vector2(-350f, 0f), new Vector2(330f, 780f), NeonBlue,
             GameConstants.ConfigIds.ShopCrateCommonSingle,
@@ -98,18 +212,16 @@ public static class ShopPageBuilder
             GameConstants.ConfigIds.ShopAdCratePremium);
         ShopGoldSupplyWidget goldSupply = CreateGoldSupplyWidget(supplyRow, "GoldSupply", new Vector2(350f, 0f), new Vector2(330f, 780f));
 
-        RectTransform exchangeRoot = CreatePanelHost(scroll.content, "ExchangeSection", new Vector2(0f, -980f), new Vector2(1040f, 520f));
+        RectTransform exchangeRoot = CreateScrollSection(scroll.content, "ExchangeSection", ExchangeSectionHeight);
         ShopAdTicketExchangePanel exchangePanel = exchangeRoot.gameObject.AddComponent<ShopAdTicketExchangePanel>();
         CreateExchangeSection(exchangeRoot, exchangePanel);
-
-        scroll.content.sizeDelta = new Vector2(0f, 1280f);
 
         RectTransform statusBar = CreateLayoutHost(
             safeArea,
             "ShopStatusBar",
             UiRectLayout.LayoutPreset.BottomStretch,
-            new RectOffset(16, 16, 0, 8),
-            new Vector2(0f, 44f));
+            new RectOffset(16, 16, 0, (int)ShopStatusBarPaddingBottom),
+            new Vector2(0f, ShopStatusBarHeight));
         TMP_Text status = CreateText(statusBar, "ShopStatusText", string.Empty, 22, NeonGold, TextAlignmentOptions.Center, Vector2.zero, new Vector2(900f, 40f));
 
         SerializedObject shopSo = new SerializedObject(shopView);
@@ -131,17 +243,7 @@ public static class ShopPageBuilder
 
     private static void CreateShopResources(RectTransform root, ShopResourcePanel panel)
     {
-        UI_ItemSlot diamond = CreateResourcePill(root, "ShopDiamond", new Vector2(-360f, 0f), "12,450", NeonBlue, CurrencyType.Diamond);
-        UI_ItemSlot gold = CreateResourcePill(root, "ShopGold", new Vector2(-120f, 0f), "8,752,300", NeonGold, CurrencyType.Gold);
-        UI_ItemSlot energy = CreateResourcePill(root, "ShopEnergy", new Vector2(120f, 0f), "120/120", Hex("#FF5E7E"), CurrencyType.Energy);
-        UI_ItemSlot tech = CreateResourcePill(root, "ShopTechPoint", new Vector2(360f, 0f), "3,260", Hex("#5BE7FF"), CurrencyType.TechPoint);
-
-        SerializedObject so = new SerializedObject(panel);
-        so.FindProperty("diamondSlot").objectReferenceValue = diamond;
-        so.FindProperty("goldSlot").objectReferenceValue = gold;
-        so.FindProperty("energySlot").objectReferenceValue = energy;
-        so.FindProperty("techPointSlot").objectReferenceValue = tech;
-        so.ApplyModifiedPropertiesWithoutUndo();
+        TopResourceBarEditorUtility.Build(root, panel, TopResourceBarEditorUtility.ShopBarPositions);
     }
 
     private static ShopCrateWidget CreateCrateWidget(
@@ -333,14 +435,27 @@ public static class ShopPageBuilder
         StretchToParent(viewport);
         viewportGo.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.01f);
 
-        GameObject contentGo = new GameObject("Content", typeof(RectTransform));
+        GameObject contentGo = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
         contentGo.transform.SetParent(viewportGo.transform, false);
         RectTransform content = contentGo.GetComponent<RectTransform>();
-        content.anchorMin = new Vector2(0.5f, 1f);
-        content.anchorMax = new Vector2(0.5f, 1f);
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
         content.pivot = new Vector2(0.5f, 1f);
         content.anchoredPosition = Vector2.zero;
-        content.sizeDelta = new Vector2(1040f, 1300f);
+        content.sizeDelta = new Vector2(0f, 0f);
+
+        VerticalLayoutGroup layout = contentGo.GetComponent<VerticalLayoutGroup>();
+        layout.childAlignment = TextAnchor.UpperCenter;
+        layout.spacing = ShopScrollSectionSpacing;
+        layout.padding = new RectOffset(0, 0, 4, 12);
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+
+        ContentSizeFitter fitter = contentGo.GetComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         ScrollRect scroll = scrollGo.GetComponent<ScrollRect>();
         scroll.viewport = viewport;
@@ -348,7 +463,20 @@ public static class ShopPageBuilder
         scroll.horizontal = false;
         scroll.vertical = true;
         scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
         return scroll;
+    }
+
+    /// <summary>ScrollView Content 子块：由 VerticalLayoutGroup 自顶向下排布。</summary>
+    private static RectTransform CreateScrollSection(RectTransform content, string name, float height)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(LayoutElement));
+        go.transform.SetParent(content, false);
+        LayoutElement element = go.GetComponent<LayoutElement>();
+        element.minHeight = height;
+        element.preferredHeight = height;
+        element.flexibleWidth = 1f;
+        return go.GetComponent<RectTransform>();
     }
 
     private static void WireMainSceneView(MainSceneView mainView, ShopSceneView shopView)
@@ -468,23 +596,6 @@ public static class ShopPageBuilder
         button.targetGraphic = bg;
         labelText = CreateText(bg.rectTransform, "Label", label, 20, TextWhite, TextAlignmentOptions.Center, Vector2.zero, size - new Vector2(8f, 8f));
         return button;
-    }
-
-    private static UI_ItemSlot CreateResourcePill(RectTransform parent, string name, Vector2 position, string value, Color accent, CurrencyType currency)
-    {
-        Image panel = CreatePanel(parent, name, position, new Vector2(230f, 58f), PanelDeep);
-        Button add = panel.gameObject.AddComponent<Button>();
-        CreatePanel(panel.rectTransform, "Icon", new Vector2(-78f, 0f), new Vector2(42f, 42f), accent);
-        TMP_Text valueText = CreateText(panel.rectTransform, "ValueText", value, 22, TextWhite, TextAlignmentOptions.Left, new Vector2(8f, 0f), new Vector2(120f, 42f));
-        CreateText(panel.rectTransform, "AddText", "+", 28, NeonBlue, TextAlignmentOptions.Center, new Vector2(88f, 0f), new Vector2(34f, 42f));
-        UI_ItemSlot slot = panel.gameObject.AddComponent<UI_ItemSlot>();
-        SerializedObject so = new SerializedObject(slot);
-        so.FindProperty("currency").enumValueIndex = (int)currency;
-        so.FindProperty("iconImage").objectReferenceValue = panel.transform.Find("Icon")?.GetComponent<Image>();
-        so.FindProperty("valueText").objectReferenceValue = valueText;
-        so.FindProperty("addButton").objectReferenceValue = add;
-        so.ApplyModifiedPropertiesWithoutUndo();
-        return slot;
     }
 
     private static void SetArray(SerializedProperty arrayProp, ShopExchangeRowWidget[] items)

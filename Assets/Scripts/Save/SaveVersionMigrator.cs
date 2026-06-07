@@ -57,9 +57,14 @@ public static class SaveVersionMigrator
 
     private static void MigrateV1ToV2(SaveData data)
     {
+        if (data.adTickets < 0)
+        {
+            data.adTickets = 0;
+        }
+
         if (data.maxEnergy <= 0)
         {
-            data.maxEnergy = EnergyConstants.DefaultMaxEnergy;
+            data.maxEnergy = StaminaConstants.DefaultMaxStamina;
         }
 
         if (data.energy <= 0)

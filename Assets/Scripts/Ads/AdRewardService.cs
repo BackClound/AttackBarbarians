@@ -91,42 +91,17 @@ public class AdRewardService : MonoBehaviour, IGameSystem
             () => shop.TryClaimAdFreeSupply(shopConfigId));
     }
 
-    public void TryShowRewardedForEnergy()
+    public void TryShowRewardedForAdTicket()
     {
-        if (!EnsureServiceReady(AdRewardSource.Energy, GameConstants.ConfigIds.AdEnergyRefill, out _))
+        if (!EnsureServiceReady(AdRewardSource.AdTicket, GameConstants.ConfigIds.AdTicketEarn, out _))
         {
             return;
         }
-
-        if (!ServiceLocator.TryGet(out ResourceManager resources))
-        {
-            RaiseFailed(
-                AdRewardSource.Energy,
-                GameConstants.ConfigIds.AdEnergyRefill,
-                GetRewardedPlacementId(),
-                AdRewardFailedReason.ContextNotAllowed,
-                "资源系统未就绪");
-            return;
-        }
-
-        if (!resources.CanClaimAdEnergyReward(out string failureReason))
-        {
-            RaiseFailed(
-                AdRewardSource.Energy,
-                GameConstants.ConfigIds.AdEnergyRefill,
-                GetRewardedPlacementId(),
-                AdRewardFailedReason.ContextNotAllowed,
-                failureReason);
-            return;
-        }
-
-        bool refillToMax = config == null || config.AdEnergyRefillToMax;
-        int rewardAmount = config != null ? config.RewardEnergyAmount : EnergyConstants.DefaultMaxEnergy;
 
         TryShowRewardedInternal(
-            AdRewardSource.Energy,
-            GameConstants.ConfigIds.AdEnergyRefill,
-            () => resources.TryGrantAdEnergyReward(refillToMax, rewardAmount, out _));
+            AdRewardSource.AdTicket,
+            GameConstants.ConfigIds.AdTicketEarn,
+            () => true);
     }
 
     public string GetRewardedPlacementId() =>
@@ -334,8 +309,9 @@ public class AdRewardService : MonoBehaviour, IGameSystem
         switch (result)
         {
             case AdShowResult.Completed:
-                if (request.GrantReward != null && request.GrantReward.Invoke())
+                if (request.GrantReward == null || request.GrantReward.Invoke())
                 {
+                    ApplyStandardAdRewards();
                     GameEvents.RaiseAdRewardCompleted(
                         this,
                         new AdRewardCompletedEventArgs(request.Source, request.ContextId, placement));
@@ -425,6 +401,21 @@ public class AdRewardService : MonoBehaviour, IGameSystem
         GameEvents.RaiseAdRewardFailed(
             this,
             new AdRewardFailedEventArgs(source, contextId, placementId, reason, message));
+    }
+
+    /// <summary>
+    /// 任意激励广告成功后统一发放：广告券 + 体力回满。
+    /// </summary>
+    private void ApplyStandardAdRewards()
+    {
+        if (!ServiceLocator.TryGet(out ResourceManager resources))
+        {
+            return;
+        }
+
+        int amount = config != null ? config.RewardAdTicketAmount : AdTicketConstants.DefaultRewardPerAd;
+        resources.TryGrantAdTicketReward(amount, ResourceChangeReason.AdReward, out _);
+        resources.TryRefillStaminaFromAd(out _);
     }
 
     private void PublishStateChanged()

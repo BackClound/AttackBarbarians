@@ -4,7 +4,7 @@
 public enum AdRewardSource
 {
     Shop = 0,
-    Energy = 1,
+    AdTicket = 1,
     DailyReward = 2,
     Generic = 3,
 }

@@ -289,7 +289,7 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         {
             ShopRewardType.Gold => CurrencyType.Gold,
             ShopRewardType.Diamond => CurrencyType.Diamond,
-            ShopRewardType.Energy => CurrencyType.Energy,
+            ShopRewardType.Energy => CurrencyType.AdTicket,
             _ => CurrencyType.Gold,
         };
 

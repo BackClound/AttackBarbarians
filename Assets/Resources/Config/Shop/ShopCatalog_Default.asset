@@ -26,3 +26,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 546707489b68b4fbe8199ae43964f41e, type: 2}
   freeDiamondCooldownHours: 12
   freeDiamondGrantAmount: 5
+  adFreeSupplyDailyLimit: 5

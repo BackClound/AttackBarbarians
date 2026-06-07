@@ -148,7 +148,16 @@ public class ShopSupplySectionPanel : MonoBehaviour
         }
 
         adAvailable = shop.CanClaimAdFreeSupply(adConfigId, out string failureReason);
-        adLabel = adAvailable ? availableLabel : failureReason ?? "暂不可领取";
+        if (adAvailable)
+        {
+            int remaining = shop.GetRemainingAdFreeSupplyCount(adConfigId);
+            int dailyLimit = shop.GetAdFreeSupplyDailyLimit();
+            adLabel = $"{availableLabel} ({remaining}/{dailyLimit})";
+        }
+        else
+        {
+            adLabel = failureReason ?? "暂不可领取";
+        }
     }
 
     private static void RefreshTierDisplay(

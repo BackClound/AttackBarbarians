@@ -198,17 +198,7 @@ public static class MainSceneBuilder
 
     private static void CreateTopResources(RectTransform root, MainSceneResourcePanel resourcePanel)
     {
-        UI_ItemSlot diamond = CreateResourcePill(root, "DiamondResource", new Vector2(-135f, 760f), "120", NeonBlue, CurrencyType.Diamond);
-        UI_ItemSlot gold = CreateResourcePill(root, "GoldResource", new Vector2(120f, 760f), "1200", NeonGold, CurrencyType.Gold);
-        UI_ItemSlot energy = CreateResourcePill(root, "EnergyResource", new Vector2(370f, 760f), "30/30", Hex("#FF5E7E"), CurrencyType.Energy);
-        UI_ItemSlot ticket = CreateResourcePill(root, "TicketResource", new Vector2(570f, 760f), "85", Hex("#5BE7FF"), CurrencyType.Diamond);
-
-        SerializedObject serialized = new SerializedObject(resourcePanel);
-        serialized.FindProperty("diamondSlot").objectReferenceValue = diamond;
-        serialized.FindProperty("goldSlot").objectReferenceValue = gold;
-        serialized.FindProperty("energySlot").objectReferenceValue = energy;
-        serialized.FindProperty("ticketSlot").objectReferenceValue = ticket;
-        serialized.ApplyModifiedPropertiesWithoutUndo();
+        TopResourceBarEditorUtility.Build(root, resourcePanel, TopResourceBarEditorUtility.MainSceneBarPositions);
     }
 
     private static void CreateTopButtons(MainSceneCardPanel cardPanel)
@@ -429,24 +419,6 @@ public static class MainSceneBuilder
         slider.maxValue = 100f;
         slider.value = 45f;
         return slider;
-    }
-
-    private static UI_ItemSlot CreateResourcePill(RectTransform parent, string name, Vector2 position, string value, Color accent, CurrencyType currency)
-    {
-        Image panel = CreatePanel(parent, name, position, new Vector2(205f, 58f), PanelDeep);
-        Button add = panel.gameObject.AddComponent<Button>();
-        Image icon = CreatePanel(panel.rectTransform, "Icon", new Vector2(-72f, 0f), new Vector2(42f, 42f), accent);
-        TMP_Text valueText = CreateText(panel.rectTransform, "ValueText", value, 25, TextWhite, TextAlignmentOptions.Left, new Vector2(5f, 0f), new Vector2(110f, 42f));
-        CreateText(panel.rectTransform, "AddText", "+", 30, NeonBlue, TextAlignmentOptions.Center, new Vector2(78f, 0f), new Vector2(34f, 42f));
-
-        UI_ItemSlot slot = panel.gameObject.AddComponent<UI_ItemSlot>();
-        SerializedObject serialized = new SerializedObject(slot);
-        serialized.FindProperty("currency").enumValueIndex = (int)currency;
-        serialized.FindProperty("iconImage").objectReferenceValue = icon;
-        serialized.FindProperty("valueText").objectReferenceValue = valueText;
-        serialized.FindProperty("addButton").objectReferenceValue = add;
-        serialized.ApplyModifiedPropertiesWithoutUndo();
-        return slot;
     }
 
     private static GeneralCardPanel CreateIconButton(RectTransform parent, string name, Vector2 position, Vector2 size, string title, string subtitle, Color accent, MainSceneAction action)

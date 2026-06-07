@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 资源条槽位：图标、数值、补充按钮。
+/// 资源条槽位：图标、数值、补充按钮；可选副标题（如体力恢复倒计时）。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。顶部资源 Pill Prefab 根物体。</para>
@@ -15,6 +15,7 @@ public class UI_ItemSlot : MonoBehaviour
     [SerializeField] private CurrencyType currency;
     [SerializeField] private Image iconImage;
     [SerializeField] private TMP_Text valueText;
+    [SerializeField] private TMP_Text subValueText;
     [SerializeField] private Button addButton;
 
     public CurrencyType Currency => currency;
@@ -48,6 +49,18 @@ public class UI_ItemSlot : MonoBehaviour
         {
             valueText.text = display ?? string.Empty;
         }
+    }
+
+    public void SetSubValue(string display)
+    {
+        if (subValueText == null)
+        {
+            return;
+        }
+
+        bool hasText = !string.IsNullOrEmpty(display);
+        subValueText.gameObject.SetActive(hasText);
+        subValueText.text = hasText ? display : string.Empty;
     }
 
     private void OnAddClick()

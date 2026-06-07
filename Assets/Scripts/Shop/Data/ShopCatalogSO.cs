@@ -17,9 +17,14 @@ public class ShopCatalogSO : ScriptableObject
     [SerializeField] private float freeDiamondCooldownHours = 12f;
     [SerializeField] private long freeDiamondGrantAmount = 5;
 
+    [Header("Ad Free Supply")]
+    [Tooltip("每个商城广告补给位每日可观看广告领取的次数。")]
+    [SerializeField] private int adFreeSupplyDailyLimit = 5;
+
     public IReadOnlyList<ShopItemSO> Items => items;
     public float FreeDiamondCooldownHours => Mathf.Max(0.1f, freeDiamondCooldownHours);
     public long FreeDiamondGrantAmount => (long)Mathf.Max(1, freeDiamondGrantAmount);
+    public int AdFreeSupplyDailyLimit => Mathf.Max(1, adFreeSupplyDailyLimit);
 
     public bool TryGetItem(string configId, out ShopItemSO item)
     {

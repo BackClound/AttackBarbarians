@@ -272,7 +272,9 @@ public class ShopManager : MonoBehaviour, IGameSystem
 
     public int GetAdTicketCount()
     {
-        return saveManager?.Current?.adTickets ?? 0;
+        return resourceManager != null
+            ? resourceManager.GetAdTicketCount()
+            : saveManager?.Current?.adTickets ?? 0;
     }
 
     public long GetTechPoints()
@@ -294,6 +296,22 @@ public class ShopManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    public int GetAdFreeSupplyDailyLimit()
+    {
+        return catalog != null ? catalog.AdFreeSupplyDailyLimit : 5;
+    }
+
+    public int GetRemainingAdFreeSupplyCount(string configId)
+    {
+        if (!TryResolveAdFreeSupply(configId, out AdFreeSupplyRule rule))
+        {
+            return 0;
+        }
+
+        int used = GetEffectivePurchaseCount(configId, ShopRefreshPeriod.Daily);
+        return Math.Max(0, rule.DailyLimit - used);
+    }
+
     public bool CanClaimAdFreeSupply(string configId, out string failureReason)
     {
         failureReason = null;
@@ -309,12 +327,13 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (GetEffectivePurchaseCount(configId, ShopRefreshPeriod.Daily) >= rule.DailyLimit)
+        int remaining = GetRemainingAdFreeSupplyCount(configId);
+        if (remaining <= 0)
         {
-            failureReason = "今日次数已用完";
+            failureReason = $"今日次数已用完（{rule.DailyLimit}/{rule.DailyLimit}）";
             return false;
         }
-        failureReason = $"可领取 {rule.RewardAmount} {FormatRewardLabel(rule.RewardType)}";
+
         return true;
     }
 
@@ -371,9 +390,9 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (saveManager.Current.adTickets < rule.TicketCost)
+        if (GetAdTicketCount() < rule.TicketCost)
         {
-            failureReason = $"广告券不足（需要 {rule.TicketCost}，当前 {saveManager.Current.adTickets}）";
+            failureReason = $"广告券不足（需要 {rule.TicketCost}，当前 {GetAdTicketCount()}）";
             reason = ShopPurchaseFailedReason.InsufficientFunds;
             return false;
         }
@@ -394,10 +413,15 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        saveManager.Current.adTickets -= rule.TicketCost;
+        if (!resourceManager.TrySpend(CurrencyType.AdTicket, rule.TicketCost, ResourceChangeReason.ShopPurchase, out failureReason))
+        {
+            GameEvents.RaiseShopPurchaseFailed(this, configId, ShopPurchaseFailedReason.InsufficientFunds, failureReason);
+            return false;
+        }
+
         if (!GrantRewardType(rule.RewardType, rule.RewardAmount))
         {
-            saveManager.Current.adTickets += rule.TicketCost;
+            resourceManager.TryAdd(CurrencyType.AdTicket, rule.TicketCost, ResourceChangeReason.ShopPurchase, out _);
             GameEvents.RaiseShopPurchaseFailed(
                 this,
                 configId,
@@ -406,10 +430,9 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        saveManager.MarkDirty();
         GameEvents.RaiseShopPurchased(
             this,
-            new ShopPurchaseEventArgs(configId, rule.RewardType, rule.RewardAmount, CurrencyType.Diamond, 0));
+            new ShopPurchaseEventArgs(configId, rule.RewardType, rule.RewardAmount, CurrencyType.AdTicket, rule.TicketCost));
         return true;
     }
 
@@ -448,14 +471,12 @@ public class ShopManager : MonoBehaviour, IGameSystem
 
     private bool TryAddAdTickets(int amount)
     {
-        if (saveManager?.Current == null || amount <= 0)
+        if (resourceManager == null || amount <= 0)
         {
             return false;
         }
 
-        saveManager.Current.adTickets += amount;
-        saveManager.MarkDirty();
-        return true;
+        return resourceManager.TryGrantAdTicketReward(amount, ResourceChangeReason.ShopPurchase, out _);
     }
 
     private bool TryAddTechPoints(long amount)
@@ -512,7 +533,8 @@ public class ShopManager : MonoBehaviour, IGameSystem
         {
             ShopRewardType.Gold => CurrencyType.Gold,
             ShopRewardType.Diamond => CurrencyType.Diamond,
-            ShopRewardType.Energy => CurrencyType.Energy,
+            ShopRewardType.Energy => CurrencyType.AdTicket,
+            ShopRewardType.AdTicket => CurrencyType.AdTicket,
             _ => CurrencyType.Gold,
         };
 
@@ -535,7 +557,7 @@ public class ShopManager : MonoBehaviour, IGameSystem
         {
             ShopRewardType.Gold => "金币",
             ShopRewardType.Diamond => "水晶",
-            ShopRewardType.Energy => "体力",
+            ShopRewardType.Energy => "广告券",
             ShopRewardType.AdTicket => "广告券",
             ShopRewardType.TechPoint => "科技点",
             _ => rewardType.ToString(),
@@ -559,19 +581,20 @@ public class ShopManager : MonoBehaviour, IGameSystem
         return $"{Mathf.CeilToInt((float)span.TotalMinutes)} 分钟";
     }
 
-    private static bool TryResolveAdFreeSupply(string configId, out AdFreeSupplyRule rule)
+    private bool TryResolveAdFreeSupply(string configId, out AdFreeSupplyRule rule)
     {
+        int dailyLimit = GetAdFreeSupplyDailyLimit();
         rule = default;
         switch (configId)
         {
             case GameConstants.ConfigIds.ShopAdCrateCommon:
-                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 500, 1);
+                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 500, dailyLimit);
                 return true;
             case GameConstants.ConfigIds.ShopAdCratePremium:
-                rule = new AdFreeSupplyRule(ShopRewardType.Diamond, 5, 1);
+                rule = new AdFreeSupplyRule(ShopRewardType.Diamond, 5, dailyLimit);
                 return true;
             case GameConstants.ConfigIds.ShopAdGoldSupply:
-                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 2000, 1);
+                rule = new AdFreeSupplyRule(ShopRewardType.Gold, 2000, dailyLimit);
                 return true;
             default:
                 return false;

@@ -40,8 +40,7 @@ public static class AdConfigBootstrapMenu
         so.FindProperty("defaultBannerPlacementId").stringValue = "Banner_Android";
         so.FindProperty("mockAdDelaySeconds").floatValue = 0.35f;
         so.FindProperty("mockSimulateSkip").boolValue = false;
-        so.FindProperty("adEnergyRefillToMax").boolValue = true;
-        so.FindProperty("rewardEnergyAmount").intValue = EnergyConstants.DefaultMaxEnergy;
+        so.FindProperty("rewardAdTicketAmount").intValue = AdTicketConstants.DefaultRewardPerAd;
         so.ApplyModifiedPropertiesWithoutUndo();
 
         EditorUtility.SetDirty(config);

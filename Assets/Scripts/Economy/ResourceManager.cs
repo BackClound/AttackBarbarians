@@ -4,12 +4,6 @@ using UnityEngine;
 /// <summary>
 /// 局外资源管理：增减、查询、体力自然恢复、持久化，并通过 <see cref="GameEvents"/> 通知 UI。
 /// </summary>
-/// <remarks>
-/// <para><b>是否需要挂载：</b>是（MonoBehaviour）。由 <see cref="GameBootstrapper"/> 在 SaveManager 之后初始化。</para>
-/// <para><b>推荐挂载对象：</b><c>GameSystems</c> 根物体或子物体。</para>
-/// <para><b>获取方式：</b><c>ServiceLocator.Get&lt;ResourceManager&gt;()</c>。</para>
-/// <para><b>规则：</b>金币/钻石/体力变更应经本类，不直接写 <see cref="SaveData"/>。</para>
-/// </remarks>
 public class ResourceManager : MonoBehaviour, IGameSystem
 {
     private SaveManager saveManager;
@@ -27,7 +21,7 @@ public class ResourceManager : MonoBehaviour, IGameSystem
 
         ServiceLocator.TryGet(out saveManager);
         ServiceLocator.TryGet(out configManager);
-        SyncEnergyRecovery();
+        SyncStaminaRecovery();
         isInitialized = true;
     }
 
@@ -38,7 +32,7 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        SyncEnergyRecovery();
+        SyncStaminaRecovery();
     }
 
     public void Shutdown()
@@ -53,35 +47,89 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             return 0;
         }
 
-        if (currency == CurrencyType.Energy)
+        if (currency == CurrencyType.Stamina)
         {
-            SyncEnergyRecovery();
+            SyncStaminaRecovery();
         }
 
         return currency switch
         {
             CurrencyType.Gold => saveManager.Gold,
             CurrencyType.Diamond => saveManager.Diamonds,
-            CurrencyType.Energy => saveManager.Current.energy,
-            CurrencyType.TechPoint => saveManager.Current.techPoints,
+            CurrencyType.AdTicket => saveManager.Current.adTickets,
+            CurrencyType.Stamina => saveManager.Current.energy,
             _ => 0,
         };
     }
 
-    public int GetMaxEnergy()
+    public int GetAdTicketCount() => (int)GetAmount(CurrencyType.AdTicket);
+
+    public int GetMaxStamina()
     {
         if (saveManager?.Current == null)
         {
-            return EnergyConstants.DefaultMaxEnergy;
+            return StaminaConstants.DefaultMaxStamina;
         }
 
         return Math.Max(1, saveManager.Current.maxEnergy);
     }
 
-    public string GetEnergyDisplayText()
+    public string GetStaminaDisplayText()
     {
-        SyncEnergyRecovery();
-        return $"{GetAmount(CurrencyType.Energy)}/{GetMaxEnergy()}";
+        SyncStaminaRecovery();
+        return $"{GetAmount(CurrencyType.Stamina)}/{GetMaxStamina()}";
+    }
+
+    public bool IsStaminaFull()
+    {
+        SyncStaminaRecovery();
+        return GetAmount(CurrencyType.Stamina) >= GetMaxStamina();
+    }
+
+    /// <summary>体力未满时返回恢复满所需倒计时文案；已满时返回 null。</summary>
+    public string GetStaminaRecoverySubtitle()
+    {
+        if (!TryGetStaminaRecoveryRemaining(out TimeSpan remaining))
+        {
+            return null;
+        }
+
+        return FormatRecoveryDuration(remaining);
+    }
+
+    public bool TryGetStaminaRecoveryRemaining(out TimeSpan remaining)
+    {
+        remaining = TimeSpan.Zero;
+        SyncStaminaRecovery();
+
+        if (saveManager?.Current == null || IsStaminaFull())
+        {
+            return false;
+        }
+
+        SaveData save = saveManager.Current;
+        int missing = GetMaxStamina() - save.energy;
+        if (missing <= 0)
+        {
+            return false;
+        }
+
+        long lastTicks = save.lastEnergyRecoverUtcTicks;
+        if (lastTicks <= 0)
+        {
+            remaining = TimeSpan.FromSeconds(missing * StaminaConstants.SecondsPerPoint);
+            return remaining > TimeSpan.Zero;
+        }
+
+        DateTime lastUtc = new DateTime(lastTicks, DateTimeKind.Utc);
+        DateTime fullAtUtc = lastUtc.AddSeconds(missing * StaminaConstants.SecondsPerPoint);
+        remaining = fullAtUtc - DateTime.UtcNow;
+        if (remaining <= TimeSpan.Zero)
+        {
+            remaining = TimeSpan.Zero;
+        }
+
+        return true;
     }
 
     public bool CanAfford(CurrencyType currency, long amount)
@@ -94,39 +142,34 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return GetAmount(currency) >= amount;
     }
 
-    public bool CanClaimAdEnergyReward(out string failureReason)
+    public bool CanStartBattle(out string failureReason)
     {
         failureReason = null;
-        SyncEnergyRecovery();
-
-        if (!isInitialized || saveManager?.Current == null)
-        {
-            failureReason = "资源系统未就绪";
-            return false;
-        }
-
-        if (GetAmount(CurrencyType.Energy) >= GetMaxEnergy())
-        {
-            failureReason = "体力已满";
-            return false;
-        }
-
-        return true;
+        return CanAfford(CurrencyType.Stamina, StaminaConstants.BattleEntryCost, out failureReason);
     }
 
-    public bool TryGrantAdEnergyReward(bool refillToMax, int rewardAmount, out ResourceChangedEventArgs change)
+    public bool CanAfford(CurrencyType currency, long amount, out string failureReason)
     {
-        change = default;
-        if (!CanClaimAdEnergyReward(out _))
+        failureReason = null;
+        if (CanAfford(currency, amount))
         {
-            return false;
+            return true;
         }
 
-        long target = refillToMax
-            ? GetMaxEnergy()
-            : Math.Min(GetMaxEnergy(), GetAmount(CurrencyType.Energy) + Math.Max(1, rewardAmount));
+        failureReason = FormatInsufficientFunds(currency, amount, GetAmount(currency));
+        return false;
+    }
 
-        return TrySetEnergy(target, ResourceChangeReason.AdReward, out change);
+    public bool TryGrantAdTicketReward(int amount, ResourceChangeReason reason, out ResourceChangedEventArgs change)
+    {
+        return TryAdd(CurrencyType.AdTicket, amount, reason, out change);
+    }
+
+    public bool TryRefillStaminaFromAd(out ResourceChangedEventArgs change)
+    {
+        change = default;
+        SyncStaminaRecovery();
+        return TrySetStamina(GetMaxStamina(), ResourceChangeReason.AdReward, out change);
     }
 
     public bool TryAdd(
@@ -146,10 +189,10 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (currency == CurrencyType.Energy)
+        if (currency == CurrencyType.Stamina)
         {
-            long cappedTarget = Math.Min(GetMaxEnergy(), GetAmount(CurrencyType.Energy) + amount);
-            return TrySetEnergy(cappedTarget, reason, out change);
+            long cappedTarget = Math.Min(GetMaxStamina(), GetAmount(CurrencyType.Stamina) + amount);
+            return TrySetStamina(cappedTarget, reason, out change);
         }
 
         long previous = GetAmount(currency);
@@ -181,9 +224,9 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (currency == CurrencyType.Energy)
+        if (currency == CurrencyType.Stamina)
         {
-            SyncEnergyRecovery();
+            SyncStaminaRecovery();
         }
 
         long previous = GetAmount(currency);
@@ -203,21 +246,41 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    public static string FormatRecoveryDuration(TimeSpan remaining)
+    {
+        if (remaining <= TimeSpan.Zero)
+        {
+            return string.Empty;
+        }
+
+        if (remaining.TotalHours >= 1d)
+        {
+            return $"{(int)remaining.TotalHours}小时{remaining.Minutes}分后满";
+        }
+
+        if (remaining.TotalMinutes >= 1d)
+        {
+            return $"{remaining.Minutes}分{remaining.Seconds}秒后满";
+        }
+
+        return $"{Mathf.Max(1, remaining.Seconds)}秒后满";
+    }
+
     public static string FormatInsufficientFunds(CurrencyType currency, long required, long current)
     {
         string label = currency switch
         {
             CurrencyType.Gold => "废料金",
             CurrencyType.Diamond => "量子钻",
-            CurrencyType.Energy => "体力",
-            CurrencyType.TechPoint => "科技点",
+            CurrencyType.AdTicket => "广告券",
+            CurrencyType.Stamina => "体力",
             _ => currency.ToString(),
         };
 
         return $"{label}不足（需要 {required}，当前 {current}）";
     }
 
-    private bool TrySetEnergy(long targetAmount, ResourceChangeReason reason, out ResourceChangedEventArgs change)
+    private bool TrySetStamina(long targetAmount, ResourceChangeReason reason, out ResourceChangedEventArgs change)
     {
         change = default;
         if (!isInitialized || saveManager?.Current == null)
@@ -225,24 +288,24 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        SyncEnergyRecovery();
-        long previous = GetAmount(CurrencyType.Energy);
-        long next = Math.Clamp(targetAmount, 0, GetMaxEnergy());
+        SyncStaminaRecovery();
+        long previous = GetAmount(CurrencyType.Stamina);
+        long next = Math.Clamp(targetAmount, 0, GetMaxStamina());
         if (next == previous)
         {
             return false;
         }
 
-        ApplyAmount(CurrencyType.Energy, next);
+        ApplyAmount(CurrencyType.Stamina, next);
         saveManager.MarkDirty();
 
-        change = new ResourceChangedEventArgs(CurrencyType.Energy, previous, next, reason);
+        change = new ResourceChangedEventArgs(CurrencyType.Stamina, previous, next, reason);
         GameEvents.RaiseResourceChanged(this, change);
         LogChange(change);
         return true;
     }
 
-    private void SyncEnergyRecovery()
+    private void SyncStaminaRecovery()
     {
         if (saveManager?.Current == null)
         {
@@ -250,9 +313,15 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         }
 
         SaveData save = saveManager.Current;
-        int maxEnergy = Math.Max(1, save.maxEnergy);
-        if (save.energy >= maxEnergy)
+        int maxStamina = GetMaxStamina();
+        if (save.maxEnergy <= 0)
         {
+            save.maxEnergy = maxStamina;
+        }
+
+        if (save.energy >= maxStamina)
+        {
+            save.energy = maxStamina;
             save.lastEnergyRecoverUtcTicks = DateTime.UtcNow.Ticks;
             return;
         }
@@ -266,14 +335,14 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         }
 
         DateTime lastUtc = new DateTime(lastTicks, DateTimeKind.Utc);
-        int recoveredPoints = (int)((now - lastUtc).TotalSeconds / EnergyConstants.SecondsPerPoint);
+        int recoveredPoints = (int)((now - lastUtc).TotalSeconds / StaminaConstants.SecondsPerPoint);
         if (recoveredPoints <= 0)
         {
             return;
         }
 
         int previous = save.energy;
-        int next = Math.Min(maxEnergy, previous + recoveredPoints);
+        int next = Math.Min(maxStamina, previous + recoveredPoints);
         if (next == previous)
         {
             return;
@@ -281,12 +350,12 @@ public class ResourceManager : MonoBehaviour, IGameSystem
 
         save.energy = next;
         save.lastEnergyRecoverUtcTicks = lastUtc
-            .AddSeconds(recoveredPoints * EnergyConstants.SecondsPerPoint)
+            .AddSeconds(recoveredPoints * StaminaConstants.SecondsPerPoint)
             .Ticks;
         saveManager.MarkDirty();
 
         ResourceChangedEventArgs change = new ResourceChangedEventArgs(
-            CurrencyType.Energy,
+            CurrencyType.Stamina,
             previous,
             next,
             ResourceChangeReason.EnergyRecover);
@@ -304,9 +373,12 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             case CurrencyType.Diamond:
                 saveManager.Diamonds = Math.Max(0, amount);
                 break;
-            case CurrencyType.Energy:
-                saveManager.Current.energy = (int)Math.Clamp(amount, 0, GetMaxEnergy());
-                if (saveManager.Current.energy >= GetMaxEnergy())
+            case CurrencyType.AdTicket:
+                saveManager.Current.adTickets = (int)Math.Min(int.MaxValue, amount);
+                break;
+            case CurrencyType.Stamina:
+                saveManager.Current.energy = (int)Math.Clamp(amount, 0, GetMaxStamina());
+                if (saveManager.Current.energy >= GetMaxStamina())
                 {
                     saveManager.Current.lastEnergyRecoverUtcTicks = DateTime.UtcNow.Ticks;
                 }
@@ -315,9 +387,6 @@ public class ResourceManager : MonoBehaviour, IGameSystem
                     saveManager.Current.lastEnergyRecoverUtcTicks = DateTime.UtcNow.Ticks;
                 }
 
-                break;
-            case CurrencyType.TechPoint:
-                saveManager.Current.techPoints = Math.Max(0, amount);
                 break;
             default:
                 Debug.LogWarning($"[ResourceManager] 暂不支持的资源类型: {currency}");

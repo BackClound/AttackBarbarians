@@ -108,11 +108,11 @@ public class ShopSceneView : MonoBehaviour
     private void OnResourceAddClicked(CurrencyType currency)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
-        if (currency == CurrencyType.Energy)
+        if (currency == CurrencyType.AdTicket || currency == CurrencyType.Stamina)
         {
             if (ServiceLocator.TryGet(out AdRewardService adService))
             {
-                adService.TryShowRewardedForEnergy();
+                adService.TryShowRewardedForAdTicket();
             }
             else
             {
@@ -126,7 +126,7 @@ public class ShopSceneView : MonoBehaviour
         {
             CurrencyType.Diamond => "水晶补充入口待接入",
             CurrencyType.Gold => "金币补充入口待接入",
-            _ => "科技点补充入口待接入",
+            _ => "补充入口待接入",
         };
         SetStatus(message);
     }
@@ -200,10 +200,22 @@ public class ShopSceneView : MonoBehaviour
 
         SetStatus(args.Source switch
         {
-            AdRewardSource.Shop => "广告奖励已发放",
-            AdRewardSource.Energy => "体力已恢复",
-            _ => "广告奖励已发放",
+            AdRewardSource.Shop => BuildStandardAdRewardStatus("补给奖励"),
+            AdRewardSource.AdTicket => BuildStandardAdRewardStatus(null),
+            _ => BuildStandardAdRewardStatus(null),
         });
+    }
+
+    private static string BuildStandardAdRewardStatus(string prefix)
+    {
+        int ticketAmount = AdTicketConstants.DefaultRewardPerAd;
+        if (ServiceLocator.TryGet(out AdRewardService adService) && adService.Config != null)
+        {
+            ticketAmount = adService.Config.RewardAdTicketAmount;
+        }
+
+        string rewardText = $"+{ticketAmount} 广告券，体力已回满";
+        return string.IsNullOrEmpty(prefix) ? $"获得 {rewardText}" : $"获得{prefix}、{rewardText}";
     }
 
     private void OnAdRewardFailed(GameEventContext ctx)
@@ -243,7 +255,7 @@ public class ShopSceneView : MonoBehaviour
         {
             ShopRewardType.Gold => "金币",
             ShopRewardType.Diamond => "水晶",
-            ShopRewardType.Energy => "体力",
+            ShopRewardType.Energy => "广告券",
             ShopRewardType.AdTicket => "广告券",
             ShopRewardType.TechPoint => "科技点",
             _ => reward.ToString(),

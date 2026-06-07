@@ -15,8 +15,8 @@ MonoBehaviour:
   selectionMode: 0
   fixedNetwork: 0
   editorNetwork: 0
-  androidNetwork: 1
-  iosNetwork: 1
+  androidNetwork: 0
+  iosNetwork: 0
   forceMock: 0
   useMockInEditor: 1
   fallbackNetwork: 0

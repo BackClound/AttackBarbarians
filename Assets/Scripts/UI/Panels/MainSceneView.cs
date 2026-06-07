@@ -274,7 +274,7 @@ public class MainSceneView : MonoBehaviour
             return;
         }
 
-        if (currentPage == MainScenePage.Shop && args.Source == AdRewardSource.Energy)
+        if (currentPage == MainScenePage.Shop && args.Source == AdRewardSource.AdTicket)
         {
             shopPage?.RefreshAll();
             return;
@@ -298,7 +298,7 @@ public class MainSceneView : MonoBehaviour
 
         string message = args.Source switch
         {
-            AdRewardSource.Energy => "体力已恢复",
+            AdRewardSource.AdTicket => "获得广告券",
             _ => "广告奖励已发放",
         };
         battlePage?.SetStatus(message);

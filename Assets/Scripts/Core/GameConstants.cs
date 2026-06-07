@@ -274,7 +274,7 @@ public static class GameConstants
         public const string DailyRewardDay1 = "daily_reward.day_1";
         public const string DailyRewardDay7 = "daily_reward.day_7";
 
-        public const string AdEnergyRefill = "ad.energy_refill";
+        public const string AdTicketEarn = "ad.ticket_earn";
     }
 
     public static class PoolKeys

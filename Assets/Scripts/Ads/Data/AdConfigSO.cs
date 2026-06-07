@@ -42,10 +42,9 @@ public class AdConfigSO : ScriptableObject
     [SerializeField] private float mockAdDelaySeconds = 0.35f;
     [SerializeField] private bool mockSimulateSkip;
 
-    [Header("Energy Ad Reward")]
-    [Tooltip("观看体力广告后是否回满体力；否则仅增加 rewardEnergyAmount。")]
-    [SerializeField] private bool adEnergyRefillToMax = true;
-    [SerializeField] private int rewardEnergyAmount = 30;
+    [Header("Ad Ticket Reward")]
+    [Tooltip("观看激励广告成功后增加的广告券数量。")]
+    [SerializeField] private int rewardAdTicketAmount = AdTicketConstants.DefaultRewardPerAd;
 
     public AdNetworkSelectionMode SelectionMode => selectionMode;
     public AdNetworkKind FixedNetwork => fixedNetwork;
@@ -61,8 +60,7 @@ public class AdConfigSO : ScriptableObject
     public string DefaultBannerPlacementId => string.IsNullOrWhiteSpace(defaultBannerPlacementId) ? "Banner_Android" : defaultBannerPlacementId;
     public float MockAdDelaySeconds => Mathf.Max(0f, mockAdDelaySeconds);
     public bool MockSimulateSkip => mockSimulateSkip;
-    public bool AdEnergyRefillToMax => adEnergyRefillToMax;
-    public int RewardEnergyAmount => Mathf.Max(1, rewardEnergyAmount);
+    public int RewardAdTicketAmount => Mathf.Max(1, rewardAdTicketAmount);
     public bool TestMode => testMode;
     public string AndroidGameId => androidGameId ?? string.Empty;
     public string IosGameId => iosGameId ?? string.Empty;

@@ -182,7 +182,7 @@ public class MainSceneBattlePageView : MonoBehaviour
     private void OnResourceAddClicked(CurrencyType currency)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
-        if (currency == CurrencyType.Energy)
+        if (currency == CurrencyType.AdTicket || currency == CurrencyType.Stamina)
         {
             if (!ServiceLocator.TryGet(out AdRewardService adService))
             {
@@ -190,7 +190,7 @@ public class MainSceneBattlePageView : MonoBehaviour
                 return;
             }
 
-            adService.TryShowRewardedForEnergy();
+            adService.TryShowRewardedForAdTicket();
             return;
         }
 
@@ -232,6 +232,19 @@ public class MainSceneBattlePageView : MonoBehaviour
 
     private void BeginBattle()
     {
+        if (ServiceLocator.TryGet(out ResourceManager resources))
+        {
+            if (!resources.TrySpend(
+                    CurrencyType.Stamina,
+                    StaminaConstants.BattleEntryCost,
+                    ResourceChangeReason.BattleStart,
+                    out string failureReason))
+            {
+                SetStatus(failureReason ?? "体力不足");
+                return;
+            }
+        }
+
         RunDifficultyContext.IsEliteMode = false;
         if (RunDifficultyContext.EliteConfig == null)
         {

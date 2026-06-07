@@ -209,6 +209,11 @@ public static class ShopConfigBootstrapMenu
             AssetDatabase.CreateAsset(catalog, CatalogPath);
         }
 
+        SerializedObject catalogSo = new SerializedObject(catalog);
+        catalogSo.FindProperty("adFreeSupplyDailyLimit").intValue = 5;
+        catalogSo.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(catalog);
+
         return catalog;
     }
 
