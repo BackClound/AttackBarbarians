@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9e61b58b07874a8d85157b489582775, type: 3}
+  m_Name: AdConfig_Default
+  m_EditorClassIdentifier: 
+  selectionMode: 0
+  fixedNetwork: 0
+  editorNetwork: 0
+  androidNetwork: 1
+  iosNetwork: 1
+  forceMock: 0
+  useMockInEditor: 1
+  fallbackNetwork: 0
+  enableFallbackOnInitFailure: 1
+  enableFallbackOnLoadFailure: 1
+  maxRewardedShowAttempts: 2
+  defaultRewardedPlacementId: Rewarded_Android
+  defaultInterstitialPlacementId: Interstitial_Android
+  defaultBannerPlacementId: Banner_Android
+  networkProfiles: []
+  testMode: 1
+  androidGameId: 
+  iosGameId: 
+  mockAdDelaySeconds: 0.35
+  mockSimulateSkip: 0
+  adEnergyRefillToMax: 1
+  rewardEnergyAmount: 120

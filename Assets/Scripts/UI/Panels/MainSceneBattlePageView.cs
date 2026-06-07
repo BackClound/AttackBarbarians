@@ -182,11 +182,22 @@ public class MainSceneBattlePageView : MonoBehaviour
     private void OnResourceAddClicked(CurrencyType currency)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        if (currency == CurrencyType.Energy)
+        {
+            if (!ServiceLocator.TryGet(out AdRewardService adService))
+            {
+                SetStatus("广告服务未就绪");
+                return;
+            }
+
+            adService.TryShowRewardedForEnergy();
+            return;
+        }
+
         string message = currency switch
         {
             CurrencyType.Diamond => "量子钻补充入口待接入",
             CurrencyType.Gold => "金币补充入口待接入",
-            CurrencyType.Energy => "体力补充入口待接入",
             _ => "道具补充入口待接入",
         };
         SetStatus(message);

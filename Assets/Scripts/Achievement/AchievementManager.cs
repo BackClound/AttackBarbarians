@@ -420,12 +420,6 @@ public class AchievementManager : MonoBehaviour, IGameSystem
     private bool GrantReward(AchievementDataSO achievement)
     {
         CurrencyType currency = MapRewardToCurrency(achievement.RewardType);
-        if (currency == CurrencyType.Energy)
-        {
-            Debug.LogWarning($"[AchievementManager] 体力奖励暂未实现 achievement={achievement.ConfigId}");
-            return false;
-        }
-
         return resourceManager.TryAdd(
             currency,
             achievement.RewardAmount,

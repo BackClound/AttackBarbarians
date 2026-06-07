@@ -12,9 +12,6 @@ public class MainSceneResourcePanel : MonoBehaviour
     [SerializeField] private UI_ItemSlot energySlot;
     [SerializeField] private UI_ItemSlot ticketSlot;
 
-    [Header("Fallback")]
-    [SerializeField] private int currentEnergyFallback = 30;
-    [SerializeField] private int maxEnergyFallback = 30;
     [SerializeField] private int ticketFallback = 85;
 
     public event Action<CurrencyType> AddClicked;
@@ -39,21 +36,31 @@ public class MainSceneResourcePanel : MonoBehaviour
     {
         long gold = 0;
         long diamonds = 0;
+        string energyText = $"{EnergyConstants.DefaultStartingEnergy}/{EnergyConstants.DefaultMaxEnergy}";
+        int tickets = ticketFallback;
+
         if (ServiceLocator.TryGet(out ResourceManager resources))
         {
             gold = resources.GetAmount(CurrencyType.Gold);
             diamonds = resources.GetAmount(CurrencyType.Diamond);
+            energyText = resources.GetEnergyDisplayText();
         }
         else if (ServiceLocator.TryGet(out SaveManager save) && save.Current != null)
         {
             gold = save.Current.gold;
             diamonds = save.Current.diamonds;
+            energyText = $"{save.Current.energy}/{save.Current.maxEnergy}";
+        }
+
+        if (ServiceLocator.TryGet(out ShopManager shop))
+        {
+            tickets = shop.GetAdTicketCount();
         }
 
         diamondSlot?.SetValue(diamonds);
         goldSlot?.SetValue(gold);
-        energySlot?.SetValue($"{currentEnergyFallback}/{maxEnergyFallback}");
-        ticketSlot?.SetValue(ticketFallback.ToString(CultureInfo.InvariantCulture));
+        energySlot?.SetValue(energyText);
+        ticketSlot?.SetValue(tickets.ToString(CultureInfo.InvariantCulture));
     }
 
     private void BindAdd(UI_ItemSlot slot)

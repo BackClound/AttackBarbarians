@@ -558,6 +558,37 @@ public static class GameEvents
 
     #endregion
 
+    #region Ad
+
+    public static void RaiseAdRewardCompleted(object sender, AdRewardCompletedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AdRewardCompleted, sender, args);
+
+    public static void RaiseAdRewardFailed(object sender, AdRewardFailedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AdRewardFailed, sender, args);
+
+    public static void RaiseAdRewardStateChanged(object sender, AdRewardStateChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.AdRewardStateChanged, sender, args);
+
+    public static void SubscribeAdRewardCompleted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AdRewardCompleted, handler);
+
+    public static void UnsubscribeAdRewardCompleted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AdRewardCompleted, handler);
+
+    public static void SubscribeAdRewardFailed(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AdRewardFailed, handler);
+
+    public static void UnsubscribeAdRewardFailed(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AdRewardFailed, handler);
+
+    public static void SubscribeAdRewardStateChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.AdRewardStateChanged, handler);
+
+    public static void UnsubscribeAdRewardStateChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.AdRewardStateChanged, handler);
+
+    #endregion
+
     #region Gameplay Event
 
     public static void RaiseGameplayEventStarted(object sender, GameplayEventArgs args) =>

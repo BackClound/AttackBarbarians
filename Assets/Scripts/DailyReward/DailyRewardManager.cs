@@ -250,12 +250,6 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
     private bool GrantReward(DailyRewardEntrySO entry)
     {
         CurrencyType currency = MapRewardToCurrency(entry.RewardType);
-        if (currency == CurrencyType.Energy)
-        {
-            Debug.LogWarning($"[DailyRewardManager] 体力奖励暂未实现 day={entry.DayIndex}");
-            return false;
-        }
-
         return resourceManager.TryAdd(
             currency,
             entry.RewardAmount,

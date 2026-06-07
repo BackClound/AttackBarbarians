@@ -79,8 +79,13 @@ public class ShopSupplySectionPanel : MonoBehaviour
         shop.TryGetItemDisplay(tenId, out string tenCost, out _);
         crate.SetCosts(singleCost, tenCost);
 
-        bool adAvailable = shop.CanClaimAdFreeSupply(adId, out string adReason);
-        crate.SetAdPullAvailable(adAvailable, adAvailable ? "观看广告免费抽取" : adReason);
+        ResolveAdSupplyState(
+            shop,
+            adId,
+            "观看广告免费抽取",
+            out bool adAvailable,
+            out string adLabel);
+        crate.SetAdPullAvailable(adAvailable, adLabel);
     }
 
     private void RefreshGoldSupply()
@@ -111,8 +116,39 @@ public class ShopSupplySectionPanel : MonoBehaviour
             GameConstants.ConfigIds.ShopGoldSupplyStdSingle,
             GameConstants.ConfigIds.ShopGoldSupplyStdTen);
 
-        bool adAvailable = shop.CanClaimAdFreeSupply(GameConstants.ConfigIds.ShopAdGoldSupply, out string adReason);
-        goldSupply.SetAdClaimAvailable(adAvailable, adAvailable ? "广告领取" : adReason);
+        ResolveAdSupplyState(
+            shop,
+            GameConstants.ConfigIds.ShopAdGoldSupply,
+            "广告领取",
+            out bool adAvailable,
+            out string adLabel);
+        goldSupply.SetAdClaimAvailable(adAvailable, adLabel);
+    }
+
+    private static void ResolveAdSupplyState(
+        ShopManager shop,
+        string adConfigId,
+        string availableLabel,
+        out bool adAvailable,
+        out string adLabel)
+    {
+        adAvailable = false;
+        adLabel = string.Empty;
+
+        if (ServiceLocator.TryGet(out AdRewardService adService) && adService.IsShowing)
+        {
+            adLabel = "广告播放中";
+            return;
+        }
+
+        if (shop == null)
+        {
+            adLabel = "商店未就绪";
+            return;
+        }
+
+        adAvailable = shop.CanClaimAdFreeSupply(adConfigId, out string failureReason);
+        adLabel = adAvailable ? availableLabel : failureReason ?? "暂不可领取";
     }
 
     private static void RefreshTierDisplay(

@@ -16,6 +16,9 @@ public class SaveData
 
     public long gold;
     public long diamonds;
+    public int energy;
+    public int maxEnergy;
+    public long lastEnergyRecoverUtcTicks;
     public int adTickets;
     public long techPoints;
 
@@ -47,6 +50,9 @@ public class SaveData
             lastSavedUtcTicks = DateTime.UtcNow.Ticks,
             gold = 0,
             diamonds = 0,
+            energy = EnergyConstants.DefaultStartingEnergy,
+            maxEnergy = EnergyConstants.DefaultMaxEnergy,
+            lastEnergyRecoverUtcTicks = DateTime.UtcNow.Ticks,
             adTickets = 0,
             techPoints = 0,
             dailyRewardStreak = 0,

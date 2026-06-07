@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,6 +31,10 @@ public static class SaveVersionMigrator
                     MigrateV0ToV1(data);
                     version = 1;
                     break;
+                case 1:
+                    MigrateV1ToV2(data);
+                    version = 2;
+                    break;
                 default:
                     Debug.LogWarning($"[SaveVersionMigrator] 未知版本 {version}，重置为默认存档。");
                     return SaveData.CreateDefault();
@@ -50,8 +55,31 @@ public static class SaveVersionMigrator
         EnsureCollections(data);
     }
 
+    private static void MigrateV1ToV2(SaveData data)
+    {
+        if (data.maxEnergy <= 0)
+        {
+            data.maxEnergy = EnergyConstants.DefaultMaxEnergy;
+        }
+
+        if (data.energy <= 0)
+        {
+            data.energy = data.maxEnergy;
+        }
+
+        if (data.lastEnergyRecoverUtcTicks <= 0)
+        {
+            data.lastEnergyRecoverUtcTicks = DateTime.UtcNow.Ticks;
+        }
+
+        EnsureCollections(data);
+    }
+
     private static void EnsureCollections(SaveData data)
     {
+        data.settings ??= SettingsData.CreateDefault();
+        data.statistics ??= SaveStatisticsData.CreateDefault();
+        data.runProgress ??= RunProgressData.CreateDefault();
         data.permanentUpgrades ??= new List<ConfigIdIntPair>(4);
         data.talentLevels ??= new List<ConfigIdIntPair>(4);
         data.equipmentLevels ??= new List<ConfigIdIntPair>(4);

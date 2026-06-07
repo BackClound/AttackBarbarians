@@ -12,10 +12,6 @@ public class ShopResourcePanel : MonoBehaviour
     [SerializeField] private UI_ItemSlot energySlot;
     [SerializeField] private UI_ItemSlot techPointSlot;
 
-    [Header("Fallback")]
-    [SerializeField] private int currentEnergyFallback = 120;
-    [SerializeField] private int maxEnergyFallback = 120;
-
     public event Action<CurrencyType> AddClicked;
 
     private void Awake()
@@ -41,15 +37,18 @@ public class ShopResourcePanel : MonoBehaviour
         long techPoints = 0;
         int adTickets = 0;
 
+        string energyText = $"{EnergyConstants.DefaultStartingEnergy}/{EnergyConstants.DefaultMaxEnergy}";
         if (ServiceLocator.TryGet(out ResourceManager resources))
         {
             gold = resources.GetAmount(CurrencyType.Gold);
             diamonds = resources.GetAmount(CurrencyType.Diamond);
+            energyText = resources.GetEnergyDisplayText();
         }
         else if (ServiceLocator.TryGet(out SaveManager save) && save.Current != null)
         {
             gold = save.Current.gold;
             diamonds = save.Current.diamonds;
+            energyText = $"{save.Current.energy}/{save.Current.maxEnergy}";
         }
 
         if (ServiceLocator.TryGet(out ShopManager shop))
@@ -60,7 +59,8 @@ public class ShopResourcePanel : MonoBehaviour
 
         diamondSlot?.SetValue(diamonds);
         goldSlot?.SetValue(gold);
-        energySlot?.SetValue($"{currentEnergyFallback}/{maxEnergyFallback}");
+        energySlot?.SetValue(energyText);
+
         techPointSlot?.SetValue(techPoints.ToString("N0", CultureInfo.InvariantCulture));
     }
 

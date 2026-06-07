@@ -126,6 +126,11 @@ public static class GameConstants
         public const string DailyRewardClaimed = "DailyReward.Claimed";
         public const string DailyRewardClaimFailed = "DailyReward.ClaimFailed";
         public const string DailyRewardStateChanged = "DailyReward.StateChanged";
+
+        // Ad
+        public const string AdRewardCompleted = "Ad.RewardCompleted";
+        public const string AdRewardFailed = "Ad.RewardFailed";
+        public const string AdRewardStateChanged = "Ad.StateChanged";
     }
 
     public static class UiPanelIds
@@ -178,6 +183,7 @@ public static class GameConstants
         public const string ShopCatalog = "Config/Shop/ShopCatalog_Default";
         public const string AchievementCatalog = "Config/Achievement/AchievementCatalog_Default";
         public const string DailyRewardCatalog = "Config/DailyReward/DailyRewardCatalog_Default";
+        public const string AdConfig = "Config/Ad/AdConfig_Default";
         public const string PerformanceBudget = "Config/Performance/PerformanceBudget_Default";
     }
 
@@ -267,6 +273,8 @@ public static class GameConstants
 
         public const string DailyRewardDay1 = "daily_reward.day_1";
         public const string DailyRewardDay7 = "daily_reward.day_7";
+
+        public const string AdEnergyRefill = "ad.energy_refill";
     }
 
     public static class PoolKeys

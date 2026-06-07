@@ -38,6 +38,9 @@ public class ShopSceneView : MonoBehaviour
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
         GameEvents.UnsubscribeShopPurchased(OnShopPurchased);
         GameEvents.UnsubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
+        GameEvents.UnsubscribeAdRewardFailed(OnAdRewardFailed);
+        GameEvents.UnsubscribeAdRewardStateChanged(OnAdRewardStateChanged);
         isSubscribed = false;
     }
 
@@ -96,17 +99,33 @@ public class ShopSceneView : MonoBehaviour
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
         GameEvents.SubscribeShopPurchased(OnShopPurchased);
         GameEvents.SubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
+        GameEvents.SubscribeAdRewardFailed(OnAdRewardFailed);
+        GameEvents.SubscribeAdRewardStateChanged(OnAdRewardStateChanged);
         isSubscribed = true;
     }
 
     private void OnResourceAddClicked(CurrencyType currency)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        if (currency == CurrencyType.Energy)
+        {
+            if (ServiceLocator.TryGet(out AdRewardService adService))
+            {
+                adService.TryShowRewardedForEnergy();
+            }
+            else
+            {
+                SetStatus("广告服务未就绪");
+            }
+
+            return;
+        }
+
         string message = currency switch
         {
             CurrencyType.Diamond => "水晶补充入口待接入",
             CurrencyType.Gold => "金币补充入口待接入",
-            CurrencyType.Energy => "体力补充入口待接入",
             _ => "科技点补充入口待接入",
         };
         SetStatus(message);
@@ -127,13 +146,14 @@ public class ShopSceneView : MonoBehaviour
     private void OnAdFreeRequested(string configId)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
-        if (!ServiceLocator.TryGet(out ShopManager shop))
+        if (!ServiceLocator.TryGet(out AdRewardService adService))
         {
-            SetStatus("商店未就绪");
+            SetStatus("广告服务未就绪");
             return;
         }
 
-        shop.TryClaimAdFreeSupply(configId);
+        SetStatus("正在加载广告…");
+        adService.TryShowRewardedForShop(configId);
     }
 
     private void OnExchangeRequested(string configId)
@@ -168,6 +188,34 @@ public class ShopSceneView : MonoBehaviour
             SetStatus(args.Message);
         }
     }
+
+    private void OnAdRewardCompleted(GameEventContext ctx)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
+        RefreshAll();
+        if (ctx.Payload is not AdRewardCompletedEventArgs args)
+        {
+            return;
+        }
+
+        SetStatus(args.Source switch
+        {
+            AdRewardSource.Shop => "广告奖励已发放",
+            AdRewardSource.Energy => "体力已恢复",
+            _ => "广告奖励已发放",
+        });
+    }
+
+    private void OnAdRewardFailed(GameEventContext ctx)
+    {
+        RefreshAll();
+        if (ctx.Payload is AdRewardFailedEventArgs args)
+        {
+            SetStatus(args.Message);
+        }
+    }
+
+    private void OnAdRewardStateChanged(GameEventContext ctx) => RefreshAll();
 
     private void SetStatus(string message)
     {

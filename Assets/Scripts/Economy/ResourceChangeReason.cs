@@ -27,6 +27,11 @@ public enum ResourceChangeReason
     Lottery = 8,
     // 游戏时长奖励 金币 水晶
     GameTimeReward = 9,
-    // 体力恢复奖励 体力
+    // 自然恢复体力
+    EnergyRecover = 11,
+    // 广告奖励体力
+    AdReward = 12,
+    // 开局消耗体力
+    BattleStart = 13,
     Debug = 99,
 }

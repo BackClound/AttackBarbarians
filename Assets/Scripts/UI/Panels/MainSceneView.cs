@@ -102,6 +102,8 @@ public class MainSceneView : MonoBehaviour
         GameEvents.UnsubscribeAchievementClaimed(OnGameEventRefresh);
         GameEvents.UnsubscribeShopPurchased(OnShopPurchased);
         GameEvents.UnsubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        GameEvents.UnsubscribeAdRewardFailed(OnAdRewardFailed);
+        GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
         isSubscribed = false;
     }
 
@@ -200,6 +202,8 @@ public class MainSceneView : MonoBehaviour
         GameEvents.SubscribeAchievementClaimed(OnGameEventRefresh);
         GameEvents.SubscribeShopPurchased(OnShopPurchased);
         GameEvents.SubscribeShopPurchaseFailed(OnShopPurchaseFailed);
+        GameEvents.SubscribeAdRewardFailed(OnAdRewardFailed);
+        GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
         isSubscribed = true;
     }
 
@@ -256,6 +260,49 @@ public class MainSceneView : MonoBehaviour
                 battlePage?.OnShopPurchaseFailed(args.Message);
             }
         }
+    }
+
+    private void OnAdRewardFailed(GameEventContext ctx)
+    {
+        if (ctx.Payload is not AdRewardFailedEventArgs args)
+        {
+            return;
+        }
+
+        if (currentPage == MainScenePage.Shop && args.Source == AdRewardSource.Shop)
+        {
+            return;
+        }
+
+        if (currentPage == MainScenePage.Shop && args.Source == AdRewardSource.Energy)
+        {
+            shopPage?.RefreshAll();
+            return;
+        }
+
+        battlePage?.SetStatus(args.Message);
+        battlePage?.OnResourceChanged();
+    }
+
+    private void OnAdRewardCompleted(GameEventContext ctx)
+    {
+        if (ctx.Payload is not AdRewardCompletedEventArgs args)
+        {
+            return;
+        }
+
+        if (currentPage == MainScenePage.Shop)
+        {
+            return;
+        }
+
+        string message = args.Source switch
+        {
+            AdRewardSource.Energy => "体力已恢复",
+            _ => "广告奖励已发放",
+        };
+        battlePage?.SetStatus(message);
+        battlePage?.OnResourceChanged();
     }
 
     private static MainSceneAction MapPageToAction(MainScenePage page) =>

@@ -314,7 +314,7 @@ public class ShopManager : MonoBehaviour, IGameSystem
             failureReason = "今日次数已用完";
             return false;
         }
-
+        failureReason = $"可领取 {rule.RewardAmount} {FormatRewardLabel(rule.RewardType)}";
         return true;
     }
 
@@ -442,12 +442,6 @@ public class ShopManager : MonoBehaviour, IGameSystem
                 return TryAddTechPoints(amount);
             default:
                 CurrencyType currency = MapRewardToCurrency(rewardType);
-                if (currency == CurrencyType.Energy)
-                {
-                    Debug.LogWarning("[ShopManager] 体力奖励暂未实现");
-                    return false;
-                }
-
                 return resourceManager.TryAdd(currency, amount, ResourceChangeReason.ShopPurchase, out _);
         }
     }
