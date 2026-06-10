@@ -16,10 +16,15 @@ public class DailyRewardEntrySO : ConfigDataBase
     [Header("Reward")]
     [SerializeField] private ShopRewardType rewardType = ShopRewardType.Gold;
     [SerializeField] private long rewardAmount = 100;
+    [SerializeField] private string upgradeCardPoolConfigId;
+    [SerializeField] private int upgradeCardDrawCount = 1;
 
     public int DayIndex => Mathf.Clamp(dayIndex, 1, 7);
     public ShopRewardType RewardType => rewardType;
     public long RewardAmount => (long)Mathf.Max(0, rewardAmount);
+    public string UpgradeCardPoolConfigId => upgradeCardPoolConfigId;
+    public int UpgradeCardDrawCount => Mathf.Max(0, upgradeCardDrawCount);
+    public bool HasUpgradeCardReward => !string.IsNullOrWhiteSpace(upgradeCardPoolConfigId) && upgradeCardDrawCount > 0;
 
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
@@ -29,9 +34,9 @@ public class DailyRewardEntrySO : ConfigDataBase
             result.AddError(name, "dayIndex 必须在 1～7 之间。");
         }
 
-        if (rewardAmount <= 0)
+        if (!HasUpgradeCardReward && rewardAmount <= 0)
         {
-            result.AddError(name, "rewardAmount 必须大于 0。");
+            result.AddError(name, "rewardAmount 必须大于 0，或配置 upgradeCardPoolConfigId。");
         }
     }
 }

@@ -20,5 +20,5 @@ MonoBehaviour:
   purchaseLimit: 0
   refreshPeriod: 0
   rewardType: 0
-  rewardAmount: 8000
-  rewardConfigId: 
+  rewardAmount: 10
+  rewardConfigId: upgrade_card_pool.shop_crate_common

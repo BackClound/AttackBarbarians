@@ -48,26 +48,35 @@ public class MainSceneRewardPanel : MonoBehaviour
         }
     }
 
-    public void Refresh(bool canClaimDaily, bool canClaimFreeDiamond)
+    public void Refresh()
     {
-        // 刷新在线奖励 
-        //TODO 这应该是一个CoroutineScope，因为需要时时根据时间更新状态
-        onlineReward?.SetDisplay(
-            "在线奖励",
-            canClaimDaily ? "00:00:00" : "00:15:30",
-            canClaimDaily ? "可领取" : "倒计时");
-        stageReward?.SetDisplay("通关奖励", string.Empty, "可领取");
-        offlineReward?.SetDisplay(
-            "离线收益",
-            canClaimFreeDiamond ? "00:00:00" : "02:30:45",
-            canClaimFreeDiamond ? "可领取" : "累计中");
+        if (!ServiceLocator.TryGet(out MetaRewardService meta))
+        {
+            onlineReward?.SetDisplay("在线奖励", "--:--:--", "未就绪");
+            stageReward?.SetDisplay("通关奖励", "--:--:--", "未就绪");
+            offlineReward?.SetDisplay("离线收益", "--:--:--", "未就绪");
+            return;
+        }
+
+        bool canOnline = meta.CanClaimOnlineReward(out _);
+        bool canOffline = meta.CanClaimOfflineReward(out _, out _);
+        bool canStage = meta.CanClaimStageReward(out _);
+
+        onlineReward?.SetDisplay("在线奖励", meta.GetOnlineTimerText(), canOnline ? "可领取" : "累计中");
+        stageReward?.SetDisplay("通关奖励", meta.GetStageRewardTimerText(), canStage ? "可领取" : "冷却中");
+        offlineReward?.SetDisplay("离线收益", meta.GetOfflineTimerText(), canOffline ? "可领取" : "累计中");
     }
 
-    public void ApplyRedDots(bool canClaimDaily, bool canClaimFreeDiamond)
+    public void ApplyRedDots()
     {
-        onlineReward?.SetRedDot(canClaimDaily);
-        stageReward?.SetRedDot(true);
-        offlineReward?.SetRedDot(canClaimFreeDiamond);
+        if (!ServiceLocator.TryGet(out MetaRewardService meta))
+        {
+            return;
+        }
+
+        onlineReward?.SetRedDot(meta.CanClaimOnlineReward(out _));
+        stageReward?.SetRedDot(meta.CanClaimStageReward(out _));
+        offlineReward?.SetRedDot(meta.CanClaimOfflineReward(out _, out _));
     }
 
     private void OnRewardClicked(MainSceneAction action)

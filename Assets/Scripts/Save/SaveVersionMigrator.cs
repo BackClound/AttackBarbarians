@@ -35,6 +35,10 @@ public static class SaveVersionMigrator
                     MigrateV1ToV2(data);
                     version = 2;
                     break;
+                case 2:
+                    MigrateV2ToV3(data);
+                    version = 3;
+                    break;
                 default:
                     Debug.LogWarning($"[SaveVersionMigrator] 未知版本 {version}，重置为默认存档。");
                     return SaveData.CreateDefault();
@@ -80,6 +84,19 @@ public static class SaveVersionMigrator
         EnsureCollections(data);
     }
 
+    private static void MigrateV2ToV3(SaveData data)
+    {
+        data.upgradeCardInventory ??= new List<ConfigIdIntPair>(4);
+        data.attributeBaseLevels ??= new List<ConfigIdIntPair>(4);
+
+        if (data.lastSessionEndUtcTicks <= 0)
+        {
+            data.lastSessionEndUtcTicks = DateTime.UtcNow.Ticks;
+        }
+
+        EnsureCollections(data);
+    }
+
     private static void EnsureCollections(SaveData data)
     {
         data.settings ??= SettingsData.CreateDefault();
@@ -90,6 +107,8 @@ public static class SaveVersionMigrator
         data.equipmentLevels ??= new List<ConfigIdIntPair>(4);
         data.equippedItems ??= new List<EquipmentSlotSaveEntry>(4);
         data.skillLevels ??= new List<ConfigIdIntPair>(4);
+        data.upgradeCardInventory ??= new List<ConfigIdIntPair>(4);
+        data.attributeBaseLevels ??= new List<ConfigIdIntPair>(4);
         data.runProgress.activeBuffs ??= new List<ConfigIdIntPair>(4);
         data.shopPurchaseCounts ??= new List<ConfigIdIntPair>(4);
         data.shopLastPurchaseUtcTicks ??= new List<ConfigIdLongPair>(4);

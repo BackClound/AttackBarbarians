@@ -39,6 +39,7 @@ public static class ShopPageBuilder
     public static void BuildShopPageInMainScene()
     {
         ShopConfigBootstrapMenu.CreateDefaultShopAssets();
+        UpgradeCardConfigBootstrapMenu.CreateAllUpgradeCardAssets();
 
         Scene scene = EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
         MainSceneView mainView = Object.FindObjectOfType<MainSceneView>();
@@ -205,11 +206,15 @@ public static class ShopPageBuilder
         ShopCrateWidget commonCrate = CreateCrateWidget(supplyRow, "CommonCrate", new Vector2(-350f, 0f), new Vector2(330f, 780f), NeonBlue,
             GameConstants.ConfigIds.ShopCrateCommonSingle,
             GameConstants.ConfigIds.ShopCrateCommonTen,
-            GameConstants.ConfigIds.ShopAdCrateCommon);
+            GameConstants.ConfigIds.ShopAdCrateCommon,
+            UpgradeCardConstants.PoolIds.ShopCrateCommon,
+            "普通补给箱");
         ShopCrateWidget premiumCrate = CreateCrateWidget(supplyRow, "PremiumCrate", new Vector2(0f, 0f), new Vector2(330f, 780f), NeonPurple,
             GameConstants.ConfigIds.ShopCratePremiumSingle,
             GameConstants.ConfigIds.ShopCratePremiumTen,
-            GameConstants.ConfigIds.ShopAdCratePremium);
+            GameConstants.ConfigIds.ShopAdCratePremium,
+            UpgradeCardConstants.PoolIds.ShopCratePremium,
+            "高级补给箱");
         ShopGoldSupplyWidget goldSupply = CreateGoldSupplyWidget(supplyRow, "GoldSupply", new Vector2(350f, 0f), new Vector2(330f, 780f));
 
         RectTransform exchangeRoot = CreateScrollSection(scroll.content, "ExchangeSection", ExchangeSectionHeight);
@@ -238,6 +243,8 @@ public static class ShopPageBuilder
         supplySo.FindProperty("goldSupply").objectReferenceValue = goldSupply;
         supplySo.ApplyModifiedPropertiesWithoutUndo();
 
+        ShopCratePopupBuilder.BuildAndWire(shell.PageRoot, shopView);
+
         return shopView;
     }
 
@@ -254,17 +261,20 @@ public static class ShopPageBuilder
         Color accent,
         string singleId,
         string tenId,
-        string adId)
+        string adId,
+        string previewPoolId,
+        string crateTitle)
     {
         Image background = CreatePanel(parent, name, position, size, PanelDeep);
         CreateText(background.rectTransform, "PanelIndex", name.Contains("Common") ? "01" : "02", 28, NeonBlue, TextAlignmentOptions.TopLeft, new Vector2(-size.x * 0.42f, size.y * 0.42f), new Vector2(80f, 40f));
-        TMP_Text title = CreateText(background.rectTransform, "Title", name.Contains("Common") ? "普通补给箱" : "高级补给箱", 26, TextWhite, TextAlignmentOptions.Top, new Vector2(0f, size.y * 0.34f), new Vector2(size.x - 24f, 40f));
+        TMP_Text title = CreateText(background.rectTransform, "Title", crateTitle, 26, TextWhite, TextAlignmentOptions.Top, new Vector2(0f, size.y * 0.34f), new Vector2(size.x - 24f, 40f));
         Image crate = CreatePanel(background.rectTransform, "CrateImage", new Vector2(0f, size.y * 0.08f), new Vector2(180f, 180f), accent);
-        TMP_Text rewards = CreateText(background.rectTransform, "RewardsHint", "可获得奖励", 18, Hex("#9EC8FF"), TextAlignmentOptions.Center, new Vector2(0f, -size.y * 0.12f), new Vector2(size.x - 24f, 60f));
+        TMP_Text rewards = CreateText(background.rectTransform, "RewardsHint", "技能升级卡 · 属性升级卡", 18, Hex("#9EC8FF"), TextAlignmentOptions.Center, new Vector2(0f, -size.y * 0.12f), new Vector2(size.x - 24f, 60f));
+        Button previewBtn = CreateActionButton(background.rectTransform, "Preview", new Vector2(0f, -size.y * 0.2f), new Vector2(size.x - 32f, 44f), "奖励预览", accent, out _);
 
-        Button singleBtn = CreateActionButton(background.rectTransform, "SinglePull", new Vector2(0f, -size.y * 0.28f), new Vector2(size.x - 32f, 56f), "单抽", NeonBlue, out TMP_Text singleCost);
-        Button tenBtn = CreateActionButton(background.rectTransform, "TenPull", new Vector2(0f, -size.y * 0.38f), new Vector2(size.x - 32f, 56f), "十连抽", accent, out TMP_Text tenCost);
-        Button adBtn = CreateActionButton(background.rectTransform, "AdPull", new Vector2(0f, -size.y * 0.48f), new Vector2(size.x - 32f, 56f), "观看广告免费抽取", PanelBlue, out TMP_Text adText);
+        Button singleBtn = CreateActionButton(background.rectTransform, "SinglePull", new Vector2(0f, -size.y * 0.3f), new Vector2(size.x - 32f, 56f), "单抽", NeonBlue, out TMP_Text singleCost);
+        Button tenBtn = CreateActionButton(background.rectTransform, "TenPull", new Vector2(0f, -size.y * 0.4f), new Vector2(size.x - 32f, 56f), "十连抽", accent, out TMP_Text tenCost);
+        Button adBtn = CreateActionButton(background.rectTransform, "AdPull", new Vector2(0f, -size.y * 0.5f), new Vector2(size.x - 32f, 56f), "观看广告免费抽取", PanelBlue, out TMP_Text adText);
 
         ShopCrateWidget widget = background.gameObject.AddComponent<ShopCrateWidget>();
         SerializedObject so = new SerializedObject(widget);
@@ -278,9 +288,12 @@ public static class ShopPageBuilder
         so.FindProperty("tenCostText").objectReferenceValue = tenCost;
         so.FindProperty("adPullButton").objectReferenceValue = adBtn;
         so.FindProperty("adPullText").objectReferenceValue = adText;
+        so.FindProperty("previewButton").objectReferenceValue = previewBtn;
         so.FindProperty("singleItemConfigId").stringValue = singleId;
         so.FindProperty("tenItemConfigId").stringValue = tenId;
         so.FindProperty("adFreeConfigId").stringValue = adId;
+        so.FindProperty("previewPoolConfigId").stringValue = previewPoolId;
+        so.FindProperty("crateTitle").stringValue = crateTitle;
         so.ApplyModifiedPropertiesWithoutUndo();
         return widget;
     }

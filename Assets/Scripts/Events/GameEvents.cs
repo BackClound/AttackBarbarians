@@ -558,6 +558,19 @@ public static class GameEvents
 
     #endregion
 
+    #region Upgrade Card
+
+    public static void RaiseUpgradeCardGranted(object sender, UpgradeCardGrantedEventArgs args) =>
+        Publish(GameConstants.EventKeys.UpgradeCardGranted, sender, args);
+
+    public static void SubscribeUpgradeCardGranted(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.UpgradeCardGranted, handler);
+
+    public static void UnsubscribeUpgradeCardGranted(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.UpgradeCardGranted, handler);
+
+    #endregion
+
     #region Ad
 
     public static void RaiseAdRewardCompleted(object sender, AdRewardCompletedEventArgs args) =>

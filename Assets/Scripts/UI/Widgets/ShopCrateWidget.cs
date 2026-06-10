@@ -26,13 +26,21 @@ public class ShopCrateWidget : MonoBehaviour
     [SerializeField] private string singleItemConfigId;
     [SerializeField] private string tenItemConfigId;
     [SerializeField] private string adFreeConfigId;
+    [SerializeField] private string previewPoolConfigId;
+    [SerializeField] private string crateTitle;
+
+    [Header("Preview")]
+    [SerializeField] private Button previewButton;
 
     public string SingleItemConfigId => singleItemConfigId;
     public string TenItemConfigId => tenItemConfigId;
     public string AdFreeConfigId => adFreeConfigId;
+    public string PreviewPoolConfigId => previewPoolConfigId;
+    public string CrateTitle => crateTitle;
 
     public event Action<string> PurchaseRequested;
     public event Action<string> AdFreeRequested;
+    public event Action<string, string> PreviewRequested;
 
     private void Awake()
     {
@@ -49,6 +57,11 @@ public class ShopCrateWidget : MonoBehaviour
         if (adPullButton != null)
         {
             adPullButton.onClick.AddListener(OnAdPullClicked);
+        }
+
+        if (previewButton != null)
+        {
+            previewButton.onClick.AddListener(OnPreviewClicked);
         }
     }
 
@@ -67,6 +80,11 @@ public class ShopCrateWidget : MonoBehaviour
         if (adPullButton != null)
         {
             adPullButton.onClick.RemoveListener(OnAdPullClicked);
+        }
+
+        if (previewButton != null)
+        {
+            previewButton.onClick.RemoveListener(OnPreviewClicked);
         }
     }
 
@@ -127,6 +145,14 @@ public class ShopCrateWidget : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(adFreeConfigId))
         {
             AdFreeRequested?.Invoke(adFreeConfigId);
+        }
+    }
+
+    private void OnPreviewClicked()
+    {
+        if (!string.IsNullOrWhiteSpace(previewPoolConfigId))
+        {
+            PreviewRequested?.Invoke(previewPoolConfigId, crateTitle);
         }
     }
 

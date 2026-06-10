@@ -31,6 +31,8 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private List<ShopItemSO> shopItems = new List<ShopItemSO>();
     [SerializeField] private List<AchievementDataSO> achievements = new List<AchievementDataSO>();
     [SerializeField] private List<DailyRewardEntrySO> dailyRewardEntries = new List<DailyRewardEntrySO>();
+    [SerializeField] private List<UpgradeCardSO> upgradeCards = new List<UpgradeCardSO>();
+    [SerializeField] private List<UpgradeCardRewardPoolSO> upgradeCardRewardPools = new List<UpgradeCardRewardPoolSO>();
 
     public IReadOnlyList<PlayerDataSO> Players => players;
     public IReadOnlyList<EnemyDataSO> Enemies => enemies;
@@ -52,6 +54,8 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<ShopItemSO> ShopItems => shopItems;
     public IReadOnlyList<AchievementDataSO> Achievements => achievements;
     public IReadOnlyList<DailyRewardEntrySO> DailyRewardEntries => dailyRewardEntries;
+    public IReadOnlyList<UpgradeCardSO> UpgradeCards => upgradeCards;
+    public IReadOnlyList<UpgradeCardRewardPoolSO> UpgradeCardRewardPools => upgradeCardRewardPools;
 
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(players, configId, out data);
@@ -106,6 +110,12 @@ public class ConfigDatabaseSO : ScriptableObject
 
     public bool TryGetAchievement(string configId, out AchievementDataSO data) =>
         TryGet(achievements, configId, out data);
+
+    public bool TryGetUpgradeCard(string configId, out UpgradeCardSO data) =>
+        TryGet(upgradeCards, configId, out data);
+
+    public bool TryGetUpgradeCardRewardPool(string configId, out UpgradeCardRewardPoolSO data) =>
+        TryGet(upgradeCardRewardPools, configId, out data);
 
     public bool TryGetDailyRewardEntryByDay(int dayIndex, out DailyRewardEntrySO data)
     {

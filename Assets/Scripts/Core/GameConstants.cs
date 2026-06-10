@@ -127,6 +127,9 @@ public static class GameConstants
         public const string DailyRewardClaimFailed = "DailyReward.ClaimFailed";
         public const string DailyRewardStateChanged = "DailyReward.StateChanged";
 
+        // Upgrade Card
+        public const string UpgradeCardGranted = "UpgradeCard.Granted";
+
         // Ad
         public const string AdRewardCompleted = "Ad.RewardCompleted";
         public const string AdRewardFailed = "Ad.RewardFailed";

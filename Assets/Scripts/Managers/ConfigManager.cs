@@ -41,6 +41,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, ShopItemSO> shopItemsById = new Dictionary<string, ShopItemSO>(16);
     private readonly Dictionary<string, AchievementDataSO> achievementsById = new Dictionary<string, AchievementDataSO>(16);
     private readonly Dictionary<int, DailyRewardEntrySO> dailyRewardsByDay = new Dictionary<int, DailyRewardEntrySO>(8);
+    private readonly Dictionary<string, UpgradeCardSO> upgradeCardsById = new Dictionary<string, UpgradeCardSO>(32);
+    private readonly Dictionary<string, UpgradeCardRewardPoolSO> upgradeCardRewardPoolsById =
+        new Dictionary<string, UpgradeCardRewardPoolSO>(8);
     private readonly List<RewardPoolSO> rewardPoolList = new List<RewardPoolSO>(4);
 
     public bool IsInitialized { get; private set; }
@@ -145,6 +148,12 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     public bool TryGetDailyRewardEntry(int dayIndex, out DailyRewardEntrySO data) =>
         dailyRewardsByDay.TryGetValue(dayIndex, out data);
 
+    public bool TryGetUpgradeCard(string configId, out UpgradeCardSO data) =>
+        TryGet(upgradeCardsById, configId, out data);
+
+    public bool TryGetUpgradeCardRewardPool(string configId, out UpgradeCardRewardPoolSO data) =>
+        TryGet(upgradeCardRewardPoolsById, configId, out data);
+
     public IReadOnlyList<RewardPoolSO> GetAllRewardPools() => rewardPoolList;
 
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
@@ -223,6 +232,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.ShopItems, shopItemsById);
         IndexList(Database.Achievements, achievementsById);
         IndexDailyRewardEntries(Database.DailyRewardEntries);
+        IndexList(Database.UpgradeCards, upgradeCardsById);
+        IndexList(Database.UpgradeCardRewardPools, upgradeCardRewardPoolsById);
         rewardPoolList.Clear();
         if (Database.RewardPools != null)
         {
@@ -247,7 +258,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
                 $"RewardPool={rewardPoolsById.Count}, Talent={talentsById.Count}, " +
                 $"Equipment={equipmentById.Count}, Map={mapsById.Count}, " +
                 $"GameplayEvent={gameplayEventsById.Count}, ShopItem={shopItemsById.Count}, " +
-                $"Achievement={achievementsById.Count}, DailyReward={dailyRewardsByDay.Count}");
+                $"Achievement={achievementsById.Count}, DailyReward={dailyRewardsByDay.Count}, " +
+                $"UpgradeCard={upgradeCardsById.Count}, UpgradeCardPool={upgradeCardRewardPoolsById.Count}");
         }
     }
 
@@ -311,6 +323,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         shopItemsById.Clear();
         achievementsById.Clear();
         dailyRewardsByDay.Clear();
+        upgradeCardsById.Clear();
+        upgradeCardRewardPoolsById.Clear();
         rewardPoolList.Clear();
     }
 

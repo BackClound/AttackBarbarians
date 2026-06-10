@@ -92,12 +92,34 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
             saveManager.Current.statistics.totalPlayTimeSeconds += Mathf.RoundToInt(duration);
         }
 
+        int cardDrawCount = settlementConfig != null ? settlementConfig.UpgradeCardDrawCount : 0;
+        if (cardDrawCount > 0 &&
+            ServiceLocator.TryGet(out UpgradeCardManager upgradeCardManager))
+        {
+            string poolId = settlementConfig.UpgradeCardPoolConfigId;
+            if (string.IsNullOrWhiteSpace(poolId))
+            {
+                poolId = UpgradeCardConstants.PoolIds.RunSettlement;
+            }
+
+            upgradeCardManager.TryGrantFromPool(
+                poolId,
+                cardDrawCount,
+                UpgradeCardRewardSource.RunSettlement,
+                out _);
+        }
+
         GameEvents.RaiseRunRewardSettled(this, new RunRewardSettledEventArgs(
             duration,
             result.Tier,
             difficulty,
             goldGranted,
             diamondsGranted));
+
+        if (ServiceLocator.TryGet(out MetaRewardService metaRewardService))
+        {
+            metaRewardService.RecordSessionEnd();
+        }
 
         saveManager.MarkDirty();
         saveManager.SaveImmediate();

@@ -6,7 +6,7 @@
 /// </remarks>
 public static class SaveConstants
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
     public const string DefaultSaveFileName = "save.json";
     public const string BackupSuffix = ".bak";
     public const string ExportFileName = "save_export.json";

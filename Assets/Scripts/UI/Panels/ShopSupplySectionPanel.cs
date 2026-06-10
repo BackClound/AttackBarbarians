@@ -12,6 +12,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
 
     public event Action<string> PurchaseRequested;
     public event Action<string> AdFreeRequested;
+    public event Action<string, string> PreviewRequested;
 
     private void Awake()
     {
@@ -33,19 +34,21 @@ public class ShopSupplySectionPanel : MonoBehaviour
             commonCrate,
             "01",
             "普通补给箱",
-            "技能升级卡 · 普通装备",
+            "技能升级卡 · 属性升级卡",
             GameConstants.ConfigIds.ShopCrateCommonSingle,
             GameConstants.ConfigIds.ShopCrateCommonTen,
-            GameConstants.ConfigIds.ShopAdCrateCommon);
+            GameConstants.ConfigIds.ShopAdCrateCommon,
+            UpgradeCardConstants.PoolIds.ShopCrateCommon);
 
         RefreshCrate(
             premiumCrate,
             "02",
             "高级补给箱",
-            "高级技能卡 · 稀有/史诗装备",
+            "高级技能卡 · 稀有升级卡",
             GameConstants.ConfigIds.ShopCratePremiumSingle,
             GameConstants.ConfigIds.ShopCratePremiumTen,
-            GameConstants.ConfigIds.ShopAdCratePremium);
+            GameConstants.ConfigIds.ShopAdCratePremium,
+            UpgradeCardConstants.PoolIds.ShopCratePremium);
 
         RefreshGoldSupply();
     }
@@ -57,7 +60,8 @@ public class ShopSupplySectionPanel : MonoBehaviour
         string rewardsHint,
         string singleId,
         string tenId,
-        string adId)
+        string adId,
+        string previewPoolId)
     {
         if (crate == null)
         {
@@ -188,6 +192,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
 
         crate.PurchaseRequested += OnPurchaseRequested;
         crate.AdFreeRequested += OnAdFreeRequested;
+        crate.PreviewRequested += OnPreviewRequested;
     }
 
     private void UnwireCrate(ShopCrateWidget crate)
@@ -199,6 +204,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
 
         crate.PurchaseRequested -= OnPurchaseRequested;
         crate.AdFreeRequested -= OnAdFreeRequested;
+        crate.PreviewRequested -= OnPreviewRequested;
     }
 
     private void WireGoldSupply(ShopGoldSupplyWidget widget)
@@ -231,5 +237,10 @@ public class ShopSupplySectionPanel : MonoBehaviour
     private void OnAdFreeRequested(string configId)
     {
         AdFreeRequested?.Invoke(configId);
+    }
+
+    private void OnPreviewRequested(string poolConfigId, string crateTitle)
+    {
+        PreviewRequested?.Invoke(poolConfigId, crateTitle);
     }
 }

@@ -104,6 +104,7 @@ public class MainSceneView : MonoBehaviour
         GameEvents.UnsubscribeShopPurchaseFailed(OnShopPurchaseFailed);
         GameEvents.UnsubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
+        GameEvents.UnsubscribeUpgradeCardGranted(OnUpgradeCardGranted);
         isSubscribed = false;
     }
 
@@ -204,6 +205,7 @@ public class MainSceneView : MonoBehaviour
         GameEvents.SubscribeShopPurchaseFailed(OnShopPurchaseFailed);
         GameEvents.SubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
+        GameEvents.SubscribeUpgradeCardGranted(OnUpgradeCardGranted);
         isSubscribed = true;
     }
 
@@ -282,6 +284,20 @@ public class MainSceneView : MonoBehaviour
 
         battlePage?.SetStatus(args.Message);
         battlePage?.OnResourceChanged();
+    }
+
+    private void OnUpgradeCardGranted(GameEventContext ctx)
+    {
+        if (ctx.Payload is not UpgradeCardGrantedEventArgs args)
+        {
+            return;
+        }
+
+        battlePage?.RefreshAll();
+        if (args.Grants != null && args.Grants.Count > 0)
+        {
+            battlePage?.SetStatus($"获得升级卡：{args.Grants[0].DisplayName}");
+        }
     }
 
     private void OnAdRewardCompleted(GameEventContext ctx)

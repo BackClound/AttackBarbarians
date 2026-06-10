@@ -8,4 +8,5 @@ public enum ShopRewardType
     Energy = 2,
     AdTicket = 3,
     TechPoint = 4,
+    UpgradeCard = 5,
 }

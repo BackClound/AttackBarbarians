@@ -20,7 +20,14 @@ public class ShopSceneView : MonoBehaviour
     [SerializeField] private ShopAdTicketExchangePanel exchangePanel;
     [SerializeField] private TMP_Text statusText;
 
+    [Header("Crate Popups")]
+    [SerializeField] private ShopCrateRewardPopupPanel crateRewardPopup;
+    [SerializeField] private ShopCratePoolPreviewPanel cratePoolPreview;
+
     private bool isSubscribed;
+    private string pendingCratePurchaseId;
+    private string pendingPoolConfigId;
+    private string pendingCrateTitle;
 
     private void OnEnable()
     {
@@ -41,6 +48,7 @@ public class ShopSceneView : MonoBehaviour
         GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
         GameEvents.UnsubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.UnsubscribeAdRewardStateChanged(OnAdRewardStateChanged);
+        GameEvents.UnsubscribeUpgradeCardGranted(OnUpgradeCardGranted);
         isSubscribed = false;
     }
 
@@ -55,11 +63,17 @@ public class ShopSceneView : MonoBehaviour
         {
             supplySection.PurchaseRequested += OnPurchaseRequested;
             supplySection.AdFreeRequested += OnAdFreeRequested;
+            supplySection.PreviewRequested += OnPreviewRequested;
         }
 
         if (exchangePanel != null)
         {
             exchangePanel.ExchangeRequested += OnExchangeRequested;
+        }
+
+        if (crateRewardPopup != null)
+        {
+            crateRewardPopup.BindCallbacks(OnPreviewRequested, OnPurchaseRequested);
         }
     }
 
@@ -74,6 +88,7 @@ public class ShopSceneView : MonoBehaviour
         {
             supplySection.PurchaseRequested -= OnPurchaseRequested;
             supplySection.AdFreeRequested -= OnAdFreeRequested;
+            supplySection.PreviewRequested -= OnPreviewRequested;
         }
 
         if (exchangePanel != null)
@@ -102,6 +117,7 @@ public class ShopSceneView : MonoBehaviour
         GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
         GameEvents.SubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.SubscribeAdRewardStateChanged(OnAdRewardStateChanged);
+        GameEvents.SubscribeUpgradeCardGranted(OnUpgradeCardGranted);
         isSubscribed = true;
     }
 
@@ -140,6 +156,11 @@ public class ShopSceneView : MonoBehaviour
             return;
         }
 
+        if (IsCratePurchase(configId))
+        {
+            RememberPendingCrateContext(configId);
+        }
+
         shop.TryPurchase(configId);
     }
 
@@ -152,8 +173,25 @@ public class ShopSceneView : MonoBehaviour
             return;
         }
 
+        if (IsCratePurchase(configId))
+        {
+            RememberPendingCrateContext(configId);
+        }
+
         SetStatus("正在加载广告…");
         adService.TryShowRewardedForShop(configId);
+    }
+
+    private void OnPreviewRequested(string poolConfigId, string crateTitle)
+    {
+        PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+        if (cratePoolPreview == null)
+        {
+            SetStatus("预览面板未绑定");
+            return;
+        }
+
+        cratePoolPreview.Show(poolConfigId, crateTitle);
     }
 
     private void OnExchangeRequested(string configId)
@@ -174,10 +212,33 @@ public class ShopSceneView : MonoBehaviour
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
         RefreshAll();
-        if (ctx.Payload is ShopPurchaseEventArgs args)
+        if (ctx.Payload is ShopPurchaseEventArgs args && !IsCratePurchase(args.ItemConfigId))
         {
             SetStatus($"获得 {args.RewardAmount} {FormatReward(args.RewardType)}");
         }
+    }
+
+    private void OnUpgradeCardGranted(GameEventContext ctx)
+    {
+        if (ctx.Payload is not UpgradeCardGrantedEventArgs args ||
+            args.Source != UpgradeCardRewardSource.ShopCrate)
+        {
+            return;
+        }
+
+        PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
+        RefreshAll();
+
+        if (crateRewardPopup != null)
+        {
+            crateRewardPopup.Show(
+                args,
+                pendingCratePurchaseId,
+                pendingPoolConfigId,
+                pendingCrateTitle);
+        }
+
+        SetStatus($"获得 {args.Grants?.Count ?? 0} 张升级卡");
     }
 
     private void OnShopPurchaseFailed(GameEventContext ctx)
@@ -194,6 +255,11 @@ public class ShopSceneView : MonoBehaviour
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
         RefreshAll();
         if (ctx.Payload is not AdRewardCompletedEventArgs args)
+        {
+            return;
+        }
+
+        if (args.Source == AdRewardSource.Shop && IsCratePurchase(pendingCratePurchaseId))
         {
             return;
         }
@@ -229,6 +295,25 @@ public class ShopSceneView : MonoBehaviour
 
     private void OnAdRewardStateChanged(GameEventContext ctx) => RefreshAll();
 
+    private void RememberPendingCrateContext(string configId)
+    {
+        pendingCratePurchaseId = configId;
+        pendingPoolConfigId = ResolvePoolConfigId(configId);
+        pendingCrateTitle = ResolveCrateTitle(configId);
+    }
+
+    private static bool IsCratePurchase(string configId) =>
+        !string.IsNullOrWhiteSpace(configId) &&
+        (configId.Contains("crate") || configId.Contains("ad_crate"));
+
+    private static string ResolvePoolConfigId(string configId) =>
+        configId != null && configId.Contains("premium")
+            ? UpgradeCardConstants.PoolIds.ShopCratePremium
+            : UpgradeCardConstants.PoolIds.ShopCrateCommon;
+
+    private static string ResolveCrateTitle(string configId) =>
+        configId != null && configId.Contains("premium") ? "高级补给箱" : "普通补给箱";
+
     private void SetStatus(string message)
     {
         if (statusText == null)
@@ -258,6 +343,7 @@ public class ShopSceneView : MonoBehaviour
             ShopRewardType.Energy => "广告券",
             ShopRewardType.AdTicket => "广告券",
             ShopRewardType.TechPoint => "科技点",
+            ShopRewardType.UpgradeCard => "升级卡",
             _ => reward.ToString(),
         };
 }

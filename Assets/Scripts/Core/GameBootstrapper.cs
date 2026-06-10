@@ -48,6 +48,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private AdRewardService adRewardService;
     [SerializeField] private AchievementManager achievementManager;
     [SerializeField] private DailyRewardManager dailyRewardManager;
+    [SerializeField] private UpgradeCardManager upgradeCardManager;
+    [SerializeField] private MetaRewardService metaRewardService;
     [SerializeField] private TalentManager talentManager;
     [SerializeField] private EquipmentManager equipmentManager;
     [SerializeField] private PerformanceManager performanceManager;
@@ -166,6 +168,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         adRewardService = ResolveOrCreate(adRewardService);
         achievementManager = ResolveOrCreate(achievementManager);
         dailyRewardManager = ResolveOrCreate(dailyRewardManager);
+        upgradeCardManager = ResolveOrCreate(upgradeCardManager);
+        metaRewardService = ResolveOrCreate(metaRewardService);
         talentManager = ResolveOrCreate(talentManager);
         equipmentManager = ResolveOrCreate(equipmentManager);
         performanceManager = ResolveOrCreate(performanceManager);
@@ -209,6 +213,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         RegisterSystem(adRewardService);
         RegisterSystem(achievementManager);
         RegisterSystem(dailyRewardManager);
+        RegisterSystem(upgradeCardManager);
+        RegisterSystem(metaRewardService);
         RegisterSystem(talentManager);
         RegisterSystem(equipmentManager);
         RegisterSystem(eventBus);

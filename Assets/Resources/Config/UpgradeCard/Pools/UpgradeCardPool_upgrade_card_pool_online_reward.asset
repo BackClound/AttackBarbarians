@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c75b52733d3f4f278dd99f3e80b6f69, type: 3}
+  m_Name: UpgradeCardPool_upgrade_card_pool_online_reward
+  m_EditorClassIdentifier: 
+  configId: upgrade_card_pool.online_reward
+  displayName: "\u5728\u7EBF\u5956\u52B1\u5956\u6C60"
+  icon: {fileID: 0}
+  drawCount: 1
+  entries:
+  - card: {fileID: 11400000, guid: 8727bc44658d94f46a60316532440886, type: 2}
+    weight: 80
+  - card: {fileID: 11400000, guid: 53eedfde31b95407f850a1c6f438bce3, type: 2}
+    weight: 70
+  - card: {fileID: 11400000, guid: 8f15219076bac4127ac39bb30a5ebb60, type: 2}
+    weight: 60
+  - card: {fileID: 11400000, guid: 83afd4a032f724619bdabd1189bbc63b, type: 2}
+    weight: 50
+  - card: {fileID: 11400000, guid: 608223b3a75ab4f5293793e147e55c4a, type: 2}
+    weight: 90

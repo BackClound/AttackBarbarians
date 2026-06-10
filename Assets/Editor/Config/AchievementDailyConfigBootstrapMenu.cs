@@ -156,6 +156,8 @@ public static class AchievementDailyConfigBootstrapMenu
         so.FindProperty("dayIndex").intValue = dayIndex;
         so.FindProperty("rewardType").enumValueIndex = (int)rewardType;
         so.FindProperty("rewardAmount").longValue = amount;
+        so.FindProperty("upgradeCardPoolConfigId").stringValue = UpgradeCardConstants.PoolIds.DailyReward;
+        so.FindProperty("upgradeCardDrawCount").intValue = dayIndex == 7 ? 2 : 1;
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(entry);
         return entry;

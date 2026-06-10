@@ -106,7 +106,9 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (item.RewardAmount <= 0)
+        bool hasUpgradeCardReward = item.RewardType == ShopRewardType.UpgradeCard ||
+            (!string.IsNullOrWhiteSpace(item.RewardConfigId) && IsCrateItem(item.ConfigId));
+        if (item.RewardAmount <= 0 && !hasUpgradeCardReward)
         {
             failureReason = "商品奖励配置无效";
             reason = ShopPurchaseFailedReason.InvalidConfiguration;
@@ -354,7 +356,16 @@ public class ShopManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (!GrantRewardType(rule.RewardType, rule.RewardAmount))
+        bool granted = GrantRewardType(rule.RewardType, rule.RewardAmount);
+        if (IsCrateItem(configId))
+        {
+            string poolId = configId == GameConstants.ConfigIds.ShopAdCratePremium
+                ? UpgradeCardConstants.PoolIds.ShopCratePremium
+                : UpgradeCardConstants.PoolIds.ShopCrateCommon;
+            granted |= GrantUpgradeCardReward(poolId, 1);
+        }
+
+        if (!granted)
         {
             GameEvents.RaiseShopPurchaseFailed(
                 this,
@@ -452,6 +463,16 @@ public class ShopManager : MonoBehaviour, IGameSystem
 
     private bool GrantReward(ShopItemSO item)
     {
+        if (item.RewardType == ShopRewardType.UpgradeCard)
+        {
+            return GrantUpgradeCardReward(item.RewardConfigId, (int)item.RewardAmount);
+        }
+
+        if (!string.IsNullOrWhiteSpace(item.RewardConfigId) && IsCrateItem(item.ConfigId))
+        {
+            return GrantUpgradeCardReward(item.RewardConfigId, (int)Mathf.Max(1, item.RewardAmount));
+        }
+
         return GrantRewardType(item.RewardType, item.RewardAmount);
     }
 
@@ -463,11 +484,32 @@ public class ShopManager : MonoBehaviour, IGameSystem
                 return TryAddAdTickets((int)amount);
             case ShopRewardType.TechPoint:
                 return TryAddTechPoints(amount);
+            case ShopRewardType.UpgradeCard:
+                return false;
             default:
                 CurrencyType currency = MapRewardToCurrency(rewardType);
                 return resourceManager.TryAdd(currency, amount, ResourceChangeReason.ShopPurchase, out _);
         }
     }
+
+    private bool GrantUpgradeCardReward(string poolConfigId, int drawCount)
+    {
+        if (!ServiceLocator.TryGet(out UpgradeCardManager upgradeCardManager))
+        {
+            return false;
+        }
+
+        return upgradeCardManager.TryGrantFromPool(
+            poolConfigId,
+            drawCount,
+            UpgradeCardRewardSource.ShopCrate,
+            out _);
+    }
+
+    private static bool IsCrateItem(string configId) =>
+        configId != null && (
+            configId.Contains("crate") ||
+            configId.Contains("ad_crate"));
 
     private bool TryAddAdTickets(int amount)
     {

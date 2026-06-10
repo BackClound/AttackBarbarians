@@ -37,6 +37,16 @@ public class SaveData
     public List<ConfigIdIntPair> equipmentLevels = new List<ConfigIdIntPair>(8);
     public List<EquipmentSlotSaveEntry> equippedItems = new List<EquipmentSlotSaveEntry>(6);
     public List<ConfigIdIntPair> skillLevels = new List<ConfigIdIntPair>(16);
+    public List<ConfigIdIntPair> upgradeCardInventory = new List<ConfigIdIntPair>(32);
+    public List<ConfigIdIntPair> attributeBaseLevels = new List<ConfigIdIntPair>(8);
+
+    public int onlinePlayTimeSeconds;
+    public int accumulatedOfflineSeconds;
+    public long lastSessionEndUtcTicks;
+    public long lastOnlineRewardClaimUtcTicks;
+    public long lastOfflineRewardClaimUtcTicks;
+    public long lastLotteryUtcTicks;
+    public long lastStageRewardClaimUtcTicks;
 
     public SettingsData settings = new SettingsData();
     public SaveStatisticsData statistics = new SaveStatisticsData();
@@ -67,6 +77,15 @@ public class SaveData
             equipmentLevels = new List<ConfigIdIntPair>(4),
             equippedItems = new List<EquipmentSlotSaveEntry>(4),
             skillLevels = new List<ConfigIdIntPair>(4),
+            upgradeCardInventory = new List<ConfigIdIntPair>(4),
+            attributeBaseLevels = new List<ConfigIdIntPair>(4),
+            onlinePlayTimeSeconds = 0,
+            accumulatedOfflineSeconds = 0,
+            lastSessionEndUtcTicks = DateTime.UtcNow.Ticks,
+            lastOnlineRewardClaimUtcTicks = 0,
+            lastOfflineRewardClaimUtcTicks = 0,
+            lastLotteryUtcTicks = 0,
+            lastStageRewardClaimUtcTicks = 0,
             settings = SettingsData.CreateDefault(),
             statistics = SaveStatisticsData.CreateDefault(),
             runProgress = RunProgressData.CreateDefault(),
@@ -87,6 +106,18 @@ public class SaveData
 
     public void SetSkillLevel(string configId, int level) =>
         ConfigIdIntPairListUtility.SetValue(skillLevels, configId, level);
+
+    public int GetUpgradeCardCount(string configId) =>
+        ConfigIdIntPairListUtility.GetValue(upgradeCardInventory, configId);
+
+    public void SetUpgradeCardCount(string configId, int count) =>
+        ConfigIdIntPairListUtility.SetValue(upgradeCardInventory, configId, count);
+
+    public int GetAttributeBaseLevel(StatType statType) =>
+        ConfigIdIntPairListUtility.GetValue(attributeBaseLevels, statType.ToString());
+
+    public void SetAttributeBaseLevel(StatType statType, int level) =>
+        ConfigIdIntPairListUtility.SetValue(attributeBaseLevels, statType.ToString(), level);
 
     public int GetTalentLevel(string configId) =>
         ConfigIdIntPairListUtility.GetValue(talentLevels, configId);

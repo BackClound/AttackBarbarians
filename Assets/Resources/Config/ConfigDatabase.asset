@@ -81,3 +81,26 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 546707489b68b4fbe8199ae43964f41e, type: 2}
   achievements: []
   dailyRewardEntries: []
+  upgradeCards:
+  - {fileID: 11400000, guid: 8727bc44658d94f46a60316532440886, type: 2}
+  - {fileID: 11400000, guid: e61dcfa20e1234c06a51d34f957e5991, type: 2}
+  - {fileID: 11400000, guid: eb62d282772724577b695fe6386c9b1d, type: 2}
+  - {fileID: 11400000, guid: 53eedfde31b95407f850a1c6f438bce3, type: 2}
+  - {fileID: 11400000, guid: 0d12639917df34cdaa0a437cd77019d7, type: 2}
+  - {fileID: 11400000, guid: 51b21528b2da040cda72d44057413936, type: 2}
+  - {fileID: 11400000, guid: 8f15219076bac4127ac39bb30a5ebb60, type: 2}
+  - {fileID: 11400000, guid: 83afd4a032f724619bdabd1189bbc63b, type: 2}
+  - {fileID: 11400000, guid: d07f4612ee1fa4d4e99dfe22740cb916, type: 2}
+  - {fileID: 11400000, guid: 608223b3a75ab4f5293793e147e55c4a, type: 2}
+  - {fileID: 11400000, guid: 18e571bab2b0349178949dcaed49b6ec, type: 2}
+  - {fileID: 11400000, guid: cf6b9b530bec6401e8a3111dbf0a9750, type: 2}
+  - {fileID: 11400000, guid: b098ce0d937ef42e1b6537a1a11b8e56, type: 2}
+  upgradeCardRewardPools:
+  - {fileID: 11400000, guid: d8242a45e47a648dbb567d79d94ce0d9, type: 2}
+  - {fileID: 11400000, guid: 377e68d9e2eb249f5935700bdcfb5a8a, type: 2}
+  - {fileID: 11400000, guid: 20122dcf45ef544ca97c79cf5c381fcf, type: 2}
+  - {fileID: 11400000, guid: 3cb451fc34b1f44a78d29bf29bc7ef51, type: 2}
+  - {fileID: 11400000, guid: 1b0b34ad3b6b443cea00f6d46408241d, type: 2}
+  - {fileID: 11400000, guid: b6a9bd842788a4fcd9605469346d5036, type: 2}
+  - {fileID: 11400000, guid: 7db9d5ce79f3f475da4215150befe178, type: 2}
+  - {fileID: 11400000, guid: 4bd69ecbcf5404348ac4a03301d47ac4, type: 2}

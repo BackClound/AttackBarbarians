@@ -205,7 +205,7 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
             return false;
         }
 
-        if (entry.RewardAmount <= 0)
+        if (!entry.HasUpgradeCardReward && entry.RewardAmount <= 0)
         {
             RaiseFailed(dayIndex, DailyRewardClaimFailedReason.InvalidConfiguration, "奖励配置无效");
             return false;
@@ -249,12 +249,29 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
 
     private bool GrantReward(DailyRewardEntrySO entry)
     {
-        CurrencyType currency = MapRewardToCurrency(entry.RewardType);
-        return resourceManager.TryAdd(
-            currency,
-            entry.RewardAmount,
-            ResourceChangeReason.DailyReward,
-            out _);
+        bool granted = true;
+
+        if (entry.RewardAmount > 0 && entry.RewardType != ShopRewardType.UpgradeCard)
+        {
+            CurrencyType currency = MapRewardToCurrency(entry.RewardType);
+            granted = resourceManager.TryAdd(
+                currency,
+                entry.RewardAmount,
+                ResourceChangeReason.DailyReward,
+                out _);
+        }
+
+        if (entry.HasUpgradeCardReward &&
+            ServiceLocator.TryGet(out UpgradeCardManager upgradeCardManager))
+        {
+            granted &= upgradeCardManager.TryGrantFromPool(
+                entry.UpgradeCardPoolConfigId,
+                entry.UpgradeCardDrawCount,
+                UpgradeCardRewardSource.DailyReward,
+                out _);
+        }
+
+        return granted;
     }
 
     private void OnSaveLoaded(GameEventContext ctx) => PublishStateChanged();

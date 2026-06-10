@@ -33,7 +33,13 @@ public class RunRewardSettlementSO : ScriptableObject
     [SerializeField] private float goldGrowthPerExtraTier = 1.15f;
     [SerializeField] private float diamondGrowthPerExtraTier = 1.1f;
 
+    [Header("Upgrade Card")]
+    [SerializeField] private string upgradeCardPoolConfigId = UpgradeCardConstants.PoolIds.RunSettlement;
+    [SerializeField] private int upgradeCardDrawCount = 1;
+
     public float MinutesPerTier => Mathf.Max(0.5f, minutesPerTier);
+    public string UpgradeCardPoolConfigId => upgradeCardPoolConfigId;
+    public int UpgradeCardDrawCount => Mathf.Max(0, upgradeCardDrawCount);
     public long MinimumGold => long.Parse(Mathf.Max(0L, minimumGold).ToString());
     public long MinimumDiamonds => long.Parse(Mathf.Max(0L, minimumDiamonds).ToString());
 

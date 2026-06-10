@@ -29,6 +29,8 @@ public class MainSceneBattlePageView : MonoBehaviour
     [SerializeField] private MainSceneCardPanel rightSideCardPanel;
     [SerializeField] private GeneralCardPanel startBattleCard;
     [SerializeField] private MainSceneRewardPanel rewardPanel;
+    [SerializeField] private MetaRewardPagePanel metaRewardPage;
+    [SerializeField] private UpgradeCardRewardPopupPanel upgradeCardPopup;
 
     public event Action<MainSceneAction> ContentActionClicked;
 
@@ -83,15 +85,20 @@ public class MainSceneBattlePageView : MonoBehaviour
                 return true;
 
             case MainSceneAction.DailySignIn:
-            case MainSceneAction.OnlineReward:
                 PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
                 TryClaimDailyReward();
                 return true;
 
+            case MainSceneAction.OnlineReward:
             case MainSceneAction.OfflineReward:
+            case MainSceneAction.StageReward:
                 PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
-                TryClaimFreeDiamond();
-                return true;
+                return TryClaimMetaReward(action);
+
+            case MainSceneAction.LuckyDraw:
+                PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+                metaRewardPage?.Show();
+                return metaRewardPage != null && metaRewardPage.TryHandleAction(action);
 
             default:
                 if (IsContentCardAction(action))
@@ -205,20 +212,20 @@ public class MainSceneBattlePageView : MonoBehaviour
 
     private void RefreshRewardPanels()
     {
-        bool canClaimDaily = ServiceLocator.TryGet(out DailyRewardManager daily) && daily.CanClaimToday();
-        bool canClaimFreeDiamond = ServiceLocator.TryGet(out ShopManager shop) && shop.CanClaimFreeDiamond(out _, out _);
-        rewardPanel?.Refresh(canClaimDaily, canClaimFreeDiamond);
+        rewardPanel?.Refresh();
+        metaRewardPage?.Refresh();
     }
 
     private void RefreshRedDots()
     {
         bool canClaimDaily = ServiceLocator.TryGet(out DailyRewardManager daily) && daily.CanClaimToday();
         bool hasAchievementReward = ServiceLocator.TryGet(out AchievementManager achievements) && achievements.HasClaimableRewards();
-        bool canClaimFreeDiamond = ServiceLocator.TryGet(out ShopManager shop) && shop.CanClaimFreeDiamond(out _, out _);
+        bool canClaimLottery = ServiceLocator.TryGet(out MetaRewardService meta) && meta.CanClaimLottery(out _);
 
         promotionCardPanel?.SetRedDot(MainSceneAction.DailySignIn, canClaimDaily);
         leftSideCardPanel?.SetRedDot(MainSceneAction.DailySignIn, canClaimDaily);
         leftSideCardPanel?.SetRedDot(MainSceneAction.Achievements, hasAchievementReward);
+        leftSideCardPanel?.SetRedDot(MainSceneAction.LuckyDraw, canClaimLottery);
         topSystemCardPanel?.SetRedDot(MainSceneAction.Mail, true);
         topSystemCardPanel?.SetRedDot(MainSceneAction.Social, true);
         topSystemCardPanel?.SetRedDot(MainSceneAction.Settings, false);
@@ -227,7 +234,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         promotionCardPanel?.SetRedDot(MainSceneAction.LimitedEvent, true);
         promotionCardPanel?.SetRedDot(MainSceneAction.NewbieWelfare, true);
 
-        rewardPanel?.ApplyRedDots(canClaimDaily, canClaimFreeDiamond);
+        rewardPanel?.ApplyRedDots();
     }
 
     private void BeginBattle()
@@ -288,21 +295,39 @@ public class MainSceneBattlePageView : MonoBehaviour
         RefreshAll();
     }
 
-    private void TryClaimFreeDiamond()
+    private bool TryClaimMetaReward(MainSceneAction action)
     {
-        if (!ServiceLocator.TryGet(out ShopManager shop))
+        if (metaRewardPage != null && metaRewardPage.TryHandleAction(action))
         {
-            SetStatus("离线收益系统未就绪");
-            return;
+            RefreshAll();
+            return true;
         }
 
-        if (!shop.TryClaimFreeDiamond())
+        if (!ServiceLocator.TryGet(out MetaRewardService meta))
         {
-            shop.CanClaimFreeDiamond(out string reason, out _);
-            SetStatus(reason);
+            SetStatus("奖励系统未就绪");
+            return true;
+        }
+
+        bool success = action switch
+        {
+            MainSceneAction.OnlineReward => meta.TryClaimOnlineReward(),
+            MainSceneAction.OfflineReward => meta.TryClaimOfflineReward(),
+            MainSceneAction.StageReward => meta.TryClaimStageReward(),
+            _ => false,
+        };
+
+        if (!success)
+        {
+            SetStatus("暂不可领取，请继续累计时长");
+        }
+        else
+        {
+            SetStatus("升级卡奖励已发放");
         }
 
         RefreshAll();
+        return true;
     }
 
     private static bool IsContentCardAction(MainSceneAction action) =>
@@ -325,7 +350,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         {
             MainSceneAction.ActivityCenter => "活动中心入口已接入，待绑定活动面板",
             MainSceneAction.DailyTask => "每日任务入口已接入，待绑定任务面板",
-            MainSceneAction.LuckyDraw => "幸运抽奖入口已接入，待绑定抽奖系统",
+            MainSceneAction.LuckyDraw => "幸运抽奖入口已接入",
             MainSceneAction.Achievements => "成就入口已接入，待绑定成就详情面板",
             MainSceneAction.FirstCharge => "首充入口已接入，待绑定充值系统",
             MainSceneAction.MonthlyCard => "月卡入口已接入，待绑定月卡系统",
@@ -334,7 +359,7 @@ public class MainSceneBattlePageView : MonoBehaviour
             MainSceneAction.Announcement => "公告入口已接入，待绑定公告面板",
             MainSceneAction.Ranking => "排行榜入口已接入，待绑定排行服务",
             MainSceneAction.ValuePack => "超值礼包入口已接入，待绑定礼包系统",
-            MainSceneAction.StageReward => "通关奖励入口已接入，待绑定奖励面板",
+            MainSceneAction.StageReward => "通关奖励入口已接入",
             MainSceneAction.Characters => "角色入口已接入，待绑定角色养成面板",
             MainSceneAction.Tech => "科技入口已接入，待绑定科技树系统",
             MainSceneAction.Base => "基地入口已接入，待绑定基地系统",
