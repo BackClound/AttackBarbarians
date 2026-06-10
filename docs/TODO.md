@@ -43,7 +43,7 @@
 ### 待完成
 - [ ] 在 `MainSceneBuilder` 中生成并绑定 `MetaRewardPagePanel`、`UpgradeCardRewardPopupPanel` 节点
 - [ ] 在 `MainScene.unity` Inspector 中绑定 `metaRewardPage`、`upgradeCardPopup` 引用
-- [x] 商城页 `ShopSceneView` / `ShopCrateWidget` 单抽/十连抽取后弹出 `ShopCrateRewardPopupPanel`
+- [x] 商城页 `ShopSceneView` / `ShopCrateWidget` 单抽/十连抽取后弹出 `ShopCrateRewardPopupPanel`（3 列九宫格 + 可滚动瀑布流）
 - [x] 商城补给箱「奖励预览」按当前箱型展示对应奖池卡牌与爆率（普通箱 / 高级箱池子不同）
 - [x] `UpgradeCardDisplayView` 卡片组件（英文标题 / 图标 / 中文名 / 描述 / 稀有度星）
 - [ ] 为 13 张升级卡配置正式图标资源（替换占位色块）

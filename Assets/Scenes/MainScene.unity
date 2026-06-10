@@ -984,7 +984,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &64748435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12252,7 +12252,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 1372}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &584489706
 MonoBehaviour:
@@ -32460,20 +32460,10 @@ MonoBehaviour:
   scrimButton: {fileID: 1672510470}
   titleCnText: {fileID: 761350804}
   titleEnText: {fileID: 1436486170}
-  singleDrawRoot: {fileID: 955203079}
-  singleCardView: {fileID: 955707082}
-  tenDrawRoot: {fileID: 1740942234}
-  tenCardSlots:
-  - {fileID: 1665692138}
-  - {fileID: 1428757632}
-  - {fileID: 1204053325}
-  - {fileID: 536724907}
-  - {fileID: 1381055645}
-  - {fileID: 1583821182}
-  - {fileID: 84923459}
-  - {fileID: 2013144231}
-  - {fileID: 631738001}
-  - {fileID: 1661090547}
+  rewardCountText: {fileID: 0}
+  cardScrollRect: {fileID: 0}
+  cardGridRoot: {fileID: 0}
+  cardSlotPrefab: {fileID: 0}
   confirmButton: {fileID: 1554552356}
   drawAgainButton: {fileID: 349465599}
   drawAgainLabel: {fileID: 2050197562}

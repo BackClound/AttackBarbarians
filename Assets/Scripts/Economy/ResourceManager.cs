@@ -6,6 +6,10 @@ using UnityEngine;
 /// </summary>
 public class ResourceManager : MonoBehaviour, IGameSystem
 {
+    [Header("Debug (Play Mode)")]
+    [SerializeField] private long debugGoldAmount = 100000;
+    [SerializeField] private long debugDiamondAmount = 10000;
+
     private SaveManager saveManager;
     private ConfigManager configManager;
     private bool isInitialized;
@@ -394,6 +398,40 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         }
     }
 
+    public bool TrySet(
+        CurrencyType currency,
+        long amount,
+        ResourceChangeReason reason,
+        out ResourceChangedEventArgs change)
+    {
+        change = default;
+        if (!isInitialized || saveManager?.Current == null)
+        {
+            return false;
+        }
+
+        if (currency == CurrencyType.Stamina)
+        {
+            return TrySetStamina(amount, reason, out change);
+        }
+
+        long previous = GetAmount(currency);
+        long next = Math.Max(0, amount);
+        if (previous == next)
+        {
+            return true;
+        }
+
+        ApplyAmount(currency, next);
+        saveManager.MarkDirty();
+        saveManager.SaveImmediate();
+
+        change = new ResourceChangedEventArgs(currency, previous, next, reason);
+        GameEvents.RaiseResourceChanged(this, change);
+        LogChange(change);
+        return true;
+    }
+
     private void LogChange(ResourceChangedEventArgs change)
     {
         if (configManager == null || !configManager.ShouldLog())
@@ -405,4 +443,20 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             $"[ResourceManager] {change.Currency} {change.PreviousAmount} -> {change.NewAmount} " +
             $"(delta={change.Delta}, reason={change.Reason})");
     }
+
+    [ContextMenu("Debug/Set Gold To Test Value")]
+    private void DebugSetGold() =>
+        TrySet(CurrencyType.Gold, debugGoldAmount, ResourceChangeReason.Debug, out _);
+
+    [ContextMenu("Debug/Set Diamonds To Test Value")]
+    private void DebugSetDiamonds() =>
+        TrySet(CurrencyType.Diamond, debugDiamondAmount, ResourceChangeReason.Debug, out _);
+
+    [ContextMenu("Debug/Add 5000 Gold")]
+    private void DebugAddGold() =>
+        TryAdd(CurrencyType.Gold, 5000, ResourceChangeReason.Debug, out _);
+
+    [ContextMenu("Debug/Add 100 Diamonds")]
+    private void DebugAddDiamonds() =>
+        TryAdd(CurrencyType.Diamond, 100, ResourceChangeReason.Debug, out _);
 }

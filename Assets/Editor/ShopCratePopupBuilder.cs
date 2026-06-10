@@ -91,26 +91,11 @@ public static class ShopCratePopupBuilder
         RectTransform panel = CreateCenterPanel(root, "Panel", new Vector2(980f, 1680f), PanelBlue);
         TMP_Text titleCn = CreateText(panel, "TitleCn", "获得奖励", 42, TextWhite, TextAlignmentOptions.Center, new Vector2(0f, 720f), new Vector2(600f, 56f));
         TMP_Text titleEn = CreateText(panel, "TitleEn", "SUPPLY ACQUIRED", 22, NeonBlue, TextAlignmentOptions.Center, new Vector2(0f, 670f), new Vector2(600f, 36f));
+        TMP_Text rewardCount = CreateText(panel, "RewardCount", "共获得 0 张升级卡", 24, NeonGold, TextAlignmentOptions.Center, new Vector2(0f, 620f), new Vector2(600f, 36f));
 
-        RectTransform singleRoot = CreatePanelHost(panel, "SingleDrawRoot", new Vector2(-120f, 40f), new Vector2(520f, 720f));
-        UpgradeCardDisplayView singleCard = CreateCardInstance(singleRoot, "SingleCard", cardPrefab, new Vector2(0f, 0f), new Vector2(420f, 620f));
+        ScrollRect cardScroll = CreateRewardCardScroll(panel, cardPrefab, out RectTransform cardGrid, out UpgradeCardDisplayView rewardCardPrefab);
 
-        RectTransform tenRoot = CreatePanelHost(panel, "TenDrawRoot", new Vector2(-40f, 20f), new Vector2(760f, 760f));
-        tenRoot.gameObject.SetActive(false);
-        GridLayoutGroup grid = tenRoot.gameObject.AddComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(220f, 300f);
-        grid.spacing = new Vector2(16f, 16f);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 5;
-        grid.childAlignment = TextAnchor.UpperCenter;
-
-        var tenSlots = new UpgradeCardDisplayView[10];
-        for (int i = 0; i < tenSlots.Length; i++)
-        {
-            tenSlots[i] = CreateCardInstance(tenRoot, $"TenCard_{i + 1}", cardPrefab, Vector2.zero, grid.cellSize);
-        }
-
-        Button previewBtn = CreateActionButton(panel, "PreviewButton", new Vector2(380f, 120f), new Vector2(180f, 56f), "预览", NeonPurple, out _);
+        Button previewBtn = CreateActionButton(panel, "PreviewButton", new Vector2(380f, -520f), new Vector2(180f, 56f), "预览", NeonPurple, out _);
         Button confirmBtn = CreateActionButton(panel, "ConfirmButton", new Vector2(-180f, -720f), new Vector2(240f, 64f), "确认", NeonBlue, out _);
         Button drawAgainBtn = CreateActionButton(panel, "DrawAgainButton", new Vector2(120f, -720f), new Vector2(280f, 64f), "再抽一次", NeonPurple, out TMP_Text drawAgainLabel);
         TMP_Text tapHint = CreateText(panel, "TapHint", "点击空白处关闭", 18, Hex("#9EC8FF"), TextAlignmentOptions.BottomRight, new Vector2(360f, -760f), new Vector2(280f, 32f));
@@ -121,16 +106,10 @@ public static class ShopCratePopupBuilder
         so.FindProperty("scrimButton").objectReferenceValue = scrimButton;
         so.FindProperty("titleCnText").objectReferenceValue = titleCn;
         so.FindProperty("titleEnText").objectReferenceValue = titleEn;
-        so.FindProperty("singleDrawRoot").objectReferenceValue = singleRoot.gameObject;
-        so.FindProperty("singleCardView").objectReferenceValue = singleCard;
-        so.FindProperty("tenDrawRoot").objectReferenceValue = tenRoot.gameObject;
-        SerializedProperty tenProp = so.FindProperty("tenCardSlots");
-        tenProp.arraySize = tenSlots.Length;
-        for (int i = 0; i < tenSlots.Length; i++)
-        {
-            tenProp.GetArrayElementAtIndex(i).objectReferenceValue = tenSlots[i];
-        }
-
+        so.FindProperty("rewardCountText").objectReferenceValue = rewardCount;
+        so.FindProperty("cardScrollRect").objectReferenceValue = cardScroll;
+        so.FindProperty("cardGridRoot").objectReferenceValue = cardGrid;
+        so.FindProperty("cardSlotPrefab").objectReferenceValue = rewardCardPrefab;
         so.FindProperty("confirmButton").objectReferenceValue = confirmBtn;
         so.FindProperty("drawAgainButton").objectReferenceValue = drawAgainBtn;
         so.FindProperty("drawAgainLabel").objectReferenceValue = drawAgainLabel;
@@ -138,6 +117,52 @@ public static class ShopCratePopupBuilder
         so.FindProperty("tapHintText").objectReferenceValue = tapHint;
         so.ApplyModifiedPropertiesWithoutUndo();
         return popup;
+    }
+
+    private static ScrollRect CreateRewardCardScroll(
+        RectTransform panel,
+        UpgradeCardDisplayView cardPrefab,
+        out RectTransform cardGrid,
+        out UpgradeCardDisplayView rewardCardPrefab)
+    {
+        RectTransform scrollHost = CreatePanelHost(panel, "RewardScrollHost", new Vector2(0f, 80f), new Vector2(900f, 900f));
+        Image scrollBg = scrollHost.gameObject.AddComponent<Image>();
+        scrollBg.color = new Color(0f, 0f, 0f, 0.15f);
+        ScrollRect scroll = scrollHost.gameObject.AddComponent<ScrollRect>();
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+
+        RectTransform viewport = CreateStretchHost(scrollHost, "Viewport");
+        Image viewportMask = viewport.gameObject.AddComponent<Image>();
+        viewportMask.color = Color.white;
+        Mask mask = viewport.gameObject.AddComponent<Mask>();
+        mask.showMaskGraphic = false;
+        scroll.viewport = viewport;
+
+        cardGrid = CreateStretchHost(viewport, "RewardCardGrid");
+        cardGrid.anchorMin = new Vector2(0f, 1f);
+        cardGrid.anchorMax = new Vector2(1f, 1f);
+        cardGrid.pivot = new Vector2(0.5f, 1f);
+        cardGrid.anchoredPosition = Vector2.zero;
+        cardGrid.sizeDelta = new Vector2(0f, 0f);
+
+        GridLayoutGroup grid = cardGrid.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(260f, 340f);
+        grid.spacing = new Vector2(20f, 20f);
+        grid.padding = new RectOffset(12, 12, 12, 12);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 3;
+        grid.childAlignment = TextAnchor.UpperCenter;
+
+        ContentSizeFitter fitter = cardGrid.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        scroll.content = cardGrid;
+
+        rewardCardPrefab = CreateCardInstance(cardGrid, "RewardCardSlotPrefab", cardPrefab, Vector2.zero, grid.cellSize);
+        rewardCardPrefab.gameObject.SetActive(false);
+        return scroll;
     }
 
     private static ShopCratePoolPreviewPanel CreatePoolPreviewPopup(Transform parent, UpgradeCardDisplayView cardPrefab)
