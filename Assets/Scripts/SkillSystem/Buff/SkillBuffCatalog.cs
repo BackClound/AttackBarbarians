@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 技能 Buff 数值表：将 <see cref="SkillBuffKind"/> + tier 映射到 <see cref="SkillBuffProfile"/> 字段。
+/// 流水线位置：Buff 应用阶段写入 Profile → <see cref="ISkillEffect"/> 施法时读取。
 /// </summary>
 public static class SkillBuffCatalog
 {
@@ -10,6 +11,16 @@ public static class SkillBuffCatalog
     private static readonly int[] CountTiers2345 = { 2, 3, 4, 5 };
     private static readonly int[] PierceTiers = { 1, 2, 3 };
 
+    /// <summary>
+    /// 获取 Buff 种类对应的目标技能类型；全局 Buff 返回 <see cref="SkillType.None"/>。
+    /// </summary>
+    /// <param name="kind">Buff 种类。</param>
+    /// <returns>目标技能类型。</returns>
+    /// <summary>
+    /// 解析 Buff 种类对应的目标技能；全局 Kind 返回 <see cref="SkillType.None"/>。
+    /// </summary>
+    /// <param name="kind">Buff 种类。</param>
+    /// <returns>应写入 Profile 的技能类型。</returns>
     public static SkillType GetTargetSkill(SkillBuffKind kind)
     {
         switch (kind)
@@ -64,9 +75,19 @@ public static class SkillBuffCatalog
         }
     }
 
+    /// <summary>
+    /// 判断是否为全局 Buff（不绑定单一技能类型）。
+    /// </summary>
+    /// <param name="kind">Buff 种类。</param>
+    /// <returns>是否为全局 Buff。</returns>
     public static bool IsGlobalKind(SkillBuffKind kind) => GetTargetSkill(kind) == SkillType.None && kind != SkillBuffKind.None;
 
-    /// <summary>将 Buff 写入 profile；tier 从 1 起。</summary>
+    /// <summary>
+    /// 将 Buff 写入 profile；tier 从 1 起。
+    /// </summary>
+    /// <param name="profile">目标 Buff 聚合表。</param>
+    /// <param name="kind">Buff 种类。</param>
+    /// <param name="tier">Buff 层级，从 1 起。</param>
     public static void Apply(SkillBuffProfile profile, SkillBuffKind kind, int tier)
     {
         if (profile == null || kind == SkillBuffKind.None)
@@ -209,6 +230,16 @@ public static class SkillBuffCatalog
         }
     }
 
+    /// <summary>
+    /// 获取通用叠加百分比（10%/tier，上限为最高档）。
+    /// </summary>
+    /// <param name="tier">Buff 层级，从 1 起。</param>
+    /// <returns>叠加百分比（0.1~0.5）。</returns>
+    /// <summary>
+    /// 获取通用百分比 tier 值（10%/20%/…/50%）。
+    /// </summary>
+    /// <param name="tier">Buff 层级，从 1 起。</param>
+    /// <returns>百分比小数。</returns>
     public static float GetStackPercent(int tier)
     {
         tier = Mathf.Max(1, tier);
@@ -220,12 +251,30 @@ public static class SkillBuffCatalog
         return PercentTiers[PercentTiers.Length - 1];
     }
 
+    /// <summary>按 tier 查表获取百分比加成。</summary>
+    /// <param name="table">百分比档位表。</param>
+    /// <param name="tier">Buff 层级。</param>
+    /// <returns>对应百分比值。</returns>
+    /// <summary>从百分比表中按 tier 取值。</summary>
+    /// <param name="table">百分比表。</param>
+    /// <param name="tier">层级，从 1 起。</param>
+    /// <returns>对应百分比小数。</returns>
     private static float GetPercentTier(float[] table, int tier)
     {
         tier = Mathf.Clamp(tier, 1, table.Length);
         return table[tier - 1];
     }
 
+    /// <summary>按 tier 查表获取数量档位并限制上限。</summary>
+    /// <param name="table">数量档位表。</param>
+    /// <param name="tier">Buff 层级。</param>
+    /// <param name="max">数量上限。</param>
+    /// <returns>对应数量值。</returns>
+    /// <summary>从数量表中按 tier 取值并限制上限。</summary>
+    /// <param name="table">数量表。</param>
+    /// <param name="tier">层级，从 1 起。</param>
+    /// <param name="max">允许的最大值。</param>
+    /// <returns>对应数量。</returns>
     private static int GetCountTier(int[] table, int tier, int max)
     {
         tier = Mathf.Clamp(tier, 1, table.Length);

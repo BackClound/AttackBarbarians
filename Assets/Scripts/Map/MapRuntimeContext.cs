@@ -14,13 +14,23 @@ public static class MapRuntimeContext
     private static float eventRewardMultiplier = 1f;
     private static int pauseSpawnsCount;
 
+    /// <summary>当前地图配置。</summary>
     public static MapDataSO CurrentMap => currentMap;
+    /// <summary>敌人属性综合倍率（地图 × 事件）。</summary>
     public static float EnemyStatMultiplier => mapEnemyStatMultiplier * eventEnemyStatMultiplier;
+    /// <summary>刷怪间隔综合倍率（地图 × 事件）。</summary>
     public static float SpawnIntervalMultiplier => mapSpawnIntervalMultiplier * eventSpawnIntervalMultiplier;
+    /// <summary>单波最大刷怪数量倍率（仅地图）。</summary>
     public static float MaxSpawnCountMultiplier => mapMaxSpawnCountMultiplier;
+    /// <summary>奖励倍率（事件叠加）。</summary>
     public static float RewardMultiplier => eventRewardMultiplier;
+    /// <summary>是否因事件暂停刷怪。</summary>
     public static bool PauseSpawns => pauseSpawnsCount > 0;
 
+    /// <summary>
+    /// 设置当前地图并写入地图级波次修正。
+    /// </summary>
+    /// <param name="map">地图配置；为 null 时重置地图倍率为 1。</param>
     public static void SetMap(MapDataSO map)
     {
         currentMap = map;
@@ -38,6 +48,7 @@ public static class MapRuntimeContext
         mapMaxSpawnCountMultiplier = modifiers.MaxSpawnCountMultiplier;
     }
 
+    /// <summary>重置所有事件级修正为默认值。</summary>
     public static void ResetEventModifiers()
     {
         eventEnemyStatMultiplier = 1f;
@@ -46,6 +57,10 @@ public static class MapRuntimeContext
         pauseSpawnsCount = 0;
     }
 
+    /// <summary>
+    /// 根据当前激活事件列表重新计算事件修正。
+    /// </summary>
+    /// <param name="activeEvents">正在生效的事件配置列表。</param>
     public static void RecomputeEventModifiers(IReadOnlyList<GameplayEventDataSO> activeEvents)
     {
         ResetEventModifiers();
@@ -60,6 +75,7 @@ public static class MapRuntimeContext
         }
     }
 
+    /// <summary>重置地图与事件相关的全部运行时修正。</summary>
     public static void Reset()
     {
         currentMap = null;
@@ -69,6 +85,8 @@ public static class MapRuntimeContext
         ResetEventModifiers();
     }
 
+    /// <summary>将单条事件的所有效果叠加到事件修正。</summary>
+    /// <param name="eventData">事件配置。</param>
     private static void ApplyEventEffects(GameplayEventDataSO eventData)
     {
         if (eventData == null)
@@ -88,6 +106,8 @@ public static class MapRuntimeContext
         }
     }
 
+    /// <summary>应用单条事件效果到运行时修正。</summary>
+    /// <param name="effect">效果配置。</param>
     private static void ApplyEffect(GameplayEventEffectConfig effect)
     {
         float value = effect.Value <= 0f ? 1f : effect.Value;

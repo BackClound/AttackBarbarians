@@ -24,10 +24,16 @@ public class CollisionDataSO : ScriptableObject
     [Header("Buffers")]
     [SerializeField] private int maxOverlapResults = 48;
 
+    /// <summary>玩家扫描敌人的层级掩码。</summary>
     public LayerMask PlayerEnemyScanLayers => playerEnemyScanLayers;
+    /// <summary>玩家默认圆形扫描半径。</summary>
     public float DefaultPlayerScanRadius => Mathf.Max(0.1f, defaultPlayerScanRadius);
+    /// <summary>敌人检测墙体的层级掩码。</summary>
     public LayerMask EnemyWallLayers => enemyWallLayers;
+    /// <summary>敌人默认向下射线检测距离。</summary>
     public float DefaultWallRayDistance => Mathf.Max(0.05f, defaultWallRayDistance);
+    /// <summary>投射物命中敌人的层级掩码。</summary>
     public LayerMask ProjectileEnemyLayers => projectileEnemyLayers;
+    /// <summary>Overlap 查询缓冲区的最大容量。</summary>
     public int MaxOverlapResults => Mathf.Clamp(maxOverlapResults, 4, 128);
 }

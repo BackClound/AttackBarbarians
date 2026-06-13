@@ -9,12 +9,16 @@ using UnityEngine;
 /// </remarks>
 public class WallControlManager : MonoBehaviour
 {
+    /// <summary>单例访问（旧名兼容）。</summary>
     public static WallControlManager sInstance => Instance;
 
+    /// <summary>全局单例实例。</summary>
     public static WallControlManager Instance => SingletonHost<WallControlManager>.Instance;
 
+    /// <summary>单例是否已创建。</summary>
     public static bool HasInstance => SingletonHost<WallControlManager>.HasInstance;
 
+    /// <summary>关联的玩家血量组件。</summary>
     private Player_Health playerHealth
     {
         get
@@ -27,16 +31,23 @@ public class WallControlManager : MonoBehaviour
         }
     }
 
+    /// <summary>墙体动画控制器。</summary>
     public Animator anim;
+    /// <summary>当前帧是否被标记为受击。</summary>
     [SerializeField] public bool beDamaged;
 
     #region 
+    /// <summary>墙体动画状态机。</summary>
     public StateMachine stateMachine;
+    /// <summary>空闲状态实例。</summary>
     public WallIdleState idleState;
+    /// <summary>受击状态实例。</summary>
     public WallDamageState damageState;
     #endregion
 
-
+    /// <summary>
+    /// 初始化单例、动画器与状态机。
+    /// </summary>
     private void Awake()
     {
         if (!SingletonHost<WallControlManager>.TryClaim(this, this, SingletonOptions.SceneDefault, out bool destroyedOwner) || destroyedOwner)
@@ -52,29 +63,45 @@ public class WallControlManager : MonoBehaviour
         damageState = new WallDamageState(this, stateMachine, "isDamaged");
     }
 
+    /// <summary>
+    /// 释放单例引用。
+    /// </summary>
     private void OnDestroy()
     {
         SingletonHost<WallControlManager>.Release(this);
     }
 
+    /// <summary>
+    /// 启动时将状态机初始化为空闲状态。
+    /// </summary>
     private void Start()
     {
         stateMachine.InitialState(idleState);
     }
+
+    /// <summary>
+    /// 每帧驱动当前状态更新。
+    /// </summary>
     private void Update()
     {
         stateMachine.currentState.OnUpdate();
     }
 
     /// <summary>
-    /// TODO 在同一帧内，当有多个enemy同时进行了攻击，并且调用了TakeDamage方法的话，考虑同步的问题，避免只有一次damage生效
+    /// 以简单浮点伤害对玩家结算（跳过完整公式链）。
+    /// TODO：同一帧多敌人同时攻击时需考虑同步，避免仅一次伤害生效。
     /// </summary>
-    /// <param name="damage"></param>
+    /// <param name="damage">基础伤害数值。</param>
     public void TakeDamage(float damage)
     {
         ApplyDamageToPlayer(DamageInfo.FromFloat(damage, ResolvePlayerTarget(), null));
     }
 
+    /// <summary>
+    /// 将伤害信息转发至玩家并标记城墙受击。
+    /// </summary>
+    /// <param name="info">伤害上下文。</param>
+    /// <returns>伤害结算结果。</returns>
     private DamageResult ApplyDamageToPlayer(DamageInfo info)
     {
         GameObject target = ResolvePlayerTarget();
@@ -89,7 +116,11 @@ public class WallControlManager : MonoBehaviour
         return result;
     }
 
-    /// <summary>敌人攻击城墙时由 <see cref="EnemyController.ExecuteWallAttack"/> 调用，转发至玩家血量并由 <see cref="DamageSystem"/> 结算。</summary>
+    /// <summary>
+    /// 敌人攻击城墙时由 <see cref="EnemyController.ExecuteWallAttack"/> 调用，转发至玩家血量并由 <see cref="DamageSystem"/> 结算。
+    /// </summary>
+    /// <param name="enemy">攻击来源敌人。</param>
+    /// <param name="baseDamage">基础伤害数值。</param>
     public void TakeDamageFromEnemy(Enemy enemy, float baseDamage)
     {
         GameObject target = ResolvePlayerTarget();
@@ -102,16 +133,27 @@ public class WallControlManager : MonoBehaviour
         ApplyDamageToPlayer(DamageInfo.Create(enemy, target, baseDamage));
     }
 
+    /// <summary>
+    /// 解析玩家 GameObject 作为伤害目标。
+    /// </summary>
+    /// <returns>玩家对象，未就绪时返回 null。</returns>
     private GameObject ResolvePlayerTarget()
     {
         return Player.HasInstance ? Player.Instance.gameObject : null;
     }
 
+    /// <summary>
+    /// 重置城墙受击标记。
+    /// </summary>
+    /// <param name="isDamaged">是否处于受击状态。</param>
     public void ResetDamageState(bool isDamaged)
     {
         beDamaged = isDamaged;
     }
 
+    /// <summary>
+    /// 动画事件回调：通知当前状态动画已播放完毕。
+    /// </summary>
     public void OnAnimFinished()
     {
         if (stateMachine.currentState == null) return;

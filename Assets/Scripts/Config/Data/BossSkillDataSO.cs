@@ -38,6 +38,10 @@ public class BossSkillDataSO : ConfigDataBase
     public int SummonCount => Mathf.Max(1, summonCount);
     public int MinPhaseIndex => Mathf.Max(0, minPhaseIndex);
 
+    /// <summary>
+    /// 收集 Boss 技能配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

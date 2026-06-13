@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 随机奖励调度：监听波次/升级事件，生成三选一候选并协调 UI 确认流程。
+/// 局内升级选择调度器：监听波次/升级事件触发三选一 UI 流程（单局成长，非 Meta 持久化）。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。</para>
@@ -18,9 +18,12 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
     private UpgradeChoicesPayload pendingPayload;
     private bool isInitialized;
 
+    /// <summary>是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前待选的升级候选负载。</summary>
     public UpgradeChoicesPayload PendingChoices => pendingPayload;
 
+    /// <summary>订阅升级事件并初始化依赖。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -36,8 +39,11 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（随机奖励系统无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">距上一帧的秒数。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消事件订阅并清空待选状态。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeUpgradeSelectionOpened(OnUpgradeSelectionOpened);
@@ -47,6 +53,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>UI 或调试入口：选择第 index 个候选并结束升级阶段。</summary>
+    /// <param name="index">候选索引（0 起）。</param>
+    /// <returns>选择并应用成功返回 <c>true</c>。</returns>
     public bool TrySelectChoice(int index)
     {
         if (pendingPayload == null || pendingPayload.Choices == null || pendingPayload.Choices.Count == 0)
@@ -77,15 +85,19 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>调试：选择第一个候选。</summary>
     [ContextMenu("Debug/Select Choice 0")]
     private void DebugSelectChoice0() => TrySelectChoice(0);
 
+    /// <summary>调试：选择第二个候选。</summary>
     [ContextMenu("Debug/Select Choice 1")]
     private void DebugSelectChoice1() => TrySelectChoice(1);
 
+    /// <summary>调试：选择第三个候选。</summary>
     [ContextMenu("Debug/Select Choice 2")]
     private void DebugSelectChoice2() => TrySelectChoice(2);
 
+    /// <summary>调试：重新抽取并发布候选列表。</summary>
     [ContextMenu("Debug/Roll Choices")]
     private void DebugRollChoices()
     {
@@ -93,6 +105,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         RollAndPublish(context);
     }
 
+    /// <summary>升级选择界面打开时抽取并发布候选。</summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnUpgradeSelectionOpened(GameEventContext ctx)
     {
         UpgradeTriggerSource source = UpgradeTriggerSource.WaveComplete;
@@ -106,6 +120,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         RollAndPublish(context);
     }
 
+    /// <summary>玩家升级时触发升级选择流程。</summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnPlayerLevelUp(GameEventContext ctx)
     {
         if (gameFlowManager != null && gameFlowManager.IsAwaitingUpgradeSelection)
@@ -122,6 +138,9 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         gameManager.BeginUpgradeChoosing();
     }
 
+    /// <summary>抽取候选并发布 <see cref="GameEvents.RaiseUpgradeChoicesReady"/> 事件。</summary>
+    /// <param name="context">升级抽取上下文。</param>
+    /// <returns>抽取并发布成功返回 <c>true</c>。</returns>
     private bool RollAndPublish(UpgradeSelectionContext context)
     {
         if (upgradeManager == null)
@@ -155,6 +174,9 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>构建升级抽取上下文。</summary>
+    /// <param name="source">触发来源。</param>
+    /// <returns>升级抽取上下文。</returns>
     private UpgradeSelectionContext BuildContext(UpgradeTriggerSource source)
     {
         int wave = ResolveCurrentWave();
@@ -162,6 +184,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return new UpgradeSelectionContext(wave, level, source);
     }
 
+    /// <summary>解析当前波次索引。</summary>
+    /// <returns>当前波次（最小为 1）。</returns>
     private static int ResolveCurrentWave()
     {
         if (ServiceLocator.TryGet(out SaveManager saveManager) &&
@@ -179,6 +203,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return 1;
     }
 
+    /// <summary>解析当前玩家等级。</summary>
+    /// <returns>当前等级（最小为 1）。</returns>
     private static int ResolvePlayerLevel()
     {
         if (PlayerSceneAccess.TryGetController(out PlayerController controller) &&
@@ -196,6 +222,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return 1;
     }
 
+    /// <summary>从服务定位器或场景中解析 <see cref="UpgradeManager"/>。</summary>
+    /// <returns>升级管理器实例；未找到时返回 <c>null</c>。</returns>
     private static UpgradeManager ResolveUpgradeManager()
     {
         if (ServiceLocator.TryGet(out UpgradeManager manager))

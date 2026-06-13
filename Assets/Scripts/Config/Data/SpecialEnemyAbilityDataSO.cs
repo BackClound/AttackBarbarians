@@ -39,6 +39,10 @@ public class SpecialEnemyAbilityDataSO : ConfigDataBase
     public int SummonCount => Mathf.Max(1, summonCount);
     public int SplitCount => Mathf.Max(1, splitCount);
 
+    /// <summary>
+    /// 收集特殊敌人能力配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

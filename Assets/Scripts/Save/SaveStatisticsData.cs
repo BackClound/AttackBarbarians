@@ -17,5 +17,7 @@ public class SaveStatisticsData
     public long totalGoldEarned;
     public long totalPlayTimeSeconds;
 
+    /// <summary>创建默认统计数据的空实例。</summary>
+    /// <returns>所有计数器归零的统计对象。</returns>
     public static SaveStatisticsData CreateDefault() => new SaveStatisticsData();
 }

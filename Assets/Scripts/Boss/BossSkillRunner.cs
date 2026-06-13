@@ -21,6 +21,11 @@ public sealed class BossSkillRunner
     private int skillCount;
     private bool isActive;
 
+    /// <summary>初始化技能 Runner 并加载 Boss 技能配置。</summary>
+    /// <param name="bossOwner">所属 Boss 控制器。</param>
+    /// <param name="controller">敌人控制器。</param>
+    /// <param name="data">Boss 配置。</param>
+    /// <param name="phases">阶段控制器。</param>
     public void Initialize(
         BossController bossOwner,
         EnemyController controller,
@@ -67,6 +72,8 @@ public sealed class BossSkillRunner
         }
     }
 
+    /// <summary>每帧 Tick 技能冷却与释放。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isActive || skillCount == 0)
@@ -99,6 +106,7 @@ public sealed class BossSkillRunner
         }
     }
 
+    /// <summary>关闭技能 Runner 并释放引用。</summary>
     public void Shutdown()
     {
         isActive = false;
@@ -110,6 +118,9 @@ public sealed class BossSkillRunner
         skillCount = 0;
     }
 
+    /// <summary>尝试释放指定 Boss 技能。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>释放成功时为 <c>true</c>。</returns>
     private bool TryCast(BossSkillDataSO skill)
     {
         if (skill == null || enemyController == null)
@@ -134,6 +145,9 @@ public sealed class BossSkillRunner
         }
     }
 
+    /// <summary>执行冲锋技能：向下 burst 移动。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>执行成功时为 <c>true</c>。</returns>
     private bool ExecuteCharge(BossSkillDataSO skill)
     {
         if (enemy == null)
@@ -146,6 +160,9 @@ public sealed class BossSkillRunner
         return true;
     }
 
+    /// <summary>执行召唤技能：生成小怪。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>执行成功时为 <c>true</c>。</returns>
     private bool ExecuteSummon(BossSkillDataSO skill)
     {
         if (string.IsNullOrEmpty(skill.SummonEnemyConfigId))
@@ -168,6 +185,9 @@ public sealed class BossSkillRunner
         return true;
     }
 
+    /// <summary>执行范围攻击：墙体伤害 + 额外 bonus。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>执行成功时为 <c>true</c>。</returns>
     private bool ExecuteAreaAttack(BossSkillDataSO skill)
     {
         float baseDamage = enemyController.GetMeleeDamage();
@@ -177,6 +197,9 @@ public sealed class BossSkillRunner
         return true;
     }
 
+    /// <summary>执行护盾技能（当前实现为减速占位）。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>执行成功时为 <c>true</c>。</returns>
     private bool ExecuteShield(BossSkillDataSO skill)
     {
         if (statusController == null && enemy != null)
@@ -192,6 +215,9 @@ public sealed class BossSkillRunner
         return true;
     }
 
+    /// <summary>执行弹幕技能：多次墙体攻击。</summary>
+    /// <param name="skill">技能配置。</param>
+    /// <returns>执行成功时为 <c>true</c>。</returns>
     private bool ExecuteBarrage(BossSkillDataSO skill)
     {
         for (int i = 0; i < skill.HitCount; i++)
@@ -202,6 +228,8 @@ public sealed class BossSkillRunner
         return true;
     }
 
+    /// <summary>对墙体施加额外 bonus 伤害。</summary>
+    /// <param name="damage">伤害量。</param>
     private void TryBonusWallDamage(float damage)
     {
         if (enemy == null || damage <= 0f)

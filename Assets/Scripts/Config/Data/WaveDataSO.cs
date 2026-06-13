@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 波次生成配置：持续时间、敌人组合、Boss 与奖励表引用。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Wave Data。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Wave/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "WaveData", menuName = "Attack Barbarians/Config/Wave Data")]
 public class WaveDataSO : ConfigDataBase
 {
@@ -55,12 +59,21 @@ public class WaveDataSO : ConfigDataBase
     public IReadOnlyList<string> SpecialEnemyConfigIds => specialEnemyConfigIds;
     public string RewardTableId => rewardTableId;
 
+    /// <summary>
+    /// 按当前波次索引计算敌人属性倍率（波次越高倍率越大）。
+    /// </summary>
+    /// <param name="currentWaveIndex">当前波次序号（从 1 开始）。</param>
+    /// <returns>属性乘算倍率，最低为 1。</returns>
     public float GetStatMultiplierForWave(int currentWaveIndex)
     {
         int index = Mathf.Max(1, currentWaveIndex);
         return 1f + (index - 1) * StatScalePerWave;
     }
 
+    /// <summary>
+    /// 收集波次配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

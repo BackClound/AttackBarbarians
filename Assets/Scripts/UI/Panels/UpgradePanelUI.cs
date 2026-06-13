@@ -16,6 +16,7 @@ public class UpgradePanelUI : UiPanelBase
     private RandomRewardManager randomRewardManager;
     private bool isSubscribedToChoices;
 
+    /// <summary>显示时订阅升级选项事件并尝试展示待选卡片。</summary>
     protected override void OnShow()
     {
         TrySubscribeChoices();
@@ -39,12 +40,14 @@ public class UpgradePanelUI : UiPanelBase
         TryDisplayPendingChoices();
     }
 
+    /// <summary>隐藏时取消订阅并清空卡片。</summary>
     protected override void OnHide()
     {
         UnsubscribeChoices();
         ClearCards();
     }
 
+    /// <summary>订阅升级三选一就绪事件。</summary>
     private void TrySubscribeChoices()
     {
         if (isSubscribedToChoices)
@@ -56,6 +59,7 @@ public class UpgradePanelUI : UiPanelBase
         isSubscribedToChoices = true;
     }
 
+    /// <summary>取消升级选项事件订阅。</summary>
     private void UnsubscribeChoices()
     {
         if (!isSubscribedToChoices)
@@ -67,6 +71,7 @@ public class UpgradePanelUI : UiPanelBase
         isSubscribedToChoices = false;
     }
 
+    /// <summary>收到升级选项后展示卡片。</summary>
     private void OnUpgradeChoicesReady(GameEventContext ctx)
     {
         if (ctx.Payload is not UpgradeChoicesPayload payload)
@@ -77,6 +82,7 @@ public class UpgradePanelUI : UiPanelBase
         DisplayChoices(payload);
     }
 
+    /// <summary>显示 RandomRewardManager 中待选选项。</summary>
     private void TryDisplayPendingChoices()
     {
         if (randomRewardManager == null)
@@ -90,6 +96,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>将选项数据绑定到三张卡片 View。</summary>
     private void DisplayChoices(UpgradeChoicesPayload payload)
     {
         if (choiceCards == null)
@@ -118,6 +125,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>玩家选中卡片后调用 RandomRewardManager 确认。</summary>
     private void OnCardSelected(int index)
     {
         PlayUiSfx("audio.sfx.ui_confirm");
@@ -133,6 +141,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>清空并隐藏所有选项卡片。</summary>
     private void ClearCards()
     {
         if (choiceCards == null)

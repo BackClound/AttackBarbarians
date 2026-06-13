@@ -14,15 +14,35 @@ public class UiRectLayout : MonoBehaviour
 {
     public enum LayoutPreset
     {
+        /// <summary>全屏拉伸。</summary>
+
         FullStretch,
+        /// <summary>顶部横条拉伸。</summary>
+
         TopStretch,
+        /// <summary>底部横条拉伸。</summary>
+
         BottomStretch,
+        /// <summary>左侧竖条拉伸。</summary>
+
         LeftStretch,
+        /// <summary>右侧竖条拉伸。</summary>
+
         RightStretch,
+        /// <summary>左上角锚定。</summary>
+
         TopLeft,
+        /// <summary>右上角锚定。</summary>
+
         TopRight,
+        /// <summary>左下角锚定。</summary>
+
         BottomLeft,
+        /// <summary>右下角锚定。</summary>
+
         BottomRight,
+        /// <summary>居中锚定。</summary>
+
         Center,
     }
 
@@ -33,6 +53,7 @@ public class UiRectLayout : MonoBehaviour
 
     private RectTransform _rect;
 
+    /// <summary>按配置在 Awake 时应用布局预设。</summary>
     private void Awake()
     {
         if (applyOnAwake)
@@ -41,6 +62,7 @@ public class UiRectLayout : MonoBehaviour
         }
     }
 
+    /// <summary>Inspector 修改时在编辑模式下预览布局。</summary>
     private void OnValidate()
     {
         ApplyLayout();
@@ -89,6 +111,7 @@ public class UiRectLayout : MonoBehaviour
         }
     }
 
+    /// <summary>应用全屏拉伸布局。</summary>
     private void StretchFull()
     {
         _rect.anchorMin = Vector2.zero;
@@ -98,6 +121,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.offsetMax = new Vector2(-padding.right, -padding.top);
     }
 
+    /// <summary>应用顶部横条拉伸布局。</summary>
     private void StretchTop()
     {
         float height = Mathf.Max(0f, fixedSize.y);
@@ -108,6 +132,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.offsetMax = new Vector2(-padding.right, -padding.top);
     }
 
+    /// <summary>应用底部横条拉伸布局。</summary>
     private void StretchBottom()
     {
         float height = Mathf.Max(0f, fixedSize.y);
@@ -118,6 +143,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.offsetMax = new Vector2(-padding.right, padding.bottom + height);
     }
 
+    /// <summary>应用左侧竖条拉伸布局。</summary>
     private void StretchLeft()
     {
         float width = Mathf.Max(0f, fixedSize.x);
@@ -128,6 +154,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.offsetMax = new Vector2(padding.left + width, -padding.top);
     }
 
+    /// <summary>应用右侧竖条拉伸布局。</summary>
     private void StretchRight()
     {
         float width = Mathf.Max(0f, fixedSize.x);
@@ -138,6 +165,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.offsetMax = new Vector2(-padding.right, -padding.top);
     }
 
+    /// <summary>将矩形锚定到指定角落。</summary>
     private void PinCorner(float anchorX, float anchorY)
     {
         _rect.anchorMin = _rect.anchorMax = new Vector2(anchorX, anchorY);
@@ -148,6 +176,7 @@ public class UiRectLayout : MonoBehaviour
         _rect.anchoredPosition = new Vector2(x, y);
     }
 
+    /// <summary>将矩形居中并固定尺寸。</summary>
     private void PinCenter()
     {
         _rect.anchorMin = _rect.anchorMax = new Vector2(0.5f, 0.5f);

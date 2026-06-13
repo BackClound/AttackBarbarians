@@ -13,6 +13,7 @@ using UnityEngine.UI;
 public class ShopPanelUI : UiPanelBase
 {
     [Serializable]
+    /// <summary>商品行 Inspector 绑定：配置 ID、购买按钮与标签。</summary>
     private class ShopItemBinding
     {
         public string itemConfigId;
@@ -30,6 +31,7 @@ public class ShopPanelUI : UiPanelBase
     [SerializeField] private Button closeButton;
     [SerializeField] private ShopItemBinding[] itemBindings;
 
+    /// <summary>绑定免费钻石、关闭与各商品购买按钮。</summary>
     private void Awake()
     {
         if (freeDiamondButton != null)
@@ -58,6 +60,7 @@ public class ShopPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>订阅资源与商店购买事件。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
@@ -65,6 +68,7 @@ public class ShopPanelUI : UiPanelBase
         GameEvents.SubscribeShopPurchaseFailed(OnShopPurchaseFailed);
     }
 
+    /// <summary>取消商店事件订阅。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
@@ -72,11 +76,13 @@ public class ShopPanelUI : UiPanelBase
         GameEvents.UnsubscribeShopPurchaseFailed(OnShopPurchaseFailed);
     }
 
+    /// <summary>显示时全量刷新货币与商品状态。</summary>
     protected override void OnShow()
     {
         RefreshAll();
     }
 
+    /// <summary>全量刷新货币、商品标签与免费钻石按钮。</summary>
     private void RefreshAll()
     {
         RefreshCurrency();
@@ -85,6 +91,7 @@ public class ShopPanelUI : UiPanelBase
         SetStatus(string.Empty);
     }
 
+    /// <summary>刷新金币与水晶显示。</summary>
     private void RefreshCurrency()
     {
         long gold = 0;
@@ -113,6 +120,7 @@ public class ShopPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>刷新各商品行价格、奖励与剩余次数。</summary>
     private void RefreshItemLabels()
     {
         if (itemBindings == null || !ServiceLocator.TryGet(out ShopManager shop))
@@ -147,6 +155,7 @@ public class ShopPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>刷新 12 小时免费钻石按钮状态。</summary>
     private void RefreshFreeDiamondButton()
     {
         if (freeDiamondButton == null || !ServiceLocator.TryGet(out ShopManager shop))
@@ -175,6 +184,7 @@ public class ShopPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>商品购买按钮回调。</summary>
     private void OnBuyClicked(string itemConfigId)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -187,6 +197,7 @@ public class ShopPanelUI : UiPanelBase
         shop.TryPurchase(itemConfigId);
     }
 
+    /// <summary>免费领取钻石按钮回调。</summary>
     private void OnFreeDiamondClicked()
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
@@ -199,6 +210,7 @@ public class ShopPanelUI : UiPanelBase
         shop.TryClaimFreeDiamond();
     }
 
+    /// <summary>关闭商城面板。</summary>
     private void OnCloseClicked()
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -206,8 +218,10 @@ public class ShopPanelUI : UiPanelBase
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Shop);
     }
 
+    /// <summary>资源变化时刷新货币显示。</summary>
     private void OnResourceChanged(GameEventContext ctx) => RefreshCurrency();
 
+    /// <summary>购买成功后刷新并提示。</summary>
     private void OnShopPurchased(GameEventContext ctx)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
@@ -218,6 +232,7 @@ public class ShopPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>购买失败后显示错误并刷新。</summary>
     private void OnShopPurchaseFailed(GameEventContext ctx)
     {
         if (ctx.Payload is ShopPurchaseFailedEventArgs args)
@@ -228,6 +243,7 @@ public class ShopPanelUI : UiPanelBase
         RefreshAll();
     }
 
+    /// <summary>更新底部状态提示文案。</summary>
     private void SetStatus(string message)
     {
         if (statusText == null)
@@ -241,6 +257,7 @@ public class ShopPanelUI : UiPanelBase
             : UiTechWastelandPalette.HazardYellow;
     }
 
+    /// <summary>格式化货币类型为中文简称。</summary>
     private static string FormatCurrency(CurrencyType currency) =>
         currency switch
         {
@@ -249,6 +266,7 @@ public class ShopPanelUI : UiPanelBase
             _ => currency.ToString(),
         };
 
+    /// <summary>格式化奖励类型为中文名称。</summary>
     private static string FormatReward(ShopRewardType reward) =>
         reward switch
         {

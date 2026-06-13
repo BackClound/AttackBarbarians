@@ -26,6 +26,11 @@ public class EliteModeConfigSO : ScriptableObject
     public float AttackSpeedMultiplier => Mathf.Max(0.1f, attackSpeedMultiplier);
     public float EliteEnemyBonusMultiplier => Mathf.Max(1f, eliteEnemyBonusMultiplier);
 
+    /// <summary>
+    /// 将精英模式倍率应用到属性快照（可选叠加精英个体加成）。
+    /// </summary>
+    /// <param name="snapshot">目标属性快照；为 null 时不执行任何操作。</param>
+    /// <param name="applyEliteEnemyBonus">是否额外应用精英个体加成倍率。</param>
     public void ApplyToSnapshot(StatRuntimeSnapshot snapshot, bool applyEliteEnemyBonus)
     {
         if (snapshot == null)
@@ -49,6 +54,12 @@ public class EliteModeConfigSO : ScriptableObject
         }
     }
 
+    /// <summary>
+    /// 按倍率缩放快照中指定属性的数值。
+    /// </summary>
+    /// <param name="snapshot">目标属性快照。</param>
+    /// <param name="statType">要缩放的属性类型。</param>
+    /// <param name="multiplier">乘算倍率；为 1 时跳过。</param>
     private static void ScaleStat(StatRuntimeSnapshot snapshot, StatType statType, float multiplier)
     {
         if (Mathf.Approximately(multiplier, 1f))

@@ -7,6 +7,9 @@ using UnityEngine;
 /// <remarks>纯静态工厂，无需挂载。</remarks>
 public static class SpecialEnemyAbilityFactory
 {
+    /// <summary>为敌人实例确保挂载所有应激活的能力组件。</summary>
+    /// <param name="controller">敌人控制器。</param>
+    /// <param name="data">敌人配置。</param>
     public static void EnsureAbilities(EnemyController controller, EnemyDataSO data)
     {
         if (controller == null || data == null || !SpecialEnemyRules.HasMechanics(data.AbilityTags))
@@ -39,6 +42,10 @@ public static class SpecialEnemyAbilityFactory
         AttachAllTaggedAbilities(controller.gameObject, data.AbilityTags, data);
     }
 
+    /// <summary>按标签位逐个挂载默认能力。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <param name="tags">能力标签组合。</param>
+    /// <param name="data">敌人配置。</param>
     private static void AttachAllTaggedAbilities(GameObject instance, EnemyAbilityTag tags, EnemyDataSO data)
     {
         TryAttach(instance, EnemyAbilityTag.Charge, tags, data);
@@ -48,6 +55,11 @@ public static class SpecialEnemyAbilityFactory
         TryAttach(instance, EnemyAbilityTag.Ranged, tags, data);
     }
 
+    /// <summary>若标签命中则挂载对应能力。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <param name="tag">目标能力标签。</param>
+    /// <param name="tags">敌人全部标签。</param>
+    /// <param name="data">敌人配置。</param>
     private static void TryAttach(GameObject instance, EnemyAbilityTag tag, EnemyAbilityTag tags, EnemyDataSO data)
     {
         if ((tags & tag) == 0)
@@ -59,6 +71,10 @@ public static class SpecialEnemyAbilityFactory
         AttachAbility(instance, tag, configId);
     }
 
+    /// <summary>获取或添加能力组件并完成配置。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <param name="tag">能力标签。</param>
+    /// <param name="configId">能力配置 Id。</param>
     private static void AttachAbility(GameObject instance, EnemyAbilityTag tag, string configId)
     {
         EnemyAbilityBase ability = GetOrAddAbilityComponent(instance, tag);
@@ -70,6 +86,10 @@ public static class SpecialEnemyAbilityFactory
         ability.Configure(configId);
     }
 
+    /// <summary>按标签类型获取或添加能力 MonoBehaviour。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <param name="tag">能力标签。</param>
+    /// <returns>能力组件；不支持时返回 null。</returns>
     private static EnemyAbilityBase GetOrAddAbilityComponent(GameObject instance, EnemyAbilityTag tag)
     {
         switch (tag)
@@ -89,6 +109,10 @@ public static class SpecialEnemyAbilityFactory
         }
     }
 
+    /// <summary>获取已有组件或添加新组件。</summary>
+    /// <typeparam name="T">能力组件类型。</typeparam>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <returns>能力组件实例。</returns>
     private static T GetOrAdd<T>(GameObject instance) where T : EnemyAbilityBase
     {
         if (instance.TryGetComponent(out T existing))

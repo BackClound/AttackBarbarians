@@ -8,6 +8,9 @@ public static class UiTmpChineseFont
 {
     private static TMP_FontAsset s_cachedFont;
 
+    /// <summary>判断 TMP 字体资源是否可用（材质与图集有效）。</summary>
+        /// <param name="font">待检测的字体资源。</param>
+        /// <returns>可用返回 <c>true</c>，否则返回 <c>false</c>。</returns>
     public static bool IsUsable(TMP_FontAsset font)
     {
         if (font == null || font.material == null)
@@ -19,6 +22,8 @@ public static class UiTmpChineseFont
         return textures != null && textures.Length > 0 && textures[0] != null;
     }
 
+    /// <summary>获取或创建简体中文 TMP 字体（优先磁盘 SDF，回退 Resources 动态生成）。</summary>
+        /// <returns>可用的 <see cref="TMP_FontAsset"/>；失败时返回 <c>null</c>。</returns>
     public static TMP_FontAsset GetFont()
     {
         if (IsUsable(s_cachedFont))
@@ -56,6 +61,8 @@ public static class UiTmpChineseFont
         return s_cachedFont;
     }
 
+    /// <summary>将中文字体应用到单个 TMP 文本组件。</summary>
+        /// <param name="text">目标 TMP 文本；为 <c>null</c> 时忽略。</param>
     public static void Apply(TMP_Text text)
     {
         if (text == null)
@@ -78,6 +85,8 @@ public static class UiTmpChineseFont
         text.ForceMeshUpdate();
     }
 
+    /// <summary>为子树内所有 TMP 文本应用中文字体。</summary>
+        /// <param name="root">遍历根节点；为 <c>null</c> 时忽略。</param>
     public static void ApplyAllInChildren(Transform root)
     {
         if (root == null)

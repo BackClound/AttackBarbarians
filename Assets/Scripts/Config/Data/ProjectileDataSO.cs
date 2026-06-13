@@ -69,6 +69,10 @@ public class ProjectileDataSO : ConfigDataBase
     public bool DespawnOnHitLimit => despawnOnHitLimit;
     public GameObject HitEffectPrefab => hitEffectPrefab;
 
+    /// <summary>
+    /// 收集投射物配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

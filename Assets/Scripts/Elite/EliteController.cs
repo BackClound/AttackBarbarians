@@ -12,8 +12,14 @@ public class EliteController : MonoBehaviour
     private bool isEliteSpawn;
     private string enemyConfigId = string.Empty;
 
+    /// <summary>是否为精英生成实例。</summary>
     public bool IsEliteSpawn => isEliteSpawn;
 
+    /// <summary>
+    /// 标记为精英并广播生成事件。
+    /// </summary>
+    /// <param name="configId">敌人配置 Id。</param>
+    /// <param name="eliteModeActive">当前是否处于精英模式。</param>
     public void Initialize(string configId, bool eliteModeActive)
     {
         isEliteSpawn = true;
@@ -22,6 +28,7 @@ public class EliteController : MonoBehaviour
         GameEvents.RaiseEliteSpawned(this, new EliteSpawnedEventArgs(gameObject, enemyConfigId, eliteModeActive));
     }
 
+    /// <summary>回收到对象池前重置精英标记。</summary>
     public void ResetForPool()
     {
         isEliteSpawn = false;

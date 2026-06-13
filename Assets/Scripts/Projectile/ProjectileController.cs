@@ -54,9 +54,12 @@ public class ProjectileController : MonoBehaviour, IPoolable
     private readonly Dictionary<int, float> hitCooldownUntil = new Dictionary<int, float>(8);
     private ContactFilter2D contactFilter;
 
+    /// <summary>是否正在飞行中。</summary>
     public bool IsFlying => isFlying;
+    /// <summary>当前生效的投射物配置。</summary>
     public ProjectileDataSO ActiveData => activeData;
 
+    /// <summary>缓存刚体与对象池原点。</summary>
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -64,6 +67,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         BuildContactFilter();
     }
 
+    /// <summary>每帧更新生命周期、运动与命中检测。</summary>
     private void Update()
     {
         if (!isFlying || activeData == null)
@@ -96,6 +100,9 @@ public class ProjectileController : MonoBehaviour, IPoolable
     }
 
     /// <summary>由 <see cref="ProjectileManager"/> 在池 <see cref="IPoolable.OnSpawn"/> 之后调用。</summary>
+    /// <param name="request">生成请求。</param>
+    /// <param name="data">投射物配置。</param>
+    /// <param name="overrides">技能 Buff 飞行覆盖参数。</param>
     public void BeginFlight(ProjectileSpawnRequest request, ProjectileDataSO data, ProjectileRuntimeOverrides overrides = default)
     {
         activeRequest = request;
@@ -134,6 +141,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         ApplyVelocity();
     }
 
+    /// <summary>对象池取出回调：重置飞行状态。</summary>
     public void OnSpawn()
     {
         ResetFlightState();
@@ -143,6 +151,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>对象池回收回调：清理飞行数据并复位。</summary>
     public void OnDespawn()
     {
         isFlying = false;
@@ -166,6 +175,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         transform.position = pooledOrigin;
     }
 
+    /// <summary>触发器碰撞命中入口。</summary>
+    /// <param name="other">命中的碰撞体。</param>
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!useTriggerCollision || !isFlying)
@@ -176,6 +187,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         TryHitCollider(other);
     }
 
+    /// <summary>重置所有飞行相关运行时状态。</summary>
     private void ResetFlightState()
     {
         isFlying = false;
@@ -198,6 +210,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>构建命中检测的 ContactFilter（含 CollisionManager 层级修正）。</summary>
     private void BuildContactFilter()
     {
         LayerMask mask = activeData != null ? activeData.HitLayerMask : fallbackHitLayers;
@@ -214,6 +227,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         };
     }
 
+    /// <summary>按 <see cref="ProjectileMotionType"/> 更新运动轨迹。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     private void UpdateMotion(float deltaTime)
     {
         switch (activeData.MotionType)
@@ -240,6 +255,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         ApplyVelocity();
     }
 
+    /// <summary>追踪运动：朝 homing 目标转向。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     private void UpdateHoming(float deltaTime)
     {
         if (homingTarget == null)
@@ -262,6 +279,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         transform.rotation = Quaternion.Euler(0f, 0f, zAngle);
     }
 
+    /// <summary>轨道运动：绕中心点圆周运动。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     private void UpdateOrbit(float deltaTime)
     {
         orbitAngleDegrees += activeData.OrbitAngularSpeed * deltaTime;
@@ -271,6 +290,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         moveDirection = offset.normalized;
     }
 
+    /// <summary>弧线运动：朝目标点插值转向。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     private void UpdateArcToPoint(float deltaTime)
     {
         if (homingTarget == null)
@@ -285,6 +306,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>将当前方向写入刚体速度。</summary>
     private void ApplyVelocity()
     {
         if (rb == null || moveDirection == Vector2.zero)
@@ -295,6 +317,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
         rb.velocity = moveDirection * activeData.MoveSpeed;
     }
 
+    /// <summary>非触发模式下圆形 NonAlloc 扫描命中。</summary>
     private void ScanHitsNonAlloc()
     {
         float hitRadius = activeData.HitRadius;
@@ -315,6 +338,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>尝试对单个碰撞体结算命中（含穿透/冷却去重）。</summary>
+    /// <param name="collider">命中的碰撞体。</param>
     private void TryHitCollider(Collider2D collider)
     {
         if (collider == null)
@@ -360,6 +385,10 @@ public class ProjectileController : MonoBehaviour, IPoolable
         ApplyHit(enemy, hitObject, instanceId);
     }
 
+    /// <summary>对敌人应用伤害、状态效果、分裂与命中计数。</summary>
+    /// <param name="enemy">命中的敌人。</param>
+    /// <param name="hitObject">受击 GameObject。</param>
+    /// <param name="instanceId">目标实例 Id（用于去重）。</param>
     private void ApplyHit(Enemy enemy, GameObject hitObject, int instanceId)
     {
         DamageInfo info = activeRequest.DamageInfo.Target != null
@@ -416,6 +445,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>在命中点生成命中特效。</summary>
+    /// <param name="position">世界坐标。</param>
     private void SpawnHitEffect(Vector3 position)
     {
         if (activeData.HitEffectPrefab != null)
@@ -424,6 +455,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>命中时施加冰冻等控制状态。</summary>
+    /// <param name="enemy">命中的敌人。</param>
     private void ApplyStatusOnHit(Enemy enemy)
     {
         if (enemy == null)
@@ -443,6 +476,9 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>在指定半径内对敌人造成范围伤害与冰冻。</summary>
+    /// <param name="radius">爆炸半径。</param>
+    /// <param name="freezeDuration">冰冻持续时间（秒）。</param>
     private void TriggerExplosion(float radius, float freezeDuration)
     {
         if (radius <= 0f)
@@ -478,6 +514,8 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>命中时向两侧分裂出子投射物。</summary>
+    /// <param name="origin">分裂起点。</param>
     private void SpawnSplitProjectiles(Vector3 origin)
     {
         if (!ServiceLocator.TryGet(out ProjectileManager manager))
@@ -494,6 +532,10 @@ public class ProjectileController : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>将二维方向向量旋转指定角度。</summary>
+    /// <param name="direction">原方向。</param>
+    /// <param name="angleDegrees">旋转角度（度）。</param>
+    /// <returns>旋转后的单位方向。</returns>
     private static Vector2 Rotate(Vector2 direction, float angleDegrees)
     {
         float rad = angleDegrees * Mathf.Deg2Rad;
@@ -504,6 +546,7 @@ public class ProjectileController : MonoBehaviour, IPoolable
             direction.x * sin + direction.y * cos).normalized;
     }
 
+    /// <summary>结束飞行并回收到对象池。</summary>
     private void Recycle()
     {
         if (!isFlying)

@@ -12,6 +12,7 @@ using UnityEngine.UI;
 public class AchievementPanelUI : UiPanelBase
 {
     [Serializable]
+    /// <summary>成就行 Inspector 绑定：配置 ID、标签与领取按钮。</summary>
     private class AchievementBinding
     {
         public string achievementConfigId;
@@ -24,6 +25,7 @@ public class AchievementPanelUI : UiPanelBase
     [SerializeField] private Button closeButton;
     [SerializeField] private AchievementBinding[] bindings;
 
+    /// <summary>绑定关闭与各成就领取按钮。</summary>
     private void Awake()
     {
         if (closeButton != null)
@@ -47,6 +49,7 @@ public class AchievementPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>订阅成就进度与领取事件。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribeAchievementProgressChanged(OnAchievementProgressChanged);
@@ -55,6 +58,7 @@ public class AchievementPanelUI : UiPanelBase
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>取消成就事件订阅。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribeAchievementProgressChanged(OnAchievementProgressChanged);
@@ -63,11 +67,13 @@ public class AchievementPanelUI : UiPanelBase
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>显示时刷新各成就进度与可领取状态。</summary>
     protected override void OnShow()
     {
         RefreshAll();
     }
 
+    /// <summary>刷新所有成就行进度与可领取状态。</summary>
     private void RefreshAll()
     {
         if (bindings == null)
@@ -88,6 +94,7 @@ public class AchievementPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>刷新单条成就绑定行的文案与按钮。</summary>
     private void RefreshBinding(AchievementBinding binding, AchievementManager manager)
     {
         if (binding == null || string.IsNullOrWhiteSpace(binding.achievementConfigId))
@@ -113,6 +120,7 @@ public class AchievementPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>成就领取按钮回调。</summary>
     private void OnClaimClicked(string configId)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -122,6 +130,7 @@ public class AchievementPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>关闭成就面板。</summary>
     private void OnCloseClicked()
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -129,8 +138,10 @@ public class AchievementPanelUI : UiPanelBase
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Achievement);
     }
 
+    /// <summary>成就进度变化时全量刷新。</summary>
     private void OnAchievementProgressChanged(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>成就领取成功后提示并刷新。</summary>
     private void OnAchievementClaimed(GameEventContext ctx)
     {
         if (ctx.Payload is AchievementClaimedEventArgs args)
@@ -141,6 +152,7 @@ public class AchievementPanelUI : UiPanelBase
         RefreshAll();
     }
 
+    /// <summary>成就领取失败后显示错误。</summary>
     private void OnAchievementClaimFailed(GameEventContext ctx)
     {
         if (ctx.Payload is AchievementClaimFailedEventArgs args)
@@ -149,8 +161,10 @@ public class AchievementPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>资源变化时刷新面板。</summary>
     private void OnResourceChanged(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>更新状态提示文案。</summary>
     private void SetStatus(string message)
     {
         if (statusText != null)

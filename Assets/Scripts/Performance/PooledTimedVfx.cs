@@ -11,6 +11,10 @@ public class PooledTimedVfx : MonoBehaviour, IPoolable
     private float remaining;
     private bool isActive;
 
+    /// <summary>
+    /// 播放特效并启动生命周期倒计时。
+    /// </summary>
+    /// <param name="durationOverride">自定义持续时间（秒），小于等于 0 时使用序列化默认值。</param>
     public void Play(float durationOverride = -1f)
     {
         remaining = durationOverride > 0f ? durationOverride : lifetimeSeconds;
@@ -18,18 +22,27 @@ public class PooledTimedVfx : MonoBehaviour, IPoolable
         gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// 实例从对象池借出时调用，重置生命周期计时。
+    /// </summary>
     public void OnSpawn()
     {
         remaining = lifetimeSeconds;
         isActive = true;
     }
 
+    /// <summary>
+    /// 实例回收到对象池时调用，停止计时。
+    /// </summary>
     public void OnDespawn()
     {
         isActive = false;
         remaining = 0f;
     }
 
+    /// <summary>
+    /// 每帧递减剩余时间，到期后回收特效。
+    /// </summary>
     private void Update()
     {
         if (!isActive)
@@ -44,6 +57,9 @@ public class PooledTimedVfx : MonoBehaviour, IPoolable
         }
     }
 
+    /// <summary>
+    /// 释放性能预算并将特效归还对象池或销毁。
+    /// </summary>
     private void Recycle()
     {
         isActive = false;

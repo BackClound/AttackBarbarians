@@ -1,8 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// 这个类用来控制检测敌人，当检测到敌人时，获取可攻击敌人列表，进入攻击状态，当进入攻击距离的时候，进行攻击
+/// 实体战斗检测基类：在范围内搜索敌人并驱动攻击状态与攻击执行。
 /// </summary>
+/// <remarks>由 Player/Enemy 战斗组件继承，挂载在实体上并配置检测半径与 Layer。</remarks>
 public class EntityCombat : MonoBehaviour
 {
     #region Check Enemys
@@ -16,23 +17,20 @@ public class EntityCombat : MonoBehaviour
     #endregion
 
 
-    /// <summary>
-    /// 在Awake方法中检查是否正确进行了初始化
-    /// </summary>
+    /// <summary>Awake 中校验检测参数是否已正确配置。</summary>
     protected virtual void Awake()
     {
     }
 
     /// <summary>
-    /// 这个可以放在FixedUpdate中吗
-    /// TODO 获得可攻击列表之后，攻击最近的敌人，获取敌人的MaxHP，然后分配对应的攻击数量
-    /// 当enemy已经分配了攻击之后，标记该敌人，其他的魔法攻击优先攻击未标记的敌人，
-    /// 当所有敌人都已被标记之后，进行随机
+    /// 在检测半径内搜索可攻击敌人，子类实现目标筛选与状态切换。
     /// </summary>
     protected virtual void CheckEnemyInRadius() { }
 
+    /// <summary>搜索敌人并按优先级排序，子类实现。</summary>
     public virtual void CheckEnemyInRadiusWithSorted() { }
 
+    /// <summary>在 Scene 视图中绘制检测范围 Gizmo。</summary>
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -43,6 +41,7 @@ public class EntityCombat : MonoBehaviour
         Gizmos.DrawWireSphere(checkPosition.position, maxCheckDistance);
     }
 
+    /// <summary>执行一次攻击，子类实现具体伤害或技能逻辑。</summary>
     public virtual void PerformAttack()
     {
 

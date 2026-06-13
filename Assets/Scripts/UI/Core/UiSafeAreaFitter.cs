@@ -18,6 +18,7 @@ public class UiSafeAreaFitter : MonoBehaviour
     private Rect _lastSafeArea;
     private Vector2Int _lastScreenSize;
 
+    /// <summary>缓存 RectTransform 并按需应用安全区。</summary>
     private void Awake()
     {
         _rect = GetComponent<RectTransform>();
@@ -27,11 +28,13 @@ public class UiSafeAreaFitter : MonoBehaviour
         }
     }
 
+    /// <summary>启用时重新应用安全区。</summary>
     private void OnEnable()
     {
         ApplySafeArea();
     }
 
+    /// <summary>监听屏幕尺寸或安全区变化并自动刷新布局。</summary>
     private void Update()
     {
         if (!listenForScreenChange)

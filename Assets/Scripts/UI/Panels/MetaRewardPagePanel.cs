@@ -18,8 +18,10 @@ public class MetaRewardPagePanel : MonoBehaviour
     [SerializeField] private GeneralRewardCardPanel lotteryReward;
     [SerializeField] private GeneralRewardCardPanel stageReward;
 
+    /// <summary>弹层关闭时触发。</summary>
     public event Action Closed;
 
+    /// <summary>绑定关闭按钮与各奖励行点击，默认隐藏。</summary>
     private void Awake()
     {
         if (closeButton != null)
@@ -34,6 +36,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         Hide();
     }
 
+    /// <summary>解绑关闭按钮与奖励行事件。</summary>
     private void OnDestroy()
     {
         UnbindRow(onlineReward);
@@ -47,6 +50,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         }
     }
 
+    /// <summary>显示 Meta 奖励页并刷新四条奖励状态。</summary>
     public void Show()
     {
         if (root != null)
@@ -57,6 +61,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         Refresh();
     }
 
+    /// <summary>隐藏 Meta 奖励页并触发 <see cref="Closed"/>。</summary>
     public void Hide()
     {
         if (root != null)
@@ -67,6 +72,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         Closed?.Invoke();
     }
 
+    /// <summary>刷新在线/离线/抽奖/通关奖励文案与红点。</summary>
     public void Refresh()
     {
         if (!ServiceLocator.TryGet(out MetaRewardService meta))
@@ -90,6 +96,9 @@ public class MetaRewardPagePanel : MonoBehaviour
         stageReward?.SetRedDot(canStage);
     }
 
+    /// <summary>尝试领取指定 Meta 奖励并更新状态栏提示。</summary>
+    /// <param name="action">奖励动作标识。</param>
+    /// <returns>已处理返回 <c>true</c>，未识别动作返回 <c>false</c>。</returns>
     public bool TryHandleAction(MainSceneAction action)
     {
         if (!ServiceLocator.TryGet(out MetaRewardService meta))
@@ -125,6 +134,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         return true;
     }
 
+    /// <summary>更新页内状态提示文案。</summary>
     private void SetStatus(string message)
     {
         if (statusText != null)
@@ -133,6 +143,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         }
     }
 
+    /// <summary>绑定奖励行点击事件。</summary>
     private void BindRow(GeneralRewardCardPanel row, MainSceneAction action)
     {
         if (row == null)
@@ -143,6 +154,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         row.Clicked += OnRowClicked;
     }
 
+    /// <summary>解绑奖励行点击事件。</summary>
     private void UnbindRow(GeneralRewardCardPanel row)
     {
         if (row != null)
@@ -151,6 +163,7 @@ public class MetaRewardPagePanel : MonoBehaviour
         }
     }
 
+    /// <summary>奖励行点击后尝试领取。</summary>
     private void OnRowClicked(MainSceneAction action)
     {
         TryHandleAction(action);

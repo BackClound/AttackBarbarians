@@ -14,6 +14,8 @@ public static class PlayerSceneAccess
         TryGetController(out PlayerController controller) && controller.IsReady;
 
     /// <summary>尝试获取 Player 实体。</summary>
+    /// <param name="player">输出 Player 实例。</param>
+    /// <returns>存在单例时返回 true。</returns>
     public static bool TryGetPlayer(out Player player)
     {
         player = null;
@@ -27,6 +29,8 @@ public static class PlayerSceneAccess
     }
 
     /// <summary>尝试获取 PlayerController（须 IsReady）。</summary>
+    /// <param name="controller">输出控制器实例。</param>
+    /// <returns>Player 就绪且控制器可用时返回 true。</returns>
     public static bool TryGetController(out PlayerController controller)
     {
         controller = null;
@@ -40,6 +44,8 @@ public static class PlayerSceneAccess
     }
 
     /// <summary>尝试获取 PlayerSkillManager。</summary>
+    /// <param name="skillManager">输出技能管理器。</param>
+    /// <returns>存在时返回 true。</returns>
     public static bool TryGetSkillManager(out PlayerSkillManager skillManager)
     {
         skillManager = null;
@@ -53,6 +59,8 @@ public static class PlayerSceneAccess
     }
 
     /// <summary>尝试获取 SkillManager（射击/技能 Buff 入口）。</summary>
+    /// <param name="skillManager">输出 SkillManager 组件。</param>
+    /// <returns>存在时返回 true。</returns>
     public static bool TryGetSkillSystem(out SkillManager skillManager)
     {
         skillManager = null;
@@ -66,6 +74,8 @@ public static class PlayerSceneAccess
     }
 
     /// <summary>尝试获取 Player_Health。</summary>
+    /// <param name="health">输出生命值组件。</param>
+    /// <returns>存在时返回 true。</returns>
     public static bool TryGetHealth(out Player_Health health)
     {
         health = null;
@@ -79,6 +89,7 @@ public static class PlayerSceneAccess
     }
 
     /// <summary>对就绪的 PlayerController 执行回调。</summary>
+    /// <param name="action">接收控制器的回调；为 null 或未就绪时跳过。</param>
     public static void WithReadyController(System.Action<PlayerController> action)
     {
         if (action == null || !TryGetController(out PlayerController controller))

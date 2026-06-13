@@ -11,16 +11,23 @@ using UnityEngine;
 /// </remarks>
 public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
 {
+    /// <summary>当前单例实例；未 Awake 前可能为 null。</summary>
     public static T Instance => SingletonHost<T>.Instance;
 
+    /// <summary>是否已有有效实例。</summary>
     public static bool HasInstance => SingletonHost<T>.HasInstance;
 
+    /// <summary>尝试获取实例而不抛异常。</summary>
+    /// <param name="value">输出实例。</param>
+    /// <returns>存在时返回 true。</returns>
     public static bool TryGet(out T value) => SingletonHost<T>.TryGet(out value);
 
     [SerializeField] private SingletonOptions singletonOptions = SingletonOptions.SceneDefault;
 
+    /// <summary>子类可覆写单例选项；默认读 Inspector 序列化字段。</summary>
     protected virtual SingletonOptions Options => singletonOptions;
 
+    /// <summary>Unity Awake：认领单例并调用 <see cref="OnSingletonAwake"/>。</summary>
     protected virtual void Awake()
     {
         if (!SingletonHost<T>.TryClaim((T)this, this, Options, out bool destroyedOwner) || destroyedOwner)
@@ -31,6 +38,7 @@ public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T
         OnSingletonAwake();
     }
 
+    /// <summary>Unity OnDestroy：释放单例并调用 <see cref="OnSingletonDestroy"/>。</summary>
     protected virtual void OnDestroy()
     {
         if (!SingletonHost<T>.IsOwner((T)this))

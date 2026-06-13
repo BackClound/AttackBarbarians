@@ -3,6 +3,7 @@
 /// </summary>
 public enum BossSkillType
 {
+    /// <summary>无技能。</summary>
     None = 0,
     /// <summary>冲锋</summary>
     Charge = 1,

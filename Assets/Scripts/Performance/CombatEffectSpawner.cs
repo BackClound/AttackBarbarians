@@ -5,6 +5,14 @@ using UnityEngine;
 /// </summary>
 public static class CombatEffectSpawner
 {
+    /// <summary>
+    /// 尝试生成命中特效，受性能预算与对象池约束。
+    /// </summary>
+    /// <param name="prefab">特效 Prefab 模板。</param>
+    /// <param name="position">生成位置。</param>
+    /// <param name="rotation">生成旋转。</param>
+    /// <param name="lifetimeSeconds">特效持续时间（秒），小于等于 0 时使用组件默认值。</param>
+    /// <returns>生成成功返回 true，预算不足或 Prefab 为空时返回 false。</returns>
     public static bool TrySpawnHitEffect(GameObject prefab, Vector3 position, Quaternion rotation, float lifetimeSeconds = -1f)
     {
         if (prefab == null)

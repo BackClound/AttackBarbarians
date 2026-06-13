@@ -6,6 +6,12 @@ using UnityEngine;
 /// <remarks>纯静态工具，无需挂载。</remarks>
 public static class RunDifficultyBootstrap
 {
+    /// <summary>
+    /// 从游戏配置加载精英模式开关与配置引用。
+    /// </summary>
+    /// <param name="gameConfig">游戏全局配置。</param>
+    /// <summary>从 GameConfig 写入单局难度上下文。</summary>
+    /// <param name="gameConfig">游戏配置。</param>
     public static void ApplyFromGameConfig(GameConfig gameConfig)
     {
         RunDifficultyContext.Reset();

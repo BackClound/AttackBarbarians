@@ -11,7 +11,10 @@ public struct MapCameraBoundsConfig
     [SerializeField] private Color backgroundColor;
     [SerializeField] private bool overrideBackgroundColor;
 
+    /// <summary>正交相机尺寸覆盖值（≤0 时不覆盖）。</summary>
     public float OrthographicSizeOverride => orthographicSizeOverride;
+    /// <summary>相机背景色。</summary>
     public Color BackgroundColor => backgroundColor;
+    /// <summary>是否覆盖相机背景色。</summary>
     public bool OverrideBackgroundColor => overrideBackgroundColor;
 }

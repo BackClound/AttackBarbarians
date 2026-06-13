@@ -4,6 +4,12 @@ using UnityEngine;
 /// <summary>
 /// 局外资源管理：增减、查询、体力自然恢复、持久化，并通过 <see cref="GameEvents"/> 通知 UI。
 /// </summary>
+/// <remarks>
+/// <para><b>是否需要挂载：</b>是（MonoBehaviour）。由 <see cref="GameBootstrapper"/> 在 Save 之后初始化。</para>
+/// <para><b>推荐挂载对象：</b><c>GameSystems</c> 根物体。</para>
+/// <para><b>获取方式：</b><c>ServiceLocator.Get&lt;ResourceManager&gt;()</c>。</para>
+/// <para><b>持久化：</b>所有资源变更通过 <see cref="SaveManager"/> 写入本地 JSON 存档。</para>
+/// </remarks>
 public class ResourceManager : MonoBehaviour, IGameSystem
 {
     [Header("Debug (Play Mode)")]
@@ -14,8 +20,12 @@ public class ResourceManager : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>系统是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>
+    /// 初始化资源管理器并同步体力自然恢复。
+    /// </summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -29,6 +39,10 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧同步体力自然恢复状态。
+    /// </summary>
+    /// <param name="deltaTime">经过的时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized)
@@ -39,11 +53,19 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         SyncStaminaRecovery();
     }
 
+    /// <summary>
+    /// 关闭资源管理器。
+    /// </summary>
     public void Shutdown()
     {
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 查询指定资源的当前持有量。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <returns>当前数量；系统未就绪时返回 0。</returns>
     public long GetAmount(CurrencyType currency)
     {
         if (!isInitialized || saveManager?.Current == null)
@@ -66,8 +88,12 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         };
     }
 
+    /// <summary>查询当前广告券数量。</summary>
+    /// <returns>广告券持有量（int 截断）。</returns>
     public int GetAdTicketCount() => (int)GetAmount(CurrencyType.AdTicket);
 
+    /// <summary>查询体力上限。</summary>
+    /// <returns>最大体力值；存档未就绪时返回默认值。</returns>
     public int GetMaxStamina()
     {
         if (saveManager?.Current == null)
@@ -78,12 +104,16 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return Math.Max(1, saveManager.Current.maxEnergy);
     }
 
+    /// <summary>获取体力显示文本（当前/上限）。</summary>
+    /// <returns>格式为 "当前/上限" 的体力文本。</returns>
     public string GetStaminaDisplayText()
     {
         SyncStaminaRecovery();
         return $"{GetAmount(CurrencyType.Stamina)}/{GetMaxStamina()}";
     }
 
+    /// <summary>判断体力是否已满。</summary>
+    /// <returns>当前体力 &gt;= 上限时返回 true。</returns>
     public bool IsStaminaFull()
     {
         SyncStaminaRecovery();
@@ -91,6 +121,7 @@ public class ResourceManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>体力未满时返回恢复满所需倒计时文案；已满时返回 null。</summary>
+    /// <returns>中文倒计时文案；体力已满时返回 null。</returns>
     public string GetStaminaRecoverySubtitle()
     {
         if (!TryGetStaminaRecoveryRemaining(out TimeSpan remaining))
@@ -101,6 +132,11 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return FormatRecoveryDuration(remaining);
     }
 
+    /// <summary>
+    /// 尝试获取体力恢复至满所需的剩余时间。
+    /// </summary>
+    /// <param name="remaining">剩余恢复时间；体力已满时为 Zero。</param>
+    /// <returns>体力未满且可计算时返回 true，否则返回 false。</returns>
     public bool TryGetStaminaRecoveryRemaining(out TimeSpan remaining)
     {
         remaining = TimeSpan.Zero;
@@ -136,6 +172,12 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 判断当前资源是否足够支付指定数量。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">所需数量；&lt;= 0 时视为足够。</param>
+    /// <returns>持有量 &gt;= 所需量时返回 true。</returns>
     public bool CanAfford(CurrencyType currency, long amount)
     {
         if (amount <= 0)
@@ -146,12 +188,24 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return GetAmount(currency) >= amount;
     }
 
+    /// <summary>
+    /// 判断是否有足够体力开始战斗。
+    /// </summary>
+    /// <param name="failureReason">不足时的失败原因文案；足够时为 null。</param>
+    /// <returns>体力足够时返回 true，否则返回 false。</returns>
     public bool CanStartBattle(out string failureReason)
     {
         failureReason = null;
         return CanAfford(CurrencyType.Stamina, StaminaConstants.BattleEntryCost, out failureReason);
     }
 
+    /// <summary>
+    /// 判断是否有足够资源，并在不足时返回本地化失败原因。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">所需数量。</param>
+    /// <param name="failureReason">不足时的失败原因文案；足够时为 null。</param>
+    /// <returns>持有量足够时返回 true，否则返回 false。</returns>
     public bool CanAfford(CurrencyType currency, long amount, out string failureReason)
     {
         failureReason = null;
@@ -164,11 +218,23 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>
+    /// 尝试发放广告券奖励。
+    /// </summary>
+    /// <param name="amount">发放数量。</param>
+    /// <param name="reason">变更来源。</param>
+    /// <param name="change">变更事件负载。</param>
+    /// <returns>发放成功时返回 true，否则返回 false。</returns>
     public bool TryGrantAdTicketReward(int amount, ResourceChangeReason reason, out ResourceChangedEventArgs change)
     {
         return TryAdd(CurrencyType.AdTicket, amount, reason, out change);
     }
 
+    /// <summary>
+    /// 尝试通过广告将体力恢复至上限。
+    /// </summary>
+    /// <param name="change">变更事件负载。</param>
+    /// <returns>体力发生变化时返回 true，否则返回 false。</returns>
     public bool TryRefillStaminaFromAd(out ResourceChangedEventArgs change)
     {
         change = default;
@@ -176,6 +242,14 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return TrySetStamina(GetMaxStamina(), ResourceChangeReason.AdReward, out change);
     }
 
+    /// <summary>
+    /// 尝试增加指定资源（体力增加时受上限约束）。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">增加数量；须 &gt; 0。</param>
+    /// <param name="reason">变更来源。</param>
+    /// <param name="change">变更事件负载。</param>
+    /// <returns>增加成功时返回 true，否则返回 false。</returns>
     public bool TryAdd(
         CurrencyType currency,
         long amount,
@@ -210,6 +284,14 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 尝试消耗指定资源。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">消耗数量；&lt;= 0 时视为成功。</param>
+    /// <param name="reason">变更来源。</param>
+    /// <param name="failureReason">不足或系统未就绪时的失败原因。</param>
+    /// <returns>消耗成功时返回 true，否则返回 false。</returns>
     public bool TrySpend(
         CurrencyType currency,
         long amount,
@@ -250,6 +332,11 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 将剩余恢复时间格式化为中文倒计时文案。
+    /// </summary>
+    /// <param name="remaining">剩余时间。</param>
+    /// <returns>格式化后的倒计时文本；已到期时返回空字符串。</returns>
     public static string FormatRecoveryDuration(TimeSpan remaining)
     {
         if (remaining <= TimeSpan.Zero)
@@ -270,6 +357,13 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return $"{Mathf.Max(1, remaining.Seconds)}秒后满";
     }
 
+    /// <summary>
+    /// 生成资源不足时的本地化提示文案。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="required">所需数量。</param>
+    /// <param name="current">当前持有量。</param>
+    /// <returns>包含资源名称与数量对比的提示文本。</returns>
     public static string FormatInsufficientFunds(CurrencyType currency, long required, long current)
     {
         string label = currency switch
@@ -284,6 +378,13 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return $"{label}不足（需要 {required}，当前 {current}）";
     }
 
+    /// <summary>
+    /// 将体力设置为指定值（受上限约束），并广播变更事件。
+    /// </summary>
+    /// <param name="targetAmount">目标体力值。</param>
+    /// <param name="reason">变更来源。</param>
+    /// <param name="change">变更事件负载。</param>
+    /// <returns>体力实际发生变化时返回 true，否则返回 false。</returns>
     private bool TrySetStamina(long targetAmount, ResourceChangeReason reason, out ResourceChangedEventArgs change)
     {
         change = default;
@@ -309,6 +410,9 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 根据离线/在线时间差计算并应用体力自然恢复。
+    /// </summary>
     private void SyncStaminaRecovery()
     {
         if (saveManager?.Current == null)
@@ -367,6 +471,11 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         LogChange(change);
     }
 
+    /// <summary>
+    /// 将指定资源的持有量写入存档内存（不含事件广播）。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">目标数量。</param>
     private void ApplyAmount(CurrencyType currency, long amount)
     {
         switch (currency)
@@ -398,6 +507,14 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 尝试将指定资源设置为绝对值（体力受上限约束，变更后立即写盘）。
+    /// </summary>
+    /// <param name="currency">资源类型。</param>
+    /// <param name="amount">目标数量。</param>
+    /// <param name="reason">变更来源。</param>
+    /// <param name="change">变更事件负载。</param>
+    /// <returns>设置成功时返回 true，否则返回 false。</returns>
     public bool TrySet(
         CurrencyType currency,
         long amount,
@@ -432,6 +549,10 @@ public class ResourceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 在调试日志开启时输出资源变更详情。
+    /// </summary>
+    /// <param name="change">资源变更事件负载。</param>
     private void LogChange(ResourceChangedEventArgs change)
     {
         if (configManager == null || !configManager.ShouldLog())
@@ -444,18 +565,22 @@ public class ResourceManager : MonoBehaviour, IGameSystem
             $"(delta={change.Delta}, reason={change.Reason})");
     }
 
+    /// <summary>Inspector 调试：将金币设为测试值。</summary>
     [ContextMenu("Debug/Set Gold To Test Value")]
     private void DebugSetGold() =>
         TrySet(CurrencyType.Gold, debugGoldAmount, ResourceChangeReason.Debug, out _);
 
+    /// <summary>Inspector 调试：将钻石设为测试值。</summary>
     [ContextMenu("Debug/Set Diamonds To Test Value")]
     private void DebugSetDiamonds() =>
         TrySet(CurrencyType.Diamond, debugDiamondAmount, ResourceChangeReason.Debug, out _);
 
+    /// <summary>Inspector 调试：增加 5000 金币。</summary>
     [ContextMenu("Debug/Add 5000 Gold")]
     private void DebugAddGold() =>
         TryAdd(CurrencyType.Gold, 5000, ResourceChangeReason.Debug, out _);
 
+    /// <summary>Inspector 调试：增加 100 钻石。</summary>
     [ContextMenu("Debug/Add 100 Diamonds")]
     private void DebugAddDiamonds() =>
         TryAdd(CurrencyType.Diamond, 100, ResourceChangeReason.Debug, out _);

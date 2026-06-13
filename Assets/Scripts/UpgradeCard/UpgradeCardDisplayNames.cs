@@ -3,6 +3,9 @@
 /// </summary>
 public static class UpgradeCardDisplayNames
 {
+    /// <summary>根据卡片配置 ID 获取英文展示标题。</summary>
+    /// <param name="cardConfigId">卡片配置 ID。</param>
+    /// <returns>英文标题；未知 ID 时返回原 ID。</returns>
     public static string GetEnglishTitle(string cardConfigId)
     {
         if (string.IsNullOrWhiteSpace(cardConfigId))
@@ -29,6 +32,9 @@ public static class UpgradeCardDisplayNames
         };
     }
 
+    /// <summary>根据稀有度获取星级数量。</summary>
+    /// <param name="rarity">升级卡稀有度。</param>
+    /// <returns>星级数量（1–5）。</returns>
     public static int GetStarCount(UpgradeRarity rarity) =>
         rarity switch
         {

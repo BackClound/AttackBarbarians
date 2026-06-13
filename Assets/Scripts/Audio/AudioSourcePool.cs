@@ -11,8 +11,16 @@ internal sealed class AudioSourcePool
     private readonly List<AudioSource> active = new List<AudioSource>(16);
     private readonly int maxSize;
 
+    /// <summary>当前正在播放的 AudioSource 数量。</summary>
     public int ActiveCount => active.Count;
 
+    /// <summary>
+    /// 创建 AudioSource 对象池并预热初始实例。
+    /// </summary>
+    /// <param name="parent">池根节点的父 Transform。</param>
+    /// <param name="poolName">池 GameObject 名称。</param>
+    /// <param name="initialSize">初始预热数量。</param>
+    /// <param name="maxSize">最大并发借出数量。</param>
     public AudioSourcePool(Transform parent, string poolName, int initialSize, int maxSize)
     {
         this.maxSize = Mathf.Max(initialSize, maxSize);
@@ -25,6 +33,11 @@ internal sealed class AudioSourcePool
         }
     }
 
+    /// <summary>
+    /// 从池中借出一个 AudioSource 用于播放。
+    /// </summary>
+    /// <param name="source">借出的 AudioSource；池满时为 null。</param>
+    /// <returns>借出成功返回 true，否则 false。</returns>
     public bool TryRent(out AudioSource source)
     {
         if (active.Count >= maxSize)
@@ -39,6 +52,9 @@ internal sealed class AudioSourcePool
         return true;
     }
 
+    /// <summary>
+    /// 回收已播放完毕的 AudioSource 到空闲栈。
+    /// </summary>
     public void ReleaseFinished()
     {
         for (int i = active.Count - 1; i >= 0; i--)
@@ -61,6 +77,9 @@ internal sealed class AudioSourcePool
         }
     }
 
+    /// <summary>
+    /// 停止所有活跃 AudioSource 并归还到空闲栈。
+    /// </summary>
     public void StopAll()
     {
         for (int i = active.Count - 1; i >= 0; i--)
@@ -79,6 +98,10 @@ internal sealed class AudioSourcePool
         active.Clear();
     }
 
+    /// <summary>
+    /// 创建新的池化 AudioSource 实例。
+    /// </summary>
+    /// <returns>配置完毕的 AudioSource。</returns>
     private AudioSource CreateSource()
     {
         var go = new GameObject("PooledAudioSource");
@@ -91,6 +114,10 @@ internal sealed class AudioSourcePool
         return source;
     }
 
+    /// <summary>
+    /// 重置 AudioSource 到默认状态并停用。
+    /// </summary>
+    /// <param name="source">要重置的 AudioSource。</param>
     private static void ResetSource(AudioSource source)
     {
         source.Stop();

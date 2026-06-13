@@ -46,25 +46,64 @@ public class AdConfigSO : ScriptableObject
     [Tooltip("观看激励广告成功后增加的广告券数量。")]
     [SerializeField] private int rewardAdTicketAmount = AdTicketConstants.DefaultRewardPerAd;
 
+    /// <summary>广告网络选择策略。</summary>
     public AdNetworkSelectionMode SelectionMode => selectionMode;
+
+    /// <summary>固定模式下使用的广告网络。</summary>
     public AdNetworkKind FixedNetwork => fixedNetwork;
+
+    /// <summary>编辑器环境下使用的广告网络。</summary>
     public AdNetworkKind EditorNetwork => editorNetwork;
+
+    /// <summary>Android 平台使用的广告网络。</summary>
     public AdNetworkKind AndroidNetwork => androidNetwork;
+
+    /// <summary>iOS 平台使用的广告网络。</summary>
     public AdNetworkKind IosNetwork => iosNetwork;
+
+    /// <summary>备用广告网络。</summary>
     public AdNetworkKind FallbackNetwork => fallbackNetwork;
+
+    /// <summary>SDK 初始化失败时是否启用备用网络。</summary>
     public bool EnableFallbackOnInitFailure => enableFallbackOnInitFailure;
+
+    /// <summary>广告加载/展示失败时是否切换备用网络重试。</summary>
     public bool EnableFallbackOnLoadFailure => enableFallbackOnLoadFailure;
+
+    /// <summary>单次激励广告最多尝试的广告商数量（1–4）。</summary>
     public int MaxRewardedShowAttempts => Mathf.Clamp(maxRewardedShowAttempts, 1, 4);
+
+    /// <summary>默认激励视频广告位 ID。</summary>
     public string DefaultRewardedPlacementId => string.IsNullOrWhiteSpace(defaultRewardedPlacementId) ? "Rewarded_Android" : defaultRewardedPlacementId;
+
+    /// <summary>默认插屏广告位 ID。</summary>
     public string DefaultInterstitialPlacementId => string.IsNullOrWhiteSpace(defaultInterstitialPlacementId) ? "Interstitial_Android" : defaultInterstitialPlacementId;
+
+    /// <summary>默认横幅广告位 ID。</summary>
     public string DefaultBannerPlacementId => string.IsNullOrWhiteSpace(defaultBannerPlacementId) ? "Banner_Android" : defaultBannerPlacementId;
+
+    /// <summary>Mock 广告模拟播放延迟（秒）。</summary>
     public float MockAdDelaySeconds => Mathf.Max(0f, mockAdDelaySeconds);
+
+    /// <summary>Mock 广告是否模拟用户跳过。</summary>
     public bool MockSimulateSkip => mockSimulateSkip;
+
+    /// <summary>观看激励广告成功后发放的广告券数量。</summary>
     public int RewardAdTicketAmount => Mathf.Max(1, rewardAdTicketAmount);
+
+    /// <summary>Unity Ads 是否启用测试模式（旧版字段）。</summary>
     public bool TestMode => testMode;
+
+    /// <summary>Android 平台 Game ID（旧版字段）。</summary>
     public string AndroidGameId => androidGameId ?? string.Empty;
+
+    /// <summary>iOS 平台 Game ID（旧版字段）。</summary>
     public string IosGameId => iosGameId ?? string.Empty;
 
+    /// <summary>
+    /// 判断当前环境是否应强制使用 Mock 广告。
+    /// </summary>
+    /// <returns>强制 Mock 返回 true，否则 false。</returns>
     public bool ShouldForceMock()
     {
         if (forceMock)
@@ -79,6 +118,12 @@ public class AdConfigSO : ScriptableObject
 #endif
     }
 
+    /// <summary>
+    /// 获取指定广告网络的配置档案。
+    /// </summary>
+    /// <param name="kind">广告网络类型。</param>
+    /// <param name="profile">找到的配置档案。</param>
+    /// <returns>找到或能合成默认档案时返回 true，否则 false。</returns>
     public bool TryGetNetworkProfile(AdNetworkKind kind, out AdNetworkProfile profile)
     {
         if (networkProfiles != null)
@@ -112,6 +157,11 @@ public class AdConfigSO : ScriptableObject
         return kind == AdNetworkKind.Mock;
     }
 
+    /// <summary>
+    /// 解析指定广告网络在当前平台的 Game ID。
+    /// </summary>
+    /// <param name="kind">广告网络类型。</param>
+    /// <returns>Game ID；未配置时返回空字符串。</returns>
     public string ResolveGameId(AdNetworkKind kind)
     {
         if (TryGetNetworkProfile(kind, out AdNetworkProfile profile))
@@ -122,6 +172,11 @@ public class AdConfigSO : ScriptableObject
         return ResolveLegacyGameId();
     }
 
+    /// <summary>
+    /// 解析指定广告网络是否启用测试模式。
+    /// </summary>
+    /// <param name="kind">广告网络类型。</param>
+    /// <returns>启用测试模式返回 true，否则 false。</returns>
     public bool ResolveTestMode(AdNetworkKind kind)
     {
         if (TryGetNetworkProfile(kind, out AdNetworkProfile profile))
@@ -132,6 +187,10 @@ public class AdConfigSO : ScriptableObject
         return testMode;
     }
 
+    /// <summary>
+    /// 解析旧版 Unity Ads 字段中的 Game ID。
+    /// </summary>
+    /// <returns>当前平台的 Game ID。</returns>
     private string ResolveLegacyGameId()
     {
 #if UNITY_IOS

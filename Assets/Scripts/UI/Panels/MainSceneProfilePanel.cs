@@ -22,6 +22,10 @@ public class MainSceneProfilePanel : MonoBehaviour
     [SerializeField] private int currentExpFallback = 4560;
     [SerializeField] private int requiredExpFallback = 9800;
 
+    /// <summary>刷新头像区昵称、VIP、等级与经验条展示。</summary>
+    /// <summary>
+    /// 刷新账号区显示：昵称、VIP、等级与经验条。
+    /// </summary>
     public void Refresh()
     {
         SetText(playerNameText, playerNameFallback);
@@ -37,6 +41,12 @@ public class MainSceneProfilePanel : MonoBehaviour
         }
     }
 
+    /// <summary>安全写入 TMP 文本。</summary>
+    /// <summary>
+    /// 安全设置 TMP 文本（组件为 null 时跳过）。
+    /// </summary>
+    /// <param name="text">目标文本组件。</param>
+    /// <param name="value">要显示的字符串。</param>
     private static void SetText(TMP_Text text, string value)
     {
         if (text != null)

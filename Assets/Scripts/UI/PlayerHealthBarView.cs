@@ -13,6 +13,7 @@ public class PlayerHealthBarView : GameEventSubscriberBase
 {
     [SerializeField] private Slider healthSlider;
 
+    /// <summary>自动绑定 Slider 组件。</summary>
     private void Awake()
     {
         if (healthSlider == null)
@@ -21,16 +22,19 @@ public class PlayerHealthBarView : GameEventSubscriberBase
         }
     }
 
+    /// <summary>订阅玩家生命值变化事件。</summary>
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribePlayerHealthChanged(OnPlayerHealthChanged);
     }
 
+    /// <summary>取消订阅玩家生命值变化事件。</summary>
     protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribePlayerHealthChanged(OnPlayerHealthChanged);
     }
 
+    /// <summary>根据事件参数更新血条填充比例。</summary>
     private void OnPlayerHealthChanged(GameEventContext context)
     {
         if (context.Payload is not PlayerHealthEventArgs args || healthSlider == null)

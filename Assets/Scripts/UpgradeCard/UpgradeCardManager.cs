@@ -4,7 +4,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 /// <summary>
-/// 升级卡管理：库存、随机抽取、发放与通用卡解析。
+/// Meta 升级卡管理器：维护局外卡片库存，负责奖池抽取、发放与通用卡解析。
 /// </summary>
 /// <remarks>
 /// <para><b>挂载：</b><c>GameSystems</c>，由 <see cref="GameBootstrapper"/> 初始化。</para>
@@ -15,8 +15,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>初始化存档与配置依赖。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -29,13 +31,19 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（升级卡系统无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">距上一帧的秒数。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>重置初始化状态。</summary>
     public void Shutdown()
     {
         isInitialized = false;
     }
 
+    /// <summary>获取指定升级卡的库存数量。</summary>
+    /// <param name="cardConfigId">卡片配置 ID。</param>
+    /// <returns>库存数量。</returns>
     public int GetCardCount(string cardConfigId)
     {
         if (saveManager?.Current == null || string.IsNullOrWhiteSpace(cardConfigId))
@@ -46,6 +54,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return ConfigIdIntPairListUtility.GetValue(saveManager.Current.upgradeCardInventory, cardConfigId);
     }
 
+    /// <summary>向库存中添加指定数量的升级卡。</summary>
+    /// <param name="cardConfigId">卡片配置 ID。</param>
+    /// <param name="count">添加数量。</param>
+    /// <returns>添加成功返回 <c>true</c>。</returns>
     public bool TryAddCard(string cardConfigId, int count)
     {
         if (!isInitialized || saveManager?.Current == null || string.IsNullOrWhiteSpace(cardConfigId) || count <= 0)
@@ -59,6 +71,12 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>从指定奖池随机抽取并发放升级卡。</summary>
+    /// <param name="poolConfigId">奖池配置 ID。</param>
+    /// <param name="drawCount">抽取次数。</param>
+    /// <param name="source">奖励来源。</param>
+    /// <param name="grants">发放结果列表。</param>
+    /// <returns>至少发放一张卡时返回 <c>true</c>。</returns>
     public bool TryGrantFromPool(
         string poolConfigId,
         int drawCount,
@@ -115,6 +133,8 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>获取所有升级卡配置。</summary>
+    /// <returns>升级卡配置列表。</returns>
     public IReadOnlyList<UpgradeCardSO> GetAllUpgradeCards()
     {
         if (configManager?.Database?.UpgradeCards != null && configManager.Database.UpgradeCards.Count > 0)
@@ -126,6 +146,9 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return loaded != null && loaded.Length > 0 ? loaded : System.Array.Empty<UpgradeCardSO>();
     }
 
+    /// <summary>获取指定奖池的爆率预览条目（含通用卡展开）。</summary>
+    /// <param name="poolConfigId">奖池配置 ID。</param>
+    /// <returns>按权重降序排列的预览条目列表。</returns>
     public IReadOnlyList<UpgradeCardPoolPreviewEntry> GetPoolPreviewEntries(string poolConfigId)
     {
         var result = new List<UpgradeCardPoolPreviewEntry>(16);
@@ -171,6 +194,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return result;
     }
 
+    /// <summary>解析指定 ID 的升级卡配置。</summary>
+    /// <param name="cardConfigId">卡片配置 ID。</param>
+    /// <param name="card">解析到的升级卡配置。</param>
+    /// <returns>解析成功返回 <c>true</c>。</returns>
     public bool TryResolveCard(string cardConfigId, out UpgradeCardSO card)
     {
         card = null;
@@ -182,6 +209,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return configManager.TryGetUpgradeCard(cardConfigId, out card);
     }
 
+    /// <summary>解析指定 ID 的升级卡奖励池。</summary>
+    /// <param name="poolConfigId">奖池配置 ID。</param>
+    /// <param name="pool">解析到的奖池配置。</param>
+    /// <returns>解析成功返回 <c>true</c>。</returns>
     private bool TryResolvePool(string poolConfigId, out UpgradeCardRewardPoolSO pool)
     {
         pool = null;
@@ -194,6 +225,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return configManager.TryGetUpgradeCardRewardPool(poolConfigId, out pool);
     }
 
+    /// <summary>从奖池按权重随机抽取一张升级卡。</summary>
+    /// <param name="pool">奖池配置。</param>
+    /// <param name="card">抽中的升级卡。</param>
+    /// <returns>抽取成功返回 <c>true</c>。</returns>
     private bool TryDrawCard(UpgradeCardRewardPoolSO pool, out UpgradeCardSO card)
     {
         card = null;
@@ -238,6 +273,9 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>将抽中的卡片解析为实际入库的配置 ID（通用卡随机展开）。</summary>
+    /// <param name="card">抽中的升级卡。</param>
+    /// <returns>实际入库的配置 ID。</returns>
     private string ResolveCardConfigId(UpgradeCardSO card)
     {
         if (card == null)
@@ -258,6 +296,8 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>随机解析通用技能卡为具体技能升级卡 ID。</summary>
+    /// <returns>技能升级卡配置 ID。</returns>
     private string ResolveGenericSkillCardId()
     {
         int index = Random.Range(0, UpgradeCardConstants.AllSkillConfigIds.Length);
@@ -265,6 +305,8 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return UpgradeCardConstants.GetSkillCardConfigId(skillId);
     }
 
+    /// <summary>随机解析通用属性卡为具体属性升级卡 ID。</summary>
+    /// <returns>属性升级卡配置 ID。</returns>
     private string ResolveGenericAttributeCardId()
     {
         int index = Random.Range(0, UpgradeCardConstants.CoreAttributeStats.Length);
@@ -272,6 +314,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return UpgradeCardConstants.GetAttributeConfigId(stat);
     }
 
+    /// <summary>获取发放卡片的展示名称。</summary>
+    /// <param name="resolvedId">解析后的配置 ID。</param>
+    /// <param name="drawnCard">原始抽中的卡片。</param>
+    /// <returns>展示名称。</returns>
     private string GetDisplayName(string resolvedId, UpgradeCardSO drawnCard)
     {
         if (TryResolveCard(resolvedId, out UpgradeCardSO resolved))
@@ -282,6 +328,9 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return drawnCard != null ? drawnCard.DisplayName : resolvedId;
     }
 
+    /// <summary>累加奖池中各卡片（含通用卡展开）的有效权重。</summary>
+    /// <param name="pool">奖池配置。</param>
+    /// <param name="weightByCardId">卡片 ID 到权重的映射。</param>
     private static void AccumulateExpandedPoolWeights(
         UpgradeCardRewardPoolSO pool,
         Dictionary<string, int> weightByCardId)
@@ -323,6 +372,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>向权重映射中累加指定卡片的权重。</summary>
+    /// <param name="weightByCardId">卡片 ID 到权重的映射。</param>
+    /// <param name="cardConfigId">卡片配置 ID。</param>
+    /// <param name="weight">累加权重。</param>
     private static void AddWeight(Dictionary<string, int> weightByCardId, string cardConfigId, int weight)
     {
         if (string.IsNullOrWhiteSpace(cardConfigId) || weight <= 0)
@@ -334,6 +387,10 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         weightByCardId[cardConfigId] = current + weight;
     }
 
+    /// <summary>将总权重均分到多个卡片 ID 并累加到映射中。</summary>
+    /// <param name="weightByCardId">卡片 ID 到权重的映射。</param>
+    /// <param name="cardConfigIds">目标卡片 ID 数组。</param>
+    /// <param name="totalWeight">待分配的总权重。</param>
     private static void DistributeWeight(Dictionary<string, int> weightByCardId, string[] cardConfigIds, int totalWeight)
     {
         if (cardConfigIds == null || cardConfigIds.Length == 0 || totalWeight <= 0)
@@ -350,6 +407,8 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>构建所有技能升级卡配置 ID 数组。</summary>
+    /// <returns>技能升级卡 ID 数组。</returns>
     private static string[] BuildSkillCardIds()
     {
         var ids = new string[UpgradeCardConstants.AllSkillConfigIds.Length];
@@ -361,6 +420,8 @@ public class UpgradeCardManager : MonoBehaviour, IGameSystem
         return ids;
     }
 
+    /// <summary>构建所有属性升级卡配置 ID 数组。</summary>
+    /// <returns>属性升级卡 ID 数组。</returns>
     private static string[] BuildAttributeCardIds()
     {
         var ids = new string[UpgradeCardConstants.CoreAttributeStats.Length];

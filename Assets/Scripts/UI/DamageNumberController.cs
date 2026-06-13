@@ -14,8 +14,10 @@ public class DamageNumberController : GameEventSubscriberBase
     /// <summary>旧字段名，与 <see cref="Instance"/> 相同。</summary>
     public static DamageNumberController numberControllerInstance => Instance;
 
+    /// <summary>飘字控制器单例。</summary>
     public static DamageNumberController Instance => SingletonHost<DamageNumberController>.Instance;
 
+    /// <summary>是否存在有效单例实例。</summary>
     public static bool HasInstance => SingletonHost<DamageNumberController>.HasInstance;
 
     [SerializeField] private Transform numberCanvas;
@@ -24,26 +26,31 @@ public class DamageNumberController : GameEventSubscriberBase
     private readonly List<DamageNumber> damageNumbers = new List<DamageNumber>();
     private readonly Queue<DamageNumber> availableDamageNumbers = new Queue<DamageNumber>();
 
+    /// <summary>声明场景级单例。</summary>
     private void Awake()
     {
         SingletonHost<DamageNumberController>.TryClaim(this, this, SingletonOptions.SceneDefault, out _);
     }
 
+    /// <summary>释放单例占用。</summary>
     private void OnDestroy()
     {
         SingletonHost<DamageNumberController>.Release(this);
     }
 
+    /// <summary>订阅伤害应用事件。</summary>
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribeDamageApplied(OnDamageApplied);
     }
 
+    /// <summary>取消订阅伤害应用事件。</summary>
     protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribeDamageApplied(OnDamageApplied);
     }
 
+    /// <summary>伤害事件回调，驱动飘字显示。</summary>
     private void OnDamageApplied(GameEventContext context)
     {
         if (context.Payload is not DamageEventArgs args)
@@ -54,12 +61,16 @@ public class DamageNumberController : GameEventSubscriberBase
         ShowDamageNumber(args.Amount, args.WorldPosition);
     }
 
+    /// <summary>在指定位置显示伤害飘字。</summary>
+    /// <param name="totalDamage">伤害数值。</param>
+    /// <param name="location">世界或屏幕坐标。</param>
     public void ShowDamageNumber(float totalDamage, Vector3 location)
     {
         DamageNumber number = GetDamageNumber();
         number?.SetupNumber(totalDamage, location);
     }
 
+    /// <summary>从对象池或本地队列获取飘字实例。</summary>
     private DamageNumber GetDamageNumber()
     {
         if (ServiceLocator.TryGet(out PerformanceManager performance) &&
@@ -104,6 +115,7 @@ public class DamageNumberController : GameEventSubscriberBase
         return null;
     }
 
+    /// <summary>对象池不可用时的 Instantiate 回退。</summary>
     private DamageNumber CreateFallbackDamageNumber()
     {
         if (numberPrefab == null || numberCanvas == null)

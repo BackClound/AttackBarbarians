@@ -11,8 +11,10 @@ public class MainSceneCardPanel : MonoBehaviour
 
     private readonly List<GeneralCardPanel> cardList = new List<GeneralCardPanel>(32);
 
+    /// <summary>区域内任意卡片被点击时触发。</summary>
     public event Action<MainSceneAction> CardClicked;
 
+    /// <summary>重建卡片缓存并绑定各 Widget 点击事件。</summary>
     private void Awake()
     {
         RebuildCache();
@@ -23,6 +25,7 @@ public class MainSceneCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>解绑所有卡片点击事件。</summary>
     private void OnDestroy()
     {
         for (int i = 0; i < cardList.Count; i++)
@@ -34,6 +37,9 @@ public class MainSceneCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>按动作标识查找对应卡片 Widget。</summary>
+    /// <param name="action">目标动作。</param>
+    /// <returns>匹配的 <see cref="GeneralCardPanel"/>，未找到返回 <c>null</c>。</returns>
     public GeneralCardPanel FindCard(MainSceneAction action)
     {
         for (int i = 0; i < cardList.Count; i++)
@@ -47,17 +53,24 @@ public class MainSceneCardPanel : MonoBehaviour
         return null;
     }
 
+    /// <summary>为指定入口设置红点状态。</summary>
+    /// <param name="action">目标动作。</param>
+    /// <param name="visible">是否显示红点。</param>
     public void SetRedDot(MainSceneAction action, bool visible)
     {
         GeneralCardPanel card = FindCard(action);
         card?.SetRedDot(visible);
     }
 
+    /// <summary>设置战斗/商城底栏选中态（兼容旧 API）。</summary>
+    /// <param name="battleSelected">为 <c>true</c> 时选中战斗页。</param>
     public void SetBattleTabSelected(bool battleSelected)
     {
         SetNavTabSelected(battleSelected ? MainSceneAction.Battle : MainSceneAction.Shop);
     }
 
+    /// <summary>设置底栏导航选中高亮。</summary>
+    /// <param name="selectedAction">当前选中的底栏动作。</param>
     public void SetNavTabSelected(MainSceneAction selectedAction)
     {
         for (int i = 0; i < cardList.Count; i++)
@@ -70,6 +83,7 @@ public class MainSceneCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>从序列化数组重建有效卡片列表。</summary>
     private void RebuildCache()
     {
         cardList.Clear();
@@ -87,6 +101,7 @@ public class MainSceneCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将 Widget 点击转发为卡片动作事件。</summary>
     private void OnCardClicked(MainSceneAction action)
     {
         CardClicked?.Invoke(action);

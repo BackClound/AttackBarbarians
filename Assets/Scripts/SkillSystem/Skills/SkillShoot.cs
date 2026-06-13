@@ -10,6 +10,7 @@ using UnityEngine;
 /// </remarks>
 public class SkillShoot : SkillBase
 {
+    /// <summary>攻速倍率变更时通知外部（如 UI/动画）。</summary>
     public Action<float> updateAttackSpeedMultiAction;
 
     [Header("Combat")]
@@ -33,8 +34,10 @@ public class SkillShoot : SkillBase
 
     private float scanTimer;
 
+    /// <summary>射击动画攻速倍率（同步自玩家属性）。</summary>
     public float shootSpeedAnimMulti { get; private set; }
 
+    /// <summary>解析玩家、控制器与射击兼容组件引用。</summary>
     protected override void Awake()
     {
         base.Awake();
@@ -44,22 +47,26 @@ public class SkillShoot : SkillBase
         shootController = player != null ? player.GetComponent<ShootSkillController>() : null;
     }
 
+    /// <summary>订阅技能施放事件以驱动射击动画。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribePlayerSkillCast(OnPlayerSkillCast);
     }
 
+    /// <summary>取消技能施放事件订阅。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribePlayerSkillCast(OnPlayerSkillCast);
     }
 
+    /// <summary>初始化攻速倍率与目标扫描计时器。</summary>
     private void Start()
     {
         RefreshAttackSpeedFromStats();
         scanTimer = 0f;
     }
 
+    /// <summary>每帧按间隔刷新战斗目标列表（供自动攻击/施法使用）。</summary>
     protected override void Update()
     {
         if (player == null || playerController == null || !playerController.IsReady)
@@ -70,6 +77,9 @@ public class SkillShoot : SkillBase
         TickTargetScan(Time.deltaTime);
     }
 
+    /// <summary>
+    /// 从玩家运行时属性刷新射击动画攻速倍率并同步 Animator。
+    /// </summary>
     public void RefreshAttackSpeedFromStats()
     {
         if (shootController != null)
@@ -93,6 +103,10 @@ public class SkillShoot : SkillBase
         ApplyAnimatorSpeedMultiplier();
     }
 
+    /// <summary>
+    /// 射击是否可释放（委托 <see cref="ShootSkillController.CanShoot"/>）。
+    /// </summary>
+    /// <returns>冷却就绪且有目标时返回 true。</returns>
     public bool CanUseShootSkill() => shootController != null && shootController.CanShoot();
 
     /// <summary>兼容旧调用：手动触发一次射击。</summary>
@@ -111,6 +125,8 @@ public class SkillShoot : SkillBase
     /// <summary>兼容旧调用：等价于 <see cref="CanUseShootSkill"/>。</summary>
     public void CheckEnemyIsAvailable() { }
 
+    /// <summary>响应技能施放事件，触发射击 Animator 并刷新攻速。</summary>
+    /// <param name="ctx">技能施放事件上下文。</param>
     private void OnPlayerSkillCast(GameEventContext ctx)
     {
         if (!driveShootAnimator || player?.anim == null)
@@ -128,6 +144,8 @@ public class SkillShoot : SkillBase
         ApplyAnimatorSpeedMultiplier();
     }
 
+    /// <summary>按配置间隔执行目标扫描。</summary>
+    /// <param name="deltaTime">帧间隔秒数。</param>
     private void TickTargetScan(float deltaTime)
     {
         scanTimer -= deltaTime;
@@ -140,6 +158,8 @@ public class SkillShoot : SkillBase
         scanTimer = HasCombatTarget() ? targetScanIntervalEngaged : targetScanIntervalIdle;
     }
 
+    /// <summary>刷新战斗目标列表（优先 AutoAttackController）。</summary>
+    /// <param name="force">是否强制刷新。</param>
     private void RefreshCombatTargets(bool force)
     {
         if (autoAttack != null && autoAttack.IsReady)
@@ -151,6 +171,8 @@ public class SkillShoot : SkillBase
         playerController?.ScanCombatTargets();
     }
 
+    /// <summary>当前是否存在有效战斗目标。</summary>
+    /// <returns>有主目标时返回 true。</returns>
     private bool HasCombatTarget()
     {
         if (autoAttack != null && autoAttack.IsReady)
@@ -161,6 +183,7 @@ public class SkillShoot : SkillBase
         return playerController != null && playerController.GetPrimaryTarget() != null;
     }
 
+    /// <summary>将攻速倍率写入 Animator 的 ShootSpeedMulti 参数。</summary>
     private void ApplyAnimatorSpeedMultiplier()
     {
         if (player?.anim == null)
@@ -171,6 +194,7 @@ public class SkillShoot : SkillBase
         player.anim.SetFloat("ShootSpeedMulti", Mathf.Max(0.1f, shootSpeedAnimMulti));
     }
 
+    /// <summary>Inspector 调试占位（Legacy 子弹列表刷新）。</summary>
     [ContextMenu("Update Bullet List")]
     private void UpdateTheBulletList() { }
 }

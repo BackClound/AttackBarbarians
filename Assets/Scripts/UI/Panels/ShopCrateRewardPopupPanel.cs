@@ -34,6 +34,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
     private Action<string, string> onPreviewRequested;
     private Action<string> onDrawAgainRequested;
 
+    /// <summary>绑定遮罩、确认、再抽与预览按钮，默认隐藏。</summary>
     private void Awake()
     {
         if (scrimButton != null)
@@ -59,6 +60,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         Hide();
     }
 
+    /// <summary>解绑所有弹窗按钮。</summary>
     private void OnDestroy()
     {
         if (scrimButton != null)
@@ -82,12 +84,20 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>绑定预览与再抽一次的外部回调。</summary>
+    /// <param name="previewRequested">预览按钮回调。</param>
+    /// <param name="drawAgainRequested">再抽一次回调。</param>
     public void BindCallbacks(Action<string, string> previewRequested, Action<string> drawAgainRequested)
     {
         onPreviewRequested = previewRequested;
         onDrawAgainRequested = drawAgainRequested;
     }
 
+    /// <summary>展示抽取结果：填充九宫格升级卡并显示数量。</summary>
+    /// <param name="args">升级卡发放事件参数。</param>
+    /// <param name="purchaseConfigId">本次购买配置 ID，用于再抽。</param>
+    /// <param name="poolConfigId">奖池 ID，用于预览。</param>
+    /// <param name="crateTitle">补给箱标题。</param>
     public void Show(
         UpgradeCardGrantedEventArgs args,
         string purchaseConfigId,
@@ -140,6 +150,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>关闭抽取结果弹窗。</summary>
     public void Hide()
     {
         if (root != null)
@@ -148,6 +159,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>确保奖励 ScrollView 网格已初始化。</summary>
     private void EnsureRewardGridReady()
     {
         if (rewardGridInitialized && cardGridRoot != null && cardSlotPrefab != null)
@@ -202,12 +214,14 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         rewardGridInitialized = cardGridRoot != null && cardSlotPrefab != null;
     }
 
+    /// <summary>隐藏旧版单抽/十连展示根节点。</summary>
     private static void HideLegacyRewardRoots(Transform panel)
     {
         SetInactiveIfExists(panel, "SingleDrawRoot");
         SetInactiveIfExists(panel, "TenDrawRoot");
     }
 
+    /// <summary>若子节点存在则设为不活跃。</summary>
     private static void SetInactiveIfExists(Transform parent, string childName)
     {
         Transform child = parent.Find(childName);
@@ -217,6 +231,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>运行时创建奖励卡片滚动网格（兼容旧 Prefab）。</summary>
     private Transform CreateRuntimeScrollHost(Transform panel)
     {
         GameObject scrollHostGo = new GameObject(
@@ -286,6 +301,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         return scrollHostGo.transform;
     }
 
+    /// <summary>根据发放列表实例化并填充奖励卡片。</summary>
     private void PopulateRewardGrid(UpgradeCardGrantedEventArgs args)
     {
         ClearSpawnedSlots();
@@ -320,6 +336,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将 Count>1 的发放条目展开为多张卡片。</summary>
     private static List<UpgradeCardGrantEntry> ExpandGrants(IReadOnlyList<UpgradeCardGrantEntry> grants)
     {
         var expanded = new List<UpgradeCardGrantEntry>(grants.Count);
@@ -336,6 +353,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         return expanded;
     }
 
+    /// <summary>重置滚动视图到顶部。</summary>
     private void ResetScrollPosition()
     {
         if (cardScrollRect == null)
@@ -348,6 +366,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         cardScrollRect.horizontalNormalizedPosition = 0f;
     }
 
+    /// <summary>销毁动态生成的奖励卡片。</summary>
     private void ClearSpawnedSlots()
     {
         for (int i = 0; i < spawnedSlots.Count; i++)
@@ -361,6 +380,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         spawnedSlots.Clear();
     }
 
+    /// <summary>再抽一次按钮回调。</summary>
     private void OnDrawAgainClicked()
     {
         if (string.IsNullOrWhiteSpace(lastPurchaseConfigId))
@@ -373,6 +393,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         onDrawAgainRequested?.Invoke(configId);
     }
 
+    /// <summary>预览按钮回调。</summary>
     private void OnPreviewClicked()
     {
         if (!string.IsNullOrWhiteSpace(lastPoolConfigId))
@@ -381,6 +402,7 @@ public class ShopCrateRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将 RectTransform 设为全拉伸锚点。</summary>
     private static void StretchFull(RectTransform rect)
     {
         rect.anchorMin = Vector2.zero;

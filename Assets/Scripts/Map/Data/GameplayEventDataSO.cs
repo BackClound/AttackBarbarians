@@ -17,11 +17,19 @@ public class GameplayEventDataSO : ConfigDataBase
     [Header("Effects")]
     [SerializeField] private List<GameplayEventEffectConfig> effects = new List<GameplayEventEffectConfig>();
 
+    /// <summary>事件触发条件。</summary>
     public GameplayEventTriggerConfig Trigger => trigger;
+    /// <summary>事件持续时间（秒）。</summary>
     public float DurationSeconds => Mathf.Max(0f, durationSeconds);
+    /// <summary>是否在波次完成时提前结束。</summary>
     public bool EndsOnWaveComplete => endsOnWaveComplete;
+    /// <summary>事件效果列表。</summary>
     public IReadOnlyList<GameplayEventEffectConfig> Effects => effects;
 
+    /// <summary>
+    /// 收集配置校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

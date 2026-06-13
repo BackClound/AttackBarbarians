@@ -19,8 +19,13 @@ public class RunProgressData
     public List<ConfigIdIntPair> activeBuffs = new List<ConfigIdIntPair>(8);
     public List<ConfigIdIntPair> selectedUpgrades = new List<ConfigIdIntPair>(16);
 
+    /// <summary>创建空的局内进度实例。</summary>
+    /// <returns>无进行中局数的默认进度对象。</returns>
     public static RunProgressData CreateDefault() => new RunProgressData();
 
+    /// <summary>
+    /// 清除当前局内进度，重置为无进行中局的状态。
+    /// </summary>
     public void ClearRun()
     {
         hasActiveRun = false;

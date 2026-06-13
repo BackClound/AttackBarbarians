@@ -15,9 +15,14 @@ public class DamageSystem : MonoBehaviour, IGameSystem
 
     private bool isInitialized;
 
+    /// <summary>系统是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前使用的伤害计算公式配置。</summary>
     public DamageCalculationSO Rules => calculationRules != null ? calculationRules : GetFallbackRules();
 
+    /// <summary>
+    /// 加载伤害计算配置并完成初始化。
+    /// </summary>
     public void Initialize()
     {
         if (calculationRules == null)
@@ -34,14 +39,21 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（当前无逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔时间。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>
+    /// 关闭系统并重置初始化标记。
+    /// </summary>
     public void Shutdown()
     {
         isInitialized = false;
     }
 
     /// <summary>计算并应用伤害；目标无效时返回 <see cref="DamageResult.None"/>。</summary>
+    /// <param name="info">伤害上下文。</param>
+    /// <returns>伤害结算结果。</returns>
     public DamageResult ApplyDamage(DamageInfo info)
     {
         if (!isInitialized)
@@ -94,6 +106,9 @@ public class DamageSystem : MonoBehaviour, IGameSystem
     /// <summary>
     /// 计算顺序：基础伤害 → 技能倍率 → 攻击方增益 → 防御减免 → 元素修正 → 暴击 → 最终伤害。
     /// </summary>
+    /// <param name="info">伤害上下文。</param>
+    /// <param name="targetHealth">目标血量组件，可选；用于读取防御属性。</param>
+    /// <returns>计算后的伤害结果（尚未写入血量）。</returns>
     public DamageResult Calculate(DamageInfo info, Entity_Health targetHealth = null)
     {
         DamageCalculationSO rules = Rules;
@@ -156,11 +171,22 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         return new DamageResult(damage, mitigated, isCritical, false, triggered);
     }
 
+    /// <summary>
+    /// 判断是否向 UI 发布跳字事件（当前仅敌人目标）。
+    /// </summary>
+    /// <param name="target">受击目标。</param>
+    /// <returns>是否发布伤害数字事件。</returns>
     private static bool ShouldPublishDamageNumber(GameObject target)
     {
         return target != null && target.CompareTag(GameConstants.Tags.Enemy);
     }
 
+    /// <summary>
+    /// 根据攻击方暴击概率掷骰判定是否暴击。
+    /// </summary>
+    /// <param name="attackerStats">攻击方属性。</param>
+    /// <param name="rules">伤害计算规则。</param>
+    /// <returns>是否暴击。</returns>
     private static bool RollCritical(Entity_Stats attackerStats, DamageCalculationSO rules)
     {
         if (attackerStats == null || attackerStats.offenseStats == null || attackerStats.offenseStats.critChance == null)
@@ -172,6 +198,13 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         return chance > Random.value;
     }
 
+    /// <summary>
+    /// 获取元素附加伤害加成。
+    /// </summary>
+    /// <param name="stats">攻击方属性。</param>
+    /// <param name="element">元素类型。</param>
+    /// <param name="scale">元素属性换算比例。</param>
+    /// <returns>附加伤害量。</returns>
     private static float GetElementBonus(Entity_Stats stats, ElementType element, float scale)
     {
         if (stats == null || stats.offenseStats == null || scale <= 0f)
@@ -192,11 +225,21 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 获取元素伤害乘数（预留抗性系统扩展）。
+    /// </summary>
+    /// <param name="element">元素类型。</param>
+    /// <returns>伤害乘数。</returns>
     private static float GetElementMultiplier(ElementType element)
     {
         return element == ElementType.None ? 1f : 1f;
     }
 
+    /// <summary>
+    /// 从伤害来源解析攻击方属性组件。
+    /// </summary>
+    /// <param name="source">伤害来源对象。</param>
+    /// <returns>攻击方属性，无法解析时返回 null。</returns>
     private static Entity_Stats ResolveAttackerStats(object source)
     {
         if (source == null)
@@ -232,12 +275,22 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         return null;
     }
 
+    /// <summary>
+    /// 从目标 GameObject 解析防御方属性。
+    /// </summary>
+    /// <param name="target">受击目标。</param>
+    /// <returns>防御方属性，无法解析时返回 null。</returns>
     private static Entity_Stats ResolveDefenderStats(GameObject target)
     {
         Entity_Health health = ResolveHealth(target);
         return health != null ? health.entity_Stats : null;
     }
 
+    /// <summary>
+    /// 从目标 GameObject 解析血量组件（支持 Enemy、Player 与通用 Entity_Health）。
+    /// </summary>
+    /// <param name="target">受击目标。</param>
+    /// <returns>血量组件，无法解析时返回 null。</returns>
     private static Entity_Health ResolveHealth(GameObject target)
     {
         if (target == null)
@@ -258,6 +311,10 @@ public class DamageSystem : MonoBehaviour, IGameSystem
         return target.GetComponent<Entity_Health>();
     }
 
+    /// <summary>
+    /// 获取运行时默认伤害计算规则（配置缺失时使用）。
+    /// </summary>
+    /// <returns>默认 <see cref="DamageCalculationSO"/> 实例。</returns>
     private static DamageCalculationSO GetFallbackRules()
     {
         if (fallbackRules == null)

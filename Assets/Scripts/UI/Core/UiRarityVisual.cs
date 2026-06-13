@@ -16,11 +16,14 @@ public class UiRarityVisual : MonoBehaviour
     [SerializeField] private UpgradeRarity upgradeRarity = UpgradeRarity.Common;
     [SerializeField] private EquipmentQuality equipmentQuality = EquipmentQuality.Common;
 
+    /// <summary>编辑器 Reset 时自动绑定同物体 Image 为边框。</summary>
     private void Reset()
     {
         borderImage = GetComponent<Image>();
     }
 
+    /// <summary>按升级卡稀有度刷新边框与顶条颜色。</summary>
+        /// <param name="rarity">升级卡稀有度。</param>
     public void ApplyUpgradeRarity(UpgradeRarity rarity)
     {
         useEquipmentQuality = false;
@@ -28,6 +31,8 @@ public class UiRarityVisual : MonoBehaviour
         Refresh();
     }
 
+    /// <summary>按装备品质刷新边框与顶条颜色。</summary>
+        /// <param name="quality">装备品质等级。</param>
     public void ApplyEquipmentQuality(EquipmentQuality quality)
     {
         useEquipmentQuality = true;
@@ -35,6 +40,7 @@ public class UiRarityVisual : MonoBehaviour
         Refresh();
     }
 
+    /// <summary>根据当前模式（升级稀有度或装备品质）重绘视觉。</summary>
     public void Refresh()
     {
         Color color = useEquipmentQuality
@@ -52,6 +58,7 @@ public class UiRarityVisual : MonoBehaviour
         }
     }
 
+    /// <summary>启用时按序列化配置刷新稀有度配色。</summary>
     private void OnEnable()
     {
         Refresh();

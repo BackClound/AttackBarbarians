@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 敌人数值、Prefab 与对象池 Key 配置。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Enemy Data。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Enemy/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Attack Barbarians/Config/Enemy Data")]
 public class EnemyDataSO : ConfigDataBase
 {
@@ -35,6 +39,11 @@ public class EnemyDataSO : ConfigDataBase
     public IReadOnlyList<SpecialEnemyAbilityBinding> AbilityBindings => abilityBindings;
     public int SpecialBonusExperience => Mathf.Max(0, specialBonusExperience);
 
+    /// <summary>
+    /// 按能力标签查找绑定的特殊能力 configId。
+    /// </summary>
+    /// <param name="tag">要查询的敌人能力标签。</param>
+    /// <returns>匹配的能力 configId；未绑定时返回空字符串。</returns>
     public string TryGetAbilityConfigId(EnemyAbilityTag tag)
     {
         if (abilityBindings != null)
@@ -59,6 +68,10 @@ public class EnemyDataSO : ConfigDataBase
     public int SpawnWeight => Mathf.Max(1, spawnWeight);
     public int ExperienceReward => Mathf.Max(0, experienceReward);
 
+    /// <summary>
+    /// 收集敌人配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

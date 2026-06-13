@@ -18,11 +18,21 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
     private bool hasPlayerFocus;
     private int enemyThrottleFrame;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+
+    /// <summary>当前是否处于移动端性能配置档。</summary>
     public bool IsMobileProfile => isMobileProfile;
+
+    /// <summary>当前生效的性能预算配置。</summary>
     public PerformanceBudgetSO ActiveBudget => activeBudget;
+
+    /// <summary>运行时日志是否启用。</summary>
     public bool RuntimeLogsEnabled { get; private set; }
 
+    /// <summary>
+    /// 解析预算配置、应用平台档位并订阅事件。
+    /// </summary>
     public void Initialize()
     {
         ResolveBudget();
@@ -33,6 +43,10 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧刷新玩家焦点位置，供敌人降频逻辑使用。
+    /// </summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized)
@@ -43,6 +57,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         RefreshPlayerFocus();
     }
 
+    /// <summary>
+    /// 取消事件订阅并重置活跃计数。
+    /// </summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeEnemyKilled(OnEnemyKilled);
@@ -54,12 +71,26 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 获取指定预算分类的当前上限（含移动端缩放）。
+    /// </summary>
+    /// <param name="category">预算分类。</param>
+    /// <returns>上限值，无配置时返回 0。</returns>
     public int GetLimit(PerformanceBudgetCategory category) =>
         activeBudget != null ? activeBudget.GetLimit(category, isMobileProfile) : 0;
 
+    /// <summary>
+    /// 获取指定预算分类的当前活跃数量。
+    /// </summary>
+    /// <param name="category">预算分类。</param>
+    /// <returns>当前活跃计数。</returns>
     public int GetActiveCount(PerformanceBudgetCategory category) =>
         activeCounts[(int)category];
 
+    /// <summary>
+    /// 获取最大并发音效数（含移动端缩放）。
+    /// </summary>
+    /// <returns>并发上限，无配置时返回 12。</returns>
     public int GetMaxConcurrentSfx()
     {
         if (activeBudget == null)
@@ -76,6 +107,11 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         return Mathf.Max(1, Mathf.RoundToInt(limit * activeBudget.MobileBudgetScale));
     }
 
+    /// <summary>
+    /// 尝试占用一个预算槽位。
+    /// </summary>
+    /// <param name="category">预算分类。</param>
+    /// <returns>占用成功或不限流时返回 true，已达上限返回 false。</returns>
     public bool TryAcquire(PerformanceBudgetCategory category)
     {
         int limit = GetLimit(category);
@@ -94,6 +130,10 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 释放一个已占用的预算槽位。
+    /// </summary>
+    /// <param name="category">预算分类。</param>
     public void Release(PerformanceBudgetCategory category)
     {
         int index = (int)category;
@@ -103,7 +143,12 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         }
     }
 
-    /// <summary>敌人 <see cref="EnemyController"/> 是否在本帧执行完整 Update。</summary>
+    /// <summary>
+    /// 判断敌人是否在本帧执行完整 Update（远距离非 Boss/精英按间隔降频）。
+    /// </summary>
+    /// <param name="enemyTransform">敌人 Transform。</param>
+    /// <param name="isBossOrElite">是否为 Boss 或精英（始终完整更新）。</param>
+    /// <returns>本帧应执行完整 Update 返回 true，否则返回 false。</returns>
     public bool ShouldRunEnemyUpdateThisFrame(Transform enemyTransform, bool isBossOrElite)
     {
         if (enemyTransform == null || activeBudget == null)
@@ -133,6 +178,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         return (enemyThrottleFrame % interval) == bucket;
     }
 
+    /// <summary>
+    /// 根据存档设置与移动端偏移应用画质档位。
+    /// </summary>
     public void ApplyGraphicsFromSave()
     {
         if (activeBudget == null)
@@ -159,6 +207,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         QualitySettings.SetQualityLevel(qualityLevel, applyExpensiveChanges: true);
     }
 
+    /// <summary>
+    /// 解析生效的性能预算配置（Inspector 覆盖 → ConfigManager → Resources）。
+    /// </summary>
     private void ResolveBudget()
     {
         activeBudget = budgetOverride;
@@ -178,6 +229,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 同步运行时日志开关至 <see cref="GameDebug"/>。
+    /// </summary>
     private void SyncRuntimeLogs()
     {
         RuntimeLogsEnabled = ServiceLocator.TryGet(out ConfigManager config) &&
@@ -186,6 +240,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         GameDebug.SetRuntimeLogsEnabled(RuntimeLogsEnabled);
     }
 
+    /// <summary>
+    /// 根据运行平台应用移动端帧率等性能配置。
+    /// </summary>
     private void ApplyPlatformProfile()
     {
         isMobileProfile = Application.isMobilePlatform;
@@ -204,6 +261,9 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 刷新玩家焦点坐标，供敌人 Update 降频判定使用。
+    /// </summary>
     private void RefreshPlayerFocus()
     {
         hasPlayerFocus = false;
@@ -221,11 +281,18 @@ public class PerformanceManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 敌人击杀事件回调：释放敌人预算槽位。
+    /// </summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         Release(PerformanceBudgetCategory.Enemy);
     }
 
+    /// <summary>
+    /// 每帧递增敌人降频分桶帧计数。
+    /// </summary>
     private void LateUpdate()
     {
         enemyThrottleFrame++;

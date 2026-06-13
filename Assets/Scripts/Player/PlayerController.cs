@@ -30,13 +30,20 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
     private readonly PlayerRuntimeStats runtimeStats = new PlayerRuntimeStats();
     private readonly PlayerTargetScanner targetScanner = new PlayerTargetScanner();
 
+    /// <summary>所属玩家实体。</summary>
     public Player Player => player;
+    /// <summary>自动攻击控制器。</summary>
     public AutoAttackController AutoAttack => autoAttack;
+    /// <summary>运行时属性快照。</summary>
     public PlayerRuntimeStats RuntimeStats => runtimeStats;
+    /// <summary>战斗目标扫描器。</summary>
     public PlayerTargetScanner TargetScanner => targetScanner;
+    /// <summary>当前生效的玩家配置。</summary>
     public PlayerDataSO ActiveData { get; private set; }
+    /// <summary>配置与属性是否已完成初始化。</summary>
     public bool IsReady { get; private set; }
 
+    /// <summary>缓存组件引用并设置扫描原点。</summary>
     private void Awake()
     {
         player = GetComponent<Player>();
@@ -53,11 +60,13 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>启动时从配置初始化玩家数据。</summary>
     private void Start()
     {
         InitializeFromConfig();
     }
 
+    /// <summary>每帧驱动状态机并 Tick Buff。</summary>
     private void Update()
     {
         TickStateMachine(Time.deltaTime);
@@ -70,6 +79,8 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         runtimeStats.TickBuffs(Time.deltaTime);
     }
 
+    /// <summary>驱动玩家状态机 Update。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void TickStateMachine(float deltaTime)
     {
         if (player == null || player.stateMachine == null)
@@ -80,11 +91,14 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         player.stateMachine.UpdateState();
     }
 
+    /// <summary>驱动玩家状态机 FixedUpdate。</summary>
+    /// <param name="fixedDeltaTime">物理帧间隔（秒）。</param>
     public void TickStateMachineFixed(float fixedDeltaTime)
     {
         player?.stateMachine?.FixedUpdateState();
     }
 
+    /// <summary>取消 Buff 变更订阅。</summary>
     private void OnDestroy()
     {
         GameEvents.UnsubscribeBuffChanged(OnBuffChanged);
@@ -158,13 +172,19 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         return destination.Count > 0;
     }
 
+    /// <summary>获取当前主目标敌人。</summary>
+    /// <returns>扫描器选中的首要目标，无目标时为 <c>null</c>。</returns>
     public Enemy GetPrimaryTarget() => targetScanner.PrimaryTarget;
 
+    /// <summary>发布玩家开始攻击事件。</summary>
+    /// <param name="skillId">触发攻击的技能 Id，可为空。</param>
     public void NotifyAttackStarted(string skillId = null)
     {
         GameEvents.RaisePlayerAttackStarted(this, new PlayerAttackEventArgs(targetScanner.PrimaryTarget, skillId));
     }
 
+    /// <summary>发布技能施放与使用事件。</summary>
+    /// <param name="skillId">技能配置 Id。</param>
     public void NotifySkillCast(string skillId)
     {
         if (string.IsNullOrEmpty(skillId))
@@ -191,12 +211,17 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         ConfigureTargetScanner();
     }
 
+    /// <summary>应用 Buff 并刷新实体属性。</summary>
+    /// <param name="buff">Buff 配置。</param>
+    /// <param name="stacks">叠加层数。</param>
     public void ApplyBuff(BuffDataSO buff, int stacks = 1)
     {
         runtimeStats.ApplyBuff(buff, stacks);
         RefreshEntityStats();
     }
 
+    /// <summary>应用单条属性修正并刷新实体属性。</summary>
+    /// <param name="modifier">属性修正配置。</param>
     public void ApplyModifier(StatModifierConfig modifier)
     {
         runtimeStats.ApplyModifier(modifier);
@@ -225,6 +250,7 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>配置目标扫描器参数（射程、Layer、策略等）。</summary>
     private void ConfigureTargetScanner()
     {
         Vector2 wallFallback = wallReference != null
@@ -261,6 +287,8 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
             wallFallback);
     }
 
+    /// <summary>判断是否可进入战斗/射击状态。</summary>
+    /// <returns>技能或自动攻击允许释放时为 <c>true</c>。</returns>
     public bool CanEnterCombatState()
     {
         if (player?.skillManager != null)
@@ -277,6 +305,9 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         return false;
     }
 
+    /// <summary>从 Override 或 ConfigManager 解析玩家配置。</summary>
+    /// <param name="data">解析到的配置。</param>
+    /// <returns>成功找到配置时为 <c>true</c>。</returns>
     private bool TryResolvePlayerData(out PlayerDataSO data)
     {
         if (playerDataOverride != null)
@@ -295,6 +326,8 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         return false;
     }
 
+    /// <summary>Buff 变更回调：刷新实体属性。</summary>
+    /// <param name="context">事件上下文。</param>
     private void OnBuffChanged(GameEventContext context)
     {
         if (context.Payload is not BuffEventArgs args || args.Target != player)

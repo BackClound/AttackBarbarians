@@ -11,6 +11,7 @@ public class UiStyledBackground : MonoBehaviour
     [SerializeField] private bool useRustPanel;
     [SerializeField] private float panelAlpha = 0.92f;
 
+    /// <summary>按配置将 Image 背景设为钢板或锈蚀面板色。</summary>
     private void Awake()
     {
         var image = GetComponent<Image>();

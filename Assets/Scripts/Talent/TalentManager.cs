@@ -19,8 +19,12 @@ public class TalentManager : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>天赋服务是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>
+    /// 初始化天赋系统：订阅存档与开局事件，并尝试应用到场景玩家。
+    /// </summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -37,8 +41,15 @@ public class TalentManager : MonoBehaviour, IGameSystem
         TryApplyToScenePlayer();
     }
 
+    /// <summary>
+    /// 每帧更新（天赋系统无逐帧逻辑）。
+    /// </summary>
+    /// <param name="deltaTime">距上一帧的时间间隔（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>
+    /// 关闭天赋系统并取消事件订阅。
+    /// </summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeSaveLoaded(OnSaveLoaded);
@@ -46,6 +57,11 @@ public class TalentManager : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 获取指定天赋的当前等级。
+    /// </summary>
+    /// <param name="configId">天赋配置 ID。</param>
+    /// <returns>当前等级；未解锁或存档未就绪时返回 0。</returns>
     public int GetTalentLevel(string configId)
     {
         if (string.IsNullOrEmpty(configId) || saveManager?.Current == null)
@@ -56,6 +72,12 @@ public class TalentManager : MonoBehaviour, IGameSystem
         return saveManager.Current.GetTalentLevel(configId);
     }
 
+    /// <summary>
+    /// 校验指定天赋是否可升级。
+    /// </summary>
+    /// <param name="configId">天赋配置 ID。</param>
+    /// <param name="failureReason">不可升级时的失败说明文案。</param>
+    /// <returns>可升级时返回 true。</returns>
     public bool CanUpgrade(string configId, out string failureReason)
     {
         failureReason = null;
@@ -97,6 +119,11 @@ public class TalentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 尝试升级指定天赋（扣费、存档、重建修正并应用到玩家）。
+    /// </summary>
+    /// <param name="configId">天赋配置 ID。</param>
+    /// <returns>升级成功时返回 true。</returns>
     public bool TryUpgrade(string configId)
     {
         if (!CanUpgrade(configId, out string failureReason))
@@ -136,6 +163,9 @@ public class TalentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 根据存档中全部已解锁天赋重建合并后的属性修正列表。
+    /// </summary>
     public void RebuildCombinedModifiers()
     {
         combinedModifiers.Clear();
@@ -167,8 +197,15 @@ public class TalentManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 获取全部天赋合并后的属性修正列表。
+    /// </summary>
+    /// <returns>合并后的属性修正只读列表。</returns>
     public IReadOnlyList<StatModifierConfig> GetCombinedModifiers() => combinedModifiers;
 
+    /// <summary>
+    /// 若场景中存在玩家控制器，则应用天赋修正。
+    /// </summary>
     public void TryApplyToScenePlayer()
     {
         if (!PlayerSceneAccess.TryGetController(out PlayerController controller))
@@ -179,6 +216,10 @@ public class TalentManager : MonoBehaviour, IGameSystem
         ApplyToPlayer(controller);
     }
 
+    /// <summary>
+    /// 将天赋修正应用到指定玩家控制器。
+    /// </summary>
+    /// <param name="controller">目标玩家控制器。</param>
     public void ApplyToPlayer(PlayerController controller)
     {
         if (controller == null)
@@ -191,6 +232,11 @@ public class TalentManager : MonoBehaviour, IGameSystem
         controller.RefreshEntityStats();
     }
 
+    /// <summary>
+    /// 将指定天赋在给定等级下的属性修正追加到合并列表。
+    /// </summary>
+    /// <param name="talent">天赋配置。</param>
+    /// <param name="level">天赋等级。</param>
     private void AppendModifiersForLevel(TalentDataSO talent, int level)
     {
         IReadOnlyList<StatModifierConfig> perLevel = talent.ModifiersPerLevel;
@@ -219,6 +265,12 @@ public class TalentManager : MonoBehaviour, IGameSystem
         combinedModifiers.AddRange(scratchModifiers);
     }
 
+    /// <summary>
+    /// 校验天赋的前置天赋等级是否满足要求。
+    /// </summary>
+    /// <param name="data">天赋配置。</param>
+    /// <param name="failureReason">不满足时的失败说明文案。</param>
+    /// <returns>前置条件满足时返回 true。</returns>
     private bool ArePrerequisitesMet(TalentDataSO data, out string failureReason)
     {
         failureReason = null;
@@ -247,20 +299,37 @@ public class TalentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 从配置管理器解析天赋配置。
+    /// </summary>
+    /// <param name="configId">天赋配置 ID。</param>
+    /// <param name="data">找到的天赋配置。</param>
+    /// <returns>解析成功时返回 true。</returns>
     private bool TryResolveTalent(string configId, out TalentDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetTalent(configId, out data);
     }
 
+    /// <summary>
+    /// 存档加载完成后重建修正并应用到场景玩家。
+    /// </summary>
+    /// <param name="context">游戏事件上下文。</param>
     private void OnSaveLoaded(GameEventContext context)
     {
         RebuildCombinedModifiers();
         TryApplyToScenePlayer();
     }
 
+    /// <summary>
+    /// 游戏开局时将天赋修正应用到场景玩家。
+    /// </summary>
+    /// <param name="context">游戏事件上下文。</param>
     private void OnGameStarted(GameEventContext context) => TryApplyToScenePlayer();
 
+    /// <summary>
+    /// 调试菜单：尝试升级最大生命值天赋。
+    /// </summary>
     [ContextMenu("Debug/Upgrade Max Hp Talent")]
     private void DebugUpgradeMaxHp()
     {

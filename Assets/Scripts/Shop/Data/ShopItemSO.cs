@@ -23,16 +23,34 @@ public class ShopItemSO : ConfigDataBase
     [SerializeField] private long rewardAmount = 500;
     [SerializeField] private string rewardConfigId;
 
+    /// <summary>购买所需货币类型。</summary>
     public CurrencyType PriceCurrency => priceCurrency;
+
+    /// <summary>购买价格（不小于 0）。</summary>
     public long PriceAmount => (long)Mathf.Max(0, priceAmount);
+
+    /// <summary>限购次数（0 表示不限购）。</summary>
     public int PurchaseLimit => Mathf.Max(0, purchaseLimit);
+
+    /// <summary>限购计数刷新周期。</summary>
     public ShopRefreshPeriod RefreshPeriod => refreshPeriod;
+
+    /// <summary>购买后发放的奖励类型。</summary>
     public ShopRewardType RewardType => rewardType;
+
+    /// <summary>奖励数量（不小于 0）。</summary>
     public long RewardAmount => (long)Mathf.Max(0, rewardAmount);
+
+    /// <summary>奖励附加配置 ID（如升级卡卡池）。</summary>
     public string RewardConfigId => rewardConfigId;
 
+    /// <summary>是否启用限购。</summary>
     public bool HasPurchaseLimit => purchaseLimit > 0;
 
+    /// <summary>
+    /// 收集配置校验错误。
+    /// </summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

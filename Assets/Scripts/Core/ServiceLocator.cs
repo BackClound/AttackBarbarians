@@ -14,6 +14,9 @@ public static class ServiceLocator
 {
     private static readonly Dictionary<Type, object> Services = new Dictionary<Type, object>(32);
 
+    /// <summary>注册服务实例，同类型后注册会覆盖前者。</summary>
+    /// <typeparam name="T">服务类型。</typeparam>
+    /// <param name="service">服务实例，不可为 null。</param>
     public static void Register<T>(T service) where T : class
     {
         if (service == null)
@@ -24,6 +27,10 @@ public static class ServiceLocator
         Services[typeof(T)] = service;
     }
 
+    /// <summary>尝试获取已注册的服务。</summary>
+    /// <typeparam name="T">服务类型。</typeparam>
+    /// <param name="service">输出实例；未注册时为 null。</param>
+    /// <returns>找到且类型匹配时返回 true。</returns>
     public static bool TryGet<T>(out T service) where T : class
     {
         if (Services.TryGetValue(typeof(T), out object value))
@@ -36,6 +43,9 @@ public static class ServiceLocator
         return false;
     }
 
+    /// <summary>获取已注册的服务，未注册时抛异常。</summary>
+    /// <typeparam name="T">服务类型。</typeparam>
+    /// <returns>服务实例。</returns>
     public static T Get<T>() where T : class
     {
         if (TryGet(out T service))
@@ -46,11 +56,14 @@ public static class ServiceLocator
         throw new InvalidOperationException($"Service not registered: {typeof(T).Name}");
     }
 
+    /// <summary>移除指定类型的注册项。</summary>
+    /// <typeparam name="T">服务类型。</typeparam>
     public static void Unregister<T>() where T : class
     {
         Services.Remove(typeof(T));
     }
 
+    /// <summary>清空全部注册（Bootstrap 销毁时调用）。</summary>
     public static void Clear()
     {
         Services.Clear();

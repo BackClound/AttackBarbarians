@@ -18,10 +18,20 @@ public sealed class BossPhaseController
     private readonly StatRuntimeSnapshot phaseSnapshot = new StatRuntimeSnapshot();
     private readonly List<float> timeThresholds = new List<float>(4);
 
+    /// <summary>当前阶段索引（从 0 开始）。</summary>
     public int CurrentPhaseIndex => currentPhaseIndex;
+    /// <summary>总阶段数。</summary>
     public int PhaseCount => bossData != null ? bossData.PhaseCount : 1;
+    /// <summary>阶段控制器是否处于激活状态。</summary>
     public bool IsActive => isActive;
 
+    /// <summary>
+    /// 绑定 Boss 数据与宿主组件并初始化阶段状态。
+    /// </summary>
+    /// <param name="data">Boss 配置。</param>
+    /// <param name="enemyHealth">Boss 血量组件。</param>
+    /// <param name="stats">Boss 属性组件。</param>
+    /// <param name="owner">Boss GameObject。</param>
     public void Initialize(
         BossDataSO data,
         Enemy_Health enemyHealth,
@@ -53,6 +63,8 @@ public sealed class BossPhaseController
         }
     }
 
+    /// <summary>每帧推进存活时间并尝试切换阶段。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isActive || bossData == null)
@@ -71,6 +83,7 @@ public sealed class BossPhaseController
         TryAdvanceByHealth();
     }
 
+    /// <summary>释放引用并重置激活状态。</summary>
     public void Shutdown()
     {
         isActive = false;
@@ -80,6 +93,7 @@ public sealed class BossPhaseController
         bossObject = null;
     }
 
+    /// <summary>按当前血量比例尝试推进阶段。</summary>
     private void TryAdvanceByHealth()
     {
         float maxHp = health.MaxHp;
@@ -109,6 +123,7 @@ public sealed class BossPhaseController
         TrySetPhase(targetPhase, ratio);
     }
 
+    /// <summary>按存活时间尝试推进阶段。</summary>
     private void TryAdvanceByTime()
     {
         if (timeThresholds.Count == 0)
@@ -132,6 +147,9 @@ public sealed class BossPhaseController
         TrySetPhase(targetPhase, ratio);
     }
 
+    /// <summary>切换到新阶段并广播阶段变更事件。</summary>
+    /// <param name="newPhaseIndex">目标阶段索引。</param>
+    /// <param name="hpRatio">当前血量比例。</param>
     private void TrySetPhase(int newPhaseIndex, float hpRatio)
     {
         if (newPhaseIndex <= currentPhaseIndex)
@@ -153,6 +171,8 @@ public sealed class BossPhaseController
         GameEvents.RaiseAudioPlaySfx(bossObject, GameConstants.AudioIds.SfxBossPhase);
     }
 
+    /// <summary>应用指定阶段的属性修正到 Boss。</summary>
+    /// <param name="phaseIndex">阶段索引。</param>
     private void ApplyPhaseModifiers(int phaseIndex)
     {
         if (entityStats == null || bossData == null)

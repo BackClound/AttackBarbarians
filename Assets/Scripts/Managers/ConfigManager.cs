@@ -47,12 +47,17 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly List<RewardPoolSO> rewardPoolList = new List<RewardPoolSO>(4);
 
     public bool IsInitialized { get; private set; }
+    /// <summary>游戏全局配置。</summary>
     public GameConfig GameConfig => gameConfig;
+    /// <summary>性能预算配置。</summary>
     public PerformanceBudgetSO PerformanceBudget =>
         gameConfig != null ? gameConfig.PerformanceBudget : null;
+    /// <summary>当前使用的配置数据库。</summary>
     public ConfigDatabaseSO Database { get; private set; }
+    /// <summary>最近一次配置校验结果。</summary>
     public ConfigValidationResult LastValidation { get; private set; }
 
+    /// <summary>加载配置、重建索引并执行校验。</summary>
     public void Initialize()
     {
         if (gameConfig == null)
@@ -77,8 +82,11 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IsInitialized = true;
     }
 
+    /// <summary>每帧更新（当前无逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>清空索引缓存并重置初始化状态。</summary>
     public void Shutdown()
     {
         ClearCache();
@@ -86,76 +94,106 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         LastValidation = null;
     }
 
+    /// <summary>是否启用运行时配置相关日志。</summary>
+    /// <returns>启用返回 true，否则返回 false。</returns>
     public bool ShouldLog()
     {
         return gameConfig != null && gameConfig.EnableRuntimeLogs;
     }
 
+    /// <summary>按 configId 查找玩家配置。</summary>
     public bool TryGetPlayer(string configId, out PlayerDataSO data) =>
         TryGet(playersById, configId, out data);
 
+    /// <summary>按 configId 查找敌人配置。</summary>
     public bool TryGetEnemy(string configId, out EnemyDataSO data) =>
         TryGet(enemiesById, configId, out data);
 
+    /// <summary>按 configId 查找技能配置。</summary>
     public bool TryGetSkill(string configId, out SkillDataSO data) =>
         TryGet(skillsById, configId, out data);
 
+    /// <summary>按 configId 查找 Buff 配置。</summary>
     public bool TryGetBuff(string configId, out BuffDataSO data) =>
         TryGet(buffsById, configId, out data);
 
+    /// <summary>按 configId 查找波次配置。</summary>
     public bool TryGetWave(string configId, out WaveDataSO data) =>
         TryGet(wavesById, configId, out data);
 
+    /// <summary>按 configId 查找 Boss 配置。</summary>
     public bool TryGetBoss(string configId, out BossDataSO data) =>
         TryGet(bossesById, configId, out data);
 
+    /// <summary>按 configId 查找 Boss 技能配置。</summary>
     public bool TryGetBossSkill(string configId, out BossSkillDataSO data) =>
         TryGet(bossSkillsById, configId, out data);
 
+    /// <summary>按 configId 查找特殊敌人能力配置。</summary>
     public bool TryGetSpecialEnemyAbility(string configId, out SpecialEnemyAbilityDataSO data) =>
         TryGet(specialEnemyAbilitiesById, configId, out data);
 
+    /// <summary>按 configId 查找掉落表配置。</summary>
     public bool TryGetDropTable(string configId, out DropTableSO data) =>
         TryGet(dropTablesById, configId, out data);
 
+    /// <summary>按 configId 查找自动攻击配置。</summary>
     public bool TryGetAutoAttack(string configId, out AutoAttackDataSO data) =>
         TryGet(autoAttacksById, configId, out data);
 
+    /// <summary>按 configId 查找升级选项配置。</summary>
     public bool TryGetUpgradeOption(string configId, out UpgradeOptionSO data) =>
         TryGet(upgradeOptionsById, configId, out data);
 
+    /// <summary>按 configId 查找奖励池配置。</summary>
     public bool TryGetRewardPool(string configId, out RewardPoolSO data) =>
         TryGet(rewardPoolsById, configId, out data);
 
+    /// <summary>按 configId 查找天赋配置。</summary>
     public bool TryGetTalent(string configId, out TalentDataSO data) =>
         TryGet(talentsById, configId, out data);
 
+    /// <summary>按 configId 查找装备配置。</summary>
     public bool TryGetEquipment(string configId, out EquipmentDataSO data) =>
         TryGet(equipmentById, configId, out data);
 
+    /// <summary>按 configId 查找地图配置。</summary>
     public bool TryGetMap(string configId, out MapDataSO data) =>
         TryGet(mapsById, configId, out data);
 
+    /// <summary>按 configId 查找局内事件配置。</summary>
     public bool TryGetGameplayEvent(string configId, out GameplayEventDataSO data) =>
         TryGet(gameplayEventsById, configId, out data);
 
+    /// <summary>按 configId 查找商店物品配置。</summary>
     public bool TryGetShopItem(string configId, out ShopItemSO data) =>
         TryGet(shopItemsById, configId, out data);
 
+    /// <summary>按 configId 查找成就配置。</summary>
     public bool TryGetAchievement(string configId, out AchievementDataSO data) =>
         TryGet(achievementsById, configId, out data);
 
+    /// <summary>按天数索引查找每日奖励条目。</summary>
     public bool TryGetDailyRewardEntry(int dayIndex, out DailyRewardEntrySO data) =>
         dailyRewardsByDay.TryGetValue(dayIndex, out data);
 
+    /// <summary>按 configId 查找升级卡牌配置。</summary>
     public bool TryGetUpgradeCard(string configId, out UpgradeCardSO data) =>
         TryGet(upgradeCardsById, configId, out data);
 
+    /// <summary>按 configId 查找升级卡牌奖励池配置。</summary>
     public bool TryGetUpgradeCardRewardPool(string configId, out UpgradeCardRewardPoolSO data) =>
         TryGet(upgradeCardRewardPoolsById, configId, out data);
 
+    /// <summary>获取全部奖励池列表。</summary>
     public IReadOnlyList<RewardPoolSO> GetAllRewardPools() => rewardPoolList;
 
+    /// <summary>
+    /// 创建玩家运行时数据。
+    /// </summary>
+    /// <param name="configId">玩家配置 Id。</param>
+    /// <param name="level">等级（-1 使用配置默认）。</param>
+    /// <returns>运行时数据；未找到配置时返回 null。</returns>
     public PlayerRuntimeData CreatePlayerRuntime(string configId, int level = -1)
     {
         if (!TryGetPlayer(configId, out PlayerDataSO source))
@@ -167,6 +205,11 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         return ConfigRuntimeFactory.CreatePlayer(source, level);
     }
 
+    /// <summary>
+    /// 创建敌人运行时数据。
+    /// </summary>
+    /// <param name="configId">敌人配置 Id。</param>
+    /// <returns>运行时数据；未找到配置时返回 null。</returns>
     public EnemyRuntimeData CreateEnemyRuntime(string configId)
     {
         if (!TryGetEnemy(configId, out EnemyDataSO source))
@@ -178,6 +221,12 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         return ConfigRuntimeFactory.CreateEnemy(source);
     }
 
+    /// <summary>
+    /// 创建技能运行时数据。
+    /// </summary>
+    /// <param name="configId">技能配置 Id。</param>
+    /// <param name="level">技能等级。</param>
+    /// <returns>运行时数据；未找到配置时返回 null。</returns>
     public SkillRuntimeData CreateSkillRuntime(string configId, int level = 1)
     {
         if (!TryGetSkill(configId, out SkillDataSO source))
@@ -189,6 +238,12 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         return ConfigRuntimeFactory.CreateSkill(source, level);
     }
 
+    /// <summary>
+    /// 创建 Buff 运行时数据。
+    /// </summary>
+    /// <param name="configId">Buff 配置 Id。</param>
+    /// <param name="stacks">层数。</param>
+    /// <returns>运行时数据；未找到配置时返回 null。</returns>
     public BuffRuntimeData CreateBuffRuntime(string configId, int stacks = 1)
     {
         if (!TryGetBuff(configId, out BuffDataSO source))
@@ -200,6 +255,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         return ConfigRuntimeFactory.CreateBuff(source, stacks);
     }
 
+    /// <summary>从数据库重建全部 configId 索引。</summary>
     private void RebuildCache()
     {
         ClearCache();
@@ -263,6 +319,8 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>索引每日奖励条目（按 DayIndex）。</summary>
+    /// <param name="list">每日奖励列表。</param>
     private void IndexDailyRewardEntries(IReadOnlyList<DailyRewardEntrySO> list)
     {
         dailyRewardsByDay.Clear();
@@ -283,6 +341,10 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>将配置列表写入字典索引。</summary>
+    /// <typeparam name="T">配置类型。</typeparam>
+    /// <param name="list">配置列表。</param>
+    /// <param name="map">目标字典。</param>
     private static void IndexList<T>(IReadOnlyList<T> list, Dictionary<string, T> map) where T : ConfigDataBase
     {
         if (list == null)
@@ -302,6 +364,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>清空全部索引缓存。</summary>
     private void ClearCache()
     {
         playersById.Clear();
@@ -328,12 +391,19 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         rewardPoolList.Clear();
     }
 
+    /// <summary>从字典按 configId 查找配置。</summary>
+    /// <typeparam name="T">配置类型。</typeparam>
+    /// <param name="map">索引字典。</param>
+    /// <param name="configId">配置 Id。</param>
+    /// <param name="data">输出的配置数据。</param>
+    /// <returns>找到返回 true，否则返回 false。</returns>
     private static bool TryGet<T>(Dictionary<string, T> map, string configId, out T data)
     {
         data = default;
         return !string.IsNullOrWhiteSpace(configId) && map.TryGetValue(configId, out data);
     }
 
+    /// <summary>输出配置校验结果日志。</summary>
     private void LogValidationResult()
     {
         if (LastValidation == null)
@@ -354,6 +424,9 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         Debug.LogError($"[ConfigManager] 配置校验失败:\n{LastValidation.BuildReport()}");
     }
 
+    /// <summary>记录缺失配置的 Error 日志。</summary>
+    /// <param name="typeName">配置类型名。</param>
+    /// <param name="configId">缺失的 configId。</param>
     private void LogMissingConfig(string typeName, string configId)
     {
         Debug.LogError($"[ConfigManager] 未找到 {typeName} configId={configId}");

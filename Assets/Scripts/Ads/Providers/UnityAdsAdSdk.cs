@@ -20,14 +20,23 @@ public sealed class UnityAdsAdSdk
     private Action<AdShowResult, string> pendingFinishCallback;
     private Action<bool> pendingInitCallback;
 
+    /// <inheritdoc />
     public AdNetworkKind NetworkKind => AdNetworkKind.UnityAds;
 
+    /// <inheritdoc />
     public string DisplayName => "Unity Ads";
 
+    /// <inheritdoc />
     public bool IsInitialized => isInitialized;
 
+    /// <inheritdoc />
     public bool IsShowing => isShowing;
 
+    /// <summary>
+    /// 初始化 Unity Ads SDK。
+    /// </summary>
+    /// <param name="adConfig">广告运行时配置。</param>
+    /// <param name="onInitialized">初始化完成回调，参数为是否成功。</param>
     public void Initialize(AdConfigSO adConfig, Action<bool> onInitialized)
     {
         config = adConfig;
@@ -54,6 +63,11 @@ public sealed class UnityAdsAdSdk
         Advertisement.Initialize(gameId, testMode, this);
     }
 
+    /// <summary>
+    /// 检查指定激励广告位是否可播放。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <returns>已初始化且未在加载或播放时返回 true。</returns>
     public bool IsRewardedReady(string placementId)
     {
         if (!isInitialized || isShowing || isLoading)
@@ -64,6 +78,11 @@ public sealed class UnityAdsAdSdk
         return Advertisement.isInitialized;
     }
 
+    /// <summary>
+    /// 加载并展示激励视频广告。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <param name="onFinished">展示结束回调，参数为结果与说明文本。</param>
     public void ShowRewarded(string placementId, Action<AdShowResult, string> onFinished)
     {
         if (!isInitialized)
@@ -90,6 +109,9 @@ public sealed class UnityAdsAdSdk
         Advertisement.Load(placementId, this);
     }
 
+    /// <summary>
+    /// 关闭并释放 Unity Ads SDK 资源，中止待处理的展示回调。
+    /// </summary>
     public void Shutdown()
     {
         CompletePending(AdShowResult.Failed, "广告服务已关闭");
@@ -99,6 +121,9 @@ public sealed class UnityAdsAdSdk
         pendingInitCallback = null;
     }
 
+    /// <summary>
+    /// Unity Ads SDK 初始化成功回调。
+    /// </summary>
     public void OnInitializationComplete()
     {
         isInitialized = true;
@@ -106,6 +131,11 @@ public sealed class UnityAdsAdSdk
         pendingInitCallback = null;
     }
 
+    /// <summary>
+    /// Unity Ads SDK 初始化失败回调。
+    /// </summary>
+    /// <param name="error">初始化错误类型。</param>
+    /// <param name="message">错误说明文本。</param>
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
     {
         Debug.LogWarning($"[UnityAdsAdSdk] 初始化失败: {error} {message}");
@@ -114,6 +144,10 @@ public sealed class UnityAdsAdSdk
         pendingInitCallback = null;
     }
 
+    /// <summary>
+    /// 广告素材加载成功回调，随后开始展示。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
     public void OnUnityAdsAdLoaded(string placementId)
     {
         if (!isLoading || placementId != activePlacementId)
@@ -126,6 +160,12 @@ public sealed class UnityAdsAdSdk
         Advertisement.Show(placementId, this);
     }
 
+    /// <summary>
+    /// 广告素材加载失败回调。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <param name="error">加载错误类型。</param>
+    /// <param name="message">错误说明文本。</param>
     public void OnUnityAdsAdFailedToLoad(string placementId, UnityAdsLoadError error, string message)
     {
         if (placementId != activePlacementId)
@@ -138,6 +178,12 @@ public sealed class UnityAdsAdSdk
         CompletePending(AdShowResult.Failed, message ?? error.ToString());
     }
 
+    /// <summary>
+    /// 广告展示失败回调。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <param name="error">展示错误类型。</param>
+    /// <param name="message">错误说明文本。</param>
     public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
     {
         if (placementId != activePlacementId)
@@ -150,10 +196,23 @@ public sealed class UnityAdsAdSdk
         CompletePending(AdShowResult.Failed, message ?? error.ToString());
     }
 
+    /// <summary>
+    /// 广告开始展示回调。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
     public void OnUnityAdsShowStart(string placementId) { }
 
+    /// <summary>
+    /// 广告被点击回调。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
     public void OnUnityAdsShowClick(string placementId) { }
 
+    /// <summary>
+    /// 广告展示完成回调，根据完成状态判定是否完整观看。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <param name="showCompletionState">展示完成状态。</param>
     public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
     {
         if (placementId != activePlacementId)
@@ -169,6 +228,11 @@ public sealed class UnityAdsAdSdk
         CompletePending(result, message);
     }
 
+    /// <summary>
+    /// 完成待处理的展示回调并清理状态。
+    /// </summary>
+    /// <param name="result">展示结果。</param>
+    /// <param name="message">结果说明文本。</param>
     private void CompletePending(AdShowResult result, string message)
     {
         isShowing = false;
@@ -179,6 +243,12 @@ public sealed class UnityAdsAdSdk
         callback?.Invoke(result, message);
     }
 
+    /// <summary>
+    /// 旧版加载失败接口（未实现，由 <see cref="OnUnityAdsAdFailedToLoad"/> 替代）。
+    /// </summary>
+    /// <param name="placementId">广告位 Placement ID。</param>
+    /// <param name="error">加载错误类型。</param>
+    /// <param name="message">错误说明文本。</param>
     public void OnUnityAdsFailedToLoad(string placementId, UnityAdsLoadError error, string message)
     {
         throw new NotImplementedException();
@@ -190,7 +260,13 @@ public sealed class UnityAdsAdSdk
 /// </summary>
 public sealed class UnityAdsAdSdkFactory : IAdSdkFactory
 {
+    /// <inheritdoc />
     public AdNetworkKind NetworkKind => AdNetworkKind.UnityAds;
 
+    /// <summary>
+    /// 创建 Unity Ads SDK 实例。
+    /// </summary>
+    /// <param name="coroutineHost">协程宿主（Unity Ads 适配器不使用，可为任意 MonoBehaviour）。</param>
+    /// <returns>新创建的 <see cref="UnityAdsAdSdk"/> 实例。</returns>
     public IAdSdk Create(MonoBehaviour coroutineHost) => new UnityAdsAdSdk();
 }

@@ -9,5 +9,6 @@ using UnityEngine;
 /// </remarks>
 public abstract class PersistentMonoSingleton<T> : MonoSingleton<T> where T : PersistentMonoSingleton<T>
 {
+    /// <summary>固定使用跨场景单例选项。</summary>
     protected override SingletonOptions Options => SingletonOptions.PersistentDefault;
 }

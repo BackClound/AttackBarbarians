@@ -17,6 +17,7 @@ public class DailyRewardPanelUI : UiPanelBase
     [SerializeField] private Button claimButton;
     [SerializeField] private Button closeButton;
 
+    /// <summary>绑定签到与关闭按钮。</summary>
     private void Awake()
     {
         if (claimButton != null)
@@ -30,6 +31,7 @@ public class DailyRewardPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>订阅签到与资源变化事件。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribeDailyRewardClaimed(OnDailyRewardClaimed);
@@ -38,6 +40,7 @@ public class DailyRewardPanelUI : UiPanelBase
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>取消签到事件订阅。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribeDailyRewardClaimed(OnDailyRewardClaimed);
@@ -46,11 +49,13 @@ public class DailyRewardPanelUI : UiPanelBase
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>显示时刷新连续签到与今日奖励状态。</summary>
     protected override void OnShow()
     {
         RefreshAll();
     }
 
+    /// <summary>刷新连续签到天数、今日奖励与领取按钮状态。</summary>
     private void RefreshAll()
     {
         if (!ServiceLocator.TryGet(out DailyRewardManager manager))
@@ -92,6 +97,7 @@ public class DailyRewardPanelUI : UiPanelBase
         SetStatus(canClaim ? string.Empty : manager.HasClaimedToday() ? "今日已签到" : string.Empty);
     }
 
+    /// <summary>今日签到领取按钮回调。</summary>
     private void OnClaimClicked()
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiConfirm);
@@ -101,6 +107,7 @@ public class DailyRewardPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>关闭签到面板。</summary>
     private void OnCloseClicked()
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -108,6 +115,7 @@ public class DailyRewardPanelUI : UiPanelBase
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.SignIn);
     }
 
+    /// <summary>签到成功后更新状态并刷新。</summary>
     private void OnDailyRewardClaimed(GameEventContext ctx)
     {
         if (ctx.Payload is DailyRewardClaimedEventArgs args)
@@ -118,6 +126,7 @@ public class DailyRewardPanelUI : UiPanelBase
         RefreshAll();
     }
 
+    /// <summary>签到失败后显示错误信息。</summary>
     private void OnDailyRewardClaimFailed(GameEventContext ctx)
     {
         if (ctx.Payload is DailyRewardClaimFailedEventArgs args)
@@ -126,10 +135,13 @@ public class DailyRewardPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>签到状态变化时全量刷新。</summary>
     private void OnDailyRewardStateChanged(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>资源变化时刷新面板。</summary>
     private void OnResourceChanged(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>更新状态提示文案。</summary>
     private void SetStatus(string message)
     {
         if (statusText != null)

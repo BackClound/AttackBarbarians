@@ -3,6 +3,9 @@
 /// </summary>
 public enum AdNetworkKind
 {
+    /// <summary>本地 Mock 广告（编辑器与测试）。</summary>
     Mock = 0,
+
+    /// <summary>Unity Ads 广告网络。</summary>
     UnityAds = 1,
 }

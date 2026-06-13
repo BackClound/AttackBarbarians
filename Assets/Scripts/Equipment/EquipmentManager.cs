@@ -21,8 +21,10 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>注册存档与游戏事件，并尝试将装备加成应用到场景玩家。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -39,8 +41,11 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         TryApplyToScenePlayer();
     }
 
+    /// <summary>每帧更新（装备系统无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">距上一帧的秒数。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消事件订阅并重置初始化状态。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeSaveLoaded(OnSaveLoaded);
@@ -48,6 +53,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>获取指定部位当前穿戴的装备配置 ID。</summary>
+    /// <param name="slot">装备部位。</param>
+    /// <returns>装备配置 ID；未穿戴或存档未就绪时返回 <c>null</c>。</returns>
     public string GetEquippedAt(EquipmentSlot slot)
     {
         if (saveManager?.Current == null || slot == EquipmentSlot.None)
@@ -58,6 +66,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return EquipmentSlotSaveUtility.GetEquippedId(saveManager.Current.equippedItems, slot);
     }
 
+    /// <summary>获取指定装备的强化等级。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <returns>强化等级；无效 ID 或存档未就绪时返回 0。</returns>
     public int GetEnhanceLevel(string configId)
     {
         if (string.IsNullOrEmpty(configId) || saveManager?.Current == null)
@@ -68,6 +79,10 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return saveManager.Current.GetEquipmentLevel(configId);
     }
 
+    /// <summary>检查指定装备是否可穿戴。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <param name="failureReason">失败原因；成功时为 <c>null</c>。</param>
+    /// <returns>可穿戴返回 <c>true</c>。</returns>
     public bool CanEquip(string configId, out string failureReason)
     {
         failureReason = null;
@@ -92,6 +107,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>尝试穿戴指定装备并刷新属性加成。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <returns>穿戴成功返回 <c>true</c>。</returns>
     public bool TryEquip(string configId)
     {
         if (!CanEquip(configId, out string failureReason))
@@ -125,6 +143,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>尝试卸下指定部位的装备。</summary>
+    /// <param name="slot">装备部位。</param>
+    /// <returns>卸下成功返回 <c>true</c>。</returns>
     public bool TryUnequip(EquipmentSlot slot)
     {
         if (!isInitialized || saveManager?.Current == null || slot == EquipmentSlot.None)
@@ -150,6 +171,10 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>检查指定装备是否可强化（须已穿戴且金币足够）。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <param name="failureReason">失败原因；成功时为 <c>null</c>。</param>
+    /// <returns>可强化返回 <c>true</c>。</returns>
     public bool CanEnhance(string configId, out string failureReason)
     {
         failureReason = null;
@@ -193,6 +218,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>尝试强化指定装备并扣除金币。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <returns>强化成功返回 <c>true</c>。</returns>
     public bool TryEnhance(string configId)
     {
         if (!CanEnhance(configId, out string failureReason))
@@ -232,6 +260,7 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>根据当前穿戴装备重建合并后的属性修正列表（含套装加成）。</summary>
     public void RebuildCombinedModifiers()
     {
         combinedModifiers.Clear();
@@ -280,8 +309,11 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         AppendActiveSetBonuses();
     }
 
+    /// <summary>获取当前合并后的装备属性修正列表。</summary>
+    /// <returns>只读属性修正列表。</returns>
     public IReadOnlyList<StatModifierConfig> GetCombinedModifiers() => combinedModifiers;
 
+    /// <summary>若场景中存在玩家，则应用装备加成。</summary>
     public void TryApplyToScenePlayer()
     {
         if (!PlayerSceneAccess.TryGetController(out PlayerController controller))
@@ -292,6 +324,8 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         ApplyToPlayer(controller);
     }
 
+    /// <summary>将装备加成应用到指定玩家控制器。</summary>
+    /// <param name="controller">目标玩家控制器。</param>
     public void ApplyToPlayer(PlayerController controller)
     {
         if (controller == null)
@@ -304,6 +338,7 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         controller.RefreshEntityStats();
     }
 
+    /// <summary>将满足件数要求的套装加成追加到合并列表。</summary>
     private void AppendActiveSetBonuses()
     {
         if (setPieceCounts.Count == 0)
@@ -345,6 +380,9 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>将属性修正按倍率缩放后追加到合并列表。</summary>
+    /// <param name="sources">源属性修正列表。</param>
+    /// <param name="valueMultiplier">数值倍率（强化等级影响）。</param>
     private void AppendModifiers(IReadOnlyList<StatModifierConfig> sources, float valueMultiplier)
     {
         if (sources == null || sources.Count == 0)
@@ -372,20 +410,31 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         combinedModifiers.AddRange(scratchModifiers);
     }
 
+    /// <summary>从配置管理器解析装备数据。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <param name="data">解析到的装备配置。</param>
+    /// <returns>解析成功返回 <c>true</c>。</returns>
     private bool TryResolveEquipment(string configId, out EquipmentDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetEquipment(configId, out data);
     }
 
+    /// <summary>存档加载完成后重建装备加成并应用到玩家。</summary>
+    /// <param name="context">游戏事件上下文。</param>
     private void OnSaveLoaded(GameEventContext context)
     {
         RebuildCombinedModifiers();
         TryApplyToScenePlayer();
     }
 
+    /// <summary>游戏开始时尝试将装备加成应用到玩家。</summary>
+    /// <param name="context">游戏事件上下文。</param>
     private void OnGameStarted(GameEventContext context) => TryApplyToScenePlayer();
 
+    /// <summary>记录装备操作失败日志。</summary>
+    /// <param name="configId">装备配置 ID。</param>
+    /// <param name="failureReason">失败原因。</param>
     private void LogFailure(string configId, string failureReason)
     {
         if (!string.IsNullOrEmpty(failureReason) && configManager != null && configManager.ShouldLog())
@@ -394,12 +443,14 @@ public class EquipmentManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>调试：穿戴默认武器。</summary>
     [ContextMenu("Debug/Equip Default Weapon")]
     private void DebugEquipWeapon()
     {
         TryEquip(GameConstants.ConfigIds.EquipmentWeaponBattleAxe);
     }
 
+    /// <summary>调试：强化已穿戴的默认武器。</summary>
     [ContextMenu("Debug/Enhance Equipped Weapon")]
     private void DebugEnhanceWeapon()
     {

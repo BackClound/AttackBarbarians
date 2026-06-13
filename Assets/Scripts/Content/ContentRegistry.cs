@@ -13,8 +13,12 @@ public class ContentRegistry : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>注册表是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>
+    /// 绑定 ConfigManager 并执行内容校验。
+    /// </summary>
     public void Initialize()
     {
         configManager = ServiceLocator.TryGet(out ConfigManager cm) ? cm : null;
@@ -38,50 +42,98 @@ public class ContentRegistry : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧更新（当前无逻辑）。
+    /// </summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>
+    /// 释放 ConfigManager 引用并重置初始化状态。
+    /// </summary>
     public void Shutdown()
     {
         configManager = null;
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 按配置 ID 查找地图数据。
+    /// </summary>
+    /// <param name="configId">地图配置 ID。</param>
+    /// <param name="data">找到时输出的地图数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetMap(string configId, out MapDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetMap(configId, out data);
     }
 
+    /// <summary>
+    /// 按配置 ID 查找局内事件数据。
+    /// </summary>
+    /// <param name="configId">事件配置 ID。</param>
+    /// <param name="data">找到时输出的事件数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetGameplayEvent(string configId, out GameplayEventDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetGameplayEvent(configId, out data);
     }
 
+    /// <summary>
+    /// 按配置 ID 查找敌人数据。
+    /// </summary>
+    /// <param name="configId">敌人配置 ID。</param>
+    /// <param name="data">找到时输出的敌人数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetEnemy(string configId, out EnemyDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetEnemy(configId, out data);
     }
 
+    /// <summary>
+    /// 按配置 ID 查找技能数据。
+    /// </summary>
+    /// <param name="configId">技能配置 ID。</param>
+    /// <param name="data">找到时输出的技能数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetSkill(string configId, out SkillDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetSkill(configId, out data);
     }
 
+    /// <summary>
+    /// 按配置 ID 查找 Boss 数据。
+    /// </summary>
+    /// <param name="configId">Boss 配置 ID。</param>
+    /// <param name="data">找到时输出的 Boss 数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetBoss(string configId, out BossDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetBoss(configId, out data);
     }
 
+    /// <summary>
+    /// 按配置 ID 查找 Buff 数据。
+    /// </summary>
+    /// <param name="configId">Buff 配置 ID。</param>
+    /// <param name="data">找到时输出的 Buff 数据。</param>
+    /// <returns>找到返回 true，否则 false。</returns>
     public bool TryGetBuff(string configId, out BuffDataSO data)
     {
         data = null;
         return configManager != null && configManager.TryGetBuff(configId, out data);
     }
 
+    /// <summary>
+    /// 对配置数据库执行集中内容校验。
+    /// </summary>
+    /// <param name="database">配置数据库资产。</param>
+    /// <returns>校验结果，包含错误与警告。</returns>
     public static ConfigValidationResult ValidateContent(ConfigDatabaseSO database)
     {
         var result = new ConfigValidationResult();

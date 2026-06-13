@@ -28,18 +28,40 @@ public class AudioConfigSO : ConfigDataBase
     [Tooltip("数值越大越不易被并发上限挤掉。")]
     [SerializeField] private int priority;
 
+    /// <summary>音频播放通道。</summary>
     public AudioChannel Channel => channel;
+
+    /// <summary>音频剪辑资源。</summary>
     public AudioClip Clip => clip;
+
+    /// <summary>播放音量（0 ~ 1）。</summary>
     public float Volume => volume;
+
+    /// <summary>播放音高偏移。</summary>
     public float Pitch => pitch;
+
+    /// <summary>是否循环播放。</summary>
     public bool Loop => loop;
+
+    /// <summary>是否在启动时预加载音频数据。</summary>
     public bool Preload => preload;
+
+    /// <summary>输出混音组。</summary>
     public AudioMixerGroup MixerGroup => mixerGroup;
+
+    /// <summary>同一 ID 最短播放间隔（秒），0 表示不限制。</summary>
     public float MinIntervalSeconds => minIntervalSeconds;
+
+    /// <summary>播放优先级，数值越大越不易被并发上限挤掉。</summary>
     public int Priority => priority;
 
+    /// <summary>音频配置 ID，等同于 <see cref="ConfigDataBase.ConfigId"/>。</summary>
     public string AudioId => ConfigId;
 
+    /// <summary>
+    /// 收集本配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

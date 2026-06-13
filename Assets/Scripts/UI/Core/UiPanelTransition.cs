@@ -19,6 +19,7 @@ public class UiPanelTransition : MonoBehaviour
     private Vector2 shownAnchoredPosition;
     private Coroutine routine;
 
+    /// <summary>缓存 CanvasGroup 与 RectTransform，记录显示位置。</summary>
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -29,18 +30,22 @@ public class UiPanelTransition : MonoBehaviour
         }
     }
 
+    /// <summary>播放面板进场动画（上移 + 淡入）。</summary>
     public void PlayShow()
     {
         StopRoutine();
         routine = StartCoroutine(AnimateShow());
     }
 
+    /// <summary>播放面板退场动画，完成后执行回调。</summary>
+        /// <param name="onComplete">动画结束后的回调。</param>
     public void PlayHide(System.Action onComplete)
     {
         StopRoutine();
         routine = StartCoroutine(AnimateHide(onComplete));
     }
 
+    /// <summary>立即将面板设为隐藏态（透明、下移、不可交互）。</summary>
     public void SnapHidden()
     {
         StopRoutine();
@@ -57,6 +62,7 @@ public class UiPanelTransition : MonoBehaviour
         }
     }
 
+    /// <summary>立即将面板设为完全显示态。</summary>
     public void SnapShown()
     {
         StopRoutine();
@@ -73,6 +79,7 @@ public class UiPanelTransition : MonoBehaviour
         }
     }
 
+    /// <summary>协程：执行进场淡入与上移动画。</summary>
     private IEnumerator AnimateShow()
     {
         if (canvasGroup == null)
@@ -104,6 +111,7 @@ public class UiPanelTransition : MonoBehaviour
         routine = null;
     }
 
+    /// <summary>协程：执行退场淡出与下移动画。</summary>
     private IEnumerator AnimateHide(System.Action onComplete)
     {
         if (canvasGroup == null)
@@ -137,6 +145,7 @@ public class UiPanelTransition : MonoBehaviour
         routine = null;
     }
 
+    /// <summary>停止当前过渡协程。</summary>
     private void StopRoutine()
     {
         if (routine != null)

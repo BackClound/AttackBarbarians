@@ -10,8 +10,10 @@ public class MainSceneRewardPanel : MonoBehaviour
     [SerializeField] private GeneralRewardCardPanel stageReward;
     [SerializeField] private GeneralRewardCardPanel offlineReward;
 
+    /// <summary>奖励行卡片被点击时触发。</summary>
     public event Action<MainSceneAction> RewardClicked;
 
+    /// <summary>绑定各奖励 Widget 点击事件。</summary>
     private void Awake()
     {
         if (onlineReward != null)
@@ -30,6 +32,7 @@ public class MainSceneRewardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>解绑各奖励 Widget 点击事件。</summary>
     private void OnDestroy()
     {
         if (onlineReward != null)
@@ -48,6 +51,7 @@ public class MainSceneRewardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>从 <see cref="MetaRewardService"/> 刷新在线/通关/离线奖励文案。</summary>
     public void Refresh()
     {
         if (!ServiceLocator.TryGet(out MetaRewardService meta))
@@ -67,6 +71,7 @@ public class MainSceneRewardPanel : MonoBehaviour
         offlineReward?.SetDisplay("离线收益", meta.GetOfflineTimerText(), canOffline ? "可领取" : "累计中");
     }
 
+    /// <summary>根据可领取状态刷新三条奖励的红点。</summary>
     public void ApplyRedDots()
     {
         if (!ServiceLocator.TryGet(out MetaRewardService meta))
@@ -79,6 +84,7 @@ public class MainSceneRewardPanel : MonoBehaviour
         offlineReward?.SetRedDot(meta.CanClaimOfflineReward(out _, out _));
     }
 
+    /// <summary>将 Widget 点击转发为奖励动作事件。</summary>
     private void OnRewardClicked(MainSceneAction action)
     {
         RewardClicked?.Invoke(action);

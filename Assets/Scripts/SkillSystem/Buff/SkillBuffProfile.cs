@@ -1,115 +1,139 @@
 using UnityEngine;
 
 /// <summary>
-/// 单技能运行时 Buff 聚合；由 <see cref="SkillBuffApplier"/> 叠加写入。
+/// 单技能运行时 Buff 数值聚合表；由 <see cref="SkillBuffCatalog"/> / <see cref="SkillBuffApplier"/> 叠加写入，
+/// 施法阶段由 <see cref="ISkillEffect"/> 与 <see cref="ShootProjectileCaster"/> 读取。
 /// </summary>
 public sealed class SkillBuffProfile
 {
-    // 最小冷却时间
+    /// <summary>技能冷却下限（秒），含全局冷却缩减后不低于此值。</summary>
     public const float MinCooldownSeconds = 0.15f;
-    // 基础水浪持续时间
+    /// <summary>水浪减速基础持续时间（秒）。</summary>
     public const float BaseWaterSlowDuration = 2f;
-    // 基础冰冻持续时间
+    /// <summary>冰霜冰冻基础持续时间（秒）。</summary>
     public const float BaseIceFreezeDuration = 0.5f;
 
-    // 伤害倍率
+    /// <summary>伤害倍率（含 <see cref="SkillBuffKind.GlobalBaseDamage"/> 叠加）。</summary>
     public float DamageMultiplier = 1f;
-    // 冷却缩减倍率
+    /// <summary>冷却缩减乘数（含 <see cref="SkillBuffKind.GlobalCooldownReduction"/> 叠加）。</summary>
     public float CooldownMultiplier = 1f;
-    // 暴击几率倍率
+    /// <summary>暴击几率加成（百分比小数）。</summary>
     public float CritChanceBonus;
-    // 暴击伤害倍率
+    /// <summary>暴击伤害加成（百分比小数）。</summary>
     public float CritDamageBonus;
-    // 攻击速度倍率
+    /// <summary>攻击速度加成（百分比小数）。</summary>
     public float AttackSpeedBonus;
 
+    /// <summary>射击弹道行数（扇形展开）。</summary>
     public int TrajectoryLines = 1;
-    // 每次齐射数量
+    /// <summary>每次齐射发射数量。</summary>
     public int ShotsPerVolley = 1;
-    // 穿透次数
+    /// <summary>额外穿透次数。</summary>
     public int PierceBonus;
-    // 弹射次数
+    /// <summary>弹射次数。</summary>
     public int BounceCount;
-    // 命中分裂次数
+    /// <summary>命中后分裂子弹次数。</summary>
     public int SplitOnHitCount;
-    // 弹道大小缩放
+    /// <summary>射击弹道体积缩放。</summary>
     public float ProjectileScale = 1f;
 
+    /// <summary>并行闪电道数。</summary>
     public int LightningBolts = 1;
-    // 连接目标数量
+    /// <summary>闪电链最大连接目标数（含起点）。</summary>
     public int ChainTargets = 1;
-    // 末端爆炸
+    /// <summary>链末端是否触发范围爆炸。</summary>
     public bool LightningEndExplosion;
-    // 麻痹
+    /// <summary>命中是否附加麻痹。</summary>
     public bool LightningStun;
+    /// <summary>闪电麻痹持续时间（秒）。</summary>
     public float LightningStunDuration = 0.35f;
-    // 末端爆炸范围
+    /// <summary>闪电末端爆炸半径。</summary>
     public float LightningExplosionRadius = 1.5f;
 
+    /// <summary>单次施法落雷次数。</summary>
     public int ThunderStrikeCount = 1;
-    // 范围缩放
+    /// <summary>落雷 AoE 半径缩放。</summary>
     public float ThunderRadiusScale = 1f;
-    // 全体麻痹
+    /// <summary>落雷范围内是否全体麻痹。</summary>
     public bool ThunderStunAllInArea;
+    /// <summary>落雷麻痹基础时长（秒）。</summary>
     public float ThunderStunDuration = 0.5f;
+    /// <summary>落雷麻痹时长缩放。</summary>
     public float ThunderStunDurationScale = 1f;
-    // 持续爆炸圈
+    /// <summary>是否生成持续伤害区域。</summary>
     public bool ThunderPersistentZone;
-    // 持续爆炸圈时长
+    /// <summary>持续区域基础时长（秒）。</summary>
     public float ThunderZoneDuration = 1f;
-    // 持续爆炸圈时长缩放
+    /// <summary>持续区域时长缩放。</summary>
     public float ThunderZoneDurationScale = 1f;
 
-    // 范围缩放
+    /// <summary>火雨范围缩放。</summary>
     public float FireRainRadiusScale = 1f;
-    // 持续时间缩放
+    /// <summary>火雨持续时间缩放（影响 Tick 次数）。</summary>
     public float FireRainDurationScale = 1f;
-    // 击杀连锁附近目标数量
+    /// <summary>击杀后连锁附近敌人数量。</summary>
     public int FireRainChainOnKill;
 
+    /// <summary>水浪波次数量。</summary>
     public int WaterWaveCount = 1;
-    // 减速强度
+    /// <summary>减速强度（0~1，越大减速越明显）。</summary>
     public float WaterSlowPercent = 0.3f;
-    // 减速时长缩放
+    /// <summary>减速时长缩放。</summary>
     public float WaterSlowDurationScale = 1f;
+    /// <summary>水浪体积缩放。</summary>
     public float WaterWaveSizeScale = 1f;
-    // 波浪大小缩放 
 
+    /// <summary>冰霜扇形弹道行数。</summary>
     public int IceTrajectoryLines = 1;
+    /// <summary>冰霜每次齐射数量。</summary>
     public int IceShotsPerCast = 1;
-    // 冰冻时长缩放
+    /// <summary>冰冻时长缩放。</summary>
     public float IceFreezeDurationScale = 1f;
-    // 弹道大小缩放
+    /// <summary>冰霜弹道体积缩放。</summary>
     public float IceProjectileScale = 1f;
-    // 半范围爆炸
+    /// <summary>是否在半程触发范围爆炸。</summary>
     public bool IceExplodeAtHalfRange;
-    // 爆炸冻结时间
+    /// <summary>半程爆炸冰冻时长（秒）。</summary>
     public float IceExplosionFreezeDuration = 2f;
-    // 爆炸范围缩放
+    /// <summary>半程爆炸范围缩放。</summary>
     public float IceExplosionRadiusScale = 1f;
 
-    // 每秒恢复生命值百分比
+    /// <summary>是否启用每秒按最大生命 1% 回血。</summary>
     public bool HealRegenPercentPerSecond;
-    // 最大生命值百分比
+    /// <summary>最大生命百分比加成（累计）。</summary>
     public float HealMaxHpPercentBonus;
-    // 每分钟恢复生命值百分比
+    /// <summary>是否每分钟恢复 10% 最大生命。</summary>
     public bool HealEveryMinuteTenPercent;
-    // 每 3 分钟恢复生命值峰值百分比
+    /// <summary>是否每 3 分钟提升 10% 最大生命峰值。</summary>
     public bool HealEvery3MinPeakTenPercent;
-    // 一次性满血
+    /// <summary>是否触发一次性满血（触发后自动清除）。</summary>
     public bool HealOneTimeFull;
 
+    /// <summary>
+    /// 计算有效冷却秒数（基础冷却 × 缩减乘数，不低于 <see cref="MinCooldownSeconds"/>）。
+    /// </summary>
+    /// <param name="baseCooldown">技能基础冷却秒数。</param>
+    /// <returns>应用 Buff 后的冷却秒数。</returns>
     public float GetEffectiveCooldown(float baseCooldown) =>
         Mathf.Max(MinCooldownSeconds, baseCooldown * CooldownMultiplier);
 
+    /// <summary>获取冰霜冰冻有效时长。</summary>
+    /// <returns>冰冻秒数。</returns>
     public float GetIceFreezeDuration() => BaseIceFreezeDuration * IceFreezeDurationScale;
 
+    /// <summary>获取水浪减速有效时长。</summary>
+    /// <returns>减速秒数。</returns>
     public float GetWaterSlowDuration() => BaseWaterSlowDuration * WaterSlowDurationScale;
 
+    /// <summary>获取落雷麻痹有效时长。</summary>
+    /// <returns>麻痹秒数。</returns>
     public float GetThunderStunDuration() => ThunderStunDuration * ThunderStunDurationScale;
 
+    /// <summary>获取落雷持续区域有效时长。</summary>
+    /// <returns>区域持续秒数。</returns>
     public float GetThunderZoneDuration() => ThunderZoneDuration * ThunderZoneDurationScale;
 
+    /// <summary>重置全部 Buff 字段为默认值（解锁/重算前调用）。</summary>
     public void Reset()
     {
         DamageMultiplier = 1f;

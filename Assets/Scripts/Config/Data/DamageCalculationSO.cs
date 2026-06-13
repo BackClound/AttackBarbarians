@@ -28,6 +28,12 @@ public class DamageCalculationSO : ScriptableObject
     public bool AllowDotCritical => allowDotCritical;
     public float ElementStatScale => Mathf.Max(0f, elementStatScale);
 
+    /// <summary>
+    /// 按护甲公式减免伤害。
+    /// </summary>
+    /// <param name="damage">减免前的原始伤害。</param>
+    /// <param name="effectiveArmor">有效护甲值（已扣除破甲）。</param>
+    /// <returns>护甲减免后的最终伤害。</returns>
     public float ApplyArmor(float damage, float effectiveArmor)
     {
         if (effectiveArmor <= 0f)

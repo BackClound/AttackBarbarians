@@ -19,13 +19,25 @@ public class WaveEnemyEntry
     [Tooltip("在波次全局属性倍率之上再乘算。")]
     [SerializeField] private float statMultiplier = 1f;
 
+    /// <summary>敌人配置 Id。</summary>
     public string EnemyConfigId => enemyConfigId;
+    /// <summary>随机权重。</summary>
     public int Weight => Mathf.Max(1, weight);
+    /// <summary>本条目最大生成次数（0 表示不限）。</summary>
     public int MaxSpawnCount => Mathf.Max(0, maxSpawnCount);
+    /// <summary>生成时间窗起始（秒）。</summary>
     public float SpawnWindowStart => Mathf.Max(0f, spawnWindowStart);
+    /// <summary>生成时间窗结束（秒，≤0 表示波次结束）。</summary>
     public float SpawnWindowEnd => spawnWindowEnd;
+    /// <summary>属性倍率。</summary>
     public float StatMultiplier => Mathf.Max(0.1f, statMultiplier);
 
+    /// <summary>
+    /// 判断在指定波次经过时间下该条目是否处于激活窗口。
+    /// </summary>
+    /// <param name="waveElapsedSeconds">波次已过时间（秒）。</param>
+    /// <param name="waveDurationSeconds">波次总时长（秒）。</param>
+    /// <returns>处于激活窗口返回 true，否则返回 false。</returns>
     public bool IsActiveAt(float waveElapsedSeconds, float waveDurationSeconds)
     {
         if (waveElapsedSeconds < SpawnWindowStart)

@@ -9,6 +9,11 @@ public sealed class WaveSpecialEnemySelector
 {
     private readonly List<string> pool = new List<string>(8);
 
+    /// <summary>
+    /// 根据波次配置筛选带机制的特殊敌人并构建随机池。
+    /// </summary>
+    /// <param name="wave">波次配置。</param>
+    /// <param name="configManager">配置管理器。</param>
     public void Configure(WaveDataSO wave, ConfigManager configManager)
     {
         pool.Clear();
@@ -40,6 +45,11 @@ public sealed class WaveSpecialEnemySelector
         }
     }
 
+    /// <summary>
+    /// 从池中随机选取一个特殊敌人 configId。
+    /// </summary>
+    /// <param name="configId">输出的 configId。</param>
+    /// <returns>选取成功返回 true，池为空时返回 false。</returns>
     public bool TryPick(out string configId)
     {
         configId = null;

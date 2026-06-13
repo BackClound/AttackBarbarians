@@ -7,9 +7,15 @@ using System.Collections.Generic;
 /// <remarks>纯数据结构，无需挂载。由 <see cref="EventBus.Publish"/> 构造并传递给订阅者。</remarks>
 public struct GameEventContext
 {
+    /// <summary>事件发送方（通常为 Manager 或实体）。</summary>
     public object Sender { get; }
+
+    /// <summary>强类型或匿名事件负载。</summary>
     public object Payload { get; }
 
+    /// <summary>构造事件上下文。</summary>
+    /// <param name="sender">发送者。</param>
+    /// <param name="payload">负载，可为 null。</param>
     public GameEventContext(object sender, object payload)
     {
         Sender = sender;
@@ -31,21 +37,28 @@ public sealed class EventBus : IGameSystem
     private readonly Dictionary<string, Action<GameEventContext>> listeners =
         new Dictionary<string, Action<GameEventContext>>(64);
 
+    /// <inheritdoc/>
     public bool IsInitialized { get; private set; }
 
+    /// <inheritdoc/>
     public void Initialize()
     {
         IsInitialized = true;
     }
 
+    /// <inheritdoc/>
     public void Tick(float deltaTime) { }
 
+    /// <inheritdoc/>
     public void Shutdown()
     {
         listeners.Clear();
         IsInitialized = false;
     }
 
+    /// <summary>订阅指定 Key 的事件。</summary>
+    /// <param name="eventKey"><see cref="GameConstants.EventKeys"/> 中的常量。</param>
+    /// <param name="handler">回调，不可为 null。</param>
     public void Subscribe(string eventKey, Action<GameEventContext> handler)
     {
         if (string.IsNullOrEmpty(eventKey))
@@ -62,6 +75,9 @@ public sealed class EventBus : IGameSystem
         listeners[eventKey] = current + handler;
     }
 
+    /// <summary>取消订阅；Key 或 handler 无效时静默忽略。</summary>
+    /// <param name="eventKey">事件 Key。</param>
+    /// <param name="handler">先前注册的同一委托实例。</param>
     public void Unsubscribe(string eventKey, Action<GameEventContext> handler)
     {
         if (string.IsNullOrEmpty(eventKey) || handler == null)
@@ -84,6 +100,10 @@ public sealed class EventBus : IGameSystem
         listeners[eventKey] = current;
     }
 
+    /// <summary>向所有订阅者广播事件。</summary>
+    /// <param name="eventKey">事件 Key。</param>
+    /// <param name="sender">发送者，可为 null。</param>
+    /// <param name="payload">负载，可为 null。</param>
     public void Publish(string eventKey, object sender = null, object payload = null)
     {
         if (string.IsNullOrEmpty(eventKey))

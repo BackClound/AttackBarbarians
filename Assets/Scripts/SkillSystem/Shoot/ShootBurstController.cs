@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 射击连发与休整状态：从 <see cref="SkillDataSO"/> / <see cref="SkillRuntime"/> 读取参数。
+/// 射击连发与休整状态机：从 <see cref="SkillDataSO"/> / <see cref="SkillRuntime"/> 读取连发上限与休整冷却。
+/// 用于 Legacy 连发射击流程，与 <see cref="SkillManager"/> 自动施法管线并行存在。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 Player 上，与 <see cref="SkillManager"/> 同物体。</para>
@@ -9,17 +10,25 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class ShootBurstController : MonoBehaviour
 {
-    // 连发射击次数
+    /// <summary>当前连发周期内已发射次数。</summary>
     private int burstShotsFired;
-    // 连发射击已耗尽
+    /// <summary>连发是否已耗尽并进入休整。</summary>
     private bool burstExhausted;
-    // 连发射击恢复时间
+    /// <summary>休整剩余秒数。</summary>
     private float recoveryTimer;
 
-    // 是否可以射击
+    /// <summary>
+    /// 当前是否允许发射（已解锁、未休整、未达连发上限）。
+    /// </summary>
+    /// <param name="runtime">射击技能运行时。</param>
+    /// <returns>可发射时返回 true。</returns>
     public bool CanShoot(SkillRuntime runtime) =>
         runtime != null && runtime.IsUnlocked && !burstExhausted && burstShotsFired < runtime.BaseData.MaxAttackCount;
 
+    /// <summary>
+    /// 记录一次发射；达连发上限时进入休整并读取冷却。
+    /// </summary>
+    /// <param name="runtime">射击技能运行时。</param>
     public void RecordShot(SkillRuntime runtime)
     {
         if (runtime == null)
@@ -38,6 +47,10 @@ public class ShootBurstController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 每帧递减休整计时，结束后恢复可射击状态。
+    /// </summary>
+    /// <param name="deltaTime">帧间隔秒数。</param>
     public void Tick(float deltaTime)
     {
         if (!burstExhausted)
@@ -53,6 +66,7 @@ public class ShootBurstController : MonoBehaviour
         }
     }
 
+    /// <summary>重置连发计数与休整状态。</summary>
     public void ResetBurst()
     {
         burstShotsFired = 0;

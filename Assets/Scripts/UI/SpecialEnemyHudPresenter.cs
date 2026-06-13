@@ -16,18 +16,21 @@ public class SpecialEnemyHudPresenter : GameEventSubscriberBase
 
     private float toastTimer;
 
+    /// <summary>订阅特殊敌人出现与能力触发事件。</summary>
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribeSpecialEnemySpawned(OnSpecialSpawned);
         GameEvents.SubscribeSpecialEnemyAbilityUsed(OnAbilityUsed);
     }
 
+    /// <summary>取消特殊敌人事件订阅。</summary>
     protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribeSpecialEnemySpawned(OnSpecialSpawned);
         GameEvents.UnsubscribeSpecialEnemyAbilityUsed(OnAbilityUsed);
     }
 
+    /// <summary>每帧递减 Toast 计时并在超时后隐藏提示。</summary>
     private void Update()
     {
         if (toastText == null || toastTimer <= 0f)
@@ -42,6 +45,7 @@ public class SpecialEnemyHudPresenter : GameEventSubscriberBase
         }
     }
 
+    /// <summary>特殊敌人出现时显示 Toast 并播放音效。</summary>
     private void OnSpecialSpawned(GameEventContext ctx)
     {
         if (ctx.Payload is not SpecialEnemySpawnedEventArgs args)
@@ -55,6 +59,7 @@ public class SpecialEnemyHudPresenter : GameEventSubscriberBase
         Debug.Log($"[SpecialEnemyHud] {message}");
     }
 
+    /// <summary>特殊敌人能力触发时播放音效。</summary>
     private void OnAbilityUsed(GameEventContext ctx)
     {
         if (ctx.Payload is not SpecialEnemyAbilityUsedEventArgs args)
@@ -70,6 +75,7 @@ public class SpecialEnemyHudPresenter : GameEventSubscriberBase
         GameEvents.RaiseAudioPlaySfx(this, GameConstants.AudioIds.SfxSpecialEnemyAbility);
     }
 
+    /// <summary>在 HUD 上显示限时提示文本。</summary>
     private void ShowToast(string message)
     {
         if (toastText == null)

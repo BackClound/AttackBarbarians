@@ -35,6 +35,10 @@ public class PlayerDataSO : ConfigDataBase
         initialSkillIds != null ? initialSkillIds : System.Array.Empty<string>();
     public string Description => description;
 
+    /// <summary>
+    /// 收集玩家配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

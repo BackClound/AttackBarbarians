@@ -22,6 +22,7 @@ public class GameOverPanelUI : UiPanelBase
     private int sessionKills;
     private RunRewardSettledEventArgs lastSettlement;
 
+    /// <summary>绑定再次部署与返回基地按钮。</summary>
     private void Awake()
     {
         if (redeployButton != null)
@@ -35,6 +36,7 @@ public class GameOverPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>订阅击杀、结算与开局事件。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribeEnemyKilled(OnEnemyKilled);
@@ -42,6 +44,7 @@ public class GameOverPanelUI : UiPanelBase
         GameEvents.SubscribeGameStarted(OnGameStarted);
     }
 
+    /// <summary>取消结算相关事件订阅。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribeEnemyKilled(OnEnemyKilled);
@@ -49,27 +52,33 @@ public class GameOverPanelUI : UiPanelBase
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
     }
 
+    /// <summary>由 HUD 注入本局击杀数。</summary>
+    /// <param name="kills">击杀总数。</param>
     public void SetSessionKillCount(int kills)
     {
         sessionKills = Mathf.Max(0, kills);
     }
 
+    /// <summary>显示时刷新存活时长、波次、击杀与奖励数据。</summary>
     protected override void OnShow()
     {
         RefreshDisplay();
     }
 
+    /// <summary>新局开始时重置击杀与结算缓存。</summary>
     private void OnGameStarted(GameEventContext ctx)
     {
         sessionKills = 0;
         lastSettlement = default;
     }
 
+    /// <summary>累计本局击杀数。</summary>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         sessionKills++;
     }
 
+    /// <summary>缓存 Run 结算奖励数据。</summary>
     private void OnRunRewardSettled(GameEventContext ctx)
     {
         if (ctx.Payload is RunRewardSettledEventArgs args)
@@ -78,6 +87,7 @@ public class GameOverPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>刷新存活时长、波次、击杀与奖励文案。</summary>
     private void RefreshDisplay()
     {
         float duration = 0f;
@@ -139,6 +149,7 @@ public class GameOverPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>再次部署按钮回调，重启战斗。</summary>
     private void OnRedeploy()
     {
         PlayUiSfx("audio.sfx.ui_confirm");
@@ -153,6 +164,7 @@ public class GameOverPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>返回基地按钮回调。</summary>
     private void OnReturnBase()
     {
         PlayUiSfx("audio.sfx.ui_click");
@@ -172,6 +184,7 @@ public class GameOverPanelUI : UiPanelBase
         }
     }
 
+    /// <summary>销毁 Bootstrapper 后加载主场景。</summary>
     private IEnumerator LoadMainSceneAfterBootstrapShutdown()
     {
         if (GameBootstrapper.HasInstance)

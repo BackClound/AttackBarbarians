@@ -20,6 +20,7 @@ using UnityEngine;
 /// </remarks>
 public class UIManager : GameEventSubscriberBase
 {
+    /// <summary>全局 UI 管理器单例。</summary>
     public static UIManager Instance { get; private set; }
 
     [Header("Panels")]
@@ -36,6 +37,7 @@ public class UIManager : GameEventSubscriberBase
     private readonly Dictionary<string, UiPanelBase> panelById = new Dictionary<string, UiPanelBase>(16);
     private GameManager gameManager;
 
+    /// <summary>初始化单例并构建面板注册表。</summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -49,6 +51,7 @@ public class UIManager : GameEventSubscriberBase
         BuildRegistry();
     }
 
+    /// <summary>清空单例引用。</summary>
     private void OnDestroy()
     {
         if (Instance == this)
@@ -57,12 +60,14 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>获取 GameManager 并按当前游戏状态同步面板显隐。</summary>
     private void Start()
     {
         ServiceLocator.TryGet(out gameManager);
         SyncPanelsToCurrentState();
     }
 
+    /// <summary>订阅游戏状态、面板开关与资源变化等事件。</summary>
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribeOnGameStateChanged(OnGameStateChanged);
@@ -74,6 +79,7 @@ public class UIManager : GameEventSubscriberBase
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>取消所有 UI 相关事件订阅。</summary>
     protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribeOnGameStateChanged(OnGameStateChanged);
@@ -85,29 +91,44 @@ public class UIManager : GameEventSubscriberBase
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
     }
 
+    /// <summary>生命值变化时刷新 HUD（兼容旧 API）。</summary>
+    /// <param name="current">当前生命。</param>
+    /// <param name="max">最大生命。</param>
     public void UpdateHealthDisplay(float current, float max)
     {
         gameplayHud?.RefreshAll();
     }
 
+    /// <summary>波次变化时刷新 HUD 与波次过渡面板。</summary>
+    /// <param name="waveIndex">当前波次序号。</param>
     public void UpdateWaveDisplay(int waveIndex)
     {
         waveTransitionPanel?.SetWaveIndex(waveIndex);
         gameplayHud?.RefreshAll();
     }
 
+    /// <summary>金币变化时刷新 HUD。</summary>
+    /// <param name="gold">金币数量。</param>
     public void UpdateGoldDisplay(long gold)
     {
         gameplayHud?.RefreshAll();
     }
 
+    /// <summary>分数变化时刷新 HUD（兼容旧 API）。</summary>
+    /// <param name="score">当前分数。</param>
     public void UpdateScoreDisplay(int score)
     {
         gameplayHud?.RefreshAll();
     }
 
+    /// <summary>按 PanelId 查找已注册面板。</summary>
+    /// <param name="panelId">面板标识。</param>
+    /// <param name="panel">输出的面板实例。</param>
+    /// <returns>找到返回 <c>true</c>。</returns>
     public bool TryGetPanel(string panelId, out UiPanelBase panel) => panelById.TryGetValue(panelId, out panel);
 
+    /// <summary>按 PanelId 显示面板。</summary>
+    /// <param name="panelId">面板标识。</param>
     public void ShowPanel(string panelId)
     {
         if (panelById.TryGetValue(panelId, out UiPanelBase panel))
@@ -116,6 +137,8 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>按 PanelId 隐藏面板。</summary>
+    /// <param name="panelId">面板标识。</param>
     public void HidePanel(string panelId)
     {
         if (panelById.TryGetValue(panelId, out UiPanelBase panel))
@@ -124,6 +147,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>将所有面板注册到 PanelId 字典。</summary>
     private void BuildRegistry()
     {
         panelById.Clear();
@@ -137,6 +161,7 @@ public class UIManager : GameEventSubscriberBase
         RegisterPanel(GameConstants.UiPanelIds.Achievement, achievementPanel);
     }
 
+    /// <summary>注册单个面板到字典。</summary>
     private void RegisterPanel(string panelId, UiPanelBase panel)
     {
         if (panel == null || string.IsNullOrWhiteSpace(panelId))
@@ -147,6 +172,7 @@ public class UIManager : GameEventSubscriberBase
         panelById[panelId] = panel;
     }
 
+    /// <summary>启动时按 GameManager 当前状态同步面板。</summary>
     private void SyncPanelsToCurrentState()
     {
         if (gameManager == null)
@@ -162,12 +188,14 @@ public class UIManager : GameEventSubscriberBase
         ApplyState(gameManager.CurrentState, gameManager.PreviousState);
     }
 
+    /// <summary>资源变化时刷新 HUD 与主菜单 Meta 展示。</summary>
     private void OnResourceChanged(GameEventContext ctx)
     {
         gameplayHud?.RefreshAll();
         mainMenuPanel?.RefreshMetaDisplay();
     }
 
+    /// <summary>开局时刷新 HUD 并重置结算击杀数。</summary>
     private void OnGameStarted(GameEventContext ctx)
     {
         gameplayHud?.RefreshAll();
@@ -177,6 +205,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>波次开始时更新波次显示。</summary>
     private void OnWaveStarted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args)
@@ -186,6 +215,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>波次完成时预置下一波编号。</summary>
     private void OnWaveCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args)
@@ -194,6 +224,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>根据游戏状态机切换各面板显隐。</summary>
     private void OnGameStateChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not GameStateChange change)
@@ -204,6 +235,7 @@ public class UIManager : GameEventSubscriberBase
         ApplyState(change.NewState, change.OldState);
     }
 
+    /// <summary>响应面板打开事件。</summary>
     private void OnUiPanelOpened(GameEventContext ctx)
     {
         if (ctx.Payload is string panelId)
@@ -212,6 +244,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>响应面板关闭事件。</summary>
     private void OnUiPanelClosed(GameEventContext ctx)
     {
         if (ctx.Payload is string panelId)
@@ -220,6 +253,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>按新游戏状态显示/隐藏对应面板组合。</summary>
     private void ApplyState(GameState newState, GameState oldState)
     {
         bool showHud = newState == GameState.Playing
@@ -277,6 +311,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>隐藏所有战斗流程相关面板。</summary>
     private void HideAllGameplayPanels()
     {
         mainMenuPanel?.Hide();

@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 掉落表：按权重随机产出资源或物品 ID。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Drop Table。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Drop/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "DropTable", menuName = "Attack Barbarians/Config/Drop Table")]
 public class DropTableSO : ConfigDataBase
 {
@@ -11,6 +15,10 @@ public class DropTableSO : ConfigDataBase
 
     public IReadOnlyList<DropEntryConfig> Entries => entries;
 
+    /// <summary>
+    /// 收集掉落表配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);
@@ -51,7 +59,7 @@ public class DropTableSO : ConfigDataBase
     }
 }
 
-/// <summary>单条掉落条目。</summary>
+/// <summary>掉落表单条条目：物品 ID、权重与数量区间。</summary>
 [System.Serializable]
 public class DropEntryConfig
 {

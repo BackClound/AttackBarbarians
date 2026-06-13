@@ -2,10 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 内置技能效果：射击、闪电、落雷、火雨、水浪、冰霜、恢复。
+/// 技能效果工厂：按 <see cref="SkillType"/> 创建 <see cref="ISkillEffect"/> 实例。
+/// 流水线位置：<see cref="SkillManager"/> 注册阶段 → 自动施法循环调用各效果。
 /// </summary>
 public static class SkillEffectFactory
 {
+    /// <summary>
+    /// 创建指定类型的技能效果实现。
+    /// </summary>
+    /// <param name="type">技能类型。</param>
+    /// <returns>效果实例；未知类型返回 null。</returns>
     public static ISkillEffect Create(SkillType type)
     {
         switch (type)
@@ -30,13 +36,24 @@ public static class SkillEffectFactory
     }
 }
 
+/// <summary>
+/// 闪电技能效果：链式命中、麻痹与末端爆炸。
+/// 流水线位置：SkillManager → 本类 → VFX + DamagePipeline + EnemyStatusController。
+/// </summary>
 public sealed class LightningSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(16);
     private readonly List<Enemy> explosionScratch = new List<Enemy>(16);
 
+    /// <summary>技能类型：闪电。</summary>
     public SkillType SkillType => SkillType.Lightning;
 
+    /// <summary>
+    /// 自动施法：从主目标出发链式伤害，可选麻痹与末端 AoE。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">闪电运行时。</param>
+    /// <returns>是否成功施放。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
@@ -96,16 +113,30 @@ public sealed class LightningSkillEffect : ISkillEffect
         return true;
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">闪电运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 }
 
+/// <summary>
+/// 落雷技能效果：随机锚点 AoE、全体麻痹与持续伤害圈。
+/// 流水线位置：SkillManager → 本类 → DamagePipeline + SkillAreaZone。
+/// </summary>
 public sealed class ThunderSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> anchorTargets = new List<Enemy>(24);
     private readonly List<Enemy> areaScratch = new List<Enemy>(24);
 
+    /// <summary>技能类型：落雷。</summary>
     public SkillType SkillType => SkillType.Thunder;
 
+    /// <summary>
+    /// 自动施法：多次随机落点范围伤害，可选麻痹与持续圈。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">落雷运行时。</param>
+    /// <returns>是否成功施放。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
@@ -152,16 +183,30 @@ public sealed class ThunderSkillEffect : ISkillEffect
         return true;
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">落雷运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 }
 
+/// <summary>
+/// 火雨技能效果：随机区域多段 Tick 伤害与击杀连锁。
+/// 流水线位置：SkillManager → 本类 → DamagePipeline（含击杀连锁二次伤害）。
+/// </summary>
 public sealed class FireRainSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(24);
     private readonly List<Enemy> chainScratch = new List<Enemy>(8);
 
+    /// <summary>技能类型：火雨。</summary>
     public SkillType SkillType => SkillType.FireRain;
 
+    /// <summary>
+    /// 自动施法：以随机敌人为锚点进行多 Tick 范围伤害。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">火雨运行时。</param>
+    /// <returns>是否成功施放。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
@@ -192,6 +237,14 @@ public sealed class FireRainSkillEffect : ISkillEffect
         return true;
     }
 
+    /// <summary>
+    /// 对单个敌人造成火雨伤害；击杀时可选连锁附近目标。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">火雨运行时。</param>
+    /// <param name="enemy">受击敌人。</param>
+    /// <param name="buff">火雨 Buff 表。</param>
+    /// <param name="chainBuffer">连锁查询缓冲区。</param>
     private static void ApplyFireHit(
         SkillContext context,
         SkillRuntime runtime,
@@ -223,15 +276,29 @@ public sealed class FireRainSkillEffect : ISkillEffect
         }
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">火雨运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 }
 
+/// <summary>
+/// 水浪技能效果：朝向主目标的多道方向波，附带减速。
+/// 流水线位置：SkillManager → 本类 → DamagePipeline + EnemyStatusController。
+/// </summary>
 public sealed class WaterWaveSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(24);
 
+    /// <summary>技能类型：水浪。</summary>
     public SkillType SkillType => SkillType.WaterWave;
 
+    /// <summary>
+    /// 自动施法：沿主目标方向释放多道水浪并减速命中敌人。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">水浪运行时。</param>
+    /// <returns>是否成功施放。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
@@ -269,15 +336,29 @@ public sealed class WaterWaveSkillEffect : ISkillEffect
         return true;
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">水浪运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 }
 
+/// <summary>
+/// 冰霜技能效果：扇形冰霜投射物，路径穿透与命中冰冻。
+/// 流水线位置：SkillManager → 本类 → ProjectileManager → DamagePipeline。
+/// </summary>
 public sealed class IceSkillEffect : ISkillEffect
 {
     private readonly List<Enemy> scratch = new List<Enemy>(16);
 
+    /// <summary>技能类型：冰霜。</summary>
     public SkillType SkillType => SkillType.Ice;
 
+    /// <summary>
+    /// 自动施法：向主目标方向生成多道冰霜投射物。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">冰霜运行时。</param>
+    /// <returns>是否至少成功生成一枚投射物。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context == null || runtime?.Config == null || !runtime.Config.AutoCast)
@@ -338,6 +419,10 @@ public sealed class IceSkillEffect : ISkillEffect
         return false;
     }
 
+    /// <summary>将二维方向向量旋转指定角度。</summary>
+    /// <param name="direction">原始方向。</param>
+    /// <param name="angleDegrees">旋转角度（度）。</param>
+    /// <returns>归一化后的新方向。</returns>
     private static Vector2 Rotate(Vector2 direction, float angleDegrees)
     {
         float rad = angleDegrees * Mathf.Deg2Rad;
@@ -348,13 +433,27 @@ public sealed class IceSkillEffect : ISkillEffect
             direction.x * sin + direction.y * cos).normalized;
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">冰霜运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 }
 
+/// <summary>
+/// 恢复技能效果：被动 Tick 回血与一次性满血 Buff 触发。
+/// 流水线位置：SkillManager.Update 被动 Tick + 冷却就绪时 TryAutoCast。
+/// </summary>
 public sealed class HealSkillEffect : ISkillEffect
 {
+    /// <summary>技能类型：恢复。</summary>
     public SkillType SkillType => SkillType.Heal;
 
+    /// <summary>
+    /// 自动施法：处理一次性满血 Buff（被动回血由 <see cref="TickPassive"/> 驱动）。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">恢复运行时。</param>
+    /// <returns>是否触发了一次性满血。</returns>
     public bool TryAutoCast(SkillContext context, SkillRuntime runtime)
     {
         if (context?.Player?.player_Health == null || runtime?.BuffProfile == null)
@@ -373,8 +472,17 @@ public sealed class HealSkillEffect : ISkillEffect
         return false;
     }
 
+    /// <summary>外部触发时复用自动施法逻辑。</summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">恢复运行时。</param>
     public void OnExternalCast(SkillContext context, SkillRuntime runtime) => TryAutoCast(context, runtime);
 
+    /// <summary>
+    /// 每帧被动回血（每秒 1% 最大生命，需 Buff 开启）。
+    /// </summary>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="runtime">恢复运行时。</param>
+    /// <param name="deltaTime">帧间隔秒数。</param>
     public static void TickPassive(SkillContext context, SkillRuntime runtime, float deltaTime)
     {
         if (context?.Player?.player_Health == null || runtime?.BuffProfile == null)
@@ -394,7 +502,10 @@ public sealed class HealSkillEffect : ISkillEffect
     }
 }
 
-/// <summary>落雷持续区域简易 Tick（非池化，低频创建）。</summary>
+/// <summary>
+/// 落雷持续区域简易 Tick（非池化，低频创建）；由 <see cref="ThunderSkillEffect"/> 生成。
+/// 流水线位置：落雷 Buff 持续圈 → 本组件 Update → DamagePipeline。
+/// </summary>
 public sealed class SkillAreaZone : MonoBehaviour
 {
     private float remaining;
@@ -405,6 +516,15 @@ public sealed class SkillAreaZone : MonoBehaviour
     private SkillContext context;
     private readonly List<Enemy> scratch = new List<Enemy>(16);
 
+    /// <summary>
+    /// 在指定位置生成持续伤害区域。
+    /// </summary>
+    /// <param name="center">区域中心。</param>
+    /// <param name="radius">伤害半径。</param>
+    /// <param name="duration">存在时长（秒）。</param>
+    /// <param name="runtime">关联技能运行时。</param>
+    /// <param name="context">技能上下文。</param>
+    /// <param name="tickInterval">Tick 间隔（秒）。</param>
     public static void Spawn(Vector2 center, float radius, float duration, SkillRuntime runtime, SkillContext context, float tickInterval)
     {
         var go = new GameObject("SkillAreaZone");
@@ -417,6 +537,7 @@ public sealed class SkillAreaZone : MonoBehaviour
         zone.interval = tickInterval;
     }
 
+    /// <summary>每帧递减寿命并按间隔对范围内敌人造成伤害。</summary>
     private void Update()
     {
         remaining -= Time.deltaTime;

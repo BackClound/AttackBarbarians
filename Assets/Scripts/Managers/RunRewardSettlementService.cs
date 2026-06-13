@@ -14,8 +14,10 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
     private SaveManager saveManager;
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>加载结算配置并订阅 GameOver 事件。</summary>
     public void Initialize()
     {
         if (settlementConfig == null)
@@ -34,14 +36,22 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（当前无逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消订阅并重置初始化状态。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameOver(OnGameOver);
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 立即按当前时长与难度计算奖励（不写入存档）。
+    /// </summary>
+    /// <param name="difficultyLevel">难度等级。</param>
+    /// <returns>计算结果。</returns>
     public RunRewardResult SettleNow(int difficultyLevel)
     {
         if (settlementConfig == null)
@@ -54,6 +64,8 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         return settlementConfig.Calculate(duration, difficultyLevel);
     }
 
+    /// <summary>GameOver 时执行完整结算、发放资源并保存。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameOver(GameEventContext ctx)
     {
         if (settlementConfig == null || saveManager == null || saveManager.Current == null)
@@ -138,6 +150,9 @@ public class RunRewardSettlementService : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>从存档读取难度等级。</summary>
+    /// <param name="save">存档数据。</param>
+    /// <returns>难度等级（0~2）。</returns>
     private static int ResolveDifficulty(SaveData save)
     {
         if (save?.settings == null)

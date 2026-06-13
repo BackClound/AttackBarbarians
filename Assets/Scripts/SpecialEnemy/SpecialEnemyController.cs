@@ -15,10 +15,19 @@ public class SpecialEnemyController : MonoBehaviour
     private string enemyConfigId = string.Empty;
     private EnemyAbilityTag abilityTags;
 
+    /// <summary>是否为特殊敌人生成实例。</summary>
     public bool IsSpecialSpawn => isSpecialSpawn;
+    /// <summary>能力标签组合。</summary>
     public EnemyAbilityTag AbilityTags => abilityTags;
+    /// <summary>击败后额外经验。</summary>
     public int BonusExperience => Mathf.Max(0, bonusExperience);
 
+    /// <summary>
+    /// 标记为特殊敌人并广播生成事件。
+    /// </summary>
+    /// <param name="configId">敌人配置 Id。</param>
+    /// <param name="tags">能力标签。</param>
+    /// <param name="bonusExpOverride">额外经验覆盖（≥0 时生效）。</param>
     public void Initialize(string configId, EnemyAbilityTag tags, int bonusExpOverride = -1)
     {
         isSpecialSpawn = true;
@@ -35,6 +44,7 @@ public class SpecialEnemyController : MonoBehaviour
             abilityTags));
     }
 
+    /// <summary>回收到对象池前重置特殊敌人标记。</summary>
     public void ResetForPool()
     {
         isSpecialSpawn = false;

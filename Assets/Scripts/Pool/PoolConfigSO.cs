@@ -14,5 +14,6 @@ public class PoolConfigSO : ScriptableObject
 {
     [SerializeField] private List<PoolEntry> entries = new List<PoolEntry>();
 
+    /// <summary>所有对象池条目的只读列表。</summary>
     public IReadOnlyList<PoolEntry> Entries => entries;
 }

@@ -25,11 +25,16 @@ public class WaveManager : MonoBehaviour, IGameSystem
     private bool bossDefeated;
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前波次是否处于激活刷怪状态。</summary>
     public bool IsWaveActive => waveActive;
+    /// <summary>当前波次序号（从 1 开始）。</summary>
     public int CurrentWaveIndex => currentWaveIndex;
+    /// <summary>当前波次已过时间（秒）。</summary>
     public float WaveElapsed => waveElapsed;
 
+    /// <summary>解析依赖、订阅事件并按需自动开始首波。</summary>
     public void Initialize()
     {
         configManager = ServiceLocator.TryGet(out ConfigManager cm) ? cm : null;
@@ -60,6 +65,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>驱动刷怪计时、Boss 生成与波次完成判定。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized || !waveActive || currentWaveData == null || spawner == null)
@@ -80,6 +87,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         TryCompleteWave();
     }
 
+    /// <summary>取消订阅并停止当前波次。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
@@ -88,6 +96,10 @@ public class WaveManager : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 开始指定序号的波次。
+    /// </summary>
+    /// <param name="waveIndex">波次序号（从 1 开始）。</param>
     public void StartWave(int waveIndex)
     {
         currentWaveIndex = Mathf.Max(1, waveIndex);
@@ -111,6 +123,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
             currentWaveData.MaxSpawnCount));
     }
 
+    /// <summary>停止当前波次刷怪。</summary>
     public void StopWave()
     {
         waveActive = false;
@@ -144,6 +157,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         TryCompleteWave();
     }
 
+    /// <summary>按间隔尝试生成一名普通敌人。</summary>
     private void TrySpawnByInterval()
     {
         if (spawnedThisWave >= GetEffectiveMaxSpawnCount() || spawnTimer < GetEffectiveSpawnInterval())
@@ -165,6 +179,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>按概率额外生成特殊敌人。</summary>
     private void TrySpawnBonusSpecial()
     {
         float chance = currentWaveData.SpecialSpawnChance;
@@ -178,6 +193,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         spawner.TrySpawnBonusSpecial(multiplier, currentWaveIndex);
     }
 
+    /// <summary>Boss 存活且配置要求时是否暂停普通刷怪。</summary>
+    /// <returns>应暂停返回 true，否则返回 false。</returns>
     private bool ShouldPauseSpawnsForBoss()
     {
         return currentWaveData.PauseNormalSpawnsWhileBossAlive &&
@@ -186,6 +203,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
                spawner.AliveBossCount > 0;
     }
 
+    /// <summary>按概率额外生成精英敌人。</summary>
     private void TrySpawnBonusElite()
     {
         float chance = currentWaveData.EliteSpawnChance;
@@ -199,6 +217,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: true);
     }
 
+    /// <summary>到达时间点时尝试生成 Boss。</summary>
     private void TrySpawnBoss()
     {
         if (bossSpawned || !currentWaveData.HasBoss || string.IsNullOrEmpty(currentWaveData.BossConfigId))
@@ -223,6 +242,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>尝试生成一名普通敌人。</summary>
+    /// <returns>生成成功返回 true，否则返回 false。</returns>
     private bool TrySpawnOne()
     {
         float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
@@ -230,17 +251,22 @@ public class WaveManager : MonoBehaviour, IGameSystem
         return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: false);
     }
 
+    /// <summary>获取含地图修正的有效刷怪间隔。</summary>
+    /// <returns>刷怪间隔（秒）。</returns>
     private float GetEffectiveSpawnInterval()
     {
         return currentWaveData.SpawnInterval * MapRuntimeContext.SpawnIntervalMultiplier;
     }
 
+    /// <summary>获取含地图修正的有效单波最大刷怪数。</summary>
+    /// <returns>最大刷怪数量。</returns>
     private int GetEffectiveMaxSpawnCount()
     {
         return Mathf.Max(1, Mathf.RoundToInt(
             currentWaveData.MaxSpawnCount * MapRuntimeContext.MaxSpawnCountMultiplier));
     }
 
+    /// <summary>检测是否满足波次完成条件。</summary>
     private void TryCompleteWave()
     {
         if (!waveActive || currentWaveData == null)
@@ -262,6 +288,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>结束当前波次并广播 WaveCompleted。</summary>
     private void CompleteCurrentWave()
     {
         waveActive = false;
@@ -271,6 +298,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
             spawnedThisWave));
     }
 
+    /// <summary>敌人击杀事件回调。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         if (ctx.Payload is EnemyEventArgs args)
@@ -279,6 +308,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>游戏状态变更时控制波次启停。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not GameStateChange change)
@@ -303,6 +334,12 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 按波次序号解析波次配置。
+    /// </summary>
+    /// <param name="waveIndex">波次序号。</param>
+    /// <param name="data">输出的波次配置。</param>
+    /// <returns>解析成功返回 true，否则返回 false。</returns>
     private bool TryResolveWaveData(int waveIndex, out WaveDataSO data)
     {
         data = null;

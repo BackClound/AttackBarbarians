@@ -8,11 +8,16 @@
 /// </remarks>
 public interface IGameSystem
 {
+    /// <summary>是否已完成 <see cref="Initialize"/>。</summary>
     bool IsInitialized { get; }
 
+    /// <summary>Bootstrap 阶段的一次性初始化。</summary>
     void Initialize();
 
+    /// <summary>每帧更新（由 <see cref="GameBootstrapper"/> 统一驱动）。</summary>
+    /// <param name="deltaTime">帧间隔秒数。</param>
     void Tick(float deltaTime);
 
+    /// <summary>系统关闭与资源释放。</summary>
     void Shutdown();
 }

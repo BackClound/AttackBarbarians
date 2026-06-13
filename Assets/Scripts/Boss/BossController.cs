@@ -25,11 +25,16 @@ public class BossController : MonoBehaviour
     private bool isInitialized;
     private bool defeatRaised;
 
+    /// <summary>Boss 配置 Id。</summary>
     public string BossConfigId => bossConfigId;
+    /// <summary>是否已完成初始化。</summary>
     public bool IsReady => isInitialized;
+    /// <summary>当前阶段索引。</summary>
     public int CurrentPhaseIndex => phaseController.CurrentPhaseIndex;
+    /// <summary>击败后额外经验奖励。</summary>
     public int BonusExperience => bossData != null ? bossData.BonusExperience : 0;
 
+    /// <summary>缓存同物体上的敌人组件引用。</summary>
     private void Awake()
     {
         enemy = GetComponent<Enemy>();
@@ -38,7 +43,11 @@ public class BossController : MonoBehaviour
         entityStats = GetComponent<Entity_Stats>();
     }
 
-    /// <summary>由 <see cref="EnemySpawnerManager.TrySpawnBoss"/> 在敌人初始化后调用。</summary>
+    /// <summary>
+    /// 由 <see cref="EnemySpawnerManager.TrySpawnBoss"/> 在敌人初始化后调用。
+    /// </summary>
+    /// <param name="configId">Boss 配置 Id。</param>
+    /// <param name="waveStatMultiplier">波次属性倍率。</param>
     public void Initialize(string configId, float waveStatMultiplier)
     {
         Shutdown();
@@ -75,6 +84,7 @@ public class BossController : MonoBehaviour
         GameEvents.RaiseAudioPlaySfx(this, GameConstants.AudioIds.SfxBossSpawn);
     }
 
+    /// <summary>重置 Boss 运行时状态并关闭子系统。</summary>
     public void Shutdown()
     {
         isInitialized = false;
@@ -85,6 +95,10 @@ public class BossController : MonoBehaviour
         defeatRaised = false;
     }
 
+    /// <summary>
+    /// 通知 Boss 已被击败并广播事件（仅触发一次）。
+    /// </summary>
+    /// <param name="killer">击杀来源对象。</param>
     public void NotifyDefeated(object killer)
     {
         if (!isInitialized || defeatRaised)
@@ -105,6 +119,7 @@ public class BossController : MonoBehaviour
         GameEvents.RaiseAudioPlaySfx(this, GameConstants.AudioIds.SfxBossDefeat);
     }
 
+    /// <summary>每帧驱动阶段与技能子系统。</summary>
     private void Update()
     {
         if (!isInitialized)
@@ -117,11 +132,14 @@ public class BossController : MonoBehaviour
         skillRunner.Tick(dt);
     }
 
+    /// <summary>禁用时关闭 Boss 运行时。</summary>
     private void OnDisable()
     {
         Shutdown();
     }
 
+    /// <summary>应用 Boss 属性覆盖、波次倍率与精英模式修正。</summary>
+    /// <param name="waveStatMultiplier">波次属性倍率。</param>
     private void ApplyBossStatOverrides(float waveStatMultiplier)
     {
         if (entityStats == null || bossData == null)

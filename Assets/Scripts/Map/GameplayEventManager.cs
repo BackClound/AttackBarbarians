@@ -10,9 +10,12 @@ using UnityEngine;
 /// </remarks>
 public class GameplayEventManager : MonoBehaviour, IGameSystem
 {
+    /// <summary>当前激活事件的运行时记录。</summary>
     private sealed class ActiveEvent
     {
+        /// <summary>事件配置。</summary>
         public GameplayEventDataSO Data;
+        /// <summary>剩余持续时间（秒）。</summary>
         public float RemainingSeconds;
     }
 
@@ -31,9 +34,12 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
     private float randomDuringWaveTimer;
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前激活事件数量。</summary>
     public int ActiveEventCount => activeEvents.Count;
 
+    /// <summary>订阅波次/地图事件并完成初始化。</summary>
     public void Initialize()
     {
         contentRegistry = ServiceLocator.TryGet(out ContentRegistry registry) ? registry : null;
@@ -53,6 +59,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>驱动波中随机检测与事件倒计时。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized || !enableRandomEvents)
@@ -83,6 +91,7 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>取消订阅、清空激活事件并重置修正。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeMapLoaded(OnMapLoaded);
@@ -97,6 +106,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>地图加载完成时触发 OnMapLoad 与关联事件。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnMapLoaded(GameEventContext ctx)
     {
         if (!enableRandomEvents || configManager?.Database == null)
@@ -108,6 +119,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         TryTriggerLinkedMapEvents();
     }
 
+    /// <summary>波次开始时更新索引并尝试触发 OnWaveStarted 事件。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnWaveStarted(GameEventContext ctx)
     {
         if (ctx.Payload is not WaveEventArgs args)
@@ -127,6 +140,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         TryTriggerEventsForType(GameplayEventTriggerType.OnWaveStarted, args.WaveIndex);
     }
 
+    /// <summary>波次完成时触发 OnWaveCompleted 并结束标记为波次结束的事件。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnWaveCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is not WaveEventArgs args)
@@ -152,6 +167,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>波次进行中按间隔尝试 RandomDuringWave 触发。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     private void TickRandomDuringWave(float deltaTime)
     {
         if (!waveActive)
@@ -169,6 +186,7 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         TryTriggerEventsForType(GameplayEventTriggerType.RandomDuringWave, currentWaveIndex);
     }
 
+    /// <summary>触发当前地图绑定的局内事件。</summary>
     private void TryTriggerLinkedMapEvents()
     {
         if (mapManager == null || !mapManager.IsMapLoaded)
@@ -192,6 +210,9 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>按触发类型与波次范围筛选并尝试启动事件。</summary>
+    /// <param name="triggerType">触发时机。</param>
+    /// <param name="waveIndex">当前波次序号。</param>
     private void TryTriggerEventsForType(GameplayEventTriggerType triggerType, int waveIndex)
     {
         if (configManager?.Database?.GameplayEvents == null)
@@ -223,6 +244,9 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>启动单条事件：应用即时效果、加入激活列表并广播。</summary>
+    /// <param name="eventData">事件配置。</param>
+    /// <param name="waveIndex">当前波次序号。</param>
     private void TryStartEvent(GameplayEventDataSO eventData, int waveIndex)
     {
         if (eventData == null || IsEventActive(eventData.ConfigId))
@@ -246,6 +270,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
             eventData.DurationSeconds));
     }
 
+    /// <summary>应用无需持续计时的即时效果（如玩家 Buff）。</summary>
+    /// <param name="eventData">事件配置。</param>
     private void ApplyInstantEffects(GameplayEventDataSO eventData)
     {
         IReadOnlyList<GameplayEventEffectConfig> effects = eventData.Effects;
@@ -266,6 +292,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>为玩家施加指定 Buff。</summary>
+    /// <param name="buffConfigId">Buff 配置 Id。</param>
     private void ApplyPlayerBuff(string buffConfigId)
     {
         if (string.IsNullOrWhiteSpace(buffConfigId) || contentRegistry == null)
@@ -285,6 +313,8 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>结束指定索引的激活事件并重新计算修正。</summary>
+    /// <param name="index">激活列表索引。</param>
     private void EndEventAt(int index)
     {
         if (index < 0 || index >= activeEvents.Count)
@@ -302,6 +332,7 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>根据当前激活事件重算 <see cref="MapRuntimeContext"/> 修正。</summary>
     private void RecomputeEventModifiers()
     {
         scratchEvents.Clear();
@@ -313,6 +344,9 @@ public class GameplayEventManager : MonoBehaviour, IGameSystem
         MapRuntimeContext.RecomputeEventModifiers(scratchEvents);
     }
 
+    /// <summary>检查指定 configId 的事件是否已在激活中。</summary>
+    /// <param name="configId">事件配置 Id。</param>
+    /// <returns>已激活返回 true，否则返回 false。</returns>
     private bool IsEventActive(string configId)
     {
         for (int i = 0; i < activeEvents.Count; i++)

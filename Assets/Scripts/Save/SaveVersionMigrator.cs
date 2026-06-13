@@ -10,6 +10,11 @@ using UnityEngine;
 /// </remarks>
 public static class SaveVersionMigrator
 {
+    /// <summary>
+    /// 将存档数据迁移到当前版本，补齐缺失字段与集合。
+    /// </summary>
+    /// <param name="data">待迁移的存档数据；为 null 时返回默认存档。</param>
+    /// <returns>版本号已升级且集合已补齐的存档数据。</returns>
     public static SaveData Migrate(SaveData data)
     {
         if (data == null)
@@ -51,6 +56,10 @@ public static class SaveVersionMigrator
         return data;
     }
 
+    /// <summary>
+    /// 版本 0 → 1：补齐 settings、statistics、runProgress 等基础嵌套对象。
+    /// </summary>
+    /// <param name="data">待迁移的存档数据。</param>
     private static void MigrateV0ToV1(SaveData data)
     {
         data.settings ??= SettingsData.CreateDefault();
@@ -59,6 +68,10 @@ public static class SaveVersionMigrator
         EnsureCollections(data);
     }
 
+    /// <summary>
+    /// 版本 1 → 2：规范化广告券、体力上限与自然恢复时间戳。
+    /// </summary>
+    /// <param name="data">待迁移的存档数据。</param>
     private static void MigrateV1ToV2(SaveData data)
     {
         if (data.adTickets < 0)
@@ -84,6 +97,10 @@ public static class SaveVersionMigrator
         EnsureCollections(data);
     }
 
+    /// <summary>
+    /// 版本 2 → 3：补齐升级卡库存、属性基础等级与会话结束时间戳。
+    /// </summary>
+    /// <param name="data">待迁移的存档数据。</param>
     private static void MigrateV2ToV3(SaveData data)
     {
         data.upgradeCardInventory ??= new List<ConfigIdIntPair>(4);
@@ -97,6 +114,10 @@ public static class SaveVersionMigrator
         EnsureCollections(data);
     }
 
+    /// <summary>
+    /// 确保所有 List 型字段与嵌套对象非 null，并修正默认音量。
+    /// </summary>
+    /// <param name="data">待补齐的存档数据。</param>
     private static void EnsureCollections(SaveData data)
     {
         data.settings ??= SettingsData.CreateDefault();

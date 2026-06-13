@@ -22,9 +22,12 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
     private Coroutine waveTransitionRoutine;
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>是否正在等待玩家确认升级选项。</summary>
     public bool IsAwaitingUpgradeSelection { get; private set; }
 
+    /// <summary>解析依赖、订阅事件并完成初始化。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -46,8 +49,11 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（当前无逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消订阅、停止协程并重置流程状态。</summary>
     public void Shutdown()
     {
         StopWaveTransitionRoutine();
@@ -105,12 +111,15 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         NotifyWaveCompleted(new WaveEventArgs(1, waveTransitionSeconds, 0));
     }
 
+    /// <summary>调试：模拟确认升级选择。</summary>
     [ContextMenu("Debug/Confirm Upgrade Selection")]
     public void DebugConfirmUpgradeSelection()
     {
         ConfirmUpgradeSelection();
     }
 
+    /// <summary>波次完成事件回调。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnWaveCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args)
@@ -119,6 +128,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         }
     }
 
+    /// <summary>玩家死亡时触发 GameOver。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnPlayerDied(GameEventContext ctx)
     {
         if (gameManager == null)
@@ -134,6 +145,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         gameManager.GameOver();
     }
 
+    /// <summary>根据新状态驱动 UI、音频与流程协程。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not GameStateChange change)
@@ -172,6 +185,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         }
     }
 
+    /// <summary>进入 WaveTransition 时打开过渡 UI 并启动计时协程。</summary>
     private void BeginWaveTransitionSequence()
     {
         StopWaveTransitionRoutine();
@@ -179,6 +193,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         waveTransitionRoutine = StartCoroutine(WaveTransitionRoutine());
     }
 
+    /// <summary>波次过渡计时结束后进入升级或返回 Playing。</summary>
+    /// <returns>协程迭代器。</returns>
     private IEnumerator WaveTransitionRoutine()
     {
         float duration = ResolveWaveTransitionSeconds();
@@ -208,6 +224,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         gameManager.BeginUpgradeChoosing();
     }
 
+    /// <summary>打开升级三选一 UI 并广播事件。</summary>
     private void OpenUpgradeFlow()
     {
         IsAwaitingUpgradeSelection = true;
@@ -216,6 +233,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         GameEvents.RaiseAudioPlayMusic(this, GameConstants.AudioIds.MusicUpgrade);
     }
 
+    /// <summary>返回 Playing 时关闭流程相关 UI 面板。</summary>
     private void CloseFlowPanels()
     {
         IsAwaitingUpgradeSelection = false;
@@ -224,6 +242,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Pause);
     }
 
+    /// <summary>停止进行中的波次过渡协程。</summary>
     private void StopWaveTransitionRoutine()
     {
         if (waveTransitionRoutine == null)
@@ -235,6 +254,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         waveTransitionRoutine = null;
     }
 
+    /// <summary>解析波次过渡等待时长。</summary>
+    /// <returns>过渡时长（秒）。</returns>
     private float ResolveWaveTransitionSeconds()
     {
         if (waveTransitionSeconds > 0f)
@@ -250,6 +271,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         return 1.5f;
     }
 
+    /// <summary>判断是否应跳过升级三选一阶段。</summary>
+    /// <returns>跳过返回 true，否则返回 false。</returns>
     private bool ShouldSkipUpgradeChoosing()
     {
 #if UNITY_EDITOR
@@ -266,6 +289,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         return false;
     }
 
+    /// <summary>是否启用流程调试日志。</summary>
+    /// <returns>启用返回 true，否则返回 false。</returns>
     private bool enableFlowLogs()
     {
         return configManager != null

@@ -1,12 +1,13 @@
 /// <summary>一次技能释放的弹道排布。</summary>
+/// <remarks><b>是否需要挂载：</b>否。</remarks>
 public enum ProjectileSpawnPattern
 {
-    // 单体
+    /// <summary>单发直线。</summary>
     Single = 0,
-    // 扇形
+    /// <summary>扇形多弹道。</summary>
     Fan = 1,
-    // 环形
+    /// <summary>环形均匀分布。</summary>
     Ring = 2,
-    // 多波次
+    /// <summary>多波次连发（预留）。</summary>
     MultiWave = 3,
 }

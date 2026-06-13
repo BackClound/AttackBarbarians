@@ -33,10 +33,12 @@ public class MainSceneView : MonoBehaviour
     [Header("Shared")]
     [SerializeField] private MainSceneCardPanel bottomNavCardPanel;
 
+    /// <summary>页面内任意入口被点击时触发，供外部监听。</summary>
     public event Action<MainSceneAction> ActionClicked;
 
     private bool isSubscribed;
 
+    /// <summary>绑定子页面与底栏事件，初始化默认页面显隐。</summary>
     private void Awake()
     {
         if (battlePage != null)
@@ -62,6 +64,7 @@ public class MainSceneView : MonoBehaviour
         ShowPage(currentPage, false);
     }
 
+    /// <summary>解绑子页面与底栏事件。</summary>
     private void OnDestroy()
     {
         if (battlePage != null)
@@ -75,18 +78,21 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>订阅游戏事件并全量刷新 UI。</summary>
     private void OnEnable()
     {
         TrySubscribeEvents();
         RefreshAll();
     }
 
+    /// <summary>确保事件订阅并刷新展示。</summary>
     private void Start()
     {
         TrySubscribeEvents();
         RefreshAll();
     }
 
+    /// <summary>取消所有 <see cref="GameEvents"/> 订阅。</summary>
     private void OnDisable()
     {
         if (!isSubscribed)
@@ -108,6 +114,7 @@ public class MainSceneView : MonoBehaviour
         isSubscribed = false;
     }
 
+    /// <summary>刷新底栏选中态，并按当前页面刷新战斗页或商城页。</summary>
     public void RefreshAll()
     {
         bottomNavCardPanel?.SetNavTabSelected(MapPageToAction(currentPage));
@@ -121,6 +128,9 @@ public class MainSceneView : MonoBehaviour
         battlePage?.RefreshAll();
     }
 
+    /// <summary>切换底栏页面（战斗/商城等）并可选刷新。</summary>
+    /// <param name="page">目标页面。</param>
+    /// <param name="refresh">是否在切换后刷新数据。</param>
     public void ShowPage(MainScenePage page, bool refresh = true)
     {
         currentPage = page;
@@ -151,6 +161,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>统一处理底栏与内容区点击，分发页面切换或子页逻辑。</summary>
     private void HandleAction(MainSceneAction action)
     {
         ActionClicked?.Invoke(action);
@@ -188,6 +199,7 @@ public class MainSceneView : MonoBehaviour
         Debug.Log($"[MainSceneView] {action} clicked.");
     }
 
+    /// <summary>延迟订阅 GameEvents，避免 ServiceLocator 未就绪。</summary>
     private void TrySubscribeEvents()
     {
         if (isSubscribed || !ServiceLocator.TryGet(out EventBus _))
@@ -209,6 +221,7 @@ public class MainSceneView : MonoBehaviour
         isSubscribed = true;
     }
 
+    /// <summary>资源/成就等事件触发时刷新当前可见页面。</summary>
     private void OnGameEventRefresh(GameEventContext ctx)
     {
         battlePage?.OnResourceChanged();
@@ -218,6 +231,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>转发签到成功事件到战斗页。</summary>
     private void OnDailyRewardClaimed(GameEventContext ctx)
     {
         if (ctx.Payload is DailyRewardClaimedEventArgs args)
@@ -226,6 +240,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>转发签到失败消息到战斗页。</summary>
     private void OnDailyRewardClaimFailed(GameEventContext ctx)
     {
         if (ctx.Payload is DailyRewardClaimFailedEventArgs args)
@@ -234,6 +249,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>按当前页面刷新商城或战斗页并显示购买结果。</summary>
     private void OnShopPurchased(GameEventContext ctx)
     {
         if (ctx.Payload is ShopPurchaseEventArgs args)
@@ -249,6 +265,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>按当前页面显示购买失败信息。</summary>
     private void OnShopPurchaseFailed(GameEventContext ctx)
     {
         if (ctx.Payload is ShopPurchaseFailedEventArgs args)
@@ -264,6 +281,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>处理广告奖励失败并更新状态栏。</summary>
     private void OnAdRewardFailed(GameEventContext ctx)
     {
         if (ctx.Payload is not AdRewardFailedEventArgs args)
@@ -286,6 +304,7 @@ public class MainSceneView : MonoBehaviour
         battlePage?.OnResourceChanged();
     }
 
+    /// <summary>升级卡发放后刷新战斗页并提示。</summary>
     private void OnUpgradeCardGranted(GameEventContext ctx)
     {
         if (ctx.Payload is not UpgradeCardGrantedEventArgs args)
@@ -300,6 +319,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>非商城页广告奖励完成后更新状态栏。</summary>
     private void OnAdRewardCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is not AdRewardCompletedEventArgs args)
@@ -321,6 +341,7 @@ public class MainSceneView : MonoBehaviour
         battlePage?.OnResourceChanged();
     }
 
+    /// <summary>将页面枚举映射为底栏动作。</summary>
     private static MainSceneAction MapPageToAction(MainScenePage page) =>
         page switch
         {
@@ -331,6 +352,7 @@ public class MainSceneView : MonoBehaviour
             _ => MainSceneAction.Battle,
         };
 
+    /// <summary>播放 UI 点击音效。</summary>
     private static void PlayUiSfx(string sfxId)
     {
         if (!string.IsNullOrWhiteSpace(sfxId))
@@ -339,6 +361,7 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>返回尚未接入功能的占位提示文案。</summary>
     private static string GetPendingNavMessage(MainSceneAction action) =>
         action switch
         {

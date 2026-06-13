@@ -23,9 +23,21 @@ public sealed class PlayerTargetScanner
     private Transform wallReference;
     private Vector2 fallbackWallPoint;
 
+    /// <summary>最近一次扫描命中的敌人列表（已按策略排序）。</summary>
     public IReadOnlyList<Enemy> Results => results;
+    /// <summary>排序后的首要攻击目标。</summary>
     public Enemy PrimaryTarget { get; private set; }
 
+    /// <summary>
+    /// 配置扫描原点、半径、层级与目标选择策略。
+    /// </summary>
+    /// <param name="scanTransform">扫描原点 Transform。</param>
+    /// <param name="radius">圆形扫描半径。</param>
+    /// <param name="layerMask">敌人层级掩码。</param>
+    /// <param name="tag">敌人 Tag 过滤，空则使用默认。</param>
+    /// <param name="targetPolicy">目标排序策略。</param>
+    /// <param name="wallTransform">墙体参考点，用于「靠近城墙」策略。</param>
+    /// <param name="wallFallback">墙体参考点缺失时的备用坐标。</param>
     public void Configure(
         Transform scanTransform,
         float radius,
@@ -44,8 +56,16 @@ public sealed class PlayerTargetScanner
         fallbackWallPoint = wallFallback;
     }
 
+    /// <summary>
+    /// 更新扫描原点世界坐标。
+    /// </summary>
+    /// <param name="origin">新的扫描原点。</param>
     public void SetScanOrigin(Vector2 origin) => scanOrigin = origin;
 
+    /// <summary>
+    /// 执行一次圆形 NonAlloc 扫描，过滤可受伤敌人并按策略排序。
+    /// </summary>
+    /// <returns>命中的有效敌人数量。</returns>
     public int Scan()
     {
         results.Clear();
@@ -88,6 +108,10 @@ public sealed class PlayerTargetScanner
         return results.Count;
     }
 
+    /// <summary>
+    /// 将扫描结果复制到外部列表。
+    /// </summary>
+    /// <param name="destination">目标列表，调用前会被清空。</param>
     public void CopyResultsTo(List<Enemy> destination)
     {
         destination.Clear();
@@ -97,6 +121,10 @@ public sealed class PlayerTargetScanner
         }
     }
 
+    /// <summary>
+    /// 按当前 <see cref="PlayerTargetPolicy"/> 对敌人列表排序。
+    /// </summary>
+    /// <param name="enemies">待排序的敌人列表。</param>
     private void SortByPolicy(List<Enemy> enemies)
     {
         Vector2 wallPoint = wallReference != null ? (Vector2)wallReference.position : fallbackWallPoint;
@@ -104,12 +132,21 @@ public sealed class PlayerTargetScanner
         enemies.Sort(targetComparer);
     }
 
+    /// <summary>
+    /// 敌人目标比较器，按策略计算排序优先级。
+    /// </summary>
     private sealed class EnemyTargetComparer : IComparer<Enemy>
     {
         private PlayerTargetPolicy activePolicy;
         private Vector2 wallPoint;
         private Vector2 origin;
 
+        /// <summary>
+        /// 配置比较策略与参考坐标。
+        /// </summary>
+        /// <param name="targetPolicy">目标选择策略。</param>
+        /// <param name="wall">墙体参考点。</param>
+        /// <param name="scanOrigin">扫描原点。</param>
         public void Configure(PlayerTargetPolicy targetPolicy, Vector2 wall, Vector2 scanOrigin)
         {
             activePolicy = targetPolicy;
@@ -117,6 +154,12 @@ public sealed class PlayerTargetScanner
             origin = scanOrigin;
         }
 
+        /// <summary>
+        /// 比较两个敌人的攻击优先级。
+        /// </summary>
+        /// <param name="a">敌人 A。</param>
+        /// <param name="b">敌人 B。</param>
+        /// <returns>排序比较结果。</returns>
         public int Compare(Enemy a, Enemy b)
         {
             if (a == null || b == null)

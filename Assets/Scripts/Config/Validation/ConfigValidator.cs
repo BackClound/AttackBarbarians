@@ -9,6 +9,11 @@ using UnityEngine;
 /// </remarks>
 public static class ConfigValidator
 {
+    /// <summary>
+    /// 校验配置总表中的引用完整性、重复 ID 与数值合法性。
+    /// </summary>
+    /// <param name="database">待校验的配置总表资产。</param>
+    /// <returns>聚合后的校验结果，包含错误与警告列表。</returns>
     public static ConfigValidationResult ValidateDatabase(ConfigDatabaseSO database)
     {
         var result = new ConfigValidationResult();
@@ -59,6 +64,11 @@ public static class ConfigValidator
         return result;
     }
 
+    /// <summary>
+    /// 校验地图配置中的局内事件与偏好敌人引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateMapReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.Maps == null)
@@ -115,6 +125,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验局内事件效果中的 Buff 引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateGameplayEventReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.GameplayEvents == null)
@@ -159,6 +174,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验技能解锁表及其引用的技能配置。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateSkillUnlockTable(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         SkillUnlockTableSO table = database.SkillUnlockTable;
@@ -189,6 +209,12 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验配置列表中是否存在重复的 configId。
+    /// </summary>
+    /// <typeparam name="T">配置资产类型。</typeparam>
+    /// <param name="entries">待校验的配置列表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateUniqueIds<T>(IReadOnlyList<T> entries, ConfigValidationResult result) where T : ConfigDataBase
     {
         if (entries == null || entries.Count == 0)
@@ -218,6 +244,12 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 遍历配置列表，校验空引用并调用各条目的自身校验逻辑。
+    /// </summary>
+    /// <typeparam name="T">配置资产类型。</typeparam>
+    /// <param name="entries">待校验的配置列表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateEntries<T>(IReadOnlyList<T> entries, ConfigValidationResult result) where T : ConfigDataBase
     {
         if (entries == null)
@@ -238,6 +270,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验波次配置中的敌人、Boss 与特殊敌人引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateWaveReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.Waves == null)
@@ -286,6 +323,13 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验波次特殊敌人 ID 列表的引用与能力标签。
+    /// </summary>
+    /// <param name="wave">波次配置。</param>
+    /// <param name="enemyIds">特殊敌人 configId 列表。</param>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateWaveSpecialEnemyIdList(
         WaveDataSO wave,
         IReadOnlyList<string> enemyIds,
@@ -319,6 +363,13 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验波次普通敌人 ID 列表的引用。
+    /// </summary>
+    /// <param name="wave">波次配置。</param>
+    /// <param name="enemyIds">敌人 configId 列表。</param>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateWaveEnemyIdList(
         WaveDataSO wave,
         IReadOnlyList<string> enemyIds,
@@ -346,6 +397,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验 Boss 配置中的基础敌人与技能引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateBossReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.Bosses == null)
@@ -384,6 +440,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验 Boss 技能配置条目的自身规则。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateBossSkillReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.BossSkills == null)
@@ -403,6 +464,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验特殊敌人能力配置及其召唤敌人引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateSpecialEnemyAbilityReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.SpecialEnemyAbilities == null)
@@ -429,6 +495,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验敌人配置中特殊能力绑定的引用。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateEnemySpecialAbilityReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.Enemies == null)
@@ -466,6 +537,11 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 校验掉落表配置是否包含有效条目。
+    /// </summary>
+    /// <param name="database">配置总表。</param>
+    /// <param name="result">校验结果容器。</param>
     private static void ValidateDropReferences(ConfigDatabaseSO database, ConfigValidationResult result)
     {
         if (database.DropTables == null)
@@ -489,6 +565,13 @@ public static class ConfigValidator
         }
     }
 
+    /// <summary>
+    /// 按修正类型顺序将指定属性的修正列表应用到基础值。
+    /// </summary>
+    /// <param name="baseValue">属性的原始基础值。</param>
+    /// <param name="modifiers">修正配置列表；为 null 或空时直接返回基础值。</param>
+    /// <param name="targetStat">要应用修正的目标属性类型。</param>
+    /// <returns>叠加所有匹配修正后的最终数值。</returns>
     public static float ApplyModifiers(float baseValue, IReadOnlyList<StatModifierConfig> modifiers, StatType targetStat)
     {
         if (modifiers == null || modifiers.Count == 0)

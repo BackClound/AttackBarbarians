@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否。由 <see cref="GameManager"/> 在运行时持有。</para>
-/// <para><b>时间缩放：</b>仅在 <see cref="ChangeState"/> 成功时根据目标状态写入 <c>Time.timeScale</c>，避免在 Manager 各方法中散落赋值。</para>
+/// <para><b>时间缩放：</b>仅在 <see cref="TryChangeState"/> 成功时根据目标状态写入 <c>Time.timeScale</c>，避免在 Manager 各方法中散落赋值。</para>
 /// </remarks>
 public sealed class GameStateMachine
 {
@@ -14,12 +14,21 @@ public sealed class GameStateMachine
     private GameState currentState;
     private GameState previousState;
 
+    /// <summary>当前游戏状态。</summary>
     public GameState CurrentState => currentState;
+
+    /// <summary>上一次成功切换前的状态。</summary>
     public GameState PreviousState => previousState;
 
+    /// <summary>状态退出时触发（oldState, newState）。</summary>
     public event Action<GameState, GameState> StateExited;
+
+    /// <summary>状态进入时触发（oldState, newState）。</summary>
     public event Action<GameState, GameState> StateEntered;
 
+    /// <summary>创建状态机并应用初始状态的 timeScale。</summary>
+    /// <param name="initialState">起始状态。</param>
+    /// <param name="enableDebugLogs">为 true 时记录跳转与拒绝日志。</param>
     public GameStateMachine(GameState initialState, bool enableDebugLogs = false)
     {
         this.enableDebugLogs = enableDebugLogs;
@@ -28,9 +37,16 @@ public sealed class GameStateMachine
         ApplyTimeScaleForState(currentState);
     }
 
+    /// <summary>判断从当前状态到目标状态是否合法。</summary>
+    /// <param name="targetState">目标状态。</param>
+    /// <returns>合法且不同于当前状态时返回 true。</returns>
     public bool CanTransitionTo(GameState targetState) =>
         targetState != currentState && IsTransitionAllowed(currentState, targetState);
 
+    /// <summary>尝试切换状态，失败时不修改当前状态。</summary>
+    /// <param name="newState">目标状态。</param>
+    /// <param name="failureReason">失败原因；成功时为 null。</param>
+    /// <returns>切换成功时返回 true。</returns>
     public bool TryChangeState(GameState newState, out string failureReason)
     {
         if (newState == currentState)
@@ -63,6 +79,8 @@ public sealed class GameStateMachine
         return true;
     }
 
+    /// <summary>强制重置到指定状态（不触发 Exit/Enter 事件）。</summary>
+    /// <param name="state">目标状态。</param>
     public void ResetTo(GameState state)
     {
         currentState = state;
@@ -78,6 +96,8 @@ public sealed class GameStateMachine
         Time.timeScale = 1f;
     }
 
+    /// <summary>根据状态设置 <see cref="Time.timeScale"/>。</summary>
+    /// <param name="state">当前或目标状态。</param>
     private static void ApplyTimeScaleForState(GameState state)
     {
         switch (state)
@@ -93,6 +113,9 @@ public sealed class GameStateMachine
         }
     }
 
+    /// <summary>记录非法跳转警告。</summary>
+    /// <param name="target">被拒绝的目标状态。</param>
+    /// <param name="reason">拒绝原因。</param>
     private void LogTransitionRejected(GameState target, string reason)
     {
         if (!enableDebugLogs)
@@ -103,6 +126,10 @@ public sealed class GameStateMachine
         Debug.LogWarning($"[GameStateMachine] Rejected {currentState} -> {target}: {reason}");
     }
 
+    /// <summary>静态跳转表：判断 from → to 是否允许。</summary>
+    /// <param name="from">源状态。</param>
+    /// <param name="to">目标状态。</param>
+    /// <returns>允许时返回 true。</returns>
     private static bool IsTransitionAllowed(GameState from, GameState to)
     {
         switch (from)

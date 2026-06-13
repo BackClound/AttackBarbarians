@@ -8,6 +8,11 @@ using UnityEngine;
 /// </remarks>
 public static class UpgradeApplicator
 {
+    /// <summary>尝试将升级选项效果应用到对应系统。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="skillManager">玩家技能管理器。</param>
+    /// <param name="saveManager">存档管理器。</param>
+    /// <returns>应用成功返回 <c>true</c>。</returns>
     public static bool TryApply(UpgradeOptionSO option, PlayerSkillManager skillManager, SaveManager saveManager)
     {
         if (option == null)
@@ -42,6 +47,10 @@ public static class UpgradeApplicator
         }
     }
 
+    /// <summary>应用属性 Buff 或直接属性修正。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="playerSkillManager">玩家技能管理器。</param>
+    /// <returns>至少应用一项效果时返回 <c>true</c>。</returns>
     private static bool ApplyStatBuff(UpgradeOptionSO option, PlayerSkillManager playerSkillManager)
     {
         if (playerSkillManager == null)
@@ -77,6 +86,10 @@ public static class UpgradeApplicator
         return applied;
     }
 
+    /// <summary>应用技能 Buff 或武器强化效果。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="skillManager">玩家技能管理器。</param>
+    /// <returns>应用成功返回 <c>true</c>。</returns>
     private static bool ApplySkillBuff(UpgradeOptionSO option, PlayerSkillManager skillManager)
     {
         if (skillManager == null || option.SkillBuffKind == SkillBuffKind.None)
@@ -88,6 +101,10 @@ public static class UpgradeApplicator
         return true;
     }
 
+    /// <summary>解锁指定技能。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="skillManager">玩家技能管理器。</param>
+    /// <returns>解锁成功返回 <c>true</c>。</returns>
     private static bool ApplySkillUnlock(UpgradeOptionSO option, PlayerSkillManager skillManager)
     {
         if (skillManager?.SkillManager == null || string.IsNullOrWhiteSpace(option.SkillConfigId))
@@ -99,6 +116,10 @@ public static class UpgradeApplicator
         return true;
     }
 
+    /// <summary>提升指定技能等级。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="skillManager">玩家技能管理器。</param>
+    /// <returns>升级成功返回 <c>true</c>。</returns>
     private static bool ApplySkillLevelUp(UpgradeOptionSO option, PlayerSkillManager skillManager)
     {
         if (skillManager?.SkillManager == null || string.IsNullOrWhiteSpace(option.SkillConfigId))
@@ -109,6 +130,11 @@ public static class UpgradeApplicator
         return skillManager.SkillManager.UpgradeSkillLevel(option.SkillConfigId, option.SkillLevelDelta);
     }
 
+    /// <summary>发放金币或钻石资源奖励。</summary>
+    /// <param name="saveManager">存档管理器。</param>
+    /// <param name="gold">金币数量。</param>
+    /// <param name="diamonds">钻石数量。</param>
+    /// <returns>至少发放一项资源时返回 <c>true</c>。</returns>
     private static bool ApplyResource(SaveManager saveManager, long gold, long diamonds)
     {
         if (saveManager?.Current == null)

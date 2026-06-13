@@ -20,14 +20,18 @@ public class GeneralCardPanel : MonoBehaviour
     [SerializeField] private TMP_Text costText;
     [SerializeField] private UI_RedDot redDot;
 
+    /// <summary>本卡片绑定的页面内动作标识。</summary>
     public MainSceneAction Action => action;
+    /// <summary>卡片可点击按钮引用。</summary>
     public Button Button => button;
 
+    /// <summary>卡片被点击时触发，携带 <see cref="MainSceneAction"/>。</summary>
     public event Action<MainSceneAction> Clicked;
 
     private Color defaultBackgroundColor;
     private Color defaultTitleColor;
 
+    /// <summary>缓存默认配色并绑定按钮点击。</summary>
     private void Awake()
     {
         if (backgroundImage != null)
@@ -46,6 +50,7 @@ public class GeneralCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>解绑按钮点击。</summary>
     private void OnDestroy()
     {
         if (button != null)
@@ -54,6 +59,10 @@ public class GeneralCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>批量设置标题、副标题与消耗文案。</summary>
+    /// <param name="title">主标题。</param>
+    /// <param name="subtitle">副标题，可选。</param>
+    /// <param name="cost">消耗说明，可选。</param>
     public void SetTexts(string title, string subtitle = null, string cost = null)
     {
         SetText(titleText, title);
@@ -61,6 +70,8 @@ public class GeneralCardPanel : MonoBehaviour
         SetText(costText, cost);
     }
 
+    /// <summary>设置红点可见性，用于可领取/新内容提示。</summary>
+    /// <param name="visible">为 <c>true</c> 时显示红点。</param>
     public void SetRedDot(bool visible)
     {
         if (redDot != null)
@@ -69,6 +80,8 @@ public class GeneralCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>设置底栏/导航选中高亮态。</summary>
+    /// <param name="selected">为 <c>true</c> 时应用选中配色。</param>
     public void SetSelectedHighlight(bool selected)
     {
         if (backgroundImage == null)
@@ -86,11 +99,13 @@ public class GeneralCardPanel : MonoBehaviour
         }
     }
 
+    /// <summary>按钮点击回调，向上层抛出动作。</summary>
     private void OnButtonClick()
     {
         Clicked?.Invoke(action);
     }
 
+    /// <summary>安全写入 TMP 文本，空值写为空串。</summary>
     private static void SetText(TMP_Text text, string value)
     {
         if (text == null)

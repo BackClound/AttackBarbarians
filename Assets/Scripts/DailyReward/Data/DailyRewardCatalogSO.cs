@@ -17,11 +17,21 @@ public class DailyRewardCatalogSO : ScriptableObject
     [SerializeField] private bool allowMakeup = true;
     [SerializeField] private long makeupDiamondCost = 10;
 
+    /// <summary>全部签到奖励条目。</summary>
     public IReadOnlyList<DailyRewardEntrySO> Entries => entries;
+    /// <summary>是否允许补签。</summary>
     public bool AllowMakeup => allowMakeup;
+    /// <summary>单次补签消耗的钻石数量。</summary>
     public long MakeupDiamondCost => (long)Mathf.Max(0, makeupDiamondCost);
+    /// <summary>签到周期最大天数。</summary>
     public int MaxDay => 7;
 
+    /// <summary>
+    /// 按天数索引查找签到奖励条目。
+    /// </summary>
+    /// <param name="dayIndex">签到天数索引（1～7）。</param>
+    /// <param name="entry">找到的奖励配置；未找到时为 null。</param>
+    /// <returns>找到对应配置时返回 true。</returns>
     public bool TryGetEntry(int dayIndex, out DailyRewardEntrySO entry)
     {
         entry = null;

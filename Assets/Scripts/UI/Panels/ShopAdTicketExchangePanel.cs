@@ -12,20 +12,24 @@ public class ShopAdTicketExchangePanel : MonoBehaviour
     [SerializeField] private ShopExchangeRowWidget[] diamondRows;
     [SerializeField] private ShopExchangeRowWidget[] goldRows;
 
+    /// <summary>兑换行请求兑换时向上层抛出配置 ID。</summary>
     public event Action<string> ExchangeRequested;
 
+    /// <summary>绑定兑换行事件。</summary>
     private void Awake()
     {
         WireRows(diamondRows);
         WireRows(goldRows);
     }
 
+    /// <summary>解绑兑换行事件。</summary>
     private void OnDestroy()
     {
         UnwireRows(diamondRows);
         UnwireRows(goldRows);
     }
 
+    /// <summary>刷新持有广告券数量与各兑换行状态。</summary>
     public void Refresh()
     {
         if (sectionTitleText != null)
@@ -48,6 +52,7 @@ public class ShopAdTicketExchangePanel : MonoBehaviour
         RefreshRows(goldRows);
     }
 
+    /// <summary>刷新一组兑换行的价格与可用性。</summary>
     private void RefreshRows(ShopExchangeRowWidget[] rows)
     {
         if (rows == null || !ServiceLocator.TryGet(out ShopManager shop))
@@ -70,6 +75,7 @@ public class ShopAdTicketExchangePanel : MonoBehaviour
         }
     }
 
+    /// <summary>绑定兑换行点击事件。</summary>
     private void WireRows(ShopExchangeRowWidget[] rows)
     {
         if (rows == null)
@@ -86,6 +92,7 @@ public class ShopAdTicketExchangePanel : MonoBehaviour
         }
     }
 
+    /// <summary>解绑兑换行点击事件。</summary>
     private void UnwireRows(ShopExchangeRowWidget[] rows)
     {
         if (rows == null)
@@ -102,6 +109,7 @@ public class ShopAdTicketExchangePanel : MonoBehaviour
         }
     }
 
+    /// <summary>转发兑换行请求到上层。</summary>
     private void OnExchangeRequested(string configId)
     {
         ExchangeRequested?.Invoke(configId);

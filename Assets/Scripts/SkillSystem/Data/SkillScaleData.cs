@@ -2,20 +2,23 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// TODO 需要考虑等级会提升哪些属性值，攻击频率，伤害值，爆击概率，爆击值， 攻击范围
-/// 护甲值（NO），特殊元素伤害？
-/// coolDown - 冷却值随等级上升，冷却变短，减少的最大阈值为50%， 
+/// 技能等级成长缩放系数（Legacy）；用于 <see cref="SkillLevelData"/> 按等级调整冷却、伤害等。
 /// </summary>
 [Serializable]
 public class SkillScaleData
 {
-    //0 - 100
+    /// <summary>冷却缩减倍率（0~0.5）。</summary>
     [Range(0, 0.5f)]
     public float coolDownScaleMulti;
+    /// <summary>攻击速度缩放倍率。</summary>
     public float attackSpeedScaleMulti;
+    /// <summary>伤害缩放倍率。</summary>
     public float damageScaleMulti;
+    /// <summary>暴击几率缩放倍率。</summary>
     public float critChanceScaleMulti;
+    /// <summary>暴击伤害缩放倍率。</summary>
     public float critDamageScaleMulti;
+    /// <summary>攻击范围缩放倍率。</summary>
     public float attackRadiusScaleMulti;
 
 }

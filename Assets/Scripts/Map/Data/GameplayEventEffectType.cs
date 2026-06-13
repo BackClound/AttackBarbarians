@@ -3,15 +3,16 @@
 /// </summary>
 public enum GameplayEventEffectType
 {
+    /// <summary>无效果。</summary>
     None = 0,
-    // 修改生成间隔
+    /// <summary>修改刷怪间隔倍率。</summary>
     ModifySpawnInterval = 1,
-    // 修改敌人属性
+    /// <summary>修改敌人属性倍率。</summary>
     ModifyEnemyStats = 2,
-    // 暂停生成 
+    /// <summary>暂停刷怪。</summary>
     PauseSpawns = 3,
-    // 应用玩家Buff
+    /// <summary>为玩家施加 Buff。</summary>
     ApplyPlayerBuff = 4,
-    // 修改奖励倍率
+    /// <summary>修改局末奖励倍率。</summary>
     ModifyRewardMultiplier = 5
 }

@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// Boss 配置：基于敌人模板叠加阶段、技能与专属数值修正。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Boss Data。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Boss/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "BossData", menuName = "Attack Barbarians/Config/Boss Data")]
 public class BossDataSO : ConfigDataBase
 {
@@ -42,6 +46,11 @@ public class BossDataSO : ConfigDataBase
     public string DropTableId => dropTableId;
     public int BonusExperience => Mathf.Max(0, bonusExperience);
 
+    /// <summary>
+    /// 获取指定 Boss 阶段的属性修正列表。
+    /// </summary>
+    /// <param name="phaseIndex">阶段索引（从 0 开始）。</param>
+    /// <returns>该阶段的修正列表；未配置时返回 null。</returns>
     public IReadOnlyList<StatModifierConfig> GetPhaseModifiers(int phaseIndex)
     {
         if (phaseModifierEntries == null || phaseIndex < 0)
@@ -61,6 +70,10 @@ public class BossDataSO : ConfigDataBase
         return null;
     }
 
+    /// <summary>
+    /// 收集 Boss 配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

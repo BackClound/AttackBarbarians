@@ -11,6 +11,11 @@ public sealed class WaveSpawnSelector
     private readonly List<WaveEnemyEntry> activeEntries = new List<WaveEnemyEntry>(8);
     private WaveDataSO waveData;
 
+    /// <summary>
+    /// 根据波次配置构建权重池或条目列表。
+    /// </summary>
+    /// <param name="wave">波次配置。</param>
+    /// <param name="configManager">配置管理器（用于旧式 enemyConfigIds 权重）。</param>
     public void Configure(WaveDataSO wave, ConfigManager configManager)
     {
         waveData = wave;
@@ -42,6 +47,11 @@ public sealed class WaveSpawnSelector
         BuildPoolFromConfigIds(wave.EnemyConfigIds, configManager);
     }
 
+    /// <summary>
+    /// 按当前波次经过时间随机选取敌人 configId。
+    /// </summary>
+    /// <param name="waveElapsedSeconds">波次已过时间（秒）。</param>
+    /// <returns>选中的敌人 configId；无可用池时返回默认蝙蝠 Id。</returns>
     public string PickEnemyId(float waveElapsedSeconds)
     {
         if (waveData == null)
@@ -62,6 +72,12 @@ public sealed class WaveSpawnSelector
         return weightedIds[Random.Range(0, weightedIds.Count)];
     }
 
+    /// <summary>
+    /// 获取指定敌人条目的综合属性倍率。
+    /// </summary>
+    /// <param name="configId">敌人 configId。</param>
+    /// <param name="waveStatMultiplier">波次全局属性倍率。</param>
+    /// <returns>综合倍率。</returns>
     public float GetEntryStatMultiplier(string configId, float waveStatMultiplier)
     {
         if (string.IsNullOrEmpty(configId) || activeEntries.Count == 0)
@@ -81,6 +97,9 @@ public sealed class WaveSpawnSelector
         return waveStatMultiplier;
     }
 
+    /// <summary>从条目列表按时间窗与权重构建临时池并随机选取。</summary>
+    /// <param name="waveElapsedSeconds">波次已过时间（秒）。</param>
+    /// <returns>选中的敌人 configId。</returns>
     private string PickFromEntries(float waveElapsedSeconds)
     {
         weightedIds.Clear();
@@ -108,6 +127,9 @@ public sealed class WaveSpawnSelector
         return weightedIds[Random.Range(0, weightedIds.Count)];
     }
 
+    /// <summary>从旧式 configId 列表按敌人 SpawnWeight 构建权重池。</summary>
+    /// <param name="enemyConfigIds">敌人 configId 列表。</param>
+    /// <param name="configManager">配置管理器。</param>
     private void BuildPoolFromConfigIds(IReadOnlyList<string> enemyConfigIds, ConfigManager configManager)
     {
         if (enemyConfigIds == null || configManager == null)

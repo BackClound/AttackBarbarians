@@ -6,6 +6,11 @@ using UnityEngine;
 /// <remarks>纯静态类，无需挂载。</remarks>
 public static class DamagePipeline
 {
+    /// <summary>
+    /// 将伤害上下文提交至 <see cref="DamageSystem"/> 结算。
+    /// </summary>
+    /// <param name="info">伤害上下文。</param>
+    /// <returns>结算结果；目标为空或未注册系统时返回 None。</returns>
     public static DamageResult Apply(DamageInfo info)
     {
         if (info.Target == null)
@@ -23,6 +28,14 @@ public static class DamagePipeline
         return DamageResult.None;
     }
 
+    /// <summary>
+    /// 以浮点伤害对指定目标结算（可选技能标识）。
+    /// </summary>
+    /// <param name="damage">伤害数值。</param>
+    /// <param name="target">受击目标。</param>
+    /// <param name="source">伤害来源，可选。</param>
+    /// <param name="skillId">技能标识，可选。</param>
+    /// <returns>结算结果。</returns>
     public static DamageResult ApplyToTarget(float damage, GameObject target, object source = null, string skillId = null)
     {
         if (target == null)
@@ -47,6 +60,12 @@ public static class DamagePipeline
         return Apply(info);
     }
 
+    /// <summary>
+    /// 对实现 <see cref="IDamagable"/> 的目标应用伤害。
+    /// </summary>
+    /// <param name="damagable">可受伤对象。</param>
+    /// <param name="info">伤害上下文。</param>
+    /// <returns>结算结果。</returns>
     public static DamageResult ApplyToDamagable(IDamagable damagable, DamageInfo info)
     {
         if (damagable == null)

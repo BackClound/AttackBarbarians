@@ -11,11 +11,13 @@ public class PlayerCombatBridge : MonoBehaviour
 {
     private Player player;
 
+    /// <summary>缓存玩家引用。</summary>
     private void Awake()
     {
         player = GetComponent<Player>();
     }
 
+    /// <summary>Animator 攻击帧入口，转发至状态机。</summary>
     public void PerformAttack()
     {
         player?.OnAnimatorAttackTrigger();

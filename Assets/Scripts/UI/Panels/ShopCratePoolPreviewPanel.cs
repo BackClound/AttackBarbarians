@@ -18,6 +18,7 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
 
     private readonly List<UpgradeCardDisplayView> spawnedSlots = new List<UpgradeCardDisplayView>(16);
 
+    /// <summary>绑定遮罩与关闭按钮，默认隐藏。</summary>
     private void Awake()
     {
         if (scrimButton != null)
@@ -33,6 +34,7 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
         Hide();
     }
 
+    /// <summary>解绑弹窗按钮。</summary>
     private void OnDestroy()
     {
         if (scrimButton != null)
@@ -46,6 +48,9 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
         }
     }
 
+    /// <summary>打开奖池预览并填充卡牌与爆率。</summary>
+    /// <param name="poolConfigId">奖池配置 ID。</param>
+    /// <param name="crateTitle">补给箱标题，用于副标题。</param>
     public void Show(string poolConfigId, string crateTitle)
     {
         if (root != null)
@@ -68,6 +73,7 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
         PopulateCards(poolConfigId);
     }
 
+    /// <summary>关闭奖池预览弹窗。</summary>
     public void Hide()
     {
         if (root != null)
@@ -76,6 +82,7 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
         }
     }
 
+    /// <summary>从 UpgradeCardManager 填充奖池预览卡片。</summary>
     private void PopulateCards(string poolConfigId)
     {
         ClearSlots();
@@ -101,6 +108,7 @@ public class ShopCratePoolPreviewPanel : MonoBehaviour
         }
     }
 
+    /// <summary>销毁已生成的预览卡片实例。</summary>
     private void ClearSlots()
     {
         for (int i = 0; i < spawnedSlots.Count; i++)

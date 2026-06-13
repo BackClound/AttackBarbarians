@@ -29,11 +29,16 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     private LayerMask wallLayerMask;
     private bool isInitialized;
 
+    /// <summary>所属敌人实体。</summary>
     public Enemy Enemy => enemy;
+    /// <summary>运行时数据（配置 Id、经验等）。</summary>
     public EnemyRuntimeData RuntimeData => runtimeData;
+    /// <summary>当前敌人配置 Id。</summary>
     public string ConfigId => runtimeData.ConfigId;
+    /// <summary>是否已完成池化初始化。</summary>
     public bool IsReady => isInitialized;
 
+    /// <summary>缓存组件与能力引用。</summary>
     private void Awake()
     {
         enemy = GetComponent<Enemy>();
@@ -44,6 +49,11 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     }
 
     /// <summary>由 <see cref="EnemySpawnerManager"/> 在池取出后调用。</summary>
+    /// <param name="configId">敌人配置 Id。</param>
+    /// <param name="statMultiplier">波次属性倍率。</param>
+    /// <param name="waveIndex">当前波次索引。</param>
+    /// <param name="markAsElite">是否标记为精英。</param>
+    /// <param name="markAsSpecial">是否标记为特殊敌人。</param>
     public void InitializeForSpawn(
         string configId,
         float statMultiplier,
@@ -85,6 +95,9 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             runtimeData.ConfigId));
     }
 
+    /// <summary>
+    /// 对象池回收回调：重置初始化标记并通知敌人清理。
+    /// </summary>
     public void OnPoolDespawn()
     {
         isInitialized = false;
@@ -92,6 +105,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         enemy?.OnDespawn();
     }
 
+    /// <summary>每帧驱动状态机与特殊能力组件（受性能预算节流）。</summary>
     private void Update()
     {
         if (!isInitialized)
@@ -122,16 +136,24 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>驱动敌人状态机 Update。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void TickStateMachine(float deltaTime)
     {
         enemy?.stateMachine?.UpdateState();
     }
 
+    /// <summary>驱动敌人状态机 FixedUpdate。</summary>
+    /// <param name="fixedDeltaTime">物理帧间隔（秒）。</param>
     public void TickStateMachineFixed(float fixedDeltaTime)
     {
         enemy?.stateMachine?.FixedUpdateState();
     }
 
+    /// <summary>
+    /// 检测攻击探测点下方是否命中墙体。
+    /// </summary>
+    /// <returns>墙体在攻击范围内时为 <c>true</c>。</returns>
     public bool IsWallInAttackRange()
     {
         if (enemy == null)
@@ -151,6 +173,8 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         return CollisionQuery.Raycast(origin, Vector2.down, distance, mask, out _);
     }
 
+    /// <summary>获取对城墙的近战伤害值。</summary>
+    /// <returns>配置或缩放后的近战伤害。</returns>
     public float GetMeleeDamage() => meleeDamage;
 
     /// <summary>动画攻击帧：对墙体射线命中后经 <see cref="DamagePipeline"/> 结算玩家伤害。</summary>
@@ -180,6 +204,10 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>
+    /// 计算击杀该敌人授予玩家的经验值（含 Boss/特殊敌人加成）。
+    /// </summary>
+    /// <returns>经验奖励，未初始化时为 0。</returns>
     public int GetExperienceReward()
     {
         if (!isInitialized)
@@ -207,6 +235,9 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         return reward;
     }
 
+    /// <summary>根据配置挂载特殊敌人能力与控制器。</summary>
+    /// <param name="data">敌人配置。</param>
+    /// <param name="markAsSpecial">是否标记为特殊敌人。</param>
     private void SetupSpecialEnemyMechanics(EnemyDataSO data, bool markAsSpecial)
     {
         bool hasMechanics = data != null && SpecialEnemyRules.HasMechanics(data.AbilityTags);
@@ -231,6 +262,8 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             data.SpecialBonusExperience);
     }
 
+    /// <summary>确保存在 <see cref="SpecialEnemyController"/> 组件。</summary>
+    /// <returns>特殊敌人控制器实例。</returns>
     private SpecialEnemyController EnsureSpecialEnemyController()
     {
         if (!TryGetComponent(out SpecialEnemyController controller))
@@ -241,6 +274,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         return controller;
     }
 
+    /// <summary>将波次缩放后的属性快照写入 Entity_Stats。</summary>
     private void ApplyScaledStats()
     {
         scaledSnapshot.CopyFrom(runtimeData.Stats);
@@ -249,6 +283,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         ConfigStatBridge.ApplyToEntityStats(scaledSnapshot, entityStats);
     }
 
+    /// <summary>应用精英模式或精英敌人的额外属性缩放。</summary>
     private void ApplyEliteScaling()
     {
         EliteModeConfigSO eliteConfig = RunDifficultyContext.EliteConfig;
@@ -264,6 +299,8 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>从配置同步移速、冷却、近战伤害与探测距离。</summary>
+    /// <param name="data">敌人配置。</param>
     private void ApplyCombatFieldsFromConfig(EnemyDataSO data)
     {
         if (enemy == null || data == null)
@@ -280,6 +317,8 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         enemy?.SetAttackProbeDistance(wallRayDistance);
     }
 
+    /// <summary>解析墙体检测层级掩码（优先 Inspector，其次 CollisionManager）。</summary>
+    /// <returns>墙体射线检测层级。</returns>
     private LayerMask ResolveWallLayers()
     {
         if (wallLayerMask.value != 0)
@@ -300,6 +339,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         return wallLayerMask;
     }
 
+    /// <summary>通知所有 <see cref="IEnemyAbility"/> 组件已完成生成。</summary>
     private void NotifyAbilitiesSpawn()
     {
         if (abilities == null)
@@ -313,6 +353,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
+    /// <summary>死亡时通知 Boss 控制器与特殊能力组件。</summary>
     public void NotifyDeath()
     {
         if (TryGetComponent(out BossController bossController))
@@ -331,7 +372,10 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
-    // 尝试解析数据
+    /// <summary>从 Override 或 ConfigManager 解析敌人配置。</summary>
+    /// <param name="configId">配置 Id。</param>
+    /// <param name="data">解析到的配置。</param>
+    /// <returns>成功找到配置时为 <c>true</c>。</returns>
     private bool TryResolveData(string configId, out EnemyDataSO data)
     {
         if (dataOverride != null)
@@ -356,6 +400,11 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 /// </summary>
 public static class EnemyStatScaling
 {
+    /// <summary>
+    /// 将波次倍率应用到快照中的核心战斗属性。
+    /// </summary>
+    /// <param name="snapshot">属性快照。</param>
+    /// <param name="multiplier">波次缩放倍率。</param>
     public static void ApplyMultiplier(StatRuntimeSnapshot snapshot, float multiplier)
     {
         if (snapshot == null || Mathf.Approximately(multiplier, 1f))
@@ -374,6 +423,10 @@ public static class EnemyStatScaling
         ScaleStat(snapshot, StatType.Armor, multiplier);
     }
 
+    /// <summary>缩放快照中的单个属性。</summary>
+    /// <param name="snapshot">属性快照。</param>
+    /// <param name="statType">属性类型。</param>
+    /// <param name="multiplier">缩放倍率。</param>
     private static void ScaleStat(StatRuntimeSnapshot snapshot, StatType statType, float multiplier)
     {
         snapshot.Set(statType, snapshot.Get(statType) * multiplier);

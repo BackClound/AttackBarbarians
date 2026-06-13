@@ -28,11 +28,19 @@ public class SaveManager : MonoBehaviour, IGameSystem
     private float autoSaveCountdown;
     private bool enableLogs;
 
+    /// <summary>系统是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+
+    /// <summary>当前内存中的存档数据引用。</summary>
     public SaveData Current => currentData;
+
+    /// <summary>当前玩家设置数据（嵌套在 <see cref="Current"/> 中）。</summary>
     public SettingsData Settings => currentData?.settings;
+
+    /// <summary>是否存在进行中的局内进度。</summary>
     public bool HasActiveRun => currentData?.runProgress != null && currentData.runProgress.hasActiveRun;
 
+    /// <summary>当前金币数量；写入时自动标记脏数据。</summary>
     public long Gold
     {
         get => currentData?.gold ?? 0;
@@ -48,6 +56,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>当前钻石数量；写入时自动标记脏数据。</summary>
     public long Diamonds
     {
         get => currentData?.diamonds ?? 0;
@@ -63,6 +72,9 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 初始化存档管理器：读取配置、加载磁盘存档并订阅游戏事件。
+    /// </summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -87,6 +99,10 @@ public class SaveManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧驱动防抖自动存档倒计时。
+    /// </summary>
+    /// <param name="deltaTime">经过的时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized || !enableAutoSave || !isDirty)
@@ -101,6 +117,9 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 关闭存档管理器：取消事件订阅，若有脏数据则强制写盘。
+    /// </summary>
     public void Shutdown()
     {
         UnsubscribeEvents();
@@ -113,6 +132,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>从磁盘加载；无文件或损坏时使用默认数据并尝试备份。</summary>
+    /// <returns>无返回值；结果写入 <see cref="Current"/> 并广播 <c>SaveLoaded</c> 事件。</returns>
     public void Load()
     {
         string path = SaveFileIO.GetSaveFilePath(saveFileName);
@@ -144,6 +164,8 @@ public class SaveManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>立即写入磁盘。</summary>
+    /// <param name="autoSave">是否为防抖自动存档（影响日志标签）。</param>
+    /// <returns>写入成功时返回 true，否则返回 false。</returns>
     public bool Save(bool autoSave = false)
     {
         if (currentData == null)
@@ -203,6 +225,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>导出当前存档 JSON 到 persistentDataPath/save_export.json。</summary>
+    /// <returns>导出文件的绝对路径；失败时返回 null。</returns>
     public string ExportToFile()
     {
         if (currentData == null)
@@ -226,10 +249,13 @@ public class SaveManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>返回当前存档 JSON 字符串，便于调试复制。</summary>
+    /// <returns>格式化 JSON 字符串；无数据时返回空字符串。</returns>
     public string ExportToJson() =>
         currentData != null ? JsonUtility.ToJson(currentData, prettyPrint: true) : string.Empty;
 
     /// <summary>从 JSON 字符串导入并覆盖当前内存存档（不自动写盘，需调用 Save）。</summary>
+    /// <param name="json">存档 JSON 字符串。</param>
+    /// <returns>反序列化并迁移成功时返回 true，否则返回 false。</returns>
     public bool ImportFromJson(string json)
     {
         SaveData imported = TryDeserializeJson(json);
@@ -244,6 +270,8 @@ public class SaveManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>从导出文件或任意路径导入 JSON。</summary>
+    /// <param name="path">存档 JSON 文件的绝对路径。</param>
+    /// <returns>读取并导入成功时返回 true，否则返回 false。</returns>
     public bool ImportFromFile(string path)
     {
         if (!SaveFileIO.TryReadText(path, out string json))
@@ -254,6 +282,13 @@ public class SaveManager : MonoBehaviour, IGameSystem
         return ImportFromJson(json);
     }
 
+    /// <summary>
+    /// 开始新一局并记录局内初始进度。
+    /// </summary>
+    /// <param name="startingWave">起始波次，默认 1。</param>
+    /// <param name="startingLevel">起始等级，默认 1。</param>
+    /// <param name="hp">初始当前生命值。</param>
+    /// <param name="maxHp">初始最大生命值。</param>
     public void BeginRun(int startingWave = 1, int startingLevel = 1, float hp = 0f, float maxHp = 0f)
     {
         if (currentData?.runProgress == null)
@@ -272,12 +307,20 @@ public class SaveManager : MonoBehaviour, IGameSystem
         MarkDirty();
     }
 
+    /// <summary>清除进行中的局内进度。</summary>
     public void ClearActiveRun()
     {
         currentData?.runProgress?.ClearRun();
         MarkDirty();
     }
 
+    /// <summary>
+    /// 更新进行中的局内进度，并同步最高波次统计。
+    /// </summary>
+    /// <param name="wave">当前波次。</param>
+    /// <param name="level">当前等级。</param>
+    /// <param name="hp">当前生命值。</param>
+    /// <param name="maxHp">最大生命值。</param>
     public void UpdateRunProgress(int wave, int level, float hp, float maxHp)
     {
         if (currentData?.runProgress == null || !currentData.runProgress.hasActiveRun)
@@ -299,18 +342,26 @@ public class SaveManager : MonoBehaviour, IGameSystem
         MarkDirty();
     }
 
+    /// <summary>Inspector 调试：从磁盘重新加载存档。</summary>
     [ContextMenu("Debug/Load")]
     private void DebugLoad() => Load();
 
+    /// <summary>Inspector 调试：立即写盘保存。</summary>
     [ContextMenu("Debug/Save")]
     private void DebugSave() => SaveImmediate();
 
+    /// <summary>Inspector 调试：删除存档并重建默认数据。</summary>
     [ContextMenu("Debug/Delete")]
     private void DebugDelete() => DeleteSave();
 
+    /// <summary>Inspector 调试：导出存档 JSON 到文件。</summary>
     [ContextMenu("Debug/Export")]
     private void DebugExport() => ExportToFile();
 
+    /// <summary>
+    /// 应用进入后台时，若有脏数据则立即保存。
+    /// </summary>
+    /// <param name="pauseStatus">true 表示进入暂停/后台。</param>
     private void OnApplicationPause(bool pauseStatus)
     {
         if (pauseStatus && isDirty)
@@ -319,6 +370,9 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 应用退出时，若有脏数据则立即保存。
+    /// </summary>
     private void OnApplicationQuit()
     {
         if (isDirty)
@@ -327,6 +381,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>订阅波次完成、升级选择、游戏结束等自动存档触发事件。</summary>
     private void SubscribeEvents()
     {
         GameEvents.SubscribeGameStateChanged(OnGameStateChanged);
@@ -335,6 +390,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
         GameEvents.SubscribeGameOver(OnGameOver);
     }
 
+    /// <summary>取消所有自动存档相关事件订阅。</summary>
     private void UnsubscribeEvents()
     {
         GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
@@ -343,6 +399,10 @@ public class SaveManager : MonoBehaviour, IGameSystem
         GameEvents.UnsubscribeGameOver(OnGameOver);
     }
 
+    /// <summary>
+    /// 游戏状态变更回调：退出场景时强制写盘。
+    /// </summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not GameStateChange change)
@@ -356,6 +416,10 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 波次完成回调：更新局内进度与最高波次统计，并请求自动存档。
+    /// </summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnWaveCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args && currentData?.runProgress != null)
@@ -370,14 +434,23 @@ public class SaveManager : MonoBehaviour, IGameSystem
         RequestAutoSave();
     }
 
+    /// <summary>升级选择完成回调：触发自动存档。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnUpgradeSelectionCompleted(GameEventContext ctx) => RequestAutoSave();
 
+    /// <summary>
+    /// 游戏结束回调：清除局内进度并立即写盘。
+    /// </summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameOver(GameEventContext ctx)
     {
         ClearActiveRun();
         SaveImmediate();
     }
 
+    /// <summary>
+    /// 标记脏数据；若禁用防抖则立即保存，否则启动倒计时。
+    /// </summary>
     private void RequestAutoSave()
     {
         MarkDirty();
@@ -387,6 +460,11 @@ public class SaveManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 从指定路径读取 JSON 并反序列化为存档数据。
+    /// </summary>
+    /// <param name="path">存档文件绝对路径。</param>
+    /// <returns>反序列化成功时返回数据，否则返回 null。</returns>
     private SaveData TryDeserializeFromFile(string path)
     {
         if (!SaveFileIO.TryReadText(path, out string json))
@@ -397,6 +475,11 @@ public class SaveManager : MonoBehaviour, IGameSystem
         return TryDeserializeJson(json);
     }
 
+    /// <summary>
+    /// 将 JSON 字符串反序列化为存档数据。
+    /// </summary>
+    /// <param name="json">存档 JSON 字符串。</param>
+    /// <returns>反序列化成功时返回数据，否则返回 null。</returns>
     private static SaveData TryDeserializeJson(string json)
     {
         if (string.IsNullOrWhiteSpace(json))

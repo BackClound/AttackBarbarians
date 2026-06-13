@@ -28,16 +28,29 @@ public class AutoAttackDataSO : ConfigDataBase
     [SerializeField] private float fanAngleDegrees = 10f;
     [SerializeField] private ProjectileSpawnPattern spawnPattern = ProjectileSpawnPattern.Single;
 
+    /// <summary>关联的射击技能 Id。</summary>
     public string SkillId => string.IsNullOrEmpty(skillId) ? GameConstants.ConfigIds.SkillShoot : skillId;
+    /// <summary>单轮连发最大射击次数。</summary>
     public int ShotsPerBurst => Mathf.Max(1, shotsPerBurst);
+    /// <summary>连发耗尽后的休整时间（秒）。</summary>
     public float BurstRecoverySeconds => Mathf.Max(0f, burstRecoverySeconds);
+    /// <summary>无目标时的目标扫描间隔（秒）。</summary>
     public float ScanIntervalWhileIdle => Mathf.Max(0.05f, scanIntervalWhileIdle);
+    /// <summary>持有目标时的扫描间隔（秒）。</summary>
     public float ScanIntervalWhileEngaged => Mathf.Max(0.05f, scanIntervalWhileEngaged);
+    /// <summary>默认投射物配置。</summary>
     public ProjectileDataSO ProjectileData => projectileData;
+    /// <summary>每次射击的弹道数量。</summary>
     public int ProjectilesPerShot => Mathf.Max(1, projectilesPerShot);
+    /// <summary>扇形排布夹角（度）。</summary>
     public float FanAngleDegrees => fanAngleDegrees;
+    /// <summary>弹道排布模式。</summary>
     public ProjectileSpawnPattern SpawnPattern => spawnPattern;
 
+    /// <summary>
+    /// 收集配置校验错误。
+    /// </summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

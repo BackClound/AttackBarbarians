@@ -32,8 +32,10 @@ public class MainSceneBattlePageView : MonoBehaviour
     [SerializeField] private MetaRewardPagePanel metaRewardPage;
     [SerializeField] private UpgradeCardRewardPopupPanel upgradeCardPopup;
 
+    /// <summary>战斗页内容区入口被点击时向上层抛出。</summary>
     public event Action<MainSceneAction> ContentActionClicked;
 
+    /// <summary>绑定各子 Panel 与开始战斗卡片回调。</summary>
     private void Awake()
     {
         BindPanelCallbacks();
@@ -43,6 +45,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>解绑各子 Panel 回调。</summary>
     private void OnDestroy()
     {
         if (resourcePanel != null)
@@ -66,6 +69,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>刷新头像、资源、奖励区与各入口红点。</summary>
     public void RefreshAll()
     {
         profilePanel?.Refresh();
@@ -113,6 +117,8 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>更新底部状态栏提示文案。</summary>
+    /// <param name="message">状态消息。</param>
     public void SetStatus(string message)
     {
         if (statusText != null)
@@ -121,32 +127,42 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>商店购买成功后刷新并显示状态提示。</summary>
+    /// <param name="args">购买事件参数。</param>
     public void OnShopPurchased(ShopPurchaseEventArgs args)
     {
         RefreshAll();
         SetStatus($"奖励领取成功：+{args.RewardAmount} {args.RewardType}");
     }
 
+    /// <summary>商店购买失败后刷新并显示错误信息。</summary>
+    /// <param name="message">失败原因。</param>
     public void OnShopPurchaseFailed(string message)
     {
         RefreshAll();
         SetStatus(message);
     }
 
+    /// <summary>签到成功后更新状态栏并刷新 UI。</summary>
+    /// <param name="args">签到事件参数。</param>
     public void OnDailyRewardClaimed(DailyRewardClaimedEventArgs args)
     {
         SetStatus($"签到成功：第 {args.DayIndex} 天 +{args.RewardAmount} {args.RewardType}");
         RefreshAll();
     }
 
+    /// <summary>签到失败后显示错误并刷新 UI。</summary>
+    /// <param name="message">失败原因。</param>
     public void OnDailyRewardClaimFailed(string message)
     {
         SetStatus(message);
         RefreshAll();
     }
 
+    /// <summary>资源变化时全量刷新战斗页 UI。</summary>
     public void OnResourceChanged() => RefreshAll();
 
+    /// <summary>绑定资源条与各卡片 Panel 的点击回调。</summary>
     private void BindPanelCallbacks()
     {
         if (resourcePanel != null)
@@ -165,6 +181,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>订阅卡片 Panel 的 CardClicked 事件。</summary>
     private void WireCardPanel(MainSceneCardPanel panel)
     {
         if (panel != null)
@@ -173,6 +190,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>取消订阅卡片 Panel 事件。</summary>
     private void UnwireCardPanel(MainSceneCardPanel panel)
     {
         if (panel != null)
@@ -181,11 +199,13 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>将子 Panel 点击转发给根 Presenter。</summary>
     private void OnCardAction(MainSceneAction action)
     {
         ContentActionClicked?.Invoke(action);
     }
 
+    /// <summary>处理资源加号点击（广告券/体力走广告服务）。</summary>
     private void OnResourceAddClicked(CurrencyType currency)
     {
         PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
@@ -210,12 +230,14 @@ public class MainSceneBattlePageView : MonoBehaviour
         SetStatus(message);
     }
 
+    /// <summary>刷新主奖励行与 Meta 奖励页。</summary>
     private void RefreshRewardPanels()
     {
         rewardPanel?.Refresh();
         metaRewardPage?.Refresh();
     }
 
+    /// <summary>根据各 Manager 状态刷新促销/侧边/系统入口红点。</summary>
     private void RefreshRedDots()
     {
         bool canClaimDaily = ServiceLocator.TryGet(out DailyRewardManager daily) && daily.CanClaimToday();
@@ -237,6 +259,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         rewardPanel?.ApplyRedDots();
     }
 
+    /// <summary>扣除体力、初始化 Run 并加载战斗场景。</summary>
     private void BeginBattle()
     {
         if (ServiceLocator.TryGet(out ResourceManager resources))
@@ -279,6 +302,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>尝试领取今日签到奖励。</summary>
     private void TryClaimDailyReward()
     {
         if (!ServiceLocator.TryGet(out DailyRewardManager daily))
@@ -295,6 +319,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         RefreshAll();
     }
 
+    /// <summary>尝试领取在线/离线/通关 Meta 奖励。</summary>
     private bool TryClaimMetaReward(MainSceneAction action)
     {
         if (metaRewardPage != null && metaRewardPage.TryHandleAction(action))
@@ -330,6 +355,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         return true;
     }
 
+    /// <summary>判断动作是否属于战斗页内容卡片。</summary>
     private static bool IsContentCardAction(MainSceneAction action) =>
         action switch
         {
@@ -337,6 +363,7 @@ public class MainSceneBattlePageView : MonoBehaviour
             _ => true,
         };
 
+    /// <summary>播放 UI 音效。</summary>
     private static void PlayUiSfx(string sfxId)
     {
         if (!string.IsNullOrWhiteSpace(sfxId))
@@ -345,6 +372,7 @@ public class MainSceneBattlePageView : MonoBehaviour
         }
     }
 
+    /// <summary>返回未接入功能的占位提示。</summary>
     private static string GetPendingFeatureMessage(MainSceneAction action) =>
         action switch
         {

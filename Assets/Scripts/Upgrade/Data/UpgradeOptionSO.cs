@@ -40,24 +40,43 @@ public class UpgradeOptionSO : ConfigDataBase
     [Header("Effect — Stat (optional direct modifier)")]
     [SerializeField] private List<StatModifierConfig> directModifiers = new List<StatModifierConfig>();
 
+    /// <summary>选项描述文本。</summary>
     public string Description => description;
+    /// <summary>稀有度。</summary>
     public UpgradeRarity Rarity => rarity;
+    /// <summary>默认抽取权重。</summary>
     public int Weight => Mathf.Max(1, weight);
+    /// <summary>效果类型。</summary>
     public UpgradeEffectType EffectType => effectType;
+    /// <summary>最大可叠加层数。</summary>
     public int MaxStacks => Mathf.Max(1, maxStacks);
+    /// <summary>生效的最小波次。</summary>
     public int MinWave => Mathf.Max(1, minWave);
+    /// <summary>生效的最大波次（0 表示无上限）。</summary>
     public int MaxWave => maxWave;
+    /// <summary>互斥组 ID（同组仅可选一次）。</summary>
     public string MutuallyExclusiveGroup => mutuallyExclusiveGroup;
+    /// <summary>前置升级选项 ID 列表。</summary>
     public IReadOnlyList<string> PrerequisiteOptionIds => prerequisiteOptionIds;
+    /// <summary>Buff 配置 ID。</summary>
     public string BuffConfigId => buffConfigId;
+    /// <summary>Buff 叠加层数。</summary>
     public int BuffStacks => Mathf.Max(1, buffStacks);
+    /// <summary>目标技能配置 ID。</summary>
     public string SkillConfigId => skillConfigId;
+    /// <summary>技能等级提升量。</summary>
     public int SkillLevelDelta => Mathf.Max(1, skillLevelDelta);
+    /// <summary>技能 Buff 种类。</summary>
     public SkillBuffKind SkillBuffKind => skillBuffKind;
+    /// <summary>技能 Buff 层级。</summary>
     public int SkillBuffTier => Mathf.Max(1, skillBuffTier);
+    /// <summary>资源奖励数量。</summary>
     public long ResourceAmount => resourceAmount;
+    /// <summary>直接属性修正列表（可选）。</summary>
     public IReadOnlyList<StatModifierConfig> DirectModifiers => directModifiers;
 
+    /// <summary>收集升级选项配置校验错误。</summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

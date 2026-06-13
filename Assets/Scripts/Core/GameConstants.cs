@@ -7,6 +7,7 @@
 /// </remarks>
 public static class GameConstants
 {
+    /// <summary>Unity Tag 名称常量。</summary>
     public static class Tags
     {
         public const string Player = "Player";
@@ -14,6 +15,7 @@ public static class GameConstants
         public const string Wall = "Wall";
     }
 
+    /// <summary>Unity Layer 名称常量。</summary>
     public static class Layers
     {
         public const string Player = "Player";
@@ -22,6 +24,7 @@ public static class GameConstants
         public const string Projectile = "Projectile";
     }
 
+    /// <summary><see cref="EventBus"/> 事件 Key 字符串常量，按业务域分组。</summary>
     public static class EventKeys
     {
         // Game
@@ -136,6 +139,7 @@ public static class GameConstants
         public const string AdRewardStateChanged = "Ad.StateChanged";
     }
 
+    /// <summary>UI 面板标识符，用于 <see cref="GameEvents.RaiseUiPanelOpened"/> 等事件。</summary>
     public static class UiPanelIds
     {
         public const string MainMenu = "ui.main_menu";
@@ -148,6 +152,7 @@ public static class GameConstants
         public const string Achievement = "ui.achievement";
     }
 
+    /// <summary>音频资源标识符，供 <see cref="AudioManager"/> 与事件系统引用。</summary>
     public static class AudioIds
     {
         public const string MusicMainMenu = "audio.music.main_menu";
@@ -169,6 +174,7 @@ public static class GameConstants
         public const string MusicGameplay = "audio.music.gameplay";
     }
 
+    /// <summary>Resources 加载路径（不含扩展名）。</summary>
     public static class ResourcePaths
     {
         public const string GameConfig = "Config/GameConfig";
@@ -190,6 +196,7 @@ public static class GameConstants
         public const string PerformanceBudget = "Config/Performance/PerformanceBudget_Default";
     }
 
+    /// <summary>配置表条目 ID，与 ScriptableObject 资产一一对应。</summary>
     public static class ConfigIds
     {
         public const string MapDefault = "map.default";
@@ -280,6 +287,7 @@ public static class GameConstants
         public const string AdTicketEarn = "ad.ticket_earn";
     }
 
+    /// <summary><see cref="PoolManager"/> 对象池 Key 常量。</summary>
     public static class PoolKeys
     {
         public const string Enemy = "Enemy";

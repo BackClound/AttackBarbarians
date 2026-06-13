@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// Buff 配置：持续时间、堆叠与属性修正。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Buff Data。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Buff/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "BuffData", menuName = "Attack Barbarians/Config/Buff Data")]
 public class BuffDataSO : ConfigDataBase
 {
@@ -38,6 +42,10 @@ public class BuffDataSO : ConfigDataBase
     public string Description => description;
     public Color TintColor => tintColor;
 
+    /// <summary>
+    /// 收集 Buff 配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

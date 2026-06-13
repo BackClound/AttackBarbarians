@@ -1,19 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>Bootstrap 完成后要执行的游戏流程分支。</summary>
 public enum BootstrapPostFlow
 {
+    /// <summary>读取 <see cref="GameConfig.StartGameOnBootstrap"/> 决定是否开局。</summary>
     UseGameConfig = 0,
+    /// <summary>直接调用 <see cref="GameManager.StartGame"/>。</summary>
     StartGame = 1,
+    /// <summary>打开主菜单。</summary>
     OpenMainMenu = 2,
+    /// <summary>不执行任何后续流程。</summary>
     None = 3,
 }
 
+/// <summary>Bootstrap 时要注册并初始化的 Manager 集合范围。</summary>
 public enum BootstrapManagerSet
 {
+    /// <summary>根据 <see cref="BootstrapPostFlow"/> 自动选择主场景或战斗场景集合。</summary>
     AutoByPostFlow = 0,
+    /// <summary>仅注册主场景 Meta/UI 相关 Manager。</summary>
     MainScene = 1,
+    /// <summary>注册战斗场景所需的完整 Manager 集合。</summary>
     BattleScene = 2,
+    /// <summary>注册全部 Manager。</summary>
     All = 3,
 }
 
@@ -78,9 +88,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     private EventBus eventBus;
     private bool isBootstrapped;
 
+    /// <summary>根据 Inspector 配置决定单例是否跨场景保留。</summary>
     protected override SingletonOptions Options =>
         dontDestroyOnLoad ? SingletonOptions.PersistentDefault : SingletonOptions.SceneDefault;
 
+    /// <summary>单例认领成功后，按配置决定是否立即 Bootstrap。</summary>
     protected override void OnSingletonAwake()
     {
         if (initializeOnAwake)
@@ -89,6 +101,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         }
     }
 
+    /// <summary>每帧驱动已注册 <see cref="IGameSystem"/> 的 <see cref="IGameSystem.Tick"/>。</summary>
     private void Update()
     {
         if (!isBootstrapped)
@@ -103,6 +116,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         }
     }
 
+    /// <summary>逆序关闭各系统并清空 <see cref="ServiceLocator"/>。</summary>
     protected override void OnSingletonDestroy()
     {
         for (int i = systems.Count - 1; i >= 0; i--)
@@ -131,6 +145,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         ApplyPostBootstrapFlow();
     }
 
+    /// <summary>Bootstrap 完成后按 <see cref="BootstrapPostFlow"/> 启动主菜单或开局。</summary>
     private void ApplyPostBootstrapFlow()
     {
         switch (postBootstrapFlow)
@@ -157,6 +172,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         }
     }
 
+    /// <summary>解析 Inspector 引用或在场景中查找/创建各 Manager 组件。</summary>
     private void ResolveManagers()
     {
         bool includeBattleManagers = IncludesBattleManagers();
@@ -201,6 +217,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         eventBus = new EventBus();
     }
 
+    /// <summary>将 Manager 与 <see cref="EventBus"/> 注册到 <see cref="ServiceLocator"/> 并加入 Tick 列表。</summary>
     private void RegisterServices()
     {
         systems.Clear();
@@ -255,6 +272,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         }
     }
 
+    /// <summary>按注册顺序初始化各系统，并应用难度与对象池运行时策略。</summary>
     private void InitializeSystems()
     {
         for (int i = 0; i < systems.Count; i++)
@@ -270,6 +288,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         RunDifficultyBootstrap.ApplyFromGameConfig(configManager != null ? configManager.GameConfig : null);
     }
 
+    /// <summary>从 <see cref="GameConfig"/> 读取预热数量与扩容策略并配置 <see cref="PoolManager"/>。</summary>
     private void ApplyPoolRuntimePolicy()
     {
         if (poolManager == null || configManager == null)
@@ -293,6 +312,8 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
             gameConfig.AllowPoolGrowth);
     }
 
+    /// <summary>判断当前 Bootstrap 配置是否应包含战斗场景 Manager。</summary>
+    /// <returns>需要战斗 Manager 时返回 true。</returns>
     private bool IncludesBattleManagers()
     {
         BootstrapManagerSet effectiveSet = managerSet;
@@ -306,6 +327,9 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         return effectiveSet == BootstrapManagerSet.BattleScene || effectiveSet == BootstrapManagerSet.All;
     }
 
+    /// <summary>注册单个 <see cref="IGameSystem"/> 到定位器与 Tick 列表。</summary>
+    /// <typeparam name="T">系统类型。</typeparam>
+    /// <param name="system">系统实例；为 null 时跳过。</param>
     private void RegisterSystem<T>(T system) where T : class, IGameSystem
     {
         if (system == null)
@@ -317,6 +341,10 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         systems.Add(system);
     }
 
+    /// <summary>优先使用已有引用，否则在子物体、场景或本物体上查找/创建组件。</summary>
+    /// <typeparam name="T">组件类型。</typeparam>
+    /// <param name="current">Inspector 已指定引用。</param>
+    /// <returns>解析到的组件实例。</returns>
     private T ResolveOrCreate<T>(T current) where T : Component
     {
         if (current != null)

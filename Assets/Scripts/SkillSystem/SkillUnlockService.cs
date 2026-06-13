@@ -3,6 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 局外技能解锁：按存档 <c>totalPlayTimeSeconds</c> 与解锁表判定，并在开局同步到 <see cref="SkillManager"/>。
+/// 流水线位置：元进度评估 → 存档写入 → 开局 <see cref="ApplyUnlocksToPlayerSkillManager"/>。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。</para>
@@ -37,8 +38,10 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
     private SkillUnlockTableSO unlockTable;
     private bool isInitialized;
 
+    /// <summary>服务是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>订阅事件并解析解锁表。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -54,15 +57,21 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧 Tick（本服务无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔秒数。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消订阅并标记未初始化。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
         isInitialized = false;
     }
 
-    /// <summary>累计游玩秒数（存档 + 当前局）。</summary>
+    /// <summary>
+    /// 累计游玩秒数（存档 + 当前局）。
+    /// </summary>
+    /// <returns>总游玩秒数。</returns>
     public long GetTotalPlayTimeSeconds()
     {
         long total = 0;
@@ -79,7 +88,11 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         return total;
     }
 
-    /// <summary>是否已在元进度中解锁（存档或时长达标）。</summary>
+    /// <summary>
+    /// 是否已在元进度中解锁（存档或时长达标）。
+    /// </summary>
+    /// <param name="skillConfigId">技能配置 ID。</param>
+    /// <returns>是否已元解锁。</returns>
     public bool IsMetaUnlocked(string skillConfigId)
     {
         if (string.IsNullOrWhiteSpace(skillConfigId))
@@ -100,7 +113,11 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         return GetTotalPlayTimeSeconds() >= GetRequiredSeconds(skillConfigId);
     }
 
-    /// <summary>评估时长解锁并写入存档，返回本帧新解锁数量。</summary>
+    /// <summary>
+    /// 评估时长解锁并写入存档，返回本帧新解锁数量。
+    /// </summary>
+    /// <param name="newlyUnlockedBuffer">可选，接收新解锁技能 ID 列表。</param>
+    /// <returns>本帧新解锁技能数量。</returns>
     public int RefreshMetaUnlocks(List<string> newlyUnlockedBuffer = null)
     {
         newlyUnlockedBuffer?.Clear();
@@ -130,7 +147,9 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         return count;
     }
 
-    /// <summary>将存档中已解锁技能同步到场景内 <see cref="SkillManager"/>。</summary>
+    /// <summary>
+    /// 将存档中已解锁技能同步到场景内 <see cref="SkillManager"/>。
+    /// </summary>
     public void ApplyUnlocksToPlayerSkillManager()
     {
         PlayerSkillManager playerSkills = ResolvePlayerSkillManager();
@@ -156,6 +175,11 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         });
     }
 
+    /// <summary>
+    /// 获取技能元解锁所需累计游玩秒数。
+    /// </summary>
+    /// <param name="skillConfigId">技能配置 ID。</param>
+    /// <returns>所需秒数；未知技能返回 <see cref="long.MaxValue"/>。</returns>
     public long GetRequiredSeconds(string skillConfigId)
     {
         if (unlockTable != null && unlockTable.TryGetRequiredSeconds(skillConfigId, out long seconds))
@@ -174,12 +198,16 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         return long.MaxValue;
     }
 
+    /// <summary>对局开始时刷新元解锁并同步到玩家。</summary>
+    /// <param name="ctx">游戏开始事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx)
     {
         RefreshMetaUnlocks();
         ApplyUnlocksToPlayerSkillManager();
     }
 
+    /// <summary>解析解锁表（Override → ConfigDatabase → Resources）。</summary>
+    /// <returns>解锁表资产；可能为 null。</returns>
     private SkillUnlockTableSO ResolveUnlockTable()
     {
         if (unlockTableOverride != null)
@@ -195,6 +223,10 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         return Resources.Load<SkillUnlockTableSO>(GameConstants.ResourcePaths.SkillUnlockTable);
     }
 
+    /// <summary>
+    /// 遍历全部解锁规则（配置表或内置 Fallback）。
+    /// </summary>
+    /// <param name="visitor">访问器：(技能ID, 所需秒数, 是否默认解锁)。</param>
     private void IterateRules(System.Action<string, long, bool> visitor)
     {
         if (unlockTable != null && unlockTable.Entries != null && unlockTable.Entries.Count > 0)
@@ -220,6 +252,8 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>解析场景中的 <see cref="PlayerSkillManager"/>。</summary>
+    /// <returns>玩家技能管理器；未找到时返回 null。</returns>
     private static PlayerSkillManager ResolvePlayerSkillManager()
     {
         if (Player.HasInstance && Player.Instance.skillManager != null)

@@ -33,17 +33,30 @@ public class EquipmentDataSO : ConfigDataBase
     [Header("Presentation")]
     [SerializeField] private string description;
 
+    /// <summary>装备部位。</summary>
     public EquipmentSlot Slot => slot;
+    /// <summary>装备品质。</summary>
     public EquipmentQuality Quality => quality;
+    /// <summary>主属性修正列表。</summary>
     public IReadOnlyList<StatModifierConfig> MainModifiers => mainModifiers;
+    /// <summary>词条属性修正列表。</summary>
     public IReadOnlyList<StatModifierConfig> AffixModifiers => affixModifiers;
+    /// <summary>套装 ID。</summary>
     public string SetId => setId;
+    /// <summary>激活套装加成所需的件数。</summary>
     public int SetPiecesRequired => Mathf.Max(1, setPiecesRequired);
+    /// <summary>套装加成属性修正列表。</summary>
     public IReadOnlyList<StatModifierConfig> SetBonusModifiers => setBonusModifiers;
+    /// <summary>最大强化等级。</summary>
     public int MaxEnhanceLevel => Mathf.Max(0, maxEnhanceLevel);
+    /// <summary>每级强化带来的属性加成比例。</summary>
     public float EnhanceStatBonusPerLevel => Mathf.Max(0f, enhanceStatBonusPerLevel);
+    /// <summary>装备描述文本。</summary>
     public string Description => description;
 
+    /// <summary>计算达到指定强化等级所需的金币消耗。</summary>
+    /// <param name="targetLevel">目标强化等级。</param>
+    /// <returns>所需金币数量。</returns>
     public long GetEnhanceCostForLevel(int targetLevel)
     {
         int clamped = Mathf.Clamp(targetLevel, 1, MaxEnhanceLevel);
@@ -61,12 +74,17 @@ public class EquipmentDataSO : ConfigDataBase
         return System.Math.Max(0L, cost);
     }
 
+    /// <summary>获取指定强化等级下的属性倍率。</summary>
+    /// <param name="enhanceLevel">强化等级。</param>
+    /// <returns>属性倍率（1 表示无加成）。</returns>
     public float GetEnhanceStatMultiplier(int enhanceLevel)
     {
         int clamped = Mathf.Clamp(enhanceLevel, 0, MaxEnhanceLevel);
         return 1f + EnhanceStatBonusPerLevel * clamped;
     }
 
+    /// <summary>根据品质获取强化消耗倍率。</summary>
+    /// <returns>消耗倍率。</returns>
     private float GetQualityCostMultiplier()
     {
         return quality switch
@@ -79,6 +97,8 @@ public class EquipmentDataSO : ConfigDataBase
         };
     }
 
+    /// <summary>收集装备配置校验错误与警告。</summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

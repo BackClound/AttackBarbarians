@@ -24,5 +24,7 @@ public class SettingsData
     /// <summary>0=简单, 1=普通, 2=困难；影响局末金币/钻石结算倍率。</summary>
     public int gameDifficulty = 1;
 
+    /// <summary>创建默认玩家设置实例。</summary>
+    /// <returns>音量、画质与语言等均为默认值的设置对象。</returns>
     public static SettingsData CreateDefault() => new SettingsData();
 }

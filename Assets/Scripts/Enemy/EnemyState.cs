@@ -10,6 +10,12 @@ public class EnemyState : EntityState
     protected float cooldownThreshold;
     protected float cooldownTimer;
 
+    /// <summary>
+    /// 创建敌人状态基类实例。
+    /// </summary>
+    /// <param name="enemy">所属敌人实体。</param>
+    /// <param name="machine">敌人状态机。</param>
+    /// <param name="animName">Animator 状态名。</param>
     public EnemyState(Enemy enemy, StateMachine machine, string animName) : base(machine, animName)
     {
         this.enemy = enemy;
@@ -17,6 +23,10 @@ public class EnemyState : EntityState
         this.rb = enemy.rb;
     }
 
+    /// <summary>
+    /// 检测墙体是否在攻击范围内。
+    /// </summary>
+    /// <returns>可攻击墙体时为 <c>true</c>。</returns>
     protected bool IsWallInAttackRange()
     {
         if (Controller != null && Controller.IsReady)
@@ -27,6 +37,10 @@ public class EnemyState : EntityState
         return enemy != null && enemy.IsWallDetected();
     }
 
+    /// <summary>
+    /// 按方向设置移动速度，受 <see cref="EnemyStatusController"/> 控制状态影响。
+    /// </summary>
+    /// <param name="direction">移动方向。</param>
     protected void ApplyMoveVelocity(Vector2 direction)
     {
         if (enemy == null)
@@ -54,6 +68,9 @@ public class EnemyState : EntityState
         enemy.SetVelocity(direction.normalized * speed);
     }
 
+    /// <summary>
+    /// 停止移动（速度归零）。
+    /// </summary>
     protected void StopMovement()
     {
         enemy?.SetVelocity(Vector2.zero);

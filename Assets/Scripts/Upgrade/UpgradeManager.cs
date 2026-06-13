@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 升级系统核心：过滤候选、加权抽取、应用效果并记录局内已选升级。
+/// 局内 Roguelike 升级管理器：负责单局三选一抽取、效果应用与已选升级持久化（与 Meta 天赋/装备互补）。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。</para>
@@ -23,10 +23,14 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     private string lastResolvedPoolId = string.Empty;
     private bool isInitialized;
 
+    /// <summary>是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前抽取到的候选升级选项。</summary>
     public IReadOnlyList<UpgradeOptionSO> CurrentChoices => currentChoices;
+    /// <summary>最近一次解析到的奖励池配置 ID。</summary>
     public string LastResolvedPoolId => lastResolvedPoolId;
 
+    /// <summary>初始化配置依赖并从存档恢复已选升级。</summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -41,8 +45,11 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（升级系统无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">距上一帧的秒数。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消事件订阅并清空当前候选。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
@@ -51,6 +58,9 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>根据上下文从奖励池抽取不重复候选。</summary>
+    /// <param name="context">升级抽取上下文。</param>
+    /// <param name="choices">抽取到的候选列表。</param>
+    /// <returns>抽取成功返回 <c>true</c>。</returns>
     public bool TryRollChoices(UpgradeSelectionContext context, out IReadOnlyList<UpgradeOptionSO> choices)
     {
         choices = null;
@@ -93,6 +103,9 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>应用玩家选中的升级并写入存档。</summary>
+    /// <param name="option">选中的升级选项。</param>
+    /// <param name="triggerSource">触发来源。</param>
+    /// <returns>应用成功返回 <c>true</c>。</returns>
     public bool TryApplyChoice(UpgradeOptionSO option, UpgradeTriggerSource triggerSource)
     {
         if (option == null)
@@ -115,6 +128,9 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>获取指定升级选项的已选叠加层数。</summary>
+    /// <param name="optionConfigId">升级选项配置 ID。</param>
+    /// <returns>叠加层数；未选中时返回 0。</returns>
     public int GetStackCount(string optionConfigId)
     {
         if (string.IsNullOrWhiteSpace(optionConfigId))
@@ -125,6 +141,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return selectedStacks.TryGetValue(optionConfigId, out int stacks) ? stacks : 0;
     }
 
+    /// <summary>判断指定升级选项在当前上下文中是否可选。</summary>
+    /// <param name="option">升级选项。</param>
+    /// <param name="context">升级抽取上下文。</param>
+    /// <returns>可选返回 <c>true</c>。</returns>
     public bool IsOptionAvailable(UpgradeOptionSO option, UpgradeSelectionContext context)
     {
         if (option == null)
@@ -174,11 +194,16 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>游戏开始时重新应用已保存的升级效果。</summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx)
     {
         ReapplySavedUpgrades();
     }
 
+    /// <summary>判断技能类升级选项在当前状态下是否可用。</summary>
+    /// <param name="option">升级选项。</param>
+    /// <returns>可用返回 <c>true</c>。</returns>
     private static bool IsSkillEffectOptionAvailable(UpgradeOptionSO option)
     {
         if (option == null)
@@ -227,6 +252,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>重新应用存档中已选升级的全部效果。</summary>
     private void ReapplySavedUpgrades()
     {
         if (selectedStacks.Count == 0)
@@ -256,11 +282,16 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>尝试应用升级选项效果。</summary>
+    /// <param name="option">升级选项。</param>
+    /// <returns>应用成功返回 <c>true</c>。</returns>
     private bool TryApplyEffect(UpgradeOptionSO option)
     {
         return UpgradeApplicator.TryApply(option, ResolvePlayerSkillManager(), saveManager);
     }
 
+    /// <summary>解析场景中的玩家技能管理器。</summary>
+    /// <returns>玩家技能管理器；未找到时返回 <c>null</c>。</returns>
     private static PlayerSkillManager ResolvePlayerSkillManager()
     {
         if (Player.HasInstance && Player.Instance.skillManager != null)
@@ -271,6 +302,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return FindFirstObjectByType<PlayerSkillManager>();
     }
 
+    /// <summary>根据过滤规则构建可抽取的候选条目列表。</summary>
+    /// <param name="pool">奖励池配置。</param>
+    /// <param name="context">升级抽取上下文。</param>
+    /// <param name="destination">输出候选列表。</param>
     private void BuildEligibleEntries(
         RewardPoolSO pool,
         UpgradeSelectionContext context,
@@ -302,6 +337,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>从候选列表中排除与已选选项互斥的条目。</summary>
+    /// <param name="pool">奖励池配置。</param>
+    /// <param name="picked">已选中的选项。</param>
+    /// <param name="candidates">待过滤的候选列表。</param>
     private static void ExcludeMutualGroup(
         RewardPoolSO pool,
         UpgradeOptionSO picked,
@@ -346,6 +385,11 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>按权重随机选取一个候选。</summary>
+    /// <param name="candidates">候选列表。</param>
+    /// <param name="picked">选中的候选。</param>
+    /// <param name="pickedIndex">选中项在列表中的索引。</param>
+    /// <returns>选取成功返回 <c>true</c>。</returns>
     private static bool TryPickWeighted(
         List<UpgradeRollCandidate> candidates,
         out UpgradeRollCandidate picked,
@@ -389,6 +433,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return picked.Option != null;
     }
 
+    /// <summary>根据稀有度计算最终抽取权重。</summary>
+    /// <param name="option">升级选项。</param>
+    /// <param name="baseWeight">基础权重。</param>
+    /// <returns>有效权重。</returns>
     private static float GetEffectiveWeight(UpgradeOptionSO option, float baseWeight)
     {
         if (option == null)
@@ -416,6 +464,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return Mathf.Max(1f, weight);
     }
 
+    /// <summary>根据波次解析适用的奖励池。</summary>
+    /// <param name="waveIndex">当前波次。</param>
+    /// <param name="pool">解析到的奖励池。</param>
+    /// <returns>解析成功返回 <c>true</c>。</returns>
     private bool TryResolvePool(int waveIndex, out RewardPoolSO pool)
     {
         pool = null;
@@ -448,6 +500,10 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>判断奖励池是否适用于指定波次。</summary>
+    /// <param name="pool">奖励池配置。</param>
+    /// <param name="waveIndex">当前波次。</param>
+    /// <returns>适用返回 <c>true</c>。</returns>
     private static bool IsPoolValidForWave(RewardPoolSO pool, int waveIndex)
     {
         if (pool == null)
@@ -463,6 +519,8 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return pool.MaxWave <= 0 || waveIndex <= pool.MaxWave;
     }
 
+    /// <summary>记录玩家选中升级并更新互斥组状态。</summary>
+    /// <param name="option">选中的升级选项。</param>
     private void RecordSelection(UpgradeOptionSO option)
     {
         string id = option.ConfigId;
@@ -479,6 +537,8 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>将选中升级写入局内存档。</summary>
+    /// <param name="option">选中的升级选项。</param>
     private void PersistSelection(UpgradeOptionSO option)
     {
         if (saveManager?.Current?.runProgress == null)
@@ -491,6 +551,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         saveManager.MarkDirty();
     }
 
+    /// <summary>从局内存档恢复已选升级记录。</summary>
     private void RestoreFromSave()
     {
         selectedStacks.Clear();

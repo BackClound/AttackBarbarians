@@ -24,15 +24,26 @@ public class TalentDataSO : ConfigDataBase
     [Header("Presentation")]
     [SerializeField] private string description;
 
+    /// <summary>天赋最大等级。</summary>
     public int MaxLevel => Mathf.Max(1, maxLevel);
+    /// <summary>1 级升级基础金币消耗。</summary>
     public long BaseUpgradeCostGold => (long)Mathf.Max(0f, baseUpgradeCostGold);
+    /// <summary>每级升级消耗的增长倍率。</summary>
     public float CostGrowthPerLevel => Mathf.Max(1f, costGrowthPerLevel);
+    /// <summary>前置天赋配置 ID 列表。</summary>
     public IReadOnlyList<string> PrerequisiteTalentIds => prerequisiteTalentIds;
+    /// <summary>前置天赋所需的最低等级。</summary>
     public int PrerequisiteMinLevel => Mathf.Max(1, prerequisiteMinLevel);
+    /// <summary>每级天赋提供的属性修正列表。</summary>
     public IReadOnlyList<StatModifierConfig> ModifiersPerLevel => modifiersPerLevel;
+    /// <summary>天赋描述文本。</summary>
     public string Description => description;
 
-    /// <summary>从 1 级升到 targetLevel 的累计金币消耗（不含已付等级）。</summary>
+    /// <summary>
+    /// 计算从 1 级升到目标等级的单次升级金币消耗。
+    /// </summary>
+    /// <param name="targetLevel">目标等级（1～MaxLevel）。</param>
+    /// <returns>升到该等级所需的金币数量。</returns>
     public long GetUpgradeCostForLevel(int targetLevel)
     {
         int clamped = Mathf.Clamp(targetLevel, 1, MaxLevel);
@@ -50,6 +61,10 @@ public class TalentDataSO : ConfigDataBase
         return System.Math.Max(0L, cost);
     }
 
+    /// <summary>
+    /// 收集天赋配置校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果收集器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);

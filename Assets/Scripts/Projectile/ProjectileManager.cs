@@ -13,9 +13,12 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
 
     private bool isInitialized;
 
+    /// <summary>系统是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>默认投射物配置（请求未指定时使用）。</summary>
     public ProjectileDataSO DefaultData => ResolveData(null);
 
+    /// <summary>加载默认配置并完成初始化。</summary>
     public void Initialize()
     {
         if (defaultProjectileData == null)
@@ -31,14 +34,20 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧 Tick（本服务无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>关闭系统并重置初始化标记。</summary>
     public void Shutdown()
     {
         isInitialized = false;
     }
 
     /// <summary>按请求发射一枚投射物。</summary>
+    /// <param name="request">生成请求。</param>
+    /// <param name="overrides">技能 Buff 飞行覆盖参数。</param>
+    /// <returns>生成的投射物控制器，失败时为 <c>null</c>。</returns>
     public ProjectileController Spawn(ProjectileSpawnRequest request, ProjectileRuntimeOverrides overrides = default)
     {
         if (!isInitialized)
@@ -75,6 +84,10 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>扇形多弹道（当前射击技能默认排布）。</summary>
+    /// <param name="template">弹道模板请求。</param>
+    /// <param name="count">弹道数量。</param>
+    /// <param name="angleBetweenDegrees">相邻弹道夹角（度）。</param>
+    /// <returns>成功生成的弹道数量。</returns>
     public int SpawnFan(ProjectileSpawnRequest template, int count, float angleBetweenDegrees)
     {
         if (count <= 1)
@@ -99,6 +112,9 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>环形均匀分布弹道。</summary>
+    /// <param name="template">弹道模板请求。</param>
+    /// <param name="count">弹道数量。</param>
+    /// <returns>成功生成的弹道数量。</returns>
     public int SpawnRing(ProjectileSpawnRequest template, int count)
     {
         if (count <= 0)
@@ -122,6 +138,8 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>根据 Pattern 分发排布。</summary>
+    /// <param name="request">含排布模式的生成请求。</param>
+    /// <returns>成功生成的弹道数量。</returns>
     public int SpawnPattern(ProjectileSpawnRequest request)
     {
         switch (request.Pattern)
@@ -137,6 +155,8 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>回收投射物实例到对象池。</summary>
+    /// <param name="controller">待回收的投射物控制器。</param>
     public void Release(ProjectileController controller)
     {
         if (controller == null)
@@ -159,6 +179,11 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         controller.gameObject.SetActive(false);
     }
 
+    /// <summary>从对象池或 Prefab 实例化投射物。</summary>
+    /// <param name="position">生成位置。</param>
+    /// <param name="direction">初始方向。</param>
+    /// <param name="data">投射物配置。</param>
+    /// <returns>投射物控制器，失败时为 <c>null</c>。</returns>
     private ProjectileController SpawnInstance(Vector3 position, Vector2 direction, ProjectileDataSO data)
     {
         float zAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
@@ -186,6 +211,9 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         return null;
     }
 
+    /// <summary>解析生效的投射物配置（请求优先，否则默认）。</summary>
+    /// <param name="requestData">请求中的配置，可为空。</param>
+    /// <returns>生效的配置资产。</returns>
     private ProjectileDataSO ResolveData(ProjectileDataSO requestData)
     {
         if (requestData != null)
@@ -201,6 +229,10 @@ public class ProjectileManager : MonoBehaviour, IGameSystem
         return Resources.Load<ProjectileDataSO>(GameConstants.ResourcePaths.ProjectileDefault);
     }
 
+    /// <summary>将二维方向向量旋转指定角度。</summary>
+    /// <param name="direction">原方向。</param>
+    /// <param name="angleDegrees">旋转角度（度）。</param>
+    /// <returns>旋转后的单位方向。</returns>
     private static Vector2 Rotate(Vector2 direction, float angleDegrees)
     {
         float rad = angleDegrees * Mathf.Deg2Rad;

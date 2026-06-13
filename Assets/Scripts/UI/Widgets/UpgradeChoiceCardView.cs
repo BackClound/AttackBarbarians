@@ -19,6 +19,7 @@ public class UpgradeChoiceCardView : MonoBehaviour
     private int choiceIndex = -1;
     private System.Action<int> onSelected;
 
+    /// <summary>绑定选择按钮点击事件。</summary>
     private void Awake()
     {
         if (selectButton != null)
@@ -27,6 +28,7 @@ public class UpgradeChoiceCardView : MonoBehaviour
         }
     }
 
+    /// <summary>解绑选择按钮点击事件。</summary>
     private void OnDestroy()
     {
         if (selectButton != null)
@@ -35,12 +37,17 @@ public class UpgradeChoiceCardView : MonoBehaviour
         }
     }
 
+    /// <summary>绑定选项索引与选中回调。</summary>
+    /// <param name="index">三选一中的选项下标。</param>
+    /// <param name="selectedCallback">玩家选中时的回调。</param>
     public void Bind(int index, System.Action<int> selectedCallback)
     {
         choiceIndex = index;
         onSelected = selectedCallback;
     }
 
+    /// <summary>根据升级选项数据刷新卡片展示。</summary>
+    /// <param name="option">升级选项配置；为 <c>null</c> 时隐藏卡片。</param>
     public void SetData(UpgradeOptionSO option)
     {
         if (option == null)
@@ -75,6 +82,7 @@ public class UpgradeChoiceCardView : MonoBehaviour
         }
     }
 
+    /// <summary>清空绑定并隐藏卡片。</summary>
     public void Clear()
     {
         choiceIndex = -1;
@@ -82,6 +90,7 @@ public class UpgradeChoiceCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>选择按钮回调，通知 Presenter 玩家选择。</summary>
     private void OnClick()
     {
         if (choiceIndex >= 0)

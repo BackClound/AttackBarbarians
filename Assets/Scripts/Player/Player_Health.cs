@@ -9,11 +9,19 @@ public class Player_Health : Entity_Health
     private float lastKnownMaxHp;
     private bool isDead;
 
+    /// <summary>当前血量。</summary>
+    public float CurrentHp => currentHp;
+
+    /// <summary>最大血量（来自 Entity_Stats）。</summary>
+    public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : 0f;
+
+    /// <summary>缓存组件引用。</summary>
     public override void Awake()
     {
         base.Awake();
     }
 
+    /// <summary>启动时初始化血量并发布事件。</summary>
     private void Start()
     {
         if (currentHp <= 0f)
@@ -37,11 +45,15 @@ public class Player_Health : Entity_Health
         PublishHealthChanged(0f);
     }
 
+    /// <summary>是否仍可受到伤害。</summary>
+    /// <returns>存活且未标记死亡时为 <c>true</c>。</returns>
     public override bool CanBeDamage()
     {
         return currentHp > 0 && !isDead;
     }
 
+    /// <summary>扣减血量并在归零时触发死亡。</summary>
+    /// <param name="damage">伤害量。</param>
     protected override void ReduceHp(float damage)
     {
         currentHp -= damage;
@@ -57,10 +69,8 @@ public class Player_Health : Entity_Health
         }
     }
 
-    public float CurrentHp => currentHp;
-
-    public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : 0f;
-
+    /// <summary>回复血量并发布变更事件。</summary>
+    /// <param name="healing">治疗量。</param>
     public override void RaiseHp(float healing)
     {
         float maxHp = entity_Stats.GetMaxHp();
@@ -101,6 +111,7 @@ public class Player_Health : Entity_Health
         PublishHealthChanged(0f);
     }
 
+    /// <summary>玩家死亡：发布事件并切换至死亡状态。</summary>
     public override void Die()
     {
         GameEvents.RaisePlayerDied(this);
@@ -111,6 +122,7 @@ public class Player_Health : Entity_Health
         }
     }
 
+    /// <summary>最大生命 Buff 变更后按血量比例重算当前值。</summary>
     public void ApplyMaxHpMultiplierFromBuff()
     {
         if (entity_Stats == null)
@@ -130,6 +142,8 @@ public class Player_Health : Entity_Health
         PublishHealthChanged(0f);
     }
 
+    /// <summary>发布玩家血量变更事件。</summary>
+    /// <param name="delta">本次变化量（正为治疗，负为伤害）。</param>
     private void PublishHealthChanged(float delta)
     {
         float maxHp = entity_Stats.GetMaxHp();

@@ -41,8 +41,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
     private bool enableLogs;
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>
+    /// 加载音频数据库、构建索引、预加载剪辑并订阅游戏事件。
+    /// </summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -70,6 +74,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧回收已播放完毕的音效 AudioSource。
+    /// </summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime)
     {
         if (!isInitialized)
@@ -80,6 +88,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         sfxPool?.ReleaseFinished();
     }
 
+    /// <summary>
+    /// 取消事件订阅、停止所有音乐并清理缓存。
+    /// </summary>
     public void Shutdown()
     {
         if (!isInitialized)
@@ -97,6 +108,7 @@ public class AudioManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>按 ID 播放音效（供事件与外部直接调用）。</summary>
+    /// <param name="audioId">音频配置 ID。</param>
     public void PlaySfx(string audioId)
     {
         if (!TryGetConfig(audioId, out AudioConfigSO config))
@@ -108,6 +120,7 @@ public class AudioManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>按 ID 播放背景音乐（循环）。</summary>
+    /// <param name="audioId">音频配置 ID。</param>
     public void PlayMusic(string audioId)
     {
         if (!TryGetConfig(audioId, out AudioConfigSO config))
@@ -118,6 +131,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         PlayMusicInternal(config);
     }
 
+    /// <summary>
+    /// 设置主音量并持久化到存档。
+    /// </summary>
+    /// <param name="volume">主音量（0 ~ 1）。</param>
     public void SetMasterVolume(float volume)
     {
         if (!TryGetSettings(out SettingsData settings))
@@ -130,6 +147,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         MarkSettingsDirty();
     }
 
+    /// <summary>
+    /// 设置音乐音量并持久化到存档。
+    /// </summary>
+    /// <param name="volume">音乐音量（0 ~ 1）。</param>
     public void SetMusicVolume(float volume)
     {
         if (!TryGetSettings(out SettingsData settings))
@@ -142,6 +163,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         MarkSettingsDirty();
     }
 
+    /// <summary>
+    /// 设置音效音量并持久化到存档。
+    /// </summary>
+    /// <param name="volume">音效音量（0 ~ 1）。</param>
     public void SetSfxVolume(float volume)
     {
         if (!TryGetSettings(out SettingsData settings))
@@ -154,6 +179,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         MarkSettingsDirty();
     }
 
+    /// <summary>
+    /// 设置 UI 音量并持久化到存档。
+    /// </summary>
+    /// <param name="volume">UI 音量（0 ~ 1）。</param>
     public void SetUiVolume(float volume)
     {
         if (!TryGetSettings(out SettingsData settings))
@@ -166,12 +195,21 @@ public class AudioManager : MonoBehaviour, IGameSystem
         MarkSettingsDirty();
     }
 
+    /// <summary>
+    /// 调试菜单：播放 UI 点击音效。
+    /// </summary>
     [ContextMenu("Debug/Play UI Click")]
     private void DebugPlayUiClick() => PlaySfx(GameConstants.AudioIds.SfxUiClick);
 
+    /// <summary>
+    /// 调试菜单：播放主菜单背景音乐。
+    /// </summary>
     [ContextMenu("Debug/Play Main Menu BGM")]
     private void DebugPlayMainMenuBgm() => PlayMusic(GameConstants.AudioIds.MusicMainMenu);
 
+    /// <summary>
+    /// 确保音频层级结构（根节点、BGM 源、音效池）已创建。
+    /// </summary>
     private void EnsureHierarchy()
     {
         if (audioRoot == null)
@@ -186,6 +224,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
         sfxPool = new AudioSourcePool(audioRoot, "SfxPool", sfxPoolInitialSize, sfxPoolMaxSize);
     }
 
+    /// <summary>
+    /// 确保指定名称的音乐 AudioSource 已创建。
+    /// </summary>
+    /// <param name="name">AudioSource 节点名称。</param>
+    /// <param name="existing">已有的 AudioSource，为 null 时新建。</param>
+    /// <returns>可用的音乐 AudioSource。</returns>
     private AudioSource EnsureMusicSource(string name, AudioSource existing)
     {
         if (existing != null)
@@ -202,6 +246,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         return source;
     }
 
+    /// <summary>
+    /// 从 Inspector 或 Resources 加载音频数据库。
+    /// </summary>
     private void LoadDatabase()
     {
         if (audioDatabase == null)
@@ -215,6 +262,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 将数据库条目构建为 ID → 配置 的查找索引。
+    /// </summary>
     private void BuildConfigIndex()
     {
         configById.Clear();
@@ -236,6 +286,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 预加载标记了 Preload 的音频剪辑数据。
+    /// </summary>
     private void PreloadMarkedClips()
     {
         if (audioDatabase?.Entries == null)
@@ -256,6 +309,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 订阅音频与战斗相关的游戏事件。
+    /// </summary>
     private void SubscribeEvents()
     {
         GameEvents.SubscribeAudioPlaySfx(OnAudioPlaySfx);
@@ -268,6 +324,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         GameEvents.SubscribeBossDefeated(OnBossDefeated);
     }
 
+    /// <summary>
+    /// 取消所有已订阅的游戏事件。
+    /// </summary>
     private void UnsubscribeEvents()
     {
         GameEvents.UnsubscribeAudioPlaySfx(OnAudioPlaySfx);
@@ -280,6 +339,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         GameEvents.UnsubscribeBossDefeated(OnBossDefeated);
     }
 
+    /// <summary>
+    /// 响应音频播放音效事件。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文，Payload 为音频 ID 字符串。</param>
     private void OnAudioPlaySfx(GameEventContext ctx)
     {
         if (ctx.Payload is string audioId)
@@ -288,6 +351,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 响应音频播放音乐事件。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文，Payload 为音频 ID 字符串。</param>
     private void OnAudioPlayMusic(GameEventContext ctx)
     {
         if (ctx.Payload is string audioId)
@@ -296,8 +363,16 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 存档加载后重新应用音量设置。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnSaveLoaded(GameEventContext ctx) => ApplyVolumeFromSave();
 
+    /// <summary>
+    /// 玩家受伤时播放受伤音效。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnPlayerDamaged(GameEventContext ctx)
     {
         if (string.IsNullOrEmpty(playerHurtSfxId))
@@ -308,6 +383,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         PlaySfx(playerHurtSfxId);
     }
 
+    /// <summary>
+    /// 敌人被击杀时播放击杀音效。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         if (string.IsNullOrEmpty(enemyKillSfxId))
@@ -318,6 +397,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         PlaySfx(enemyKillSfxId);
     }
 
+    /// <summary>
+    /// 玩家施放技能时播放施法音效。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文，Payload 为技能 ID。</param>
     private void OnPlayerSkillCast(GameEventContext ctx)
     {
         if (ctx.Payload is not string skillId || string.IsNullOrEmpty(skillCastSfxId))
@@ -328,8 +411,16 @@ public class AudioManager : MonoBehaviour, IGameSystem
         PlaySfx(skillCastSfxId);
     }
 
+    /// <summary>
+    /// Boss 被击败时停止 Boss 背景音乐。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnBossDefeated(GameEventContext ctx) => StopBossMusic();
 
+    /// <summary>
+    /// 投射物命中敌人时播放命中音效（带节流）。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文，Payload 为 <see cref="ProjectileHitEventArgs"/>。</param>
     private void OnProjectileHit(GameEventContext ctx)
     {
         if (ctx.Payload is not ProjectileHitEventArgs args || args.Target == null)
@@ -361,6 +452,10 @@ public class AudioManager : MonoBehaviour, IGameSystem
         PlaySfxInternal(config, args.Target.transform.position, use3D: false);
     }
 
+    /// <summary>
+    /// 内部播放背景音乐，处理 BGM/Boss 通道切换与音量叠加。
+    /// </summary>
+    /// <param name="config">音频配置。</param>
     private void PlayMusicInternal(AudioConfigSO config)
     {
         if (!TryValidateClip(config, out AudioClip clip))
@@ -400,6 +495,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 内部播放音效，经对象池租借 AudioSource 并应用节流与并发限制。
+    /// </summary>
+    /// <param name="config">音频配置。</param>
+    /// <param name="worldPosition">3D 音效的世界坐标位置。</param>
+    /// <param name="use3D">是否以 3D 空间音效播放。</param>
     private void PlaySfxInternal(AudioConfigSO config, Vector3 worldPosition, bool use3D)
     {
         if (!TryValidateClip(config, out AudioClip clip))
@@ -445,6 +546,13 @@ public class AudioManager : MonoBehaviour, IGameSystem
         source.Play();
     }
 
+    /// <summary>
+    /// 将配置参数应用到 AudioSource。
+    /// </summary>
+    /// <param name="source">目标 AudioSource。</param>
+    /// <param name="config">音频配置。</param>
+    /// <param name="clip">要播放的音频剪辑。</param>
+    /// <param name="loop">是否循环播放。</param>
     private static void ConfigureSource(AudioSource source, AudioConfigSO config, AudioClip clip, bool loop)
     {
         source.clip = clip;
@@ -453,6 +561,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
         source.outputAudioMixerGroup = config.MixerGroup;
     }
 
+    /// <summary>
+    /// 按音频 ID 查找配置，未找到时记录一次警告。
+    /// </summary>
+    /// <param name="audioId">音频配置 ID。</param>
+    /// <param name="config">找到时输出的配置实例。</param>
+    /// <returns>找到返回 true，否则返回 false。</returns>
     private bool TryGetConfig(string audioId, out AudioConfigSO config)
     {
         config = null;
@@ -474,6 +588,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>
+    /// 校验配置是否包含有效的 AudioClip。
+    /// </summary>
+    /// <param name="config">音频配置。</param>
+    /// <param name="clip">校验通过时输出的音频剪辑。</param>
+    /// <returns>有效返回 true，否则返回 false。</returns>
     private bool TryValidateClip(AudioConfigSO config, out AudioClip clip)
     {
         clip = config.Clip;
@@ -490,6 +610,12 @@ public class AudioManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>
+    /// 检查指定音频 ID 是否已过最短播放间隔。
+    /// </summary>
+    /// <param name="audioId">音频配置 ID。</param>
+    /// <param name="intervalSeconds">最短间隔（秒）。</param>
+    /// <returns>允许播放返回 true，仍在冷却中返回 false。</returns>
     private bool CanPlayThrottled(string audioId, float intervalSeconds)
     {
         if (intervalSeconds <= 0f)
@@ -506,9 +632,19 @@ public class AudioManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 判断通道是否属于短音效类（Sfx 或 Ui）。
+    /// </summary>
+    /// <param name="channel">音频通道。</param>
+    /// <returns>是音效通道返回 true，否则返回 false。</returns>
     private static bool IsSfxChannel(AudioChannel channel) =>
         channel == AudioChannel.Sfx || channel == AudioChannel.Ui;
 
+    /// <summary>
+    /// 根据通道类型与存档设置计算最终音量系数。
+    /// </summary>
+    /// <param name="channel">音频通道。</param>
+    /// <returns>主音量 × 通道音量的组合系数。</returns>
     private float ResolveChannelVolume(AudioChannel channel)
     {
         if (!TryGetSettings(out SettingsData settings))
@@ -527,6 +663,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         };
     }
 
+    /// <summary>
+    /// 根据存档设置刷新当前正在播放的 BGM 与 Boss BGM 音量。
+    /// </summary>
     private void ApplyVolumeFromSave()
     {
         if (bgmSource != null && bgmSource.isPlaying && TryGetConfig(currentBgmId, out AudioConfigSO bgmConfig))
@@ -541,6 +680,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 停止 Boss 背景音乐并恢复普通 BGM 音量。
+    /// </summary>
     private void StopBossMusic()
     {
         if (bossBgmSource != null && bossBgmSource.isPlaying)
@@ -557,6 +699,9 @@ public class AudioManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>
+    /// 停止所有背景音乐并清除当前播放 ID。
+    /// </summary>
     private void StopAllMusic()
     {
         bgmSource?.Stop();
@@ -565,12 +710,20 @@ public class AudioManager : MonoBehaviour, IGameSystem
         currentBossBgmId = null;
     }
 
+    /// <summary>
+    /// 尝试从 SaveManager 获取设置数据。
+    /// </summary>
+    /// <param name="settings">获取成功时输出的设置数据。</param>
+    /// <returns>获取成功返回 true，否则返回 false。</returns>
     private bool TryGetSettings(out SettingsData settings)
     {
         settings = saveManager != null ? saveManager.Settings : null;
         return settings != null;
     }
 
+    /// <summary>
+    /// 标记存档为脏，触发持久化。
+    /// </summary>
     private void MarkSettingsDirty()
     {
         if (saveManager == null)

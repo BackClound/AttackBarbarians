@@ -10,10 +10,14 @@ public class ShopSupplySectionPanel : MonoBehaviour
     [SerializeField] private ShopCrateWidget premiumCrate;
     [SerializeField] private ShopGoldSupplyWidget goldSupply;
 
+    /// <summary>补给区请求购买时向上层抛出配置 ID。</summary>
     public event Action<string> PurchaseRequested;
+    /// <summary>补给区请求广告免费领取时向上层抛出配置 ID。</summary>
     public event Action<string> AdFreeRequested;
+    /// <summary>补给区请求奖池预览时向上层抛出池 ID 与标题。</summary>
     public event Action<string, string> PreviewRequested;
 
+    /// <summary>绑定补给箱与金币补给 Widget 事件。</summary>
     private void Awake()
     {
         WireCrate(commonCrate);
@@ -21,6 +25,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         WireGoldSupply(goldSupply);
     }
 
+    /// <summary>解绑补给区 Widget 事件。</summary>
     private void OnDestroy()
     {
         UnwireCrate(commonCrate);
@@ -28,6 +33,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         UnwireGoldSupply(goldSupply);
     }
 
+    /// <summary>从 <see cref="ShopManager"/> 刷新普通箱、高级箱与金币补给展示。</summary>
     public void Refresh()
     {
         RefreshCrate(
@@ -53,6 +59,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         RefreshGoldSupply();
     }
 
+    /// <summary>刷新单个补给箱 Widget 的价格、可用性与广告状态。</summary>
     private void RefreshCrate(
         ShopCrateWidget crate,
         string panelIndex,
@@ -92,6 +99,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         crate.SetAdPullAvailable(adAvailable, adLabel);
     }
 
+    /// <summary>刷新金币补给区各档位与广告领取。</summary>
     private void RefreshGoldSupply()
     {
         if (goldSupply == null)
@@ -129,6 +137,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         goldSupply.SetAdClaimAvailable(adAvailable, adLabel);
     }
 
+    /// <summary>解析广告补给可用性与按钮标签。</summary>
     private static void ResolveAdSupplyState(
         ShopManager shop,
         string adConfigId,
@@ -164,6 +173,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         }
     }
 
+    /// <summary>刷新金币补给指定档位的价格与按钮。</summary>
     private static void RefreshTierDisplay(
         ShopManager shop,
         ShopGoldSupplyWidget widget,
@@ -183,6 +193,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         widget.SetTierCosts(tier, singleCost, tenCost, singleAvailable, tenAvailable);
     }
 
+    /// <summary>绑定补给箱 Widget 事件。</summary>
     private void WireCrate(ShopCrateWidget crate)
     {
         if (crate == null)
@@ -195,6 +206,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         crate.PreviewRequested += OnPreviewRequested;
     }
 
+    /// <summary>解绑补给箱 Widget 事件。</summary>
     private void UnwireCrate(ShopCrateWidget crate)
     {
         if (crate == null)
@@ -207,6 +219,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         crate.PreviewRequested -= OnPreviewRequested;
     }
 
+    /// <summary>绑定金币补给 Widget 事件。</summary>
     private void WireGoldSupply(ShopGoldSupplyWidget widget)
     {
         if (widget == null)
@@ -218,6 +231,7 @@ public class ShopSupplySectionPanel : MonoBehaviour
         widget.AdClaimRequested += OnAdFreeRequested;
     }
 
+    /// <summary>解绑金币补给 Widget 事件。</summary>
     private void UnwireGoldSupply(ShopGoldSupplyWidget widget)
     {
         if (widget == null)
@@ -229,16 +243,19 @@ public class ShopSupplySectionPanel : MonoBehaviour
         widget.AdClaimRequested -= OnAdFreeRequested;
     }
 
+    /// <summary>转发补给箱/金币购买请求。</summary>
     private void OnPurchaseRequested(string configId)
     {
         PurchaseRequested?.Invoke(configId);
     }
 
+    /// <summary>转发广告免费领取请求。</summary>
     private void OnAdFreeRequested(string configId)
     {
         AdFreeRequested?.Invoke(configId);
     }
 
+    /// <summary>转发奖池预览请求。</summary>
     private void OnPreviewRequested(string poolConfigId, string crateTitle)
     {
         PreviewRequested?.Invoke(poolConfigId, crateTitle);

@@ -4,6 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 技能配置：类型、等级曲线与每级数值。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Skill Data。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Skill/</c></para>
+/// </remarks>
 [CreateAssetMenu(fileName = "SkillData", menuName = "Attack Barbarians/Config/Skill Data")]
 public class SkillDataSO : ConfigDataBase
 {
@@ -48,6 +52,12 @@ public class SkillDataSO : ConfigDataBase
     public float CheckRadius => Mathf.Max(1f, checkRadius);
     public IReadOnlyList<SkillLevelEntryConfig> LevelEntries => levelEntries;
 
+    /// <summary>
+    /// 按技能等级查找对应的等级条目配置。
+    /// </summary>
+    /// <param name="level">技能等级（超出范围时自动钳制）。</param>
+    /// <param name="entry">查找到的等级条目；未配置时返回 null。</param>
+    /// <returns>找到有效条目时返回 true，否则返回 false。</returns>
     public bool TryGetLevelEntry(int level, out SkillLevelEntryConfig entry)
     {
         entry = null;
@@ -61,6 +71,10 @@ public class SkillDataSO : ConfigDataBase
         return entry != null;
     }
 
+    /// <summary>
+    /// 收集技能配置的校验错误与警告。
+    /// </summary>
+    /// <param name="result">校验结果容器。</param>
     public override void CollectValidationErrors(ConfigValidationResult result)
     {
         base.CollectValidationErrors(result);
@@ -98,7 +112,7 @@ public class SkillDataSO : ConfigDataBase
     }
 }
 
-/// <summary>技能单级数值与缩放。</summary>
+/// <summary>技能单级数值与缩放配置。</summary>
 [System.Serializable]
 public class SkillLevelEntryConfig
 {

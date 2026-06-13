@@ -12,8 +12,10 @@ public class GameplayEventDebugBridge : MonoBehaviour, IGameSystem
 
     private bool isInitialized;
 
+    /// <summary>管理器是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
+    /// <summary>订阅事件并标记为已初始化。</summary>
     public void Initialize()
     {
         GameEvents.SubscribeGameplayEventStarted(OnGameplayEventStarted);
@@ -21,8 +23,11 @@ public class GameplayEventDebugBridge : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧更新（当前无逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消订阅并重置初始化状态。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameplayEventStarted(OnGameplayEventStarted);
@@ -30,6 +35,8 @@ public class GameplayEventDebugBridge : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>输出事件开始日志。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameplayEventStarted(GameEventContext ctx)
     {
         if (!logToConsole || ctx.Payload is not GameplayEventArgs args)
@@ -42,6 +49,8 @@ public class GameplayEventDebugBridge : MonoBehaviour, IGameSystem
             $"duration={args.DurationSeconds:F1}s");
     }
 
+    /// <summary>输出事件结束日志。</summary>
+    /// <param name="ctx">事件上下文。</param>
     private void OnGameplayEventEnded(GameEventContext ctx)
     {
         if (!logToConsole || ctx.Payload is not GameplayEventArgs args)

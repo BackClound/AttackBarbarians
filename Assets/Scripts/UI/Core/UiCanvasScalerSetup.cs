@@ -14,6 +14,7 @@ public class UiCanvasScalerSetup : MonoBehaviour
     [SerializeField] private Vector2 referenceResolution = new Vector2(1080f, 1920f);
     [SerializeField] private float matchWidthOrHeight = 0.5f;
 
+    /// <summary>在 Awake 中配置 CanvasScaler 为竖屏 Scale With Screen Size 模式。</summary>
     private void Awake()
     {
         var scaler = GetComponent<CanvasScaler>();

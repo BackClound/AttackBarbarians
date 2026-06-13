@@ -19,10 +19,16 @@ public sealed class PlayerRuntimeStats
     private PlayerDataSO sourceData;
     private float configuredAttackRadius = 25f;
 
+    /// <summary>局内运行时数据（等级、经验等）。</summary>
     public PlayerRuntimeData Data => runtimeData;
+    /// <summary>当前属性快照。</summary>
     public StatRuntimeSnapshot Snapshot => workingSnapshot;
+    /// <summary>是否已完成 Initialize。</summary>
     public bool IsInitialized { get; private set; }
 
+    /// <summary>从配置与存档初始化运行时属性。</summary>
+    /// <param name="data">玩家基础配置。</param>
+    /// <param name="save">存档数据，可为空。</param>
     public void Initialize(PlayerDataSO data, SaveData save = null)
     {
         sourceData = data;
@@ -42,8 +48,13 @@ public sealed class PlayerRuntimeStats
         IsInitialized = true;
     }
 
+    /// <summary>获取攻击射程。</summary>
+    /// <returns>当前攻击半径。</returns>
     public float GetAttackRadius() => workingSnapshot.Get(StatType.AttackRadius);
 
+    /// <summary>读取指定属性值。</summary>
+    /// <param name="statType">属性类型。</param>
+    /// <returns>快照中的属性值。</returns>
     public float Get(StatType statType) => workingSnapshot.Get(statType);
 
     /// <summary>天赋系统入口：替换局外天赋修正列表（由 <see cref="TalentManager"/> 驱动）。</summary>
@@ -114,6 +125,8 @@ public sealed class PlayerRuntimeStats
         RebuildSnapshot();
     }
 
+    /// <summary>移除指定 Buff 并重建属性。</summary>
+    /// <param name="buffConfigId">Buff 配置 Id。</param>
     public void RemoveBuff(string buffConfigId)
     {
         if (string.IsNullOrEmpty(buffConfigId))
@@ -125,6 +138,8 @@ public sealed class PlayerRuntimeStats
         RebuildSnapshot();
     }
 
+    /// <summary>Tick 所有 Buff 持续时间并在过期时重建属性。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void TickBuffs(float deltaTime)
     {
         if (activeBuffs.Count == 0)
@@ -150,6 +165,9 @@ public sealed class PlayerRuntimeStats
         }
     }
 
+    /// <summary>将快照同步到 Entity_Stats 并发布属性变更事件。</summary>
+    /// <param name="entityStats">目标实体属性组件。</param>
+    /// <param name="eventSender">事件发送方。</param>
     public void ApplyToEntityStats(Entity_Stats entityStats, object eventSender)
     {
         if (entityStats == null)
@@ -161,6 +179,7 @@ public sealed class PlayerRuntimeStats
         GameEvents.RaisePlayerStatsChanged(eventSender, new PlayerStatsChangedEventArgs(workingSnapshot));
     }
 
+    /// <summary>重建工作快照（基础值 + 修正 + Buff）。</summary>
     private void RebuildSnapshot()
     {
         if (sourceData == null)
@@ -180,6 +199,8 @@ public sealed class PlayerRuntimeStats
         runtimeData.Stats.CopyFrom(workingSnapshot);
     }
 
+    /// <summary>汇总局内修正、天赋、装备与 Buff 修正列表。</summary>
+    /// <returns>合并后的修正列表。</returns>
     private List<StatModifierConfig> CollectAllModifiers()
     {
         var combined = new List<StatModifierConfig>(
@@ -208,6 +229,8 @@ public sealed class PlayerRuntimeStats
         return combined;
     }
 
+    /// <summary>从存档永久成长项恢复 Buff。</summary>
+    /// <param name="save">存档数据。</param>
     private void ApplyPermanentGrowthFromSave(SaveData save)
     {
         if (save == null || save.permanentUpgrades == null || save.permanentUpgrades.Count == 0)

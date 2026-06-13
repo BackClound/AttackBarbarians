@@ -29,6 +29,9 @@ public static class UiTechWastelandPalette
     public static readonly Color RarityEpic = Hex("#9B5DE5");
     public static readonly Color RarityLegendary = Hex("#F4D35E");
 
+    /// <summary>根据升级卡稀有度返回对应边框/强调色。</summary>
+        /// <param name="rarity">升级卡稀有度。</param>
+        /// <returns>科技废土色板中的稀有度颜色。</returns>
     public static Color GetUpgradeRarityColor(UpgradeRarity rarity)
     {
         switch (rarity)
@@ -46,6 +49,9 @@ public static class UiTechWastelandPalette
         }
     }
 
+    /// <summary>根据装备品质返回对应边框/强调色。</summary>
+        /// <param name="quality">装备品质等级。</param>
+        /// <returns>科技废土色板中的品质颜色。</returns>
     public static Color GetEquipmentQualityColor(EquipmentQuality quality)
     {
         switch (quality)
@@ -63,6 +69,9 @@ public static class UiTechWastelandPalette
         }
     }
 
+    /// <summary>将十六进制色值字符串解析为 <see cref="Color"/>。</summary>
+    /// <param name="hex">HTML 色值（如 #RRGGBB）。</param>
+    /// <returns>解析成功返回颜色，失败返回白色。</returns>
     private static Color Hex(string hex)
     {
         if (ColorUtility.TryParseHtmlString(hex, out Color color))

@@ -13,6 +13,7 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
     [SerializeField] private TMP_Text cardListText;
     [SerializeField] private Button confirmButton;
 
+    /// <summary>绑定确认按钮，默认隐藏弹窗。</summary>
     private void Awake()
     {
         if (confirmButton != null)
@@ -23,16 +24,19 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
         Hide();
     }
 
+    /// <summary>订阅升级卡发放事件。</summary>
     private void OnEnable()
     {
         GameEvents.SubscribeUpgradeCardGranted(OnUpgradeCardGranted);
     }
 
+    /// <summary>取消订阅升级卡发放事件。</summary>
     private void OnDisable()
     {
         GameEvents.UnsubscribeUpgradeCardGranted(OnUpgradeCardGranted);
     }
 
+    /// <summary>解绑确认按钮。</summary>
     private void OnDestroy()
     {
         if (confirmButton != null)
@@ -41,6 +45,8 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>根据发放来源展示升级卡列表。</summary>
+    /// <param name="args">升级卡发放事件参数。</param>
     public void Show(UpgradeCardGrantedEventArgs args)
     {
         if (root != null)
@@ -59,6 +65,7 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>关闭升级卡奖励弹窗。</summary>
     public void Hide()
     {
         if (root != null)
@@ -67,6 +74,7 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>升级卡发放事件回调，自动弹出展示。</summary>
     private void OnUpgradeCardGranted(GameEventContext ctx)
     {
         if (ctx.Payload is UpgradeCardGrantedEventArgs args)
@@ -75,6 +83,7 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
         }
     }
 
+    /// <summary>按奖励来源格式化弹窗标题。</summary>
     private static string FormatSourceTitle(UpgradeCardRewardSource source) =>
         source switch
         {
@@ -88,6 +97,7 @@ public class UpgradeCardRewardPopupPanel : MonoBehaviour
             _ => "升级卡奖励",
         };
 
+    /// <summary>将发放列表格式化为多行文本。</summary>
     private static string BuildCardListText(System.Collections.Generic.IReadOnlyList<UpgradeCardGrantEntry> grants)
     {
         if (grants == null || grants.Count == 0)

@@ -16,15 +16,21 @@ public class TopResourceBarPanel : MonoBehaviour
     [FormerlySerializedAs("ticketSlot")]
     [SerializeField] private UI_ItemSlot staminaSlot;
 
+    /// <summary>水晶槽位 Widget。</summary>
     public UI_ItemSlot DiamondSlot => diamondSlot;
+    /// <summary>金币槽位 Widget。</summary>
     public UI_ItemSlot GoldSlot => goldSlot;
+    /// <summary>广告券槽位 Widget。</summary>
     public UI_ItemSlot AdTicketSlot => adTicketSlot;
+    /// <summary>体力槽位 Widget。</summary>
     public UI_ItemSlot StaminaSlot => staminaSlot;
 
+    /// <summary>任意槽位加号被点击时触发。</summary>
     public event Action<CurrencyType> AddClicked;
 
     private float staminaSubtitleRefreshTimer;
 
+    /// <summary>绑定各槽位加号点击事件。</summary>
     private void Awake()
     {
         BindAdd(diamondSlot);
@@ -33,6 +39,7 @@ public class TopResourceBarPanel : MonoBehaviour
         BindAdd(staminaSlot);
     }
 
+    /// <summary>解绑各槽位加号点击事件。</summary>
     private void OnDestroy()
     {
         UnbindAdd(diamondSlot);
@@ -41,6 +48,7 @@ public class TopResourceBarPanel : MonoBehaviour
         UnbindAdd(staminaSlot);
     }
 
+    /// <summary>每秒刷新体力恢复副标题。</summary>
     private void Update()
     {
         staminaSubtitleRefreshTimer += Time.unscaledDeltaTime;
@@ -53,6 +61,7 @@ public class TopResourceBarPanel : MonoBehaviour
         RefreshStaminaSubtitle();
     }
 
+    /// <summary>从 <see cref="ResourceManager"/> 或存档刷新四项资源数值。</summary>
     public void Refresh()
     {
         long gold = 0;
@@ -78,6 +87,7 @@ public class TopResourceBarPanel : MonoBehaviour
         RefreshStaminaSubtitle();
     }
 
+    /// <summary>刷新体力主值与恢复倒计时副标题。</summary>
     private void RefreshStaminaSubtitle()
     {
         if (staminaSlot == null)
@@ -96,6 +106,7 @@ public class TopResourceBarPanel : MonoBehaviour
         staminaSlot.SetSubValue(resources.GetStaminaRecoverySubtitle());
     }
 
+    /// <summary>绑定槽位加号点击事件。</summary>
     private void BindAdd(UI_ItemSlot slot)
     {
         if (slot != null)
@@ -104,6 +115,7 @@ public class TopResourceBarPanel : MonoBehaviour
         }
     }
 
+    /// <summary>解绑槽位加号点击事件。</summary>
     private void UnbindAdd(UI_ItemSlot slot)
     {
         if (slot != null)
@@ -112,6 +124,7 @@ public class TopResourceBarPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将槽位加号点击转发为 AddClicked 事件。</summary>
     private void OnSlotAddClicked(CurrencyType currency)
     {
         AddClicked?.Invoke(currency);

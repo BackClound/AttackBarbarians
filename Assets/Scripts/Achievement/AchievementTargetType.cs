@@ -3,18 +3,18 @@
 /// </summary>
 public enum AchievementTargetType
 {
-    // 总击杀敌人数量
+    /// <summary>累计击杀敌人数量。</summary>
     TotalEnemyKills = 0,
-    // 总击败Boss数量
+    /// <summary>累计击败 Boss 数量。</summary>
     TotalBossDefeats = 1,
-    // 最高波次
+    /// <summary>达到的最高波次。</summary>
     HighestWaveReached = 2,
-    // 总完成波次
+    /// <summary>累计完成波次数量。</summary>
     TotalWavesCompleted = 3,
-    // 总游玩次数
+    /// <summary>累计游玩次数。</summary>
     TotalRunsPlayed = 4,
-    // 总获得金币数量
+    /// <summary>累计获得金币数量。</summary>
     LifetimeGoldEarned = 5,
-    // 玩家等级达到
+    /// <summary>玩家等级达到指定值。</summary>
     PlayerLevelReached = 6,
 }

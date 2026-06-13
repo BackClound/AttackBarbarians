@@ -14,11 +14,19 @@ public abstract class ConfigDataBase : ScriptableObject
     [SerializeField] private string displayName;
     [SerializeField] private Sprite icon;
 
+    /// <summary>配置唯一标识，用于存档引用与运行时查找。</summary>
     public string ConfigId => configId;
+
+    /// <summary>展示名称；未配置时回退为资产文件名。</summary>
     public string DisplayName => string.IsNullOrEmpty(displayName) ? name : displayName;
+
+    /// <summary>UI 展示用图标。</summary>
     public Sprite Icon => icon;
 
-    /// <summary>由 <see cref="ConfigValidator"/> 调用，子类可追加规则。</summary>
+    /// <summary>
+    /// 收集当前配置资产的校验错误与警告，由 <see cref="ConfigValidator"/> 调用，子类可追加规则。
+    /// </summary>
+    /// <param name="result">校验结果容器，用于写入错误与警告信息。</param>
     public virtual void CollectValidationErrors(ConfigValidationResult result)
     {
         if (string.IsNullOrWhiteSpace(configId))

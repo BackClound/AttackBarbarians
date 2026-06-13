@@ -13,10 +13,14 @@ public struct MapWaveModifierConfig
     [Tooltip("单波最大刷怪数量乘算。")]
     [SerializeField] private float maxSpawnCountMultiplier;
 
+    /// <summary>敌人属性倍率。</summary>
     public float EnemyStatMultiplier => Mathf.Max(0.01f, enemyStatMultiplier <= 0f ? 1f : enemyStatMultiplier);
+    /// <summary>刷怪间隔倍率。</summary>
     public float SpawnIntervalMultiplier => Mathf.Max(0.01f, spawnIntervalMultiplier <= 0f ? 1f : spawnIntervalMultiplier);
+    /// <summary>单波最大刷怪数量倍率。</summary>
     public float MaxSpawnCountMultiplier => Mathf.Max(0.01f, maxSpawnCountMultiplier <= 0f ? 1f : maxSpawnCountMultiplier);
 
+    /// <summary>无修正的默认配置（各倍率为 1）。</summary>
     public static MapWaveModifierConfig Identity =>
         new MapWaveModifierConfig
         {

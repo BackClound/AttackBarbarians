@@ -17,10 +17,14 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 
     private bool isInitialized;
 
+    /// <summary>系统是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前存活敌人数量。</summary>
     public int AliveEnemyCount { get; private set; }
+    /// <summary>当前存活 Boss 数量。</summary>
     public int AliveBossCount { get; private set; }
 
+    /// <summary>初始化生成区域并订阅击杀事件。</summary>
     public void Initialize()
     {
         if (spawnArea == null)
@@ -42,8 +46,11 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>每帧 Tick（本服务无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>取消订阅并重置波次数据。</summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeEnemyKilled(OnEnemyKilled);
@@ -51,6 +58,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         activeWaveData = null;
     }
 
+    /// <summary>配置当前波次的敌人生成池。</summary>
+    /// <param name="waveData">波次配置。</param>
     public void ConfigureWavePool(WaveDataSO waveData)
     {
         activeWaveData = waveData;
@@ -63,6 +72,11 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         specialSelector.Configure(waveData, configManager);
     }
 
+    /// <summary>生成指定配置的特殊敌人。</summary>
+    /// <param name="configId">敌人配置 Id。</param>
+    /// <param name="statMultiplier">属性倍率。</param>
+    /// <param name="waveIndex">波次索引。</param>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     public bool TrySpawnSpecialEnemy(string configId, float statMultiplier, int waveIndex)
     {
         if (string.IsNullOrEmpty(configId))
@@ -74,6 +88,13 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return SpawnEnemyInternal(configId, statMultiplier, waveIndex, markAsElite: false, markAsSpecial: true);
     }
 
+    /// <summary>生成普通或精英敌人。</summary>
+    /// <param name="forcedConfigId">强制配置 Id，为空则从波次池随机。</param>
+    /// <param name="statMultiplier">属性倍率。</param>
+    /// <param name="waveIndex">波次索引。</param>
+    /// <param name="waveElapsedSeconds">波次已进行时间（用于权重选择）。</param>
+    /// <param name="markAsElite">是否标记为精英。</param>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     public bool TrySpawnEnemy(
         string forcedConfigId,
         float statMultiplier,
@@ -96,6 +117,11 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return SpawnEnemyInternal(configId, entryMultiplier, waveIndex, markAsElite, markAsSpecial: false);
     }
 
+    /// <summary>生成 Boss 敌人。</summary>
+    /// <param name="bossConfigId">Boss 配置 Id。</param>
+    /// <param name="statMultiplier">属性倍率。</param>
+    /// <param name="waveIndex">波次索引。</param>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     public bool TrySpawnBoss(string bossConfigId, float statMultiplier, int waveIndex)
     {
         if (string.IsNullOrEmpty(bossConfigId) ||
@@ -109,6 +135,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return SpawnBossInternal(bossConfigId, bossData.BaseEnemyConfigId, statMultiplier, waveIndex);
     }
 
+    /// <summary>内部：实例化 Boss 并挂载 <see cref="BossController"/>。</summary>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     private bool SpawnBossInternal(
         string bossConfigId,
         string enemyConfigId,
@@ -162,6 +190,10 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>从波次特殊敌人池随机生成一只。</summary>
+    /// <param name="statMultiplier">属性倍率。</param>
+    /// <param name="waveIndex">波次索引。</param>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     public bool TrySpawnBonusSpecial(float statMultiplier, int waveIndex)
     {
         if (!specialSelector.TryPick(out string configId))
@@ -173,6 +205,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return TrySpawnSpecialEnemy(configId, entryMultiplier, waveIndex);
     }
 
+    /// <summary>内部：从对象池生成并初始化敌人。</summary>
+    /// <returns>生成成功时为 <c>true</c>。</returns>
     private bool SpawnEnemyInternal(
         string configId,
         float statMultiplier,
@@ -240,6 +274,9 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>确保实例上存在 BossController。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <returns>Boss 控制器实例。</returns>
     private static BossController EnsureBossController(GameObject instance)
     {
         if (!instance.TryGetComponent(out BossController controller))
@@ -250,6 +287,9 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return controller;
     }
 
+    /// <summary>确保实例上存在 EliteController。</summary>
+    /// <param name="instance">敌人 GameObject。</param>
+    /// <returns>精英控制器实例。</returns>
     private static EliteController EnsureEliteController(GameObject instance)
     {
         if (!instance.TryGetComponent(out EliteController controller))
@@ -260,6 +300,10 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return controller;
     }
 
+    /// <summary>从对象池或 Prefab 实例化敌人。</summary>
+    /// <param name="data">敌人配置。</param>
+    /// <param name="position">生成位置。</param>
+    /// <returns>实例 GameObject，失败时为 <c>null</c>。</returns>
     private GameObject SpawnFromPool(EnemyDataSO data, Vector3 position)
     {
         string poolKey = data.PoolKey;
@@ -278,6 +322,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         return null;
     }
 
+    /// <summary>击杀事件回调：维护存活计数。</summary>
+    /// <param name="ctx">击杀事件上下文。</param>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         if (ctx.Payload is not EnemyEventArgs args)

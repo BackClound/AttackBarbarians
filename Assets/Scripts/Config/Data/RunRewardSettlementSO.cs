@@ -5,6 +5,11 @@ using UnityEngine;
 /// <summary>
 /// 局末奖励结算配置：最低奖励、每 5 分钟升一级、难度系数与每级随机浮动。
 /// </summary>
+/// <remarks>
+/// <para><b>创建：</b>Attack Barbarians → Config → Run Reward Settlement。</para>
+/// <para><b>路径：</b><c>Assets/Resources/Config/Meta/</c></para>
+/// <para><b>用途：</b>局末结算时由经济系统读取，计算金币与钻石奖励。</para>
+/// </remarks>
 [CreateAssetMenu(fileName = "RunRewardSettlement", menuName = "Attack Barbarians/Config/Run Reward Settlement")]
 public class RunRewardSettlementSO : ScriptableObject
 {
@@ -43,12 +48,24 @@ public class RunRewardSettlementSO : ScriptableObject
     public long MinimumGold => long.Parse(Mathf.Max(0L, minimumGold).ToString());
     public long MinimumDiamonds => long.Parse(Mathf.Max(0L, minimumDiamonds).ToString());
 
+    /// <summary>
+    /// 根据单局游玩时长计算奖励档位索引。
+    /// </summary>
+    /// <param name="sessionDurationSeconds">本局累计游玩秒数。</param>
+    /// <returns>奖励档位索引（从 0 开始，每档对应 minutesPerTier 分钟）。</returns>
     public int GetTierIndex(float sessionDurationSeconds)
     {
         float minutes = sessionDurationSeconds / 60f;
         return Mathf.Max(0, Mathf.FloorToInt(minutes / MinutesPerTier));
     }
 
+    /// <summary>
+    /// 根据游玩时长与难度计算局末金币与钻石奖励。
+    /// </summary>
+    /// <param name="sessionDurationSeconds">本局累计游玩秒数。</param>
+    /// <param name="difficultyLevel">难度档位（0=简单, 1=普通, 2=困难）。</param>
+    /// <param name="randomSeed">随机种子；-1 时使用当前 UTC 时间戳。</param>
+    /// <returns>包含档位、金币与钻石数量的结算结果。</returns>
     public RunRewardResult Calculate(float sessionDurationSeconds, int difficultyLevel, int randomSeed = -1)
     {
         int tier = GetTierIndex(sessionDurationSeconds);
@@ -74,6 +91,11 @@ public class RunRewardSettlementSO : ScriptableObject
         return new RunRewardResult(tier, gold, diamonds);
     }
 
+    /// <summary>
+    /// 解析指定档位的奖励条目，超出配置表时按增长倍率外推。
+    /// </summary>
+    /// <param name="tier">奖励档位索引。</param>
+    /// <returns>对应档位的奖励条目配置。</returns>
     private RunRewardTierEntry ResolveTierEntry(int tier)
     {
         if (tiers == null || tiers.Count == 0)
@@ -116,6 +138,11 @@ public class RunRewardSettlementSO : ScriptableObject
         };
     }
 
+    /// <summary>
+    /// 按难度档位获取奖励乘算系数。
+    /// </summary>
+    /// <param name="difficultyLevel">难度档位（0=简单, 1=普通, 2=困难）。</param>
+    /// <returns>难度乘算系数；未配置时返回 1。</returns>
     private float GetDifficultyMultiplier(int difficultyLevel)
     {
         if (difficultyMultipliers == null || difficultyMultipliers.Length == 0)
@@ -128,6 +155,9 @@ public class RunRewardSettlementSO : ScriptableObject
     }
 }
 
+/// <summary>
+/// 局末奖励单档配置：基础金币/钻石与随机浮动幅度。
+/// </summary>
 [Serializable]
 public struct RunRewardTierEntry
 {
@@ -138,12 +168,21 @@ public struct RunRewardTierEntry
     public float variance;
 }
 
+/// <summary>
+/// 局末奖励结算结果：档位索引与最终资源数量。
+/// </summary>
 public readonly struct RunRewardResult
 {
     public int Tier { get; }
     public long Gold { get; }
     public long Diamonds { get; }
 
+    /// <summary>
+    /// 构造局末奖励结算结果。
+    /// </summary>
+    /// <param name="tier">奖励档位索引。</param>
+    /// <param name="gold">结算金币数量。</param>
+    /// <param name="diamonds">结算钻石数量。</param>
     public RunRewardResult(int tier, long gold, long diamonds)
     {
         Tier = tier;

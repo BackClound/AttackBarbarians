@@ -22,6 +22,7 @@ public class BossHudPresenter : GameEventSubscriberBase
     private int phaseCount = 1;
     private int currentPhase;
 
+    /// <summary>订阅 Boss 出现、阶段变化与击败事件。</summary>
     protected override void RegisterHandlers()
     {
         GameEvents.SubscribeBossSpawned(OnBossSpawned);
@@ -29,6 +30,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         GameEvents.SubscribeBossDefeated(OnBossDefeated);
     }
 
+    /// <summary>取消 Boss 相关事件订阅。</summary>
     protected override void UnregisterHandlers()
     {
         GameEvents.UnsubscribeBossSpawned(OnBossSpawned);
@@ -36,6 +38,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         GameEvents.UnsubscribeBossDefeated(OnBossDefeated);
     }
 
+    /// <summary>每帧根据追踪的 Boss 血量刷新血条填充。</summary>
     private void Update()
     {
         if (trackedHealth == null || hpFill == null)
@@ -47,6 +50,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         hpFill.fillAmount = maxHp > 0f ? trackedHealth.CurrentHp / maxHp : 0f;
     }
 
+    /// <summary>Boss 出现时显示面板并记录追踪对象。</summary>
     private void OnBossSpawned(GameEventContext ctx)
     {
         if (ctx.Payload is not BossSpawnedEventArgs args || args.BossObject == null)
@@ -80,6 +84,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         Debug.Log($"[BossHud] Boss 出现：{bossDisplayName} HP={args.MaxHp}");
     }
 
+    /// <summary>Boss 阶段变化时刷新阶段标签。</summary>
     private void OnBossPhaseChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not BossPhaseChangedEventArgs args)
@@ -92,6 +97,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         Debug.Log($"[BossHud] 阶段 {args.PreviousPhaseIndex} → {args.NewPhaseIndex}");
     }
 
+    /// <summary>Boss 击败后隐藏面板并清理追踪。</summary>
     private void OnBossDefeated(GameEventContext ctx)
     {
         trackedBoss = null;
@@ -108,6 +114,7 @@ public class BossHudPresenter : GameEventSubscriberBase
         }
     }
 
+    /// <summary>刷新阶段进度文本。</summary>
     private void RefreshPhaseLabel()
     {
         if (phaseText == null)

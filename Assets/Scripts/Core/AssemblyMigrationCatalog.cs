@@ -9,15 +9,25 @@ using System.Collections.Generic;
 /// </remarks>
 public static class AssemblyMigrationCatalog
 {
+    /// <summary>运行时程序集定义根目录（相对 Assets）。</summary>
     public const string AssembliesRoot = "Assets/Scripts/_Assemblies";
+    /// <summary>Editor 程序集定义根目录（相对 Assets）。</summary>
     public const string EditorAssembliesRoot = "Assets/Editor/_Assemblies";
 
+    /// <summary>脚本目录与目标程序集、最低迁移阶段的绑定关系。</summary>
     public readonly struct FolderBinding
     {
+        /// <summary>脚本目录路径（相对 Assets）。</summary>
         public readonly string Folder;
+        /// <summary>目标程序集名称（如 AB.Core）。</summary>
         public readonly string AssemblyName;
+        /// <summary>启用该绑定所需的最低迁移阶段。</summary>
         public readonly AssemblyMigrationPhase MinimumPhase;
 
+        /// <summary>构造目录绑定项。</summary>
+        /// <param name="folder">脚本目录。</param>
+        /// <param name="assemblyName">程序集名。</param>
+        /// <param name="minimumPhase">最低阶段。</param>
         public FolderBinding(string folder, string assemblyName, AssemblyMigrationPhase minimumPhase)
         {
             Folder = folder;
@@ -26,13 +36,20 @@ public static class AssemblyMigrationCatalog
         }
     }
 
-    /// <summary>按阶段推进时需先完成的资源搬移（相对 Assets/）。</summary>
+    /// <summary>阶段激活前需搬移的资源项（保持 GUID）。</summary>
     public readonly struct AssetMove
     {
+        /// <summary>源路径（相对 Assets）。</summary>
         public readonly string Source;
+        /// <summary>目标路径（相对 Assets）。</summary>
         public readonly string Destination;
+        /// <summary>执行搬移所需的最低迁移阶段。</summary>
         public readonly AssemblyMigrationPhase RequiredPhase;
 
+        /// <summary>构造资源搬移项。</summary>
+        /// <param name="source">源路径。</param>
+        /// <param name="destination">目标路径。</param>
+        /// <param name="requiredPhase">所需阶段。</param>
         public AssetMove(string source, string destination, AssemblyMigrationPhase requiredPhase)
         {
             Source = source;
@@ -41,6 +58,7 @@ public static class AssemblyMigrationCatalog
         }
     }
 
+    /// <summary>全部目录绑定列表，供 Editor 工具生成 <c>.asmref</c>。</summary>
     public static IReadOnlyList<FolderBinding> FolderBindings { get; } = new[]
     {
         new FolderBinding("Assets/Scripts/Core/Singleton", "AB.Core", AssemblyMigrationPhase.CoreSingleton),
@@ -135,6 +153,9 @@ public static class AssemblyMigrationCatalog
             AssemblyMigrationPhase.Config),
     };
 
+    /// <summary>获取指定程序集的 <c>.asmdef</c> 文件路径。</summary>
+    /// <param name="assemblyName">程序集名称。</param>
+    /// <returns>相对项目根的路径。</returns>
     public static string GetAsmdefPath(string assemblyName)
     {
         if (assemblyName == "AB.Editor")
@@ -145,6 +166,9 @@ public static class AssemblyMigrationCatalog
         return $"{AssembliesRoot}/{assemblyName}/{assemblyName}.asmdef";
     }
 
+    /// <summary>枚举不超过指定阶段应激活的全部目录绑定。</summary>
+    /// <param name="phase">目标迁移阶段。</param>
+    /// <returns>符合条件的绑定项。</returns>
     public static IEnumerable<FolderBinding> GetBindingsUpTo(AssemblyMigrationPhase phase)
     {
         for (int i = 0; i < FolderBindings.Count; i++)
@@ -157,6 +181,9 @@ public static class AssemblyMigrationCatalog
         }
     }
 
+    /// <summary>枚举不超过指定阶段应执行的全部资源搬移。</summary>
+    /// <param name="phase">目标迁移阶段。</param>
+    /// <returns>符合条件的搬移项。</returns>
     public static IEnumerable<AssetMove> GetMovesUpTo(AssemblyMigrationPhase phase)
     {
         for (int i = 0; i < AssetMoves.Count; i++)

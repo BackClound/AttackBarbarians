@@ -11,9 +11,17 @@ using System.Collections.Generic;
 [Serializable]
 public struct ConfigIdIntPair
 {
+    /// <summary>配置唯一标识。</summary>
     public string configId;
+
+    /// <summary>关联的整数值（等级、层数或数量等）。</summary>
     public int value;
 
+    /// <summary>
+    /// 创建指定 configId 与整数值的键值对。
+    /// </summary>
+    /// <param name="configId">配置唯一标识。</param>
+    /// <param name="value">关联的整数值（等级、层数或数量等）。</param>
     public ConfigIdIntPair(string configId, int value)
     {
         this.configId = configId ?? string.Empty;
@@ -26,6 +34,13 @@ public struct ConfigIdIntPair
 /// </summary>
 public static class ConfigIdIntPairListUtility
 {
+    /// <summary>
+    /// 从列表中按 configId 读取整数值。
+    /// </summary>
+    /// <param name="list">存档键值对列表。</param>
+    /// <param name="configId">要查询的配置唯一标识。</param>
+    /// <param name="defaultValue">未找到时返回的默认值。</param>
+    /// <returns>匹配的整数值，或默认值。</returns>
     public static int GetValue(IReadOnlyList<ConfigIdIntPair> list, string configId, int defaultValue = 0)
     {
         if (list == null || string.IsNullOrWhiteSpace(configId))
@@ -44,6 +59,12 @@ public static class ConfigIdIntPairListUtility
         return defaultValue;
     }
 
+    /// <summary>
+    /// 向列表写入或更新 configId 对应的整数值；值为 0 时移除条目。
+    /// </summary>
+    /// <param name="list">存档键值对列表。</param>
+    /// <param name="configId">配置唯一标识。</param>
+    /// <param name="value">要写入的整数值；为 0 时删除该条目。</param>
     public static void SetValue(List<ConfigIdIntPair> list, string configId, int value)
     {
         if (list == null || string.IsNullOrWhiteSpace(configId))

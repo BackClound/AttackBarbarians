@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Buff 应用门面：技能 Buff 走 <see cref="SkillManager"/>，属性 Buff 走 <see cref="PlayerController"/>。
+/// 流水线位置：Upgrade/<see cref="BuffDataSO"/> → 本类 → SkillManager 或 PlayerController。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在 Player 或 GameSystems；Inspector 可指定 Player 引用。</para>
@@ -14,15 +15,17 @@ public class BuffManager : MonoBehaviour
     private SkillManager skillManager;
     private PlayerController playerController;
 
+    /// <summary>解析 SkillManager 与 PlayerController 引用。</summary>
     private void Awake()
     {
         ResolveReferences();
     }
-/// <summary>
-/// 应用 Buff
-/// </summary>
-/// <param name="buff">Buff 数据</param>
-/// <param name="stacks">堆叠层数</param>
+
+    /// <summary>
+    /// 应用 Buff 配置（技能 Buff 或玩家属性 Buff）。
+    /// </summary>
+    /// <param name="buff">Buff 数据配置。</param>
+    /// <param name="stacks">堆叠层数，默认 1。</param>
     public void ApplyBuff(BuffDataSO buff, int stacks = 1)
     {
         if (buff == null)
@@ -52,17 +55,19 @@ public class BuffManager : MonoBehaviour
                 playerController.Player));
         }
     }
-/// <summary>
-/// 应用技能 Buff
-/// </summary>
-/// <param name="kind">技能 Buff 种类</param>
-/// <param name="tier">技能 Buff 层级</param>
+
+    /// <summary>
+    /// 直接应用技能 Buff（不经过 BuffDataSO）。
+    /// </summary>
+    /// <param name="kind">技能 Buff 种类。</param>
+    /// <param name="tier">Buff 层级，默认 1。</param>
     public void ApplySkillBuff(SkillBuffKind kind, int tier = 1)
     {
         ResolveReferences();
         skillManager?.ApplySkillBuff(kind, tier);
     }
 
+    /// <summary>懒解析 SkillManager 与 PlayerController（支持 Override 与场景访问）。</summary>
     private void ResolveReferences()
     {
         if (skillManager == null)

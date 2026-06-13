@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 每日签到管理：本地日期校验、连续签到、补签与奖励发放。
+/// Meta 每日签到管理器：负责连续签到、断签重置、补签与奖励发放。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。由 <see cref="GameBootstrapper"/> 在 AchievementManager 之后初始化。</para>
@@ -19,9 +19,14 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
     private ConfigManager configManager;
     private bool isInitialized;
 
+    /// <summary>签到服务是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
+    /// <summary>当前绑定的签到目录配置。</summary>
     public DailyRewardCatalogSO Catalog => catalog;
 
+    /// <summary>
+    /// 初始化签到系统：加载目录、订阅存档事件并广播当前状态。
+    /// </summary>
     public void Initialize()
     {
         if (isInitialized)
@@ -43,19 +48,34 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         isInitialized = true;
     }
 
+    /// <summary>
+    /// 每帧更新（签到系统无逐帧逻辑）。
+    /// </summary>
+    /// <param name="deltaTime">距上一帧的时间间隔（秒）。</param>
     public void Tick(float deltaTime) { }
 
+    /// <summary>
+    /// 关闭签到系统并取消事件订阅。
+    /// </summary>
     public void Shutdown()
     {
         GameEvents.UnsubscribeSaveLoaded(OnSaveLoaded);
         isInitialized = false;
     }
 
+    /// <summary>
+    /// 获取当前连续签到天数。
+    /// </summary>
+    /// <returns>连续签到天数；存档未就绪时返回 0。</returns>
     public int GetStreakDay()
     {
         return saveManager?.Current != null ? Mathf.Max(0, saveManager.Current.dailyRewardStreak) : 0;
     }
 
+    /// <summary>
+    /// 判断今日是否已签到。
+    /// </summary>
+    /// <returns>今日已签到时返回 true。</returns>
     public bool HasClaimedToday()
     {
         if (saveManager?.Current == null)
@@ -73,6 +93,10 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return lastDate == GetTodayUtc().Date;
     }
 
+    /// <summary>
+    /// 判断今日是否可签到。
+    /// </summary>
+    /// <returns>系统就绪、今日未签且存在对应奖励配置时返回 true。</returns>
     public bool CanClaimToday()
     {
         if (!isInitialized || saveManager?.Current == null || catalog == null)
@@ -88,6 +112,10 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return catalog.TryGetEntry(ResolveNextClaimDay(), out _);
     }
 
+    /// <summary>
+    /// 解析下一次应签到的天数索引（含断签重置与周期回绕）。
+    /// </summary>
+    /// <returns>下一次签到天数（1～7）。</returns>
     public int ResolveNextClaimDay()
     {
         if (saveManager?.Current == null || catalog == null)
@@ -118,6 +146,12 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return 1;
     }
 
+    /// <summary>
+    /// 按天数索引查找签到奖励配置。
+    /// </summary>
+    /// <param name="dayIndex">签到天数索引（1～7）。</param>
+    /// <param name="entry">找到的奖励配置。</param>
+    /// <returns>解析成功时返回 true。</returns>
     public bool TryGetEntry(int dayIndex, out DailyRewardEntrySO entry)
     {
         entry = null;
@@ -134,12 +168,21 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return false;
     }
 
+    /// <summary>
+    /// 尝试领取今日签到奖励。
+    /// </summary>
+    /// <returns>领取成功时返回 true。</returns>
     public bool TryClaimToday()
     {
         int dayToClaim = ResolveNextClaimDay();
         return TryClaimDay(dayToClaim, isMakeup: false);
     }
 
+    /// <summary>
+    /// 尝试补签指定天数的奖励（可能消耗钻石）。
+    /// </summary>
+    /// <param name="dayIndex">要补签的天数索引。</param>
+    /// <returns>补签成功时返回 true。</returns>
     public bool TryMakeupClaim(int dayIndex)
     {
         if (catalog == null || !catalog.AllowMakeup)
@@ -179,6 +222,12 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return TryClaimDay(dayIndex, isMakeup: true);
     }
 
+    /// <summary>
+    /// 领取指定天数的签到奖励（普通签到或补签）。
+    /// </summary>
+    /// <param name="dayIndex">签到天数索引。</param>
+    /// <param name="isMakeup">是否为补签。</param>
+    /// <returns>领取成功时返回 true。</returns>
     private bool TryClaimDay(int dayIndex, bool isMakeup)
     {
         if (!isInitialized || saveManager?.Current == null || resourceManager == null)
@@ -247,6 +296,11 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>
+    /// 发放单日签到奖励（货币与/或升级卡）。
+    /// </summary>
+    /// <param name="entry">签到奖励配置。</param>
+    /// <returns>全部奖励发放成功时返回 true。</returns>
     private bool GrantReward(DailyRewardEntrySO entry)
     {
         bool granted = true;
@@ -274,8 +328,15 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
         return granted;
     }
 
+    /// <summary>
+    /// 存档加载完成后广播签到状态变更。
+    /// </summary>
+    /// <param name="ctx">游戏事件上下文。</param>
     private void OnSaveLoaded(GameEventContext ctx) => PublishStateChanged();
 
+    /// <summary>
+    /// 广播当前签到状态（可领、连续天数、下一签到日）。
+    /// </summary>
     private void PublishStateChanged()
     {
         GameEvents.RaiseDailyRewardStateChanged(
@@ -286,6 +347,12 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
                 ResolveNextClaimDay()));
     }
 
+    /// <summary>
+    /// 记录签到失败日志并广播失败事件。
+    /// </summary>
+    /// <param name="dayIndex">签到天数索引。</param>
+    /// <param name="reason">失败原因。</param>
+    /// <param name="message">失败说明文案。</param>
     private void RaiseFailed(int dayIndex, DailyRewardClaimFailedReason reason, string message)
     {
         if (configManager != null && configManager.ShouldLog() && !string.IsNullOrEmpty(message))
@@ -298,9 +365,17 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
             new DailyRewardClaimFailedEventArgs(dayIndex, reason, message));
     }
 
-    /// <summary>预留服务器时间接口：当前返回 UTC 日期。</summary>
+    /// <summary>
+    /// 获取当前 UTC 日期（预留服务器时间接口）。
+    /// </summary>
+    /// <returns>当前 UTC 时间。</returns>
     public static DateTime GetTodayUtc() => DateTime.UtcNow;
 
+    /// <summary>
+    /// 将商店奖励类型映射为货币类型。
+    /// </summary>
+    /// <param name="rewardType">商店奖励类型。</param>
+    /// <returns>对应的货币类型。</returns>
     private static CurrencyType MapRewardToCurrency(ShopRewardType rewardType) =>
         rewardType switch
         {
@@ -310,6 +385,9 @@ public class DailyRewardManager : MonoBehaviour, IGameSystem
             _ => CurrencyType.Gold,
         };
 
+    /// <summary>
+    /// 调试菜单：尝试领取今日签到奖励。
+    /// </summary>
     [ContextMenu("Debug/Try Claim Today")]
     private void DebugTryClaimToday() => TryClaimToday();
 }

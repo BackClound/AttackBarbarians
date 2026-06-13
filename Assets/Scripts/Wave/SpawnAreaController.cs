@@ -20,8 +20,13 @@ public class SpawnAreaController : MonoBehaviour
     private float maxY;
     private bool boundsReady;
 
+    /// <summary>生成边界是否已计算完成。</summary>
     public bool IsReady => boundsReady;
 
+    /// <summary>
+    /// 应用地图生成区域配置并重新初始化边界。
+    /// </summary>
+    /// <param name="config">地图生成区域配置。</param>
     public void ApplyMapConfig(MapSpawnAreaConfig config)
     {
         viewportMin = config.ViewportMin;
@@ -30,6 +35,7 @@ public class SpawnAreaController : MonoBehaviour
         BeginInitialize();
     }
 
+    /// <summary>解析相机引用。</summary>
     private void Awake()
     {
         if (spawnCamera == null)
@@ -38,12 +44,18 @@ public class SpawnAreaController : MonoBehaviour
         }
     }
 
+    /// <summary>启动协程重新计算生成边界。</summary>
     public void BeginInitialize()
     {
         StopAllCoroutines();
         StartCoroutine(InitializeBoundsRoutine());
     }
 
+    /// <summary>
+    /// 在已就绪的矩形区域内随机取一个生成点。
+    /// </summary>
+    /// <param name="position">输出的世界坐标。</param>
+    /// <returns>边界就绪时返回 true，否则返回 false。</returns>
     public bool TryGetRandomSpawnPosition(out Vector3 position)
     {
         position = Vector3.zero;
@@ -59,6 +71,8 @@ public class SpawnAreaController : MonoBehaviour
         return true;
     }
 
+    /// <summary>延迟后将视口范围转换为世界坐标边界。</summary>
+    /// <returns>协程迭代器。</returns>
     private IEnumerator InitializeBoundsRoutine()
     {
         boundsReady = false;

@@ -10,10 +10,14 @@ public struct MapSpawnAreaConfig
     [SerializeField] private Vector2 viewportMax;
     [SerializeField] private float initializeDelaySeconds;
 
+    /// <summary>视口矩形左下角（归一化坐标）。</summary>
     public Vector2 ViewportMin => viewportMin;
+    /// <summary>视口矩形右上角（归一化坐标）。</summary>
     public Vector2 ViewportMax => viewportMax;
+    /// <summary>初始化边界前的延迟（秒）。</summary>
     public float InitializeDelaySeconds => Mathf.Max(0f, initializeDelaySeconds);
 
+    /// <summary>项目默认生成区域配置。</summary>
     public static MapSpawnAreaConfig Default =>
         new MapSpawnAreaConfig
         {

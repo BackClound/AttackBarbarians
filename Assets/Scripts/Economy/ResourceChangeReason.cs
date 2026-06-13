@@ -3,35 +3,38 @@
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否。</para>
+/// <para><b>关联系统：</b><see cref="ResourceManager"/>、<see cref="ResourceChangedEventArgs"/>。</para>
 /// </remarks>
 public enum ResourceChangeReason
 {
+    /// <summary>未知或未分类来源。</summary>
     Unknown = 0,
-    // 局内结算奖励 金币
+    /// <summary>局内结算奖励（金币）。</summary>
     RunSettlement = 1,
-    // 技能升级奖励 技能升级卡 水晶
+    /// <summary>技能升级奖励（技能升级卡、水晶）。</summary>
     UpgradeReward = 2,
-    // 属性升级奖励 属性升级卡 水晶
+    /// <summary>属性升级奖励（属性升级卡、水晶）。</summary>
     TalentUpgrade = 3,
-    // 装备升级奖励 装备 水晶
+    /// <summary>装备强化奖励（装备、水晶）。</summary>
     EquipmentEnhance = 4,
-    // 商店购买奖励 金币 水晶
+    /// <summary>商店购买（金币、水晶）。</summary>
     ShopPurchase = 5,
-    // 商店免费领取奖励 水晶
+    /// <summary>商店免费领取（水晶）。</summary>
     ShopFreeDiamond = 6,
-    // 签到奖励 金币 水晶
+    /// <summary>签到奖励（金币、水晶）。</summary>
     DailyReward = 7,
-    // 成就奖励 金币 水晶
-    AchievementReward = 10,
-    // 抽奖奖励 金币 水晶
+    /// <summary>抽奖奖励（金币、水晶）。</summary>
     Lottery = 8,
-    // 游戏时长奖励 金币 水晶
+    /// <summary>游戏时长奖励（金币、水晶）。</summary>
     GameTimeReward = 9,
-    // 自然恢复（已废弃，保留枚举值兼容旧存档日志）
+    /// <summary>成就奖励（金币、水晶）。</summary>
+    AchievementReward = 10,
+    /// <summary>体力自然恢复。</summary>
     EnergyRecover = 11,
-    // 观看广告获得广告券
+    /// <summary>观看广告获得广告券或体力。</summary>
     AdReward = 12,
-    // 开局消耗体力
+    /// <summary>开局消耗体力。</summary>
     BattleStart = 13,
+    /// <summary>调试或开发工具触发的变更。</summary>
     Debug = 99,
 }

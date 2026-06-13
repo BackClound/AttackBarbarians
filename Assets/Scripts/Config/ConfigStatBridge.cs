@@ -9,6 +9,11 @@ using UnityEngine;
 /// </remarks>
 public static class ConfigStatBridge
 {
+    /// <summary>
+    /// 将运行时属性快照写入场景内实体的 <see cref="Entity_Stats"/> 组件。
+    /// </summary>
+    /// <param name="snapshot">来源属性快照；为 null 时不执行任何操作。</param>
+    /// <param name="entityStats">目标实体属性组件；为 null 时不执行任何操作。</param>
     public static void ApplyToEntityStats(StatRuntimeSnapshot snapshot, Entity_Stats entityStats)
     {
         if (snapshot == null || entityStats == null)
@@ -41,6 +46,11 @@ public static class ConfigStatBridge
         }
     }
 
+    /// <summary>
+    /// 将指定数值写入 <see cref="Stat"/> 的基础值。
+    /// </summary>
+    /// <param name="stat">目标属性实例；为 null 时跳过。</param>
+    /// <param name="value">要设置的基础数值。</param>
     private static void SetStat(Stat stat, float value)
     {
         if (stat == null)
