@@ -47,13 +47,16 @@ public class SkillObject_BulletSpawn : MonoBehaviour
             return;
         }
 
-        ShootProjectileCaster.TryFireAtEnemy(
-            context,
-            runtime,
-            enemy,
-            transform.position,
-            fanAngleDegrees,
-            ResolveProjectileData());
+        if (ShootProjectileCaster.TryFireAtEnemy(
+                context,
+                runtime,
+                enemy,
+                transform.position,
+                fanAngleDegrees,
+                ResolveProjectileData()))
+        {
+            context.NotifyCast(runtime);
+        }
     }
 
     private ProjectileDataSO ResolveProjectileData()

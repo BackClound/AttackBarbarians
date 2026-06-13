@@ -77,6 +77,40 @@ public sealed class SkillContext
         return false;
     }
 
+    /// <summary>从当前战斗目标列表中随机选取一个可受伤敌人（落雷/火雨等范围技能使用）。</summary>
+    public bool TryPickRandomTarget(List<Enemy> scratch, out Enemy enemy)
+    {
+        enemy = null;
+        if (!TryCopyTargets(scratch) || scratch.Count == 0)
+        {
+            return false;
+        }
+
+        enemy = scratch[Random.Range(0, scratch.Count)];
+        if (enemy == null || enemy.enemy_Health == null || !enemy.enemy_Health.CanBeDamage())
+        {
+            enemy = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    public float GetAttackSpeedMultiplier()
+    {
+        if (Controller != null && Controller.RuntimeStats.IsInitialized)
+        {
+            return Mathf.Max(0.1f, Controller.RuntimeStats.Get(StatType.AttackSpeedMulti));
+        }
+
+        if (Player != null && Player.player_Health != null && Player.player_Health.entity_Stats != null)
+        {
+            return Mathf.Max(0.1f, Player.player_Health.entity_Stats.GetAttackSpeedMultiplier());
+        }
+
+        return 1f;
+    }
+
     public List<Enemy> GetChainTargets(Enemy start, int maxCount, float maxLinkDistance)
     {
         chainBuffer.Clear();

@@ -1400,12 +1400,12 @@ GameObject:
   - component: {fileID: 825728591}
   - component: {fileID: 825728588}
   - component: {fileID: 825728589}
-  - component: {fileID: 825728587}
+  - component: {fileID: 825728592}
   - component: {fileID: 825728582}
   - component: {fileID: 825728581}
+  - component: {fileID: 825728587}
   - component: {fileID: 825728594}
   - component: {fileID: 825728593}
-  - component: {fileID: 825728592}
   m_Layer: 10
   m_HasEditorInfo: 1
   m_Name: Player
@@ -1624,7 +1624,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AutoAttackController
   autoAttackConfigId: auto_attack.default
   dataOverride: {fileID: 0}
-  fireOrigin: {fileID: 839134032}
   combatEnabled: 1
 --- !u!114 &825728592
 MonoBehaviour:
@@ -1655,7 +1654,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShootSkillController
   castOrigin: {fileID: 0}
-  fanAngleDegrees: 10
   projectileDataOverride: {fileID: 0}
 --- !u!114 &825728594
 MonoBehaviour:
@@ -1714,6 +1712,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b348dfa73f10843d4bc3486c64983ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillShoot
+  targetScanIntervalIdle: 0.12
+  targetScanIntervalEngaged: 0.08
+  driveShootAnimator: 1
   bulletSpawnPrefab: {fileID: 1089714990345592040, guid: 9a00d02bca7be487d9717ab6aecfda17, type: 3}
   bulletSpawnPoint: {fileID: 839134032}
   checkPosition: {fileID: 13335480}
@@ -2681,10 +2682,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameBootstrapper
   initializeOnAwake: 1
   dontDestroyOnLoad: 1
+  postBootstrapFlow: 0
+  managerSet: 0
   configManager: {fileID: 504535249}
   saveManager: {fileID: 1674896968}
+  resourceManager: {fileID: 0}
+  shopManager: {fileID: 0}
+  adRewardService: {fileID: 0}
+  achievementManager: {fileID: 0}
+  dailyRewardManager: {fileID: 0}
+  upgradeCardManager: {fileID: 0}
+  metaRewardService: {fileID: 0}
   talentManager: {fileID: 0}
   equipmentManager: {fileID: 0}
+  performanceManager: {fileID: 0}
   poolManager: {fileID: 159732236}
   gameManager: {fileID: 401098658}
   gameFlowManager: {fileID: 401098660}
@@ -2704,6 +2715,7 @@ MonoBehaviour:
   mapManager: {fileID: 0}
   gameplayEventManager: {fileID: 0}
   gameplayEventDebugBridge: {fileID: 0}
+  audioManager: {fileID: 0}
 --- !u!4 &1812459356
 Transform:
   m_ObjectHideFlags: 0
@@ -3169,6 +3181,7 @@ GameObject:
   serializedVersion: 7
   m_Component:
   - component: {fileID: 1951773201}
+  - component: {fileID: 1951773202}
   m_Layer: 0
   m_HasEditorInfo: 1
   m_Name: ProjectileManager
@@ -3192,6 +3205,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1812459356}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1951773202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951773200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c4d5e6f7a8091a2b3c4d5e6f7a8091, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultProjectileData: {fileID: 0}
 --- !u!1 &2008535170
 GameObject:
   m_ObjectHideFlags: 0

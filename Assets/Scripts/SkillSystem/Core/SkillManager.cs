@@ -28,13 +28,11 @@ public class SkillManager : MonoBehaviour
     private PlayerController controller;
     private SkillContext context;
     // 
-    private ShootBurstController shootBurst;
     private ShootSkillController shootController;
     private float healMinuteTimer;
     private float healPeakTimer;
 
     public SkillContext Context => context;
-    public ShootBurstController ShootBurst => shootBurst;
     public ShootSkillController ShootController => shootController;
     public IReadOnlyDictionary<SkillType, SkillRuntime> Runtimes => runtimes;
 
@@ -42,12 +40,6 @@ public class SkillManager : MonoBehaviour
     {
         player = GetComponent<Player>();
         controller = GetComponent<PlayerController>();
-        shootBurst = GetComponent<ShootBurstController>();
-        if (shootBurst == null)
-        {
-            shootBurst = gameObject.AddComponent<ShootBurstController>();
-        }
-
         shootController = GetComponent<ShootSkillController>();
         if (shootController == null)
         {
@@ -84,22 +76,20 @@ public class SkillManager : MonoBehaviour
         }
 
         float dt = Time.deltaTime;
-        shootBurst?.Tick(dt);
         TickHealPassives(dt);
         if (!CanAutoCastNow())
         {
             return;
         }
 
+        if (runtimes.TryGetValue(SkillType.Shoot, out SkillRuntime shootRuntime))
+        {
+            shootRuntime.SetCooldownDivisor(context.GetAttackSpeedMultiplier());
+        }
+
         for (int i = 0; i < autoCastOrder.Count; i++)
         {
             SkillType type = autoCastOrder[i];
-
-            // 射击由 SkillShoot 敌人检测驱动，避免与 SkillManager 自动施法双发。
-            if (type == SkillType.Shoot)
-            {
-                continue;
-            }
 
             if (!runtimes.TryGetValue(type, out SkillRuntime runtime) || !runtime.IsUnlocked)
             {
@@ -222,7 +212,12 @@ public class SkillManager : MonoBehaviour
         return true;
     }
 
-    public bool CanShootNow() => shootController != null && shootController.CanShoot();
+    public bool CanShootNow() =>
+        runtimes.TryGetValue(SkillType.Shoot, out SkillRuntime runtime) &&
+        runtime.IsUnlocked &&
+        runtime.IsCooldownReady &&
+        context != null &&
+        context.TryGetPrimaryTarget(out _);
 
     public void ApplySkillBuff(SkillBuffKind kind, int tier = 1)
     {
@@ -331,9 +326,25 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    public void TriggerShootCast()
+    public void TriggerShootCast() => TryCastSkill(SkillType.Shoot);
+
+    public bool TryCastSkill(SkillType type)
     {
-        shootController?.ExecuteShoot();
+        if (context == null ||
+            !runtimes.TryGetValue(type, out SkillRuntime runtime) ||
+            !runtime.IsUnlocked ||
+            !effects.TryGetValue(type, out ISkillEffect effect))
+        {
+            return false;
+        }
+
+        if (effect.TryAutoCast(context, runtime))
+        {
+            runtime.StartCooldown();
+            return true;
+        }
+
+        return false;
     }
 
     private void TickHealPassives(float deltaTime)

@@ -18,8 +18,8 @@ MonoBehaviour:
   skillType: 0
   maxLevel: 10
   skillPrefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
-  baseCooldown: 4
-  autoCast: 0
+  baseCooldown: 0.35
+  autoCast: 1
   maxAttackCount: 10
   bulletsPerWave: 3
   checkRadius: 25

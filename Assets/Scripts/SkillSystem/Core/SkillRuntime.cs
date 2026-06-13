@@ -16,8 +16,13 @@ public sealed class SkillRuntime
     public float LastCastTime { get; set; }
     public int CastCount { get; private set; }
 
+    private float cooldownDivisor = 1f;
+
     public bool IsCooldownReady =>
-        Time.time >= LastCastTime + buffProfile.GetEffectiveCooldown(CooldownSeconds);
+        Time.time >= LastCastTime + GetEffectiveCooldown();
+
+    public void SetCooldownDivisor(float divisor) =>
+        cooldownDivisor = Mathf.Max(0.1f, divisor);
 
     public void Initialize(SkillDataSO config, int level = 1, bool unlocked = true)
     {
@@ -65,10 +70,8 @@ public sealed class SkillRuntime
         CastCount++;
     }
 
-    public float GetEffectiveCooldown()
-    {
-        return buffProfile.GetEffectiveCooldown(CooldownSeconds);
-    }
+    public float GetEffectiveCooldown() =>
+        buffProfile.GetEffectiveCooldown(CooldownSeconds) / cooldownDivisor;
 
     public float GetDamageMultiplier() => Mathf.Max(0.1f, buffProfile.DamageMultiplier);
 

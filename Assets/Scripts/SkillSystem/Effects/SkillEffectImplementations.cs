@@ -113,18 +113,16 @@ public sealed class ThunderSkillEffect : ISkillEffect
             return false;
         }
 
-        if (!context.TryCopyTargets(anchorTargets) || anchorTargets.Count == 0)
-        {
-            return false;
-        }
-
         SkillBuffProfile buff = runtime.BuffProfile;
         float radius = runtime.Config.AreaRadius * buff.ThunderRadiusScale;
         int strikes = Mathf.Max(1, buff.ThunderStrikeCount);
 
         for (int s = 0; s < strikes; s++)
         {
-            Enemy anchor = anchorTargets[Random.Range(0, anchorTargets.Count)];
+            if (!context.TryPickRandomTarget(anchorTargets, out Enemy anchor))
+            {
+                break;
+            }
             Vector2 center = anchor.transform.position;
             context.QueryEnemiesInCircle(center, radius, areaScratch);
             for (int i = 0; i < areaScratch.Count; i++)
@@ -171,7 +169,7 @@ public sealed class FireRainSkillEffect : ISkillEffect
             return false;
         }
 
-        if (!context.TryCopyTargets(scratch) || scratch.Count == 0)
+        if (!context.TryPickRandomTarget(scratch, out Enemy anchor))
         {
             return false;
         }
@@ -179,7 +177,6 @@ public sealed class FireRainSkillEffect : ISkillEffect
         SkillBuffProfile buff = runtime.BuffProfile;
         float radius = runtime.Config.AreaRadius * buff.FireRainRadiusScale;
         int ticks = 1 + Mathf.RoundToInt(buff.FireRainDurationScale * 3f);
-        Enemy anchor = scratch[Random.Range(0, scratch.Count)];
         Vector2 center = anchor.transform.position;
 
         for (int t = 0; t < ticks; t++)

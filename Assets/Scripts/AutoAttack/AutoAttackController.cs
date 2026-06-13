@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// 自动攻击节拍：目标扫描调度、连发休整计时；实际发弹由 <see cref="ShootSkillController"/> 经 <see cref="SkillManager"/> 执行。
+/// 自动攻击节拍：目标扫描调度；实际发弹由 <see cref="SkillManager"/> 统一自动施法执行。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。挂在场景 Player 根物体（与 <see cref="Player"/>、<see cref="PlayerController"/> 同物体）。</para>
-/// <para><b>数据流：</b>本组件（扫描/休整）→ <see cref="ShootSkillController"/> → <see cref="ShootProjectileCaster"/> → <see cref="ProjectileManager"/>。</para>
+/// <para><b>数据流：</b>本组件（扫描）→ <see cref="SkillManager"/> → <see cref="ShootSkillEffect"/> → <see cref="ProjectileManager"/>。</para>
 /// </remarks>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Player))]
@@ -20,6 +20,7 @@ public class AutoAttackController : MonoBehaviour
     [SerializeField] private bool combatEnabled = true;
 
     private PlayerController playerController;
+    private SkillManager skillManager;
     private ShootSkillController shootController;
     private AutoAttackDataSO activeData;
 
@@ -43,6 +44,7 @@ public class AutoAttackController : MonoBehaviour
     private void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        skillManager = GetComponent<SkillManager>();
         shootController = GetComponent<ShootSkillController>();
     }
 
@@ -106,10 +108,10 @@ public class AutoAttackController : MonoBehaviour
         return hasValidTarget;
     }
 
-    /// <summary>手动触发一发（一般由 <see cref="SkillShoot"/> 检测驱动，勿依赖动画帧）。</summary>
+    /// <summary>手动触发一发（走 <see cref="SkillManager"/> 统一施法管线）。</summary>
     public void ExecuteAttack()
     {
-        if (!IsReady || !combatEnabled || shootController == null)
+        if (!IsReady || !combatEnabled || skillManager == null)
         {
             return;
         }
@@ -123,8 +125,10 @@ public class AutoAttackController : MonoBehaviour
             }
         }
 
-        shootController.ExecuteShoot();
-        RefreshTargetsAfterShot();
+        if (skillManager.TryCastSkill(SkillType.Shoot))
+        {
+            RefreshTargetsAfterShot();
+        }
     }
 
     public void RefreshAnimSpeedFromStats() { }

@@ -2,19 +2,17 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 射击技能：由射程内敌人检测驱动发弹，不依赖动画攻击帧。
+/// 射击技能表现层：目标扫描与射击动画；实际发弹由 <see cref="SkillManager"/> 自动施法驱动。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（历史 Prefab 子物体）。</para>
-/// <para><b>数据流：</b>扫描目标 → <see cref="ShootSkillController"/> → <see cref="ShootProjectileCaster"/>。</para>
+/// <para><b>数据流：</b>扫描目标 → <see cref="SkillManager"/> → <see cref="ShootSkillEffect"/> → <see cref="ShootProjectileCaster"/>。</para>
 /// </remarks>
 public class SkillShoot : SkillBase
 {
     public Action<float> updateAttackSpeedMultiAction;
 
     [Header("Combat")]
-    [Tooltip("单发基础间隔（秒），实际间隔 = baseShotInterval / 攻速倍率。")]
-    [SerializeField] private float baseShotInterval = 0.3f;
     [Tooltip("无目标时的扫描间隔（秒）。")]
     [SerializeField] private float targetScanIntervalIdle = 0.12f;
     [Tooltip("持有目标时的扫描间隔（秒）。")]
@@ -33,7 +31,6 @@ public class SkillShoot : SkillBase
     private AutoAttackController autoAttack;
     private ShootSkillController shootController;
 
-    private float shotTimer;
     private float scanTimer;
 
     public float shootSpeedAnimMulti { get; private set; }
@@ -47,23 +44,30 @@ public class SkillShoot : SkillBase
         shootController = player != null ? player.GetComponent<ShootSkillController>() : null;
     }
 
+    private void OnEnable()
+    {
+        GameEvents.SubscribePlayerSkillCast(OnPlayerSkillCast);
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.UnsubscribePlayerSkillCast(OnPlayerSkillCast);
+    }
+
     private void Start()
     {
         RefreshAttackSpeedFromStats();
-        shotTimer = 0f;
         scanTimer = 0f;
     }
 
     protected override void Update()
     {
-        if (player == null || shootController == null || playerController == null || !playerController.IsReady)
+        if (player == null || playerController == null || !playerController.IsReady)
         {
             return;
         }
 
-        float deltaTime = Time.deltaTime;
-        TickTargetScan(deltaTime);
-        TickCombatShoot(deltaTime);
+        TickTargetScan(Time.deltaTime);
     }
 
     public void RefreshAttackSpeedFromStats()
@@ -91,15 +95,10 @@ public class SkillShoot : SkillBase
 
     public bool CanUseShootSkill() => shootController != null && shootController.CanShoot();
 
-    /// <summary>检测驱动的一发射击（不经动画事件）。</summary>
+    /// <summary>兼容旧调用：手动触发一次射击。</summary>
     public void ActivateOneShootAttack()
     {
-        if (shootController == null)
-        {
-            return;
-        }
-
-        shootController.ExecuteShoot();
+        shootController?.ExecuteShoot();
         RefreshAttackSpeedFromStats();
     }
 
@@ -112,6 +111,23 @@ public class SkillShoot : SkillBase
     /// <summary>兼容旧调用：等价于 <see cref="CanUseShootSkill"/>。</summary>
     public void CheckEnemyIsAvailable() { }
 
+    private void OnPlayerSkillCast(GameEventContext ctx)
+    {
+        if (!driveShootAnimator || player?.anim == null)
+        {
+            return;
+        }
+
+        if (ctx.Payload is not string skillId || skillId != GameConstants.ConfigIds.SkillShoot)
+        {
+            return;
+        }
+
+        player.anim.SetTrigger("Shoot");
+        RefreshAttackSpeedFromStats();
+        ApplyAnimatorSpeedMultiplier();
+    }
+
     private void TickTargetScan(float deltaTime)
     {
         scanTimer -= deltaTime;
@@ -122,35 +138,6 @@ public class SkillShoot : SkillBase
 
         RefreshCombatTargets(force: true);
         scanTimer = HasCombatTarget() ? targetScanIntervalEngaged : targetScanIntervalIdle;
-    }
-
-    private void TickCombatShoot(float deltaTime)
-    {
-        shotTimer -= deltaTime;
-
-        if (!HasCombatTarget())
-        {
-            return;
-        }
-
-        if (!CanUseShootSkill())
-        {
-            return;
-        }
-
-        if (shotTimer > 0f)
-        {
-            return;
-        }
-
-        ActivateOneShootAttack();
-        shotTimer = GetShotInterval();
-
-        if (driveShootAnimator && player.anim != null)
-        {
-            player.anim.SetTrigger("Shoot");
-            ApplyAnimatorSpeedMultiplier();
-        }
     }
 
     private void RefreshCombatTargets(bool force)
@@ -172,12 +159,6 @@ public class SkillShoot : SkillBase
         }
 
         return playerController != null && playerController.GetPrimaryTarget() != null;
-    }
-
-    private float GetShotInterval()
-    {
-        float speedMulti = Mathf.Max(0.1f, shootSpeedAnimMulti);
-        return baseShotInterval / speedMulti;
     }
 
     private void ApplyAnimatorSpeedMultiplier()

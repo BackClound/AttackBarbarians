@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 射击技能效果：兼容技能管线的外部释放入口，实际常规射击由 <see cref="SkillShoot"/> 检测驱动。
+/// 射击技能效果：由 <see cref="SkillManager"/> 自动施法；目标经 <see cref="PlayerTargetScanner"/> 按策略排序
+/// （最近 / 最低血量 / Boss 优先等，见 <see cref="PlayerDataSO.TargetPolicy"/>）。
 /// </summary>
 public sealed class ShootSkillEffect : ISkillEffect
 {
@@ -16,7 +17,7 @@ public sealed class ShootSkillEffect : ISkillEffect
             return false;
         }
 
-        if (!context.TryGetPrimaryTarget(out Enemy primary))
+        if (!context.TryGetPrimaryTarget(out Enemy target))
         {
             return false;
         }
@@ -28,7 +29,7 @@ public sealed class ShootSkillEffect : ISkillEffect
         if (!ShootProjectileCaster.TryFireAtEnemy(
                 context,
                 runtime,
-                primary,
+                target,
                 spawnPos,
                 DefaultFanAngleDegrees,
                 ResolveProjectileData()))
@@ -36,7 +37,7 @@ public sealed class ShootSkillEffect : ISkillEffect
             return false;
         }
 
-        context.Controller?.NotifyAttackStarted(runtime.Config.ConfigId);
+        context.NotifyCast(runtime);
         return true;
     }
 
