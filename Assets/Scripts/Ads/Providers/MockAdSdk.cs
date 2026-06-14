@@ -13,16 +13,16 @@ public sealed class MockAdSdk : IAdSdk
     private bool isShowing;
     private Coroutine showRoutine;
 
-    /// <inheritdoc />
+    /// <summary>所属广告网络类型。</summary>
     public AdNetworkKind NetworkKind => AdNetworkKind.Mock;
 
-    /// <inheritdoc />
+    /// <summary>SDK 显示名称（用于日志与调试）。</summary>
     public string DisplayName => "Mock";
 
-    /// <inheritdoc />
+    /// <summary>SDK 是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
 
-    /// <inheritdoc />
+    /// <summary>是否正在展示广告。</summary>
     public bool IsShowing => isShowing;
 
     /// <summary>
@@ -135,7 +135,7 @@ public sealed class MockAdSdk : IAdSdk
 /// </summary>
 public sealed class MockAdSdkFactory : IAdSdkFactory
 {
-    /// <inheritdoc />
+    /// <summary>工厂对应的广告网络类型。</summary>
     public AdNetworkKind NetworkKind => AdNetworkKind.Mock;
 
     /// <summary>

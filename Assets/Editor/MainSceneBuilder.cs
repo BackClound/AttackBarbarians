@@ -79,6 +79,8 @@ public static class MainSceneBuilder
         serializedBootstrapper.FindProperty("postBootstrapFlow").enumValueIndex = (int)BootstrapPostFlow.OpenMainMenu;
         serializedBootstrapper.FindProperty("managerSet").enumValueIndex = (int)BootstrapManagerSet.MainScene;
         serializedBootstrapper.ApplyModifiedPropertiesWithoutUndo();
+
+        GameSystemsHierarchyEditor.ApplyForMainScene(systemsObject);
     }
 
     private static void CreateMainSceneUi()

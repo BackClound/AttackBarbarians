@@ -70,12 +70,6 @@ public class ShopManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
-    /// 获取商品在当前刷新周期内的有效购买次数。
-    /// </summary>
-    /// <param name="configId">商品配置 ID。</param>
-    /// <param name="refreshPeriod">限购刷新周期。</param>
-    /// <returns>有效购买次数；未购买或已跨日重置时返回 0。</returns>
-    /// <summary>
     /// 获取指定商品在当前刷新周期内的有效购买次数。
     /// </summary>
     /// <param name="configId">商品配置 ID。</param>
@@ -106,11 +100,6 @@ public class ShopManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
-    /// 获取商品剩余可购买次数。
-    /// </summary>
-    /// <param name="item">商品配置。</param>
-    /// <returns>剩余次数；不限购时返回 <see cref="int.MaxValue"/>。</returns>
-    /// <summary>
     /// 获取指定商品的剩余可购买次数。
     /// </summary>
     /// <param name="item">商品配置。</param>
@@ -127,14 +116,7 @@ public class ShopManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
-    /// 校验商品是否可购买（不扣费、不发奖）。
-    /// </summary>
-    /// <param name="configId">商品配置 ID。</param>
-    /// <param name="failureReason">失败时的说明文本。</param>
-    /// <param name="reason">失败原因枚举。</param>
-    /// <returns>可购买返回 true，否则 false。</returns>
-    /// <summary>
-    /// 校验指定商品是否可购买。
+    /// 校验指定商品是否可购买（不扣费、不发奖）。
     /// </summary>
     /// <param name="configId">商品配置 ID。</param>
     /// <param name="failureReason">不可购买时的失败说明文案。</param>
@@ -189,12 +171,7 @@ public class ShopManager : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
-    /// 尝试购买商品：校验、扣费、发奖并记录限购。
-    /// </summary>
-    /// <param name="configId">商品配置 ID。</param>
-    /// <returns>购买成功返回 true，否则 false。</returns>
-    /// <summary>
-    /// 尝试购买指定商品：扣费、发奖并记录限购计数。
+    /// 尝试购买指定商品：校验、扣费、发奖并记录限购计数。
     /// </summary>
     /// <param name="configId">商品配置 ID。</param>
     /// <returns>购买成功时返回 true。</returns>

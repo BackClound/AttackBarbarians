@@ -39,53 +39,269 @@ public enum BootstrapManagerSet
 /// <item><description>将同物体或子物体上的 <see cref="ConfigManager"/>、<see cref="SaveManager"/>、<see cref="PoolManager"/>、<see cref="GameManager"/> 拖入对应槽位；留空时会在 Awake 时自动查找或在本物体上 AddComponent。</description></item>
 /// <item><description><c>Dont Destroy On Load</c> 建议开启，保证跨场景保留引导流程（单例冲突时会销毁重复实例）。</description></item>
 /// </list>
-/// <para><b>启动顺序：</b>ConfigManager → SaveManager → TalentManager → EquipmentManager → EventBus → PoolManager → GameManager → …</para>
+/// <para><b>成员作用域：</b></para>
+/// <list type="bullet">
+/// <item><description><b>主场景</b> — 由 <see cref="MainSceneBuilder"/> 写入的 Lifecycle 默认值，或 <see cref="BootstrapManagerSet.MainScene"/> 下不会解析/注册的 Manager。</description></item>
+/// <item><description><b>战斗场景</b> — <see cref="IncludesBattleManagers"/> 为 true 时才会解析、注册并初始化（BattleScene / All / AutoByPostFlow 且非 OpenMainMenu）。</description></item>
+/// <item><description><b>全局</b> — 任意 Bootstrap 模式均会解析、注册并初始化。</description></item>
+/// </list>
+/// <para><b>初始化三阶段：</b>ResolveManagers（解析/创建组件）→ RegisterServices（写入 ServiceLocator 并确定 Initialize 顺序）→ InitializeSystems（依次调用 <see cref="IGameSystem.Initialize"/>）。</para>
 /// <para><b>获取方式：</b><c>GameBootstrapper.Instance</c> 或 <c>ServiceLocator.Get&lt;GameBootstrapper&gt;()</c>（Bootstrap 完成后）。</para>
 /// </remarks>
 public class GameBootstrapper : MonoSingleton<GameBootstrapper>
 {
+    // ── Lifecycle（Inspector 配置；MainSceneBuilder 与 BattleScene 默认值不同）──
+
+    /// <summary>
+    /// [作用域: 全局]
+    /// Awake 认领单例后是否立即调用 <see cref="Bootstrap"/>。
+    /// 初始化顺序：Bootstrap 总入口（先于 Resolve #1）。
+    /// MainSceneBuilder / BattleScene 均设为 true。
+    /// </summary>
     [Header("Lifecycle")]
     [SerializeField] private bool initializeOnAwake = true;
+
+    /// <summary>
+    /// [作用域: 主场景配置项]
+    /// 单例是否跨场景保留（映射到 <see cref="Options"/>）。
+    /// 初始化顺序：MonoSingleton Awake（Bootstrap 之前）。
+    /// MainSceneBuilder 设为 false；BattleScene 设为 true。
+    /// </summary>
     [SerializeField] private bool dontDestroyOnLoad = true;
+
+    /// <summary>
+    /// [作用域: 主场景 / 战斗场景（分支不同）]
+    /// Bootstrap 完成后触发的游戏流程。
+    /// 初始化顺序：Bootstrap 最后一步 <see cref="ApplyPostBootstrapFlow"/>（全部 Manager Initialize 之后）。
+    /// MainSceneBuilder 设为 <see cref="BootstrapPostFlow.OpenMainMenu"/>；
+    /// BattleScene 设为 <see cref="BootstrapPostFlow.UseGameConfig"/>（可按 GameConfig 开局）。
+    /// </summary>
     [SerializeField] private BootstrapPostFlow postBootstrapFlow = BootstrapPostFlow.UseGameConfig;
+
+    /// <summary>
+    /// [作用域: 主场景 / 战斗场景（决定 Manager 子集）]
+    /// 要注册并初始化的 Manager 集合范围；配合 <see cref="IncludesBattleManagers"/> 过滤战斗 Manager。
+    /// 初始化顺序：Bootstrap 开始时读取（Resolve / Register 之前）。
+    /// MainSceneBuilder 设为 <see cref="BootstrapManagerSet.MainScene"/>；
+    /// BattleScene 设为 <see cref="BootstrapManagerSet.AutoByPostFlow"/>（非 OpenMainMenu 时等价 BattleScene 全集）。
+    /// </summary>
     [SerializeField] private BootstrapManagerSet managerSet = BootstrapManagerSet.AutoByPostFlow;
 
+    // ── Managers — 全局（任意 Bootstrap 模式均 Resolve / Register / Initialize）──
+
+    /// <summary>
+    /// [作用域: 全局] 游戏配置加载与访问。
+    /// 初始化顺序：Resolve #1 → Register #1 → Initialize #1。
+    /// </summary>
     [Header("Managers")]
     [SerializeField] private ConfigManager configManager;
+
+    /// <summary>
+    /// [作用域: 全局] 存档读写。
+    /// 初始化顺序：Resolve #2 → Register #2 → Initialize #2。
+    /// </summary>
     [SerializeField] private SaveManager saveManager;
+
+    /// <summary>
+    /// [作用域: 全局] 货币与资源经济。
+    /// 初始化顺序：Resolve #3 → Register #3 → Initialize #3。
+    /// </summary>
     [SerializeField] private ResourceManager resourceManager;
+
+    /// <summary>
+    /// [作用域: 全局] 商城与内购逻辑。
+    /// 初始化顺序：Resolve #4 → Register #4 → Initialize #4。
+    /// </summary>
     [SerializeField] private ShopManager shopManager;
+
+    /// <summary>
+    /// [作用域: 全局] 激励广告奖励发放。
+    /// 初始化顺序：Resolve #5 → Register #5 → Initialize #5。
+    /// </summary>
     [SerializeField] private AdRewardService adRewardService;
+
+    /// <summary>
+    /// [作用域: 全局] 成就进度与解锁。
+    /// 初始化顺序：Resolve #6 → Register #6 → Initialize #6。
+    /// </summary>
     [SerializeField] private AchievementManager achievementManager;
+
+    /// <summary>
+    /// [作用域: 全局] 每日签到奖励。
+    /// 初始化顺序：Resolve #7 → Register #7 → Initialize #7。
+    /// </summary>
     [SerializeField] private DailyRewardManager dailyRewardManager;
+
+    /// <summary>
+    /// [作用域: 全局] 升级卡牌 Meta 进度。
+    /// 初始化顺序：Resolve #8 → Register #8 → Initialize #8。
+    /// </summary>
     [SerializeField] private UpgradeCardManager upgradeCardManager;
+
+    /// <summary>
+    /// [作用域: 全局] Meta 层通用奖励结算。
+    /// 初始化顺序：Resolve #9 → Register #9 → Initialize #9。
+    /// </summary>
     [SerializeField] private MetaRewardService metaRewardService;
+
+    /// <summary>
+    /// [作用域: 全局] 天赋树与天赋效果。
+    /// 初始化顺序：Resolve #10 → Register #10 → Initialize #10。
+    /// </summary>
     [SerializeField] private TalentManager talentManager;
+
+    /// <summary>
+    /// [作用域: 全局] 装备穿戴与属性。
+    /// 初始化顺序：Resolve #11 → Register #11 → Initialize #11。
+    /// </summary>
     [SerializeField] private EquipmentManager equipmentManager;
+
+    /// <summary>
+    /// [作用域: 全局] 性能档位与画质策略。
+    /// 初始化顺序：Resolve #12 → Register #13 → Initialize #13（Register 在 EventBus 之后）。
+    /// </summary>
     [SerializeField] private PerformanceManager performanceManager;
+
+    /// <summary>
+    /// [作用域: 全局] 对象池；Initialize 前会执行 <see cref="ApplyPoolRuntimePolicy"/>。
+    /// 初始化顺序：Resolve #13 → Register #14 → Initialize #14。
+    /// </summary>
     [SerializeField] private PoolManager poolManager;
+
+    /// <summary>
+    /// [作用域: 全局] 游戏状态机（菜单/战斗/暂停等）；<see cref="ApplyPostBootstrapFlow"/> 依赖本实例。
+    /// 初始化顺序：Resolve #14 → Register #15 → Initialize #15。
+    /// </summary>
     [SerializeField] private GameManager gameManager;
-    [SerializeField] private GameFlowManager gameFlowManager;
-    [SerializeField] private RunSessionTracker runSessionTracker;
-    [SerializeField] private RunRewardSettlementService runRewardSettlementService;
-    [SerializeField] private PlayerExperienceService playerExperienceService;
-    [SerializeField] private UpgradeManager upgradeManager;
-    [SerializeField] private RandomRewardManager randomRewardManager;
-    [SerializeField] private EnemySpawnerManager enemySpawnerManager;
-    [SerializeField] private WaveManager waveManager;
-    [SerializeField] private BossRunStatsBridge bossRunStatsBridge;
-    [SerializeField] private DamageSystem damageSystem;
-    [SerializeField] private CollisionManager collisionManager;
-    [SerializeField] private ProjectileManager projectileManager;
+
+    /// <summary>
+    /// [作用域: 全局] 技能解锁与 Meta 进度。
+    /// 初始化顺序：Resolve #15 → Register #16（主场景）/ #25（战斗场景）→ Initialize 同 Register 序号。
+    /// </summary>
     [SerializeField] private SkillUnlockService skillUnlockService;
+
+    /// <summary>
+    /// [作用域: 全局] 内容表与配置注册表。
+    /// 初始化顺序：Resolve #16 → Register #17（主场景）/ #26（战斗场景）→ Initialize 同 Register 序号。
+    /// </summary>
     [SerializeField] private ContentRegistry contentRegistry;
-    [SerializeField] private MapManager mapManager;
-    [SerializeField] private GameplayEventManager gameplayEventManager;
-    [SerializeField] private GameplayEventDebugBridge gameplayEventDebugBridge;
+
+    /// <summary>
+    /// [作用域: 全局] 音频播放与 BGM 管理。
+    /// 初始化顺序：Resolve #17 → Register #18（主场景）/ #29（战斗场景）→ Initialize 同 Register 序号。
+    /// </summary>
     [SerializeField] private AudioManager audioManager;
 
+    // ── Managers — 战斗场景（IncludesBattleManagers 为 true 时才 Resolve / Register / Initialize）──
+
+    /// <summary>
+    /// [作用域: 战斗场景] 单局流程（开局/结算/重开）。
+    /// 初始化顺序：Resolve #18 → Register #16 → Initialize #16。
+    /// </summary>
+    [SerializeField] private GameFlowManager gameFlowManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 当前 Run 会话统计。
+    /// 初始化顺序：Resolve #19 → Register #17 → Initialize #17。
+    /// </summary>
+    [SerializeField] private RunSessionTracker runSessionTracker;
+
+    /// <summary>
+    /// [作用域: 战斗场景] Run 结束奖励结算。
+    /// 初始化顺序：Resolve #20 → Register #18 → Initialize #18。
+    /// </summary>
+    [SerializeField] private RunRewardSettlementService runRewardSettlementService;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 局内玩家经验与升级。
+    /// 初始化顺序：Resolve #21 → Register #19 → Initialize #19。
+    /// </summary>
+    [SerializeField] private PlayerExperienceService playerExperienceService;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 局内升级选项与刷新。
+    /// 初始化顺序：Resolve #22 → Register #20 → Initialize #20。
+    /// </summary>
+    [SerializeField] private UpgradeManager upgradeManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 随机奖励掉落。
+    /// 初始化顺序：Resolve #23 → Register #21 → Initialize #21。
+    /// </summary>
+    [SerializeField] private RandomRewardManager randomRewardManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 伤害计算与结算管线。
+    /// 初始化顺序：Resolve #27 → Register #22 → Initialize #22。
+    /// </summary>
+    [SerializeField] private DamageSystem damageSystem;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 碰撞检测与命中分发。
+    /// 初始化顺序：Resolve #28 → Register #23 → Initialize #23。
+    /// </summary>
+    [SerializeField] private CollisionManager collisionManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 投射物生命周期管理。
+    /// 初始化顺序：Resolve #29 → Register #24 → Initialize #24。
+    /// </summary>
+    [SerializeField] private ProjectileManager projectileManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 地图生成与区块管理。
+    /// 初始化顺序：Resolve #30 → Register #27 → Initialize #27。
+    /// </summary>
+    [SerializeField] private MapManager mapManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 局内随机事件调度。
+    /// 初始化顺序：Resolve #31 → Register #28 → Initialize #28。
+    /// </summary>
+    [SerializeField] private GameplayEventManager gameplayEventManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 局内事件调试桥接（Editor / 开发用）。
+    /// 初始化顺序：Resolve #32 → Register #30 → Initialize #30。
+    /// </summary>
+    [SerializeField] private GameplayEventDebugBridge gameplayEventDebugBridge;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 敌人生成与池化调度。
+    /// 初始化顺序：Resolve #24 → Register #31 → Initialize #31。
+    /// </summary>
+    [SerializeField] private EnemySpawnerManager enemySpawnerManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] 波次推进与难度曲线。
+    /// 初始化顺序：Resolve #25 → Register #32 → Initialize #32。
+    /// </summary>
+    [SerializeField] private WaveManager waveManager;
+
+    /// <summary>
+    /// [作用域: 战斗场景] Boss 战 Run 统计回传。
+    /// 初始化顺序：Resolve #26 → Register #33 → Initialize #33（战斗模式下最后注册的系统）。
+    /// </summary>
+    [SerializeField] private BossRunStatsBridge bossRunStatsBridge;
+
+    // ── 运行时状态（非 Inspector 序列化）──
+
+    /// <summary>
+    /// [作用域: 全局] 已注册且需每帧 <see cref="IGameSystem.Tick"/> 的系统列表；顺序与 Register 一致。
+    /// 初始化顺序：RegisterServices 开始时 Clear，随后按 Register 顺序 Add。
+    /// </summary>
     private readonly List<IGameSystem> systems = new List<IGameSystem>(16);
+
+    /// <summary>
+    /// [作用域: 全局] 全局事件总线；非 MonoBehaviour，由代码 new 创建。
+    /// 初始化顺序：Resolve 最后一步 #33（所有 Manager 解析完成后）→ Register #12 → Initialize #12。
+    /// </summary>
     private EventBus eventBus;
+
+    /// <summary>
+    /// [作用域: 全局] Bootstrap 是否已完成；防止重复初始化。
+    /// 初始化顺序：InitializeSystems 与 ApplyPostBootstrapFlow 之间置为 true。
+    /// </summary>
     private bool isBootstrapped;
 
     /// <summary>根据 Inspector 配置决定单例是否跨场景保留。</summary>
