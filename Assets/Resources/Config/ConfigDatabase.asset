@@ -33,9 +33,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2f71c103b9b6a405780875dafbd6aa33, type: 2}
   - {fileID: 11400000, guid: f2f8f5ef5c4dd43309bae25644bd1184, type: 2}
   - {fileID: 11400000, guid: 65d855f82482b4009b006a7391325a29, type: 2}
-  skillUnlockTable: {fileID: 0}
+  skillUnlockTable: {fileID: 11400000, guid: 900818e3f9979436c8ae8ecea0b4bc82, type: 2}
   buffs:
   - {fileID: 11400000, guid: b580748b14654bbba284a7b69c187cbd, type: 2}
+  - {fileID: 11400000, guid: f74f4e9aa0d9347b9bdca4dc7473b9fd, type: 2}
+  - {fileID: 11400000, guid: 967a7881138334bba8012755519b4578, type: 2}
   waves:
   - {fileID: 11400000, guid: d323b39826634a8fb69b55d9e2a1ef57, type: 2}
   bosses:
@@ -53,7 +55,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 556cc547f8c8402b9682f64c78478370, type: 2}
   autoAttacks:
   - {fileID: 11400000, guid: e3f5a7b29c4d6e8f0a1b2c3d4e5f6a7b, type: 2}
-  upgradeOptions: []
+  upgradeOptions:
+  - {fileID: 11400000, guid: cd75de582fc8b40fbb8a4458e219a5ac, type: 2}
+  - {fileID: 11400000, guid: ebb46b05267e94655a2a2dd253ec5488, type: 2}
+  - {fileID: 11400000, guid: 96adb04c19022488681213d8e22fba6a, type: 2}
+  - {fileID: 11400000, guid: e539b8bdf8c794733bd73db2906cc0a2, type: 2}
+  - {fileID: 11400000, guid: 33afb110af87f428bbf3e9483a53205e, type: 2}
+  - {fileID: 11400000, guid: 6ed4a2787e3ee4c7bb628d52ceed61ad, type: 2}
+  - {fileID: 11400000, guid: c14745847605e4cb59c43880911f296c, type: 2}
   rewardPools: []
   talents:
   - {fileID: 11400000, guid: 4180d52731d54c4bb61db158d29c9ccc, type: 2}

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2acad61de1d134940b4ba2fed0cf582a, type: 3}
+  m_Name: SkillUnlockTable_Default
+  m_EditorClassIdentifier: 
+  entries:
+  - skillConfigId: skill.shoot
+    requiredPlayTimeSeconds: 0
+    unlockedByDefault: 1
+  - skillConfigId: skill.lightning
+    requiredPlayTimeSeconds: 600
+    unlockedByDefault: 0
+  - skillConfigId: skill.heal
+    requiredPlayTimeSeconds: 900
+    unlockedByDefault: 0
+  - skillConfigId: skill.thunder
+    requiredPlayTimeSeconds: 1800
+    unlockedByDefault: 0
+  - skillConfigId: skill.fire_rain
+    requiredPlayTimeSeconds: 3600
+    unlockedByDefault: 0
+  - skillConfigId: skill.ice
+    requiredPlayTimeSeconds: 5400
+    unlockedByDefault: 0
+  - skillConfigId: skill.water_wave
+    requiredPlayTimeSeconds: 7200
+    unlockedByDefault: 0

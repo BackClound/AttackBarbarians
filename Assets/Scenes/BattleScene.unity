@@ -1299,6 +1299,7 @@ GameObject:
   m_Component:
   - component: {fileID: 529775583}
   - component: {fileID: 529775584}
+  - component: {fileID: 529775585}
   m_Layer: 0
   m_HasEditorInfo: 1
   m_Name: EnemySpawnerManager
@@ -1335,6 +1336,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnerManager
   spawnArea: {fileID: 0}
+--- !u!114 &529775585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529775582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1123adcedd31d4d899546c4b4cf96eba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnCamera: {fileID: 0}
+  viewportMin: {x: 0.1, y: 0.9}
+  viewportMax: {x: 0.9, y: 1.1}
+  initializeDelaySeconds: 0.2
 --- !u!1 &530551914
 GameObject:
   m_ObjectHideFlags: 0
@@ -4079,7 +4096,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c4d5e6f7a8091a2b3c4d5e6f7a8091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultProjectileData: {fileID: 0}
+  defaultProjectileData: {fileID: 11400000, guid: f9430e6e89e354dd7a5f87becbc9c2fb, type: 2}
 --- !u!1 &2008535170
 GameObject:
   m_ObjectHideFlags: 0
