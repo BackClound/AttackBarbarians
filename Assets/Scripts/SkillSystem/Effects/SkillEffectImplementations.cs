@@ -84,7 +84,7 @@ public sealed class LightningSkillEffect : ISkillEffect
                 }
 
                 Vector2 to = target.transform.position;
-                SkillCastVfxPlayer.PlayLightningSegment(from, to, chainLen);
+                SkillCastVfxPlayer.PlayLightningSegment(from, to, runtime.Config.SkillPrefab, chainLen);
                 DamageInfo info = context.BuildDamageInfo(runtime, target.gameObject);
                 DamagePipeline.Apply(info);
 
