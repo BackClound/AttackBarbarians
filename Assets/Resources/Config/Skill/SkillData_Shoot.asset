@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18,7 +18,10 @@ MonoBehaviour:
   skillType: 0
   maxLevel: 10
   skillPrefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
-  baseCooldown: 0.35
+  elementType: 1
+  baseDamage: 12
+  baseCooldown: 2
+  areaRadius: 4
   autoCast: 1
   maxAttackCount: 10
   bulletsPerWave: 3
