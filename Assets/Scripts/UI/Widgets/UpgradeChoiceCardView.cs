@@ -3,18 +3,30 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 升级三选一卡片：图标、名称、描述、稀有度边框。
+/// 升级三选一卡片：Buff 名称、描述、图标、稀有度边框。
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是。UpgradePanel 下每个选项槽位一个实例。</para>
 /// </remarks>
 public class UpgradeChoiceCardView : MonoBehaviour
 {
+    [Header("Buff Display")]
+    [SerializeField] private TMP_Text buffNameText;
+    [SerializeField] private TMP_Text buffDescriptionText;
+    [SerializeField] private Image buffIconImage;
+
+    [Header("Interaction")]
     [SerializeField] private Button selectButton;
-    [SerializeField] private Image iconImage;
+
+    [Header("Optional")]
+    [SerializeField] private TMP_Text learnHintText;
+    [SerializeField] private GameObject newBadgeRoot;
+    [SerializeField] private UiRarityVisual rarityVisual;
+
+    [Header("Legacy Bindings (optional fallback)")]
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text descriptionText;
-    [SerializeField] private UiRarityVisual rarityVisual;
+    [SerializeField] private Image iconImage;
 
     private int choiceIndex = -1;
     private System.Action<int> onSelected;
@@ -26,6 +38,9 @@ public class UpgradeChoiceCardView : MonoBehaviour
         {
             selectButton.onClick.AddListener(OnClick);
         }
+
+        ConfigureIconImage(buffIconImage ?? iconImage);
+        rarityVisual?.EnsureOutlineBorderMode();
     }
 
     /// <summary>解绑选择按钮点击事件。</summary>
@@ -38,8 +53,6 @@ public class UpgradeChoiceCardView : MonoBehaviour
     }
 
     /// <summary>绑定选项索引与选中回调。</summary>
-    /// <param name="index">三选一中的选项下标。</param>
-    /// <param name="selectedCallback">玩家选中时的回调。</param>
     public void Bind(int index, System.Action<int> selectedCallback)
     {
         choiceIndex = index;
@@ -47,7 +60,6 @@ public class UpgradeChoiceCardView : MonoBehaviour
     }
 
     /// <summary>根据升级选项数据刷新卡片展示。</summary>
-    /// <param name="option">升级选项配置；为 <c>null</c> 时隐藏卡片。</param>
     public void SetData(UpgradeOptionSO option)
     {
         if (option == null)
@@ -57,27 +69,33 @@ public class UpgradeChoiceCardView : MonoBehaviour
         }
 
         gameObject.SetActive(true);
+        UpgradeOptionPresentation presentation = UpgradeOptionPresentationResolver.Resolve(option);
 
-        if (titleText != null)
+        SetText(buffNameText ?? titleText, presentation.Name, UiTechWastelandPalette.TextPrimary);
+        SetText(buffDescriptionText ?? descriptionText, presentation.Description, UiTechWastelandPalette.TextSecondary);
+        ApplyIcon(buffIconImage ?? iconImage, presentation.Icon);
+
+        if (learnHintText != null)
         {
-            titleText.text = option.DisplayName;
-            titleText.color = UiTechWastelandPalette.TextPrimary;
+            bool isUnlock = option.EffectType == UpgradeEffectType.SkillUnlock;
+            learnHintText.gameObject.SetActive(isUnlock);
+            if (isUnlock)
+            {
+                learnHintText.text = string.IsNullOrWhiteSpace(presentation.Description)
+                    ? $"学习{presentation.Name}"
+                    : presentation.Description;
+                learnHintText.color = UiTechWastelandPalette.TextPrimary;
+            }
         }
 
-        if (descriptionText != null)
+        if (newBadgeRoot != null)
         {
-            descriptionText.text = option.Description;
-            descriptionText.color = UiTechWastelandPalette.TextSecondary;
-        }
-
-        if (iconImage != null)
-        {
-            iconImage.sprite = option.Icon;
-            iconImage.enabled = option.Icon != null;
+            newBadgeRoot.SetActive(option.EffectType == UpgradeEffectType.SkillUnlock);
         }
 
         if (rarityVisual != null)
         {
+            rarityVisual.EnsureOutlineBorderMode();
             rarityVisual.ApplyUpgradeRarity(option.Rarity);
         }
     }
@@ -90,7 +108,40 @@ public class UpgradeChoiceCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    /// <summary>选择按钮回调，通知 Presenter 玩家选择。</summary>
+    private static void SetText(TMP_Text text, string value, Color color)
+    {
+        if (text == null)
+        {
+            return;
+        }
+
+        text.text = value ?? string.Empty;
+        text.color = color;
+    }
+
+    private static void ApplyIcon(Image image, Sprite sprite)
+    {
+        if (image == null)
+        {
+            return;
+        }
+
+        image.sprite = sprite;
+        image.enabled = sprite != null;
+        image.preserveAspect = true;
+    }
+
+    private static void ConfigureIconImage(Image image)
+    {
+        if (image == null)
+        {
+            return;
+        }
+
+        image.preserveAspect = true;
+        image.type = Image.Type.Simple;
+    }
+
     private void OnClick()
     {
         if (choiceIndex >= 0)

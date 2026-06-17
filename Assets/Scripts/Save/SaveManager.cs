@@ -209,6 +209,26 @@ public class SaveManager : MonoBehaviour, IGameSystem
     /// <summary>跳过防抖，立即保存。</summary>
     public void SaveImmediate() => Save(autoSave: false);
 
+    /// <summary>
+    /// 清空已解锁技能与永久 Buff，仅保留射击技能 Lv.1，并写盘。
+    /// </summary>
+    public void ResetUnlockedSkillsAndBuffsKeepShootOnly()
+    {
+        if (currentData == null)
+        {
+            return;
+        }
+
+        currentData.ResetUnlockedSkillsAndBuffsKeepShootOnly();
+        MarkDirty();
+        SaveImmediate();
+
+        if (enableLogs)
+        {
+            Debug.Log("[SaveManager] 已重置：仅保留 skill.shoot Lv.1，永久 Buff 与局内进度已清空。");
+        }
+    }
+
     /// <summary>删除主档与备份，并重建默认存档。</summary>
     public void DeleteSave()
     {
@@ -305,14 +325,24 @@ public class SaveManager : MonoBehaviour, IGameSystem
         run.activeBuffs?.Clear();
         run.selectedUpgrades?.Clear();
         currentData.statistics.totalRuns++;
-        MarkDirty();
+        if (ServiceLocator.TryGet(out UpgradeManager upgradeManager))
+        {
+            upgradeManager.ClearRunSelectionState();
+        }
+
+        SaveImmediate();
     }
 
     /// <summary>清除进行中的局内进度。</summary>
     public void ClearActiveRun()
     {
         currentData?.runProgress?.ClearRun();
-        MarkDirty();
+        if (ServiceLocator.TryGet(out UpgradeManager upgradeManager))
+        {
+            upgradeManager.ClearRunSelectionState();
+        }
+
+        SaveImmediate();
     }
 
     /// <summary>
@@ -354,6 +384,10 @@ public class SaveManager : MonoBehaviour, IGameSystem
     /// <summary>Inspector 调试：删除存档并重建默认数据。</summary>
     [ContextMenu("Debug/Delete")]
     private void DebugDelete() => DeleteSave();
+
+    /// <summary>Inspector 调试：仅保留射击技能，清空其余技能解锁与永久 Buff。</summary>
+    [ContextMenu("Debug/Reset Skills & Buffs (Shoot Only)")]
+    private void DebugResetSkillsAndBuffsKeepShootOnly() => ResetUnlockedSkillsAndBuffsKeepShootOnly();
 
     /// <summary>Inspector 调试：导出存档 JSON 到文件。</summary>
     [ContextMenu("Debug/Export")]
@@ -443,11 +477,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
     /// 游戏结束回调：清除局内进度并立即写盘。
     /// </summary>
     /// <param name="ctx">事件上下文。</param>
-    private void OnGameOver(GameEventContext ctx)
-    {
-        ClearActiveRun();
-        SaveImmediate();
-    }
+    private void OnGameOver(GameEventContext ctx) => ClearActiveRun();
 
     /// <summary>
     /// 标记脏数据；若禁用防抖则立即保存，否则启动倒计时。

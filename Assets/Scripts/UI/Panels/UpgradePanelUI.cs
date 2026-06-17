@@ -13,8 +13,26 @@ public class UpgradePanelUI : UiPanelBase
     [SerializeField] private TMP_Text pausedHintText;
     [SerializeField] private UpgradeChoiceCardView[] choiceCards;
 
+    [Header("Ad Actions")]
+    [SerializeField] private TMP_Text adQuotaHintText;
+    [SerializeField] private UiRewardedAdButton refreshAdButton;
+    [SerializeField] private UiRewardedAdButton selectAllAdButton;
+
     private RandomRewardManager randomRewardManager;
+    private AdRewardService adRewardService;
     private bool isSubscribedToChoices;
+
+    /// <summary>激活时订阅事件，避免 Show 之前错过 ChoicesReady。</summary>
+    private void OnEnable()
+    {
+        TrySubscribeChoices();
+    }
+
+    /// <summary>停用时取消订阅。</summary>
+    private void OnDisable()
+    {
+        UnsubscribeChoices();
+    }
 
     /// <summary>显示时订阅升级选项事件并尝试展示待选卡片。</summary>
     protected override void OnShow()
@@ -22,32 +40,97 @@ public class UpgradePanelUI : UiPanelBase
         TrySubscribeChoices();
         if (titleText != null)
         {
-            titleText.text = "模块重组 // SELECT 1";
+            titleText.text = "选择技能";
             titleText.color = UiTechWastelandPalette.TextPrimary;
         }
 
         if (pausedHintText != null)
         {
-            pausedHintText.text = "SYSTEM PAUSED";
-            pausedHintText.color = UiTechWastelandPalette.TextTerminal;
+            pausedHintText.gameObject.SetActive(false);
         }
 
+        ResolveManagers();
+        BindAdButtons();
+        TryDisplayPendingChoices();
+        RefreshAdQuota();
+    }
+
+    /// <summary>隐藏时清空卡片。</summary>
+    protected override void OnHide()
+    {
+        ClearCards();
+    }
+
+    private void ResolveManagers()
+    {
         if (!ServiceLocator.TryGet(out randomRewardManager))
         {
             randomRewardManager = FindFirstObjectByType<RandomRewardManager>();
         }
 
-        TryDisplayPendingChoices();
+        if (!ServiceLocator.TryGet(out adRewardService))
+        {
+            adRewardService = FindFirstObjectByType<AdRewardService>();
+        }
     }
 
-    /// <summary>隐藏时取消订阅并清空卡片。</summary>
-    protected override void OnHide()
+    private void BindAdButtons()
     {
-        UnsubscribeChoices();
-        ClearCards();
+        if (refreshAdButton != null)
+        {
+            refreshAdButton.SetLabel("刷新");
+            refreshAdButton.SetAdBadge("AD");
+            refreshAdButton.BindClick(OnRefreshAdClicked);
+        }
+
+        if (selectAllAdButton != null)
+        {
+            selectAllAdButton.SetLabel("全选");
+            selectAllAdButton.SetAdBadge("AD");
+            selectAllAdButton.BindClick(OnSelectAllAdClicked);
+        }
     }
 
-    /// <summary>订阅升级三选一就绪事件。</summary>
+    private void OnRefreshAdClicked()
+    {
+        PlayUiSfx("audio.sfx.ui_click");
+        ResolveManagers();
+        adRewardService?.TryShowRewardedForUpgradeReroll();
+    }
+
+    private void OnSelectAllAdClicked()
+    {
+        PlayUiSfx("audio.sfx.ui_click");
+        ResolveManagers();
+        adRewardService?.TryShowRewardedForUpgradeSelectAll();
+    }
+
+    private void RefreshAdQuota()
+    {
+        ResolveManagers();
+        if (randomRewardManager == null)
+        {
+            return;
+        }
+
+        if (adQuotaHintText != null)
+        {
+            adQuotaHintText.text =
+                $"当局剩余观看次数 {randomRewardManager.RemainingAdRerolls}/{randomRewardManager.MaxAdRerollsPerRun}";
+            adQuotaHintText.color = UiTechWastelandPalette.TextSecondary;
+        }
+
+        if (refreshAdButton != null)
+        {
+            refreshAdButton.SetInteractable(randomRewardManager.RemainingAdRerolls > 0);
+        }
+
+        if (selectAllAdButton != null)
+        {
+            selectAllAdButton.SetInteractable(randomRewardManager.RemainingAdSelectAll > 0);
+        }
+    }
+
     private void TrySubscribeChoices()
     {
         if (isSubscribedToChoices)
@@ -56,10 +139,10 @@ public class UpgradePanelUI : UiPanelBase
         }
 
         GameEvents.SubscribeUpgradeChoicesReady(OnUpgradeChoicesReady);
+        GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
         isSubscribedToChoices = true;
     }
 
-    /// <summary>取消升级选项事件订阅。</summary>
     private void UnsubscribeChoices()
     {
         if (!isSubscribedToChoices)
@@ -68,10 +151,32 @@ public class UpgradePanelUI : UiPanelBase
         }
 
         GameEvents.UnsubscribeUpgradeChoicesReady(OnUpgradeChoicesReady);
+        GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
         isSubscribedToChoices = false;
     }
 
-    /// <summary>收到升级选项后展示卡片。</summary>
+    private void OnAdRewardCompleted(GameEventContext ctx)
+    {
+        if (ctx.Payload is not AdRewardCompletedEventArgs args)
+        {
+            return;
+        }
+
+        if (args.Source != AdRewardSource.UpgradeReroll && args.Source != AdRewardSource.UpgradeSelectAll)
+        {
+            return;
+        }
+
+        RefreshAdQuota();
+        if (args.Source == AdRewardSource.UpgradeSelectAll)
+        {
+            ClearCards();
+            return;
+        }
+
+        TryDisplayPendingChoices();
+    }
+
     private void OnUpgradeChoicesReady(GameEventContext ctx)
     {
         if (ctx.Payload is not UpgradeChoicesPayload payload)
@@ -80,14 +185,14 @@ public class UpgradePanelUI : UiPanelBase
         }
 
         DisplayChoices(payload);
+        RefreshAdQuota();
     }
 
-    /// <summary>显示 RandomRewardManager 中待选选项。</summary>
     private void TryDisplayPendingChoices()
     {
         if (randomRewardManager == null)
         {
-            ServiceLocator.TryGet(out randomRewardManager);
+            ResolveManagers();
         }
 
         if (randomRewardManager?.PendingChoices != null)
@@ -96,7 +201,6 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
-    /// <summary>将选项数据绑定到三张卡片 View。</summary>
     private void DisplayChoices(UpgradeChoicesPayload payload)
     {
         if (choiceCards == null)
@@ -125,15 +229,10 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
-    /// <summary>玩家选中卡片后调用 RandomRewardManager 确认。</summary>
     private void OnCardSelected(int index)
     {
         PlayUiSfx("audio.sfx.ui_confirm");
-
-        if (randomRewardManager == null)
-        {
-            ServiceLocator.TryGet(out randomRewardManager);
-        }
+        ResolveManagers();
 
         if (randomRewardManager != null && randomRewardManager.TrySelectChoice(index))
         {
@@ -141,7 +240,6 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
-    /// <summary>清空并隐藏所有选项卡片。</summary>
     private void ClearCards()
     {
         if (choiceCards == null)

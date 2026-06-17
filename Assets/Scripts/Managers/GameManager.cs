@@ -144,6 +144,11 @@ public class GameManager : MonoSingleton<GameManager>, IGameSystem
             return;
         }
 
+        if (ServiceLocator.TryGet(out SaveManager save))
+        {
+            save.BeginRun(1, 1);
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

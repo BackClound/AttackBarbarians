@@ -133,6 +133,82 @@ public class AdRewardService : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
+    /// 播放激励广告以刷新局内三选一候选。
+    /// </summary>
+    public void TryShowRewardedForUpgradeReroll()
+    {
+        if (!EnsureServiceReady(AdRewardSource.UpgradeReroll, GameConstants.ConfigIds.UpgradeReroll, out _))
+        {
+            return;
+        }
+
+        if (!ServiceLocator.TryGet(out RandomRewardManager rewardManager))
+        {
+            RaiseFailed(
+                AdRewardSource.UpgradeReroll,
+                GameConstants.ConfigIds.UpgradeReroll,
+                GetRewardedPlacementId(),
+                AdRewardFailedReason.ContextNotAllowed,
+                "升级系统未就绪");
+            return;
+        }
+
+        if (rewardManager.RemainingAdRerolls <= 0)
+        {
+            RaiseFailed(
+                AdRewardSource.UpgradeReroll,
+                GameConstants.ConfigIds.UpgradeReroll,
+                GetRewardedPlacementId(),
+                AdRewardFailedReason.ContextNotAllowed,
+                "本局刷新次数已用尽");
+            return;
+        }
+
+        TryShowRewardedInternal(
+            AdRewardSource.UpgradeReroll,
+            GameConstants.ConfigIds.UpgradeReroll,
+            () => rewardManager.TryRerollViaAd());
+    }
+
+    /// <summary>
+    /// 播放激励广告以全选局内三选一候选。
+    /// </summary>
+    public void TryShowRewardedForUpgradeSelectAll()
+    {
+        if (!EnsureServiceReady(AdRewardSource.UpgradeSelectAll, GameConstants.ConfigIds.UpgradeSelectAll, out _))
+        {
+            return;
+        }
+
+        if (!ServiceLocator.TryGet(out RandomRewardManager rewardManager))
+        {
+            RaiseFailed(
+                AdRewardSource.UpgradeSelectAll,
+                GameConstants.ConfigIds.UpgradeSelectAll,
+                GetRewardedPlacementId(),
+                AdRewardFailedReason.ContextNotAllowed,
+                "升级系统未就绪");
+            return;
+        }
+
+        if (rewardManager.RemainingAdSelectAll <= 0)
+        {
+            RaiseFailed(
+                AdRewardSource.UpgradeSelectAll,
+                GameConstants.ConfigIds.UpgradeSelectAll,
+                GetRewardedPlacementId(),
+                AdRewardFailedReason.ContextNotAllowed,
+                "本局全选次数已用尽");
+            return;
+        }
+
+        TryShowRewardedInternal(
+            AdRewardSource.UpgradeSelectAll,
+            GameConstants.ConfigIds.UpgradeSelectAll,
+            () => rewardManager.TrySelectAllViaAd());
+    }
+
+    /// <summary>
     /// 获取当前激活网络的激励视频广告位 ID。
     /// </summary>
     /// <returns>激励视频 Placement ID。</returns>

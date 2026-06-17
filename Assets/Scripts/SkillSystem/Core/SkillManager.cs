@@ -38,6 +38,24 @@ public class SkillManager : MonoBehaviour
     /// <summary>已注册技能运行时表（只读）。</summary>
     public IReadOnlyDictionary<SkillType, SkillRuntime> Runtimes => runtimes;
 
+    /// <summary>本局内已为该技能选择的专属 Buff 次数（用于 HUD 等级展示）。</summary>
+    public int GetRunBuffPickCount(SkillType type) =>
+        buffStackCounts.TryGetValue(type, out int count) ? count : 0;
+
+    /// <summary>
+    /// HUD 展示用技能等级：配置等级 + 局内专属 Buff 选取次数（不改变战斗数值曲线）。
+    /// </summary>
+    public int GetDisplayLevel(SkillType type)
+    {
+        int baseLevel = 1;
+        if (runtimes.TryGetValue(type, out SkillRuntime runtime) && runtime.BaseData != null)
+        {
+            baseLevel = runtime.BaseData.Level;
+        }
+
+        return baseLevel + GetRunBuffPickCount(type);
+    }
+
     /// <summary>缓存组件引用并注册技能效果类型。</summary>
     private void Awake()
     {
@@ -55,9 +73,16 @@ public class SkillManager : MonoBehaviour
         }
 
         RegisterEffectTypes();
+        GameEvents.SubscribeGameOver(OnGameOver);
     }
 
-    /// <summary>构建上下文、默认解锁射击，并同步局外解锁。</summary>
+    /// <summary>解绑全局事件。</summary>
+    private void OnDestroy()
+    {
+        GameEvents.UnsubscribeGameOver(OnGameOver);
+    }
+
+    /// <summary>构建上下文、默认解锁射击；局内 Buff 由 <see cref="UpgradeManager"/> 在新局开始时统一恢复。</summary>
     private void Start()
     {
         context = new SkillContext(player, controller, this, castOrigin);
@@ -65,24 +90,33 @@ public class SkillManager : MonoBehaviour
         {
             UnlockSkill(shootSkillConfigId, 1);
         }
+    }
 
-        if (ServiceLocator.TryGet(out SkillUnlockService unlockService))
+    /// <summary>
+    /// 清除本局专属 SkillBuff 选取计数与局内 Profile/属性修正。
+    /// 局外永久 SkillBuff 需由 <see cref="UpgradeManager"/> 在清空后通过
+    /// <see cref="MetaProgressBuffBootstrap"/> 重新施加；技能解锁等级（<see cref="SaveData.skillLevels"/>）不受影响。
+    /// </summary>
+    public void ClearRunScopedBuffState()
+    {
+        buffStackCounts.Clear();
+        healMinuteTimer = 0f;
+        healPeakTimer = 0f;
+
+        foreach (KeyValuePair<SkillType, SkillRuntime> pair in runtimes)
         {
-            unlockService.ApplyUnlocksToPlayerSkillManager();
+            pair.Value.RebuildBuffProfile();
         }
 
-        BuffManager buffManager = GetComponent<BuffManager>();
-        if (buffManager == null)
+        if (controller != null && controller.RuntimeStats.IsInitialized)
         {
-            buffManager = GetComponentInChildren<BuffManager>();
+            controller.RuntimeStats.ClearRunScopedModifiers();
         }
+    }
 
-        if (ServiceLocator.TryGet(out SaveManager saveManager))
-        {
-            MetaProgressBuffBootstrap.TryApplyPermanentSkillBuffs(saveManager, buffManager);
-        }
-
-        PlaytestBootstrap.TryApplyStartupBuffs();
+    private void OnGameOver(GameEventContext ctx)
+    {
+        ClearRunScopedBuffState();
     }
 
     /// <summary>
@@ -334,12 +368,15 @@ public class SkillManager : MonoBehaviour
     /// </summary>
     /// <param name="kind">Buff 种类。</param>
     /// <param name="tier">Buff 层级，从 1 起。</param>
-    public void ApplySkillBuff(SkillBuffKind kind, int tier = 1)
+    /// <param name="source">应用来源；仅 <see cref="SkillBuffApplySource.RunUpgrade"/> 计入局内 HUD 选取次数。</param>
+    public void ApplySkillBuff(SkillBuffKind kind, int tier = 1, SkillBuffApplySource source = SkillBuffApplySource.RunUpgrade)
     {
         if (kind == SkillBuffKind.None)
         {
             return;
         }
+
+        bool trackRunPick = source == SkillBuffApplySource.RunUpgrade;
 
         if (SkillBuffCatalog.IsGlobalKind(kind))
         {
@@ -375,12 +412,20 @@ public class SkillManager : MonoBehaviour
                 SkillBuffCatalog.GetStackPercent(tier)));
         }
 
-        if (!buffStackCounts.ContainsKey(target))
+        if (trackRunPick)
         {
-            buffStackCounts[target] = 0;
+            if (!buffStackCounts.ContainsKey(target))
+            {
+                buffStackCounts[target] = 0;
+            }
+
+            buffStackCounts[target]++;
+            if (runtime.Config != null)
+            {
+                GameEvents.RaiseSkillLevelUp(this, runtime.Config.ConfigId, GetDisplayLevel(target));
+            }
         }
 
-        buffStackCounts[target]++;
         GameEvents.RaiseBuffChanged(this, new BuffEventArgs(kind.ToString(), tier, 0f, player));
     }
 
@@ -389,7 +434,8 @@ public class SkillManager : MonoBehaviour
     /// </summary>
     /// <param name="buff">Buff 配置。</param>
     /// <param name="stacks">堆叠层数，默认 1。</param>
-    public void ApplyBuffFromConfig(BuffDataSO buff, int stacks = 1)
+    /// <param name="source">应用来源。</param>
+    public void ApplyBuffFromConfig(BuffDataSO buff, int stacks = 1, SkillBuffApplySource source = SkillBuffApplySource.RunUpgrade)
     {
         if (buff == null)
         {
@@ -400,7 +446,7 @@ public class SkillManager : MonoBehaviour
         {
             for (int i = 0; i < stacks; i++)
             {
-                ApplySkillBuff(buff.SkillBuffKind, buff.SkillBuffTier);
+                ApplySkillBuff(buff.SkillBuffKind, buff.SkillBuffTier, source);
             }
 
             return;

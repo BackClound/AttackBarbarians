@@ -206,4 +206,20 @@ public class SaveData
     /// <param name="count">累计次数；为 0 时移除记录。</param>
     public void SetShopPurchaseCount(string configId, int count) =>
         ConfigIdIntPairListUtility.SetValue(shopPurchaseCounts, configId, count);
+
+    /// <summary>
+    /// 清空所有已解锁技能与永久 Buff，仅保留射击技能 Lv.1；同时清除局内进度中的 Buff/升级记录。
+    /// </summary>
+    public void ResetUnlockedSkillsAndBuffsKeepShootOnly()
+    {
+        skillLevels?.Clear();
+        SetSkillLevel(GameConstants.ConfigIds.SkillShoot, 1);
+
+        permanentUpgrades?.Clear();
+
+        if (runProgress != null)
+        {
+            runProgress.ClearRun();
+        }
+    }
 }

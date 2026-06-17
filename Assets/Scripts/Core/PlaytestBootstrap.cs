@@ -125,7 +125,7 @@ public static class PlaytestBootstrap
                 continue;
             }
 
-            buffManager.ApplyBuff(buff, entry.Stacks);
+            buffManager.ApplyBuff(buff, entry.Stacks, SkillBuffApplySource.Playtest);
             appliedCount++;
             if (gameConfig.EnableRuntimeLogs)
             {

@@ -60,9 +60,10 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
-    /// <summary>获取 GameManager 并按当前游戏状态同步面板显隐。</summary>
-    private void Start()
+    /// <summary>获取 GameManager、重试事件订阅并按当前状态同步面板。</summary>
+    protected override void Start()
     {
+        base.Start();
         ServiceLocator.TryGet(out gameManager);
         SyncPanelsToCurrentState();
     }
@@ -291,6 +292,11 @@ public class UIManager : GameEventSubscriberBase
                 break;
 
             case GameState.UpgradeChoosing:
+                if (upgradePanel == null)
+                {
+                    Debug.LogError("[UIManager] UpgradePanel 未绑定，三选一 UI 无法显示。请执行 Attack Barbarians/UI/Build BattleScene UI。");
+                }
+
                 upgradePanel?.Show();
                 break;
 

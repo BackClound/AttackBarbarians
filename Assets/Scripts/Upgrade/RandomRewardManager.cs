@@ -13,15 +13,29 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
     [Header("Debug")]
     [SerializeField] private bool autoConfirmFirstChoiceForDebug;
 
+    [Header("Ad Quota (per run)")]
+    [SerializeField] private int maxAdRerollsPerRun = 2;
+    [SerializeField] private int maxAdSelectAllPerRun = 2;
+
     private UpgradeManager upgradeManager;
     private GameFlowManager gameFlowManager;
     private UpgradeChoicesPayload pendingPayload;
     private bool isInitialized;
+    private int usedAdRerolls;
+    private int usedAdSelectAll;
 
     /// <summary>是否已完成初始化。</summary>
     public bool IsInitialized => isInitialized;
     /// <summary>当前待选的升级候选负载。</summary>
     public UpgradeChoicesPayload PendingChoices => pendingPayload;
+    /// <summary>本局剩余广告刷新次数。</summary>
+    public int RemainingAdRerolls => Mathf.Max(0, maxAdRerollsPerRun - usedAdRerolls);
+    /// <summary>本局剩余广告全选次数。</summary>
+    public int RemainingAdSelectAll => Mathf.Max(0, maxAdSelectAllPerRun - usedAdSelectAll);
+    /// <summary>本局广告刷新上限。</summary>
+    public int MaxAdRerollsPerRun => maxAdRerollsPerRun;
+    /// <summary>本局广告全选上限。</summary>
+    public int MaxAdSelectAllPerRun => maxAdSelectAllPerRun;
 
     /// <summary>订阅升级事件并初始化依赖。</summary>
     public void Initialize()
@@ -36,6 +50,7 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
 
         GameEvents.SubscribeUpgradeSelectionOpened(OnUpgradeSelectionOpened);
         GameEvents.SubscribePlayerLevelUp(OnPlayerLevelUp);
+        GameEvents.SubscribeGameStarted(OnGameStarted);
         isInitialized = true;
     }
 
@@ -48,6 +63,7 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
     {
         GameEvents.UnsubscribeUpgradeSelectionOpened(OnUpgradeSelectionOpened);
         GameEvents.UnsubscribePlayerLevelUp(OnPlayerLevelUp);
+        GameEvents.UnsubscribeGameStarted(OnGameStarted);
         pendingPayload = null;
         isInitialized = false;
     }
@@ -85,6 +101,86 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>广告激励后重新抽取当前三选一候选。</summary>
+    /// <returns>重抽成功返回 <c>true</c>。</returns>
+    public bool TryRerollViaAd()
+    {
+        if (RemainingAdRerolls <= 0)
+        {
+            Debug.LogWarning("[RandomRewardManager] 本局广告刷新次数已用尽。");
+            return false;
+        }
+
+        if (pendingPayload == null)
+        {
+            Debug.LogWarning("[RandomRewardManager] 当前没有可刷新的升级候选。");
+            return false;
+        }
+
+        if (!RollAndPublish(pendingPayload.Context))
+        {
+            return false;
+        }
+
+        usedAdRerolls++;
+        return true;
+    }
+
+    /// <summary>广告激励后应用全部候选并结束升级阶段。</summary>
+    /// <returns>全选成功返回 <c>true</c>。</returns>
+    public bool TrySelectAllViaAd()
+    {
+        if (RemainingAdSelectAll <= 0)
+        {
+            Debug.LogWarning("[RandomRewardManager] 本局广告全选次数已用尽。");
+            return false;
+        }
+
+        if (pendingPayload == null || pendingPayload.Choices == null || pendingPayload.Choices.Count == 0)
+        {
+            Debug.LogWarning("[RandomRewardManager] 当前没有可全选的升级候选。");
+            return false;
+        }
+
+        if (upgradeManager == null)
+        {
+            upgradeManager = ResolveUpgradeManager();
+        }
+
+        if (upgradeManager == null)
+        {
+            return false;
+        }
+
+        UpgradeTriggerSource source = pendingPayload.Context.TriggerSource;
+        var choices = pendingPayload.Choices;
+        for (int i = 0; i < choices.Count; i++)
+        {
+            UpgradeOptionSO option = choices[i];
+            if (option == null)
+            {
+                continue;
+            }
+
+            if (!upgradeManager.TryApplyChoice(option, source))
+            {
+                Debug.LogWarning($"[RandomRewardManager] 全选应用失败: {option.ConfigId}");
+            }
+        }
+
+        usedAdSelectAll++;
+        pendingPayload = null;
+        gameFlowManager?.ConfirmUpgradeSelection();
+        return true;
+    }
+
+    private void OnGameStarted(GameEventContext ctx)
+    {
+        usedAdRerolls = 0;
+        usedAdSelectAll = 0;
+        pendingPayload = null;
+    }
+
     /// <summary>调试：选择第一个候选。</summary>
     [ContextMenu("Debug/Select Choice 0")]
     private void DebugSelectChoice0() => TrySelectChoice(0);
@@ -117,7 +213,11 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         }
 
         var context = new UpgradeSelectionContext(ResolveCurrentWave(), ResolvePlayerLevel(), source);
-        RollAndPublish(context);
+        if (!RollAndPublish(context))
+        {
+            Debug.LogError("[RandomRewardManager] 无法生成升级候选，自动恢复战斗以免卡死。");
+            gameFlowManager?.ConfirmUpgradeSelection();
+        }
     }
 
     /// <summary>玩家升级时触发升级选择流程。</summary>

@@ -53,7 +53,6 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         ServiceLocator.TryGet(out saveManager);
         ServiceLocator.TryGet(out runSessionTracker);
         unlockTable = ResolveUnlockTable();
-        GameEvents.SubscribeGameStarted(OnGameStarted);
         isInitialized = true;
     }
 
@@ -64,7 +63,6 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
     /// <summary>取消订阅并标记未初始化。</summary>
     public void Shutdown()
     {
-        GameEvents.UnsubscribeGameStarted(OnGameStarted);
         isInitialized = false;
     }
 
@@ -166,9 +164,9 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
     }
 
     /// <summary>
-    /// 将存档中已解锁技能同步到场景内 <see cref="SkillManager"/>。
+    /// 将场景内 <see cref="SkillManager"/> 对齐到元进度：锁定非元解锁技能，解锁元进度技能（不写档）。
     /// </summary>
-    public void ApplyUnlocksToPlayerSkillManager()
+    public void SyncPlayerSkillManagerToMeta()
     {
         PlayerSkillManager playerSkills = ResolvePlayerSkillManager();
         if (playerSkills?.SkillManager == null)
@@ -178,22 +176,28 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
 
         SkillManager manager = playerSkills.SkillManager;
         SaveData save = saveManager?.Current;
-        IterateRules((skillId, requiredSeconds, unlockedByDefault) =>
+        IterateRules((skillId, _, _) =>
         {
-            bool unlocked = unlockedByDefault ||
-                            (save != null && save.GetSkillLevel(skillId) > 0) ||
-                            GetTotalPlayTimeSeconds() >= requiredSeconds;
-            if (!unlocked)
+            if (IsMetaUnlocked(skillId))
             {
-                return;
+                int level = save != null && save.GetSkillLevel(skillId) > 0
+                    ? Mathf.Max(1, save.GetSkillLevel(skillId))
+                    : 1;
+                manager.UnlockSkill(skillId, level, persistToSave: false);
             }
-
-            int level = save != null ? Mathf.Max(1, save.GetSkillLevel(skillId)) : 1;
-            manager.UnlockSkill(skillId, level);
+            else
+            {
+                manager.LockSkill(skillId);
+            }
         });
 
         ApplyPlaytestSkillUnlockOverrides(manager);
     }
+
+    /// <summary>
+    /// 将存档中已解锁技能同步到场景内 <see cref="SkillManager"/>。
+    /// </summary>
+    public void ApplyUnlocksToPlayerSkillManager() => SyncPlayerSkillManagerToMeta();
 
     /// <summary>应用 GameConfig 中的技能解锁覆盖（不写入存档）。</summary>
     /// <param name="manager">玩家技能管理器。</param>
@@ -247,14 +251,6 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
         }
 
         return long.MaxValue;
-    }
-
-    /// <summary>对局开始时刷新元解锁并同步到玩家。</summary>
-    /// <param name="ctx">游戏开始事件上下文。</param>
-    private void OnGameStarted(GameEventContext ctx)
-    {
-        RefreshMetaUnlocks();
-        ApplyUnlocksToPlayerSkillManager();
     }
 
     /// <summary>解析解锁表（Override → ConfigDatabase → Resources）。</summary>

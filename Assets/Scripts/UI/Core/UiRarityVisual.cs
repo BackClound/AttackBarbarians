@@ -12,14 +12,24 @@ public class UiRarityVisual : MonoBehaviour
 {
     [SerializeField] private Image borderImage;
     [SerializeField] private Image topAccentImage;
+    [SerializeField] private bool useOutlineBorder;
     [SerializeField] private bool useEquipmentQuality;
     [SerializeField] private UpgradeRarity upgradeRarity = UpgradeRarity.Common;
     [SerializeField] private EquipmentQuality equipmentQuality = EquipmentQuality.Common;
+
+    private static readonly Vector2 DefaultOutlineDistance = new Vector2(2f, -2f);
 
     /// <summary>编辑器 Reset 时自动绑定同物体 Image 为边框。</summary>
     private void Reset()
     {
         borderImage = GetComponent<Image>();
+    }
+
+    /// <summary>将边框改为透明底 + Outline，避免全屏 Image 遮挡卡片文字。</summary>
+    public void EnsureOutlineBorderMode()
+    {
+        useOutlineBorder = true;
+        Refresh();
     }
 
     /// <summary>按升级卡稀有度刷新边框与顶条颜色。</summary>
@@ -49,7 +59,17 @@ public class UiRarityVisual : MonoBehaviour
 
         if (borderImage != null)
         {
-            borderImage.color = color;
+            if (useOutlineBorder)
+            {
+                borderImage.color = Color.clear;
+                borderImage.raycastTarget = false;
+                Outline outline = GetOrAddOutline(borderImage);
+                outline.effectColor = color;
+            }
+            else
+            {
+                borderImage.color = color;
+            }
         }
 
         if (topAccentImage != null)
@@ -62,5 +82,19 @@ public class UiRarityVisual : MonoBehaviour
     private void OnEnable()
     {
         Refresh();
+    }
+
+    private static Outline GetOrAddOutline(Image image)
+    {
+        Outline outline = image.GetComponent<Outline>();
+        if (outline != null)
+        {
+            return outline;
+        }
+
+        outline = image.gameObject.AddComponent<Outline>();
+        outline.effectDistance = DefaultOutlineDistance;
+        outline.useGraphicAlpha = true;
+        return outline;
     }
 }

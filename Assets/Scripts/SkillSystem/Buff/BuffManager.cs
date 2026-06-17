@@ -26,7 +26,8 @@ public class BuffManager : MonoBehaviour
     /// </summary>
     /// <param name="buff">Buff 数据配置。</param>
     /// <param name="stacks">堆叠层数，默认 1。</param>
-    public void ApplyBuff(BuffDataSO buff, int stacks = 1)
+    /// <param name="source">技能 Buff 应用来源。</param>
+    public void ApplyBuff(BuffDataSO buff, int stacks = 1, SkillBuffApplySource source = SkillBuffApplySource.RunUpgrade)
     {
         if (buff == null)
         {
@@ -36,7 +37,7 @@ public class BuffManager : MonoBehaviour
         ResolveReferences();
         if (buff.HasSkillBuff && skillManager != null)
         {
-            skillManager.ApplyBuffFromConfig(buff, stacks);
+            skillManager.ApplyBuffFromConfig(buff, stacks, source);
             GameEvents.RaiseBuffApplied(this, new BuffEventArgs(
                 buff.ConfigId,
                 stacks,

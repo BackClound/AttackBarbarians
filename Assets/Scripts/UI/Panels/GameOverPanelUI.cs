@@ -153,11 +153,6 @@ public class GameOverPanelUI : UiPanelBase
     private void OnRedeploy()
     {
         PlayUiSfx("audio.sfx.ui_confirm");
-        if (ServiceLocator.TryGet(out SaveManager save))
-        {
-            save.BeginRun(1, 1);
-        }
-
         if (ServiceLocator.TryGet(out GameManager gameManager))
         {
             gameManager.RestartGame();

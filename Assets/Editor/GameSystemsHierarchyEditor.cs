@@ -63,6 +63,10 @@ public static class GameSystemsHierarchyEditor
     public static void EnsureBattleScene()
     {
         EnsureScene(BattleScenePath, includeBattleManagers: true);
+        if (GameObject.Find("UICanvas") == null)
+        {
+            BattleSceneUiBuilder.BuildBattleSceneUi();
+        }
     }
 
     [MenuItem("Attack Barbarians/Scene/Ensure GameSystems Hierarchy (All Scenes)")]

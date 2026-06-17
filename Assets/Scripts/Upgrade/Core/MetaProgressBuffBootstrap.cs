@@ -35,7 +35,7 @@ internal static class MetaProgressBuffBootstrap
                 continue;
             }
 
-            buffManager.ApplyBuff(buff, entry.value);
+            buffManager.ApplyBuff(buff, entry.value, SkillBuffApplySource.MetaPermanent);
             applied++;
         }
 

@@ -14,4 +14,10 @@ public enum AdRewardSource
 
     /// <summary>通用或未分类来源。</summary>
     Generic = 3,
+
+    /// <summary>局内三选一刷新候选。</summary>
+    UpgradeReroll = 4,
+
+    /// <summary>局内三选一全选。</summary>
+    UpgradeSelectAll = 5,
 }

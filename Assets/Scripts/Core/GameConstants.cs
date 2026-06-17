@@ -285,6 +285,8 @@ public static class GameConstants
         public const string DailyRewardDay7 = "daily_reward.day_7";
 
         public const string AdTicketEarn = "ad.ticket_earn";
+        public const string UpgradeReroll = "ad.upgrade_reroll";
+        public const string UpgradeSelectAll = "ad.upgrade_select_all";
     }
 
     /// <summary><see cref="PoolManager"/> 对象池 Key 常量。</summary>

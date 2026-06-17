@@ -45,6 +45,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         ServiceLocator.TryGet(out saveManager);
         RestoreFromSave();
         GameEvents.SubscribeGameStarted(OnGameStarted);
+        GameEvents.SubscribeGameOver(OnGameOver);
         isInitialized = true;
     }
 
@@ -56,6 +57,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     public void Shutdown()
     {
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
+        GameEvents.UnsubscribeGameOver(OnGameOver);
         currentChoices.Clear();
         isInitialized = false;
     }
@@ -224,12 +226,60 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         return true;
     }
 
-    /// <summary>游戏开始时重新应用已保存的升级效果。</summary>
+    /// <summary>新局开始：清空局内 Buff → 同步局外解锁 → 施加局外永久 Buff → 恢复本局已选升级。</summary>
     /// <param name="ctx">游戏事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx)
     {
+        SkillManager skillManager = ResolvePlayerSkillManager()?.SkillManager;
+        skillManager?.ClearRunScopedBuffState();
+
+        if (ServiceLocator.TryGet(out SkillUnlockService unlockService))
+        {
+            unlockService.RefreshMetaUnlocks();
+            unlockService.SyncPlayerSkillManagerToMeta();
+        }
+
+        ApplyPersistentRunStartBuffs();
+
         RestoreFromSave();
-        ReapplySavedUpgrades();
+        if (HasActiveRunSession())
+        {
+            ReapplySavedUpgrades();
+        }
+    }
+
+    /// <summary>局结束时清空内存中的局内升级记录，避免泄漏到下一局。</summary>
+    /// <param name="ctx">游戏事件上下文。</param>
+    private void OnGameOver(GameEventContext ctx)
+    {
+        ClearRunSelectionState();
+        ResolvePlayerSkillManager()?.SkillManager?.ClearRunScopedBuffState();
+    }
+
+    /// <summary>清空内存中的局内三选一记录（新局 / 局末 / BeginRun 时调用）。</summary>
+    public void ClearRunSelectionState()
+    {
+        selectedStacks.Clear();
+        activeMutualGroups.Clear();
+        skillBuffHighestTiers.Clear();
+        SeedMetaSkillBuffTiers();
+        currentChoices.Clear();
+    }
+
+    private static void ApplyPersistentRunStartBuffs()
+    {
+        PlayerSkillManager playerSkills = ResolvePlayerSkillManager();
+        if (playerSkills == null)
+        {
+            return;
+        }
+
+        if (ServiceLocator.TryGet(out SaveManager saveManager))
+        {
+            MetaProgressBuffBootstrap.TryApplyPermanentSkillBuffs(saveManager, playerSkills.BuffManager);
+        }
+
+        PlaytestBootstrap.TryApplyStartupBuffs();
     }
 
     /// <summary>基础技能规则（不含局内池范围过滤）。</summary>
@@ -514,7 +564,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     /// <summary>重新应用存档中已选升级的全部效果。</summary>
     private void ReapplySavedUpgrades()
     {
-        if (selectedStacks.Count == 0)
+        if (!HasActiveRunSession() || selectedStacks.Count == 0)
         {
             return;
         }
@@ -748,10 +798,12 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     /// <summary>从局内存档恢复已选升级记录。</summary>
     private void RestoreFromSave()
     {
-        selectedStacks.Clear();
-        activeMutualGroups.Clear();
-        skillBuffHighestTiers.Clear();
-        SeedMetaSkillBuffTiers();
+        ClearRunSelectionState();
+
+        if (!HasActiveRunSession())
+        {
+            return;
+        }
 
         List<ConfigIdIntPair> saved = saveManager?.Current?.runProgress?.selectedUpgrades;
         if (saved == null)
@@ -784,6 +836,8 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
             }
         }
     }
+
+    private bool HasActiveRunSession() => saveManager != null && saveManager.HasActiveRun;
 
     /// <summary>将局外永久 SkillBuff tier 写入基线，供局内递进抽池使用。</summary>
     private void SeedMetaSkillBuffTiers()

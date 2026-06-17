@@ -33,6 +33,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
     public int CurrentWaveIndex => currentWaveIndex;
     /// <summary>当前波次已过时间（秒）。</summary>
     public float WaveElapsed => waveElapsed;
+    /// <summary>配置波次总数（用于 HUD 展示）。</summary>
+    public int TotalWaveCount => waveConfigIds != null && waveConfigIds.Length > 0 ? waveConfigIds.Length : 20;
 
     /// <summary>解析依赖、订阅事件并按需自动开始首波。</summary>
     public void Initialize()

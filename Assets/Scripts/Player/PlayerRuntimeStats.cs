@@ -113,6 +113,18 @@ public sealed class PlayerRuntimeStats
         RebuildSnapshot();
     }
 
+    /// <summary>清除局内临时属性修正（全局攻速/伤害等），保留天赋、装备与永久成长 Buff。</summary>
+    public void ClearRunScopedModifiers()
+    {
+        if (extraModifiers.Count == 0)
+        {
+            return;
+        }
+
+        extraModifiers.Clear();
+        RebuildSnapshot();
+    }
+
     /// <summary>Buff 系统入口：应用 Buff 配置并重建属性。</summary>
     public void ApplyBuff(BuffDataSO buff, int stacks = 1)
     {
@@ -252,6 +264,12 @@ public sealed class PlayerRuntimeStats
             }
 
             if (!configManager.TryGetBuff(entry.configId, out BuffDataSO buffData))
+            {
+                continue;
+            }
+
+            // 带 SkillBuff 的条目由 SkillManager 局外永久管线施加，避免与 Profile 重复叠层。
+            if (buffData.HasSkillBuff)
             {
                 continue;
             }

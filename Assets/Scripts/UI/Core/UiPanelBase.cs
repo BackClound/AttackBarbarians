@@ -36,6 +36,14 @@ public abstract class UiPanelBase : MonoBehaviour
         SetVisibleImmediate(false);
     }
 
+    private void EnsureTransitionReference()
+    {
+        if (transition == null)
+        {
+            transition = GetComponent<UiPanelTransition>();
+        }
+    }
+
     /// <summary>显示面板：激活根节点、触发 <see cref="OnShow"/> 并播放进场动画。</summary>
     public virtual void Show()
     {
@@ -51,6 +59,7 @@ public abstract class UiPanelBase : MonoBehaviour
         }
 
         OnShow();
+        EnsureTransitionReference();
         if (useTransition && transition != null)
         {
             transition.PlayShow();
