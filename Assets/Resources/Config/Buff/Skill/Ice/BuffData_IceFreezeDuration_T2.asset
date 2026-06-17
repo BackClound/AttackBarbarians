@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7ab2ff7c0468421bb2074cdd81b80e70, type: 3}
-  m_Name: BuffData_ThunderRadius
+  m_Name: BuffData_IceFreezeDuration_T2
   m_EditorClassIdentifier: 
-  configId: buff.skill.thunder_radius
-  displayName: ThunderRadius
+  configId: buff.skill.ice_freeze_duration.t2
+  displayName: IceFreezeDuration T2
   icon: {fileID: 0}
   duration: 5
   isPermanent: 1
@@ -21,8 +21,8 @@ MonoBehaviour:
   refreshDurationOnStack: 0
   modifiers: []
   hasSkillBuff: 1
-  skillBuffKind: 11
-  skillBuffTarget: 99
+  skillBuffKind: 24
+  skillBuffTarget: 2
   skillBuffTier: 2
-  description: 
+  description: "\u51B0\u51BB\u65F6\u957F\u5EF6\u957F"
   tintColor: {r: 1, g: 1, b: 1, a: 1}

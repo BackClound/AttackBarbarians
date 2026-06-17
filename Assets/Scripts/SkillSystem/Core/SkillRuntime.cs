@@ -87,6 +87,9 @@ public sealed class SkillRuntime
         IsUnlocked = Config != null;
     }
 
+    /// <summary>将技能标记为锁定（保留配置与等级数据）。</summary>
+    public void Lock() => IsUnlocked = false;
+
     /// <summary>记录一次施法并启动冷却。</summary>
     public void StartCooldown()
     {

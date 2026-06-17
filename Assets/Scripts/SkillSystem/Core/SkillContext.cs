@@ -66,6 +66,17 @@ public sealed class SkillContext
         return 25f;
     }
 
+    /// <summary>闪电首段发射点（优先 CastOrigin，否则 Player 根节点）。</summary>
+    public Vector2 GetLightningCastOrigin()
+    {
+        if (CastOrigin != null)
+        {
+            return CastOrigin.position;
+        }
+
+        return Player != null ? (Vector2)Player.transform.position : Vector2.zero;
+    }
+
     /// <summary>
     /// 获取主目标敌人（优先控制器主目标，否则战斗列表首项）。
     /// </summary>
@@ -208,6 +219,123 @@ public sealed class SkillContext
         }
 
         return chainBuffer;
+    }
+
+    /// <summary>
+    /// 闪电链：首目标由调用方指定（须在攻击范围内），后续链接在 <paramref name="maxLinkDistance"/> 内
+    /// 搜索全场可受伤敌人，不受玩家攻击范围限制。
+    /// </summary>
+    /// <param name="firstTarget">首段闪电命中的敌人。</param>
+    /// <param name="maxCount">链上目标数（含首目标）。</param>
+    /// <param name="maxLinkDistance">相邻链接最大距离。</param>
+    /// <returns>内部复用的链式目标列表。</returns>
+    public List<Enemy> GetLightningChainTargets(Enemy firstTarget, int maxCount, float maxLinkDistance)
+    {
+        chainBuffer.Clear();
+        if (firstTarget == null || maxCount <= 0)
+        {
+            return chainBuffer;
+        }
+
+        chainUsedIds.Clear();
+        chainBuffer.Add(firstTarget);
+        chainUsedIds.Add(firstTarget.gameObject.GetInstanceID());
+        Vector2 cursor = firstTarget.transform.position;
+        float maxLinkDistanceSqr = maxLinkDistance * maxLinkDistance;
+
+        while (chainBuffer.Count < maxCount)
+        {
+            QueryEnemiesInCircle(cursor, maxLinkDistance, targetBuffer);
+            Enemy best = null;
+            float bestSqr = maxLinkDistanceSqr;
+            for (int i = 0; i < targetBuffer.Count; i++)
+            {
+                Enemy candidate = targetBuffer[i];
+                if (candidate == null || candidate.enemy_Health == null || !candidate.enemy_Health.CanBeDamage())
+                {
+                    continue;
+                }
+
+                int id = candidate.gameObject.GetInstanceID();
+                if (chainUsedIds.Contains(id))
+                {
+                    continue;
+                }
+
+                float sqr = ((Vector2)candidate.transform.position - cursor).sqrMagnitude;
+                if (sqr <= bestSqr)
+                {
+                    bestSqr = sqr;
+                    best = candidate;
+                }
+            }
+
+            if (best == null)
+            {
+                break;
+            }
+
+            chainBuffer.Add(best);
+            chainUsedIds.Add(best.gameObject.GetInstanceID());
+            cursor = best.transform.position;
+        }
+
+        return chainBuffer;
+    }
+
+    /// <summary>
+    /// 从攻击范围内选取至多 <paramref name="count"/> 个互不重复的首段目标（按距施法点从近到远）。
+    /// </summary>
+    /// <param name="scratch">可复用列表；写入选中的敌人。</param>
+    /// <param name="count">需要的首段目标数量。</param>
+    /// <returns>实际选中的数量。</returns>
+    public int PickDistinctCombatTargets(List<Enemy> scratch, int count)
+    {
+        if (scratch == null || count <= 0)
+        {
+            return 0;
+        }
+
+        scratch.Clear();
+        if (!TryCopyTargets(scratch))
+        {
+            return 0;
+        }
+
+        Vector2 origin = CastOrigin != null ? (Vector2)CastOrigin.position : (Vector2)Player.transform.position;
+        scratch.Sort((a, b) =>
+        {
+            float aSqr = a == null ? float.MaxValue : ((Vector2)a.transform.position - origin).sqrMagnitude;
+            float bSqr = b == null ? float.MaxValue : ((Vector2)b.transform.position - origin).sqrMagnitude;
+            return aSqr.CompareTo(bSqr);
+        });
+
+        int write = 0;
+        chainUsedIds.Clear();
+        for (int i = 0; i < scratch.Count && write < count; i++)
+        {
+            Enemy enemy = scratch[i];
+            if (enemy == null || enemy.enemy_Health == null || !enemy.enemy_Health.CanBeDamage())
+            {
+                continue;
+            }
+
+            int id = enemy.gameObject.GetInstanceID();
+            if (chainUsedIds.Contains(id))
+            {
+                continue;
+            }
+
+            chainUsedIds.Add(id);
+            scratch[write++] = enemy;
+        }
+
+        if (write < scratch.Count)
+        {
+            scratch.RemoveRange(write, scratch.Count - write);
+        }
+
+        return scratch.Count;
     }
 
     /// <summary>

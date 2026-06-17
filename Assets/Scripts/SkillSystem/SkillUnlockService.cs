@@ -102,7 +102,25 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
 
         if (skillConfigId == GameConstants.ConfigIds.SkillShoot)
         {
+            if (GameConfigPlaytestSettings.TryGetSkillUnlockOverride(
+                    configManager?.GameConfig,
+                    skillConfigId,
+                    out GameConfigSkillUnlockOverrideState overrideState,
+                    out _))
+            {
+                return overrideState == GameConfigSkillUnlockOverrideState.ForceUnlock;
+            }
+
             return true;
+        }
+
+        if (GameConfigPlaytestSettings.TryGetSkillUnlockOverride(
+                configManager?.GameConfig,
+                skillConfigId,
+                out GameConfigSkillUnlockOverrideState state,
+                out _))
+        {
+            return state == GameConfigSkillUnlockOverrideState.ForceUnlock;
         }
 
         if (saveManager?.Current != null && saveManager.Current.GetSkillLevel(skillConfigId) > 0)
@@ -173,6 +191,39 @@ public class SkillUnlockService : MonoBehaviour, IGameSystem
             int level = save != null ? Mathf.Max(1, save.GetSkillLevel(skillId)) : 1;
             manager.UnlockSkill(skillId, level);
         });
+
+        ApplyPlaytestSkillUnlockOverrides(manager);
+    }
+
+    /// <summary>应用 GameConfig 中的技能解锁覆盖（不写入存档）。</summary>
+    /// <param name="manager">玩家技能管理器。</param>
+    private void ApplyPlaytestSkillUnlockOverrides(SkillManager manager)
+    {
+        GameConfig config = configManager?.GameConfig;
+        if (!GameConfigPlaytestSettings.IsSkillUnlockOverrideEnabled(config))
+        {
+            return;
+        }
+
+        IReadOnlyList<GameConfigSkillUnlockOverride> overrides = config.SkillUnlockOverrides;
+        for (int i = 0; i < overrides.Count; i++)
+        {
+            GameConfigSkillUnlockOverride entry = overrides[i];
+            string skillId = entry?.ResolveSkillConfigId();
+            if (string.IsNullOrWhiteSpace(skillId))
+            {
+                continue;
+            }
+
+            if (entry.State == GameConfigSkillUnlockOverrideState.ForceUnlock)
+            {
+                manager.UnlockSkill(skillId, entry.Level, persistToSave: false);
+            }
+            else
+            {
+                manager.LockSkill(skillId);
+            }
+        }
     }
 
     /// <summary>

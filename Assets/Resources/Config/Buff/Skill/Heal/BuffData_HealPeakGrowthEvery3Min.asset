@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ab2ff7c0468421bb2074cdd81b80e70, type: 3}
+  m_Name: BuffData_HealPeakGrowthEvery3Min
+  m_EditorClassIdentifier: 
+  configId: buff.skill.heal_peak_growth_every3_min
+  displayName: HealPeakGrowthEvery3Min
+  icon: {fileID: 0}
+  duration: 5
+  isPermanent: 1
+  maxStacks: 1
+  refreshDurationOnStack: 0
+  modifiers: []
+  hasSkillBuff: 1
+  skillBuffKind: 31
+  skillBuffTarget: 6
+  skillBuffTier: 1
+  description: "\u6BCF 3 \u5206\u949F\u5CF0\u503C +10% \u6700\u5927\u751F\u547D"
+  tintColor: {r: 1, g: 1, b: 1, a: 1}

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -28,6 +29,15 @@ public class GameConfig : ScriptableObject
     [SerializeField] private EliteModeConfigSO eliteModeConfig;
     [Tooltip("调试：开局启用精英模式全局倍率。")]
     [SerializeField] private bool startWithEliteMode;
+
+    [Header("Playtest")]
+    [Tooltip("启用后，下方列表在开局覆盖元进度技能解锁结果（不写入存档）。")]
+    [SerializeField] private bool enableSkillUnlockOverrides;
+    [SerializeField] private List<GameConfigSkillUnlockOverride> skillUnlockOverrides = new List<GameConfigSkillUnlockOverride>();
+
+    [Tooltip("启用后，开局自动为玩家施加下列 Buff。")]
+    [SerializeField] private bool enableStartupBuffs;
+    [SerializeField] private List<GameConfigStartupBuffEntry> startupBuffs = new List<GameConfigStartupBuffEntry>();
 
     [Header("Pool")]
     [SerializeField] private int defaultPoolPrewarmCount = 8;
@@ -60,6 +70,14 @@ public class GameConfig : ScriptableObject
     public EliteModeConfigSO EliteModeConfig => eliteModeConfig;
     /// <summary>调试：开局是否启用精英模式。</summary>
     public bool StartWithEliteMode => startWithEliteMode;
+    /// <summary>是否启用技能解锁覆盖（试玩/调试）。</summary>
+    public bool EnableSkillUnlockOverrides => enableSkillUnlockOverrides;
+    /// <summary>技能解锁覆盖列表。</summary>
+    public IReadOnlyList<GameConfigSkillUnlockOverride> SkillUnlockOverrides => skillUnlockOverrides;
+    /// <summary>是否启用开局 Buff（试玩/调试）。</summary>
+    public bool EnableStartupBuffs => enableStartupBuffs;
+    /// <summary>开局 Buff 列表。</summary>
+    public IReadOnlyList<GameConfigStartupBuffEntry> StartupBuffs => startupBuffs;
     /// <summary>对象池默认预热数量。</summary>
     public int DefaultPoolPrewarmCount => Mathf.Max(0, defaultPoolPrewarmCount);
     /// <summary>对象池是否允许运行时扩容。</summary>

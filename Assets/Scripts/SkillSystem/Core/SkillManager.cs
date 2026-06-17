@@ -70,6 +70,8 @@ public class SkillManager : MonoBehaviour
         {
             unlockService.ApplyUnlocksToPlayerSkillManager();
         }
+
+        PlaytestBootstrap.TryApplyStartupBuffs();
     }
 
     /// <summary>
@@ -194,7 +196,8 @@ public class SkillManager : MonoBehaviour
     /// </summary>
     /// <param name="configId">技能配置 ID。</param>
     /// <param name="level">初始等级，默认 1。</param>
-    public void UnlockSkill(string configId, int level = 1)
+    /// <param name="persistToSave">是否写入存档，默认 true。</param>
+    public void UnlockSkill(string configId, int level = 1, bool persistToSave = true)
     {
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
             !configManager.TryGetSkill(configId, out SkillDataSO data))
@@ -203,7 +206,7 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        UnlockSkill(data, level);
+        UnlockSkill(data, level, persistToSave);
     }
 
     /// <summary>
@@ -211,7 +214,8 @@ public class SkillManager : MonoBehaviour
     /// </summary>
     /// <param name="data">技能配置资产。</param>
     /// <param name="level">初始等级，默认 1。</param>
-    public void UnlockSkill(SkillDataSO data, int level = 1)
+    /// <param name="persistToSave">是否写入存档，默认 true。</param>
+    public void UnlockSkill(SkillDataSO data, int level = 1, bool persistToSave = true)
     {
         if (data == null)
         {
@@ -227,11 +231,53 @@ public class SkillManager : MonoBehaviour
             {
                 autoCastOrder.Add(type);
             }
+
+            runtime.Initialize(data, level, true);
+        }
+        else if (runtime.IsUnlocked &&
+                 runtime.Config != null &&
+                 runtime.Config.ConfigId == data.ConfigId)
+        {
+            // 重复同步解锁（如 GameStarted + Start）时保留本局已叠加的 SkillBuffProfile。
+            int newLevel = Mathf.Max(runtime.BaseData.Level, level);
+            runtime.SetLevel(newLevel);
+            runtime.Unlock();
+        }
+        else
+        {
+            runtime.Initialize(data, level, true);
+        }
+        if (persistToSave)
+        {
+            PersistUnlock(data.ConfigId, runtime.BaseData.Level);
         }
 
-        runtime.Initialize(data, level, true);
-        PersistUnlock(data.ConfigId, runtime.BaseData.Level);
         GameEvents.RaiseSkillLevelUp(this, data.ConfigId, runtime.BaseData.Level);
+    }
+
+    /// <summary>
+    /// 锁定指定技能（仅运行时生效，不修改存档）。
+    /// </summary>
+    /// <param name="configId">技能配置 ID。</param>
+    public void LockSkill(string configId)
+    {
+        if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
+            !configManager.TryGetSkill(configId, out SkillDataSO data))
+        {
+            Debug.LogWarning($"[SkillManager] 未找到技能配置: {configId}");
+            return;
+        }
+
+        SkillType type = data.SkillType;
+        if (!runtimes.TryGetValue(type, out SkillRuntime runtime))
+        {
+            runtime = new SkillRuntime();
+            runtimes[type] = runtime;
+            runtime.Initialize(data, 1, false);
+            return;
+        }
+
+        runtime.Lock();
     }
 
     /// <summary>

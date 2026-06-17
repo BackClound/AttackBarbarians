@@ -502,6 +502,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         }
 
         RunDifficultyBootstrap.ApplyFromGameConfig(configManager != null ? configManager.GameConfig : null);
+        PlaytestBootstrap.Initialize(configManager != null ? configManager.GameConfig : null);
     }
 
     /// <summary>从 <see cref="GameConfig"/> 读取预热数量与扩容策略并配置 <see cref="PoolManager"/>。</summary>

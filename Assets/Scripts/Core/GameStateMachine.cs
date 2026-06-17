@@ -105,10 +105,10 @@ public sealed class GameStateMachine
             case GameState.Paused:
             case GameState.UpgradeChoosing:
             case GameState.GameOver:
-                Time.timeScale = 0f;
+                // Time.timeScale = 0f;
                 break;
             default:
-                Time.timeScale = 1f;
+                // Time.timeScale = 1f;
                 break;
         }
     }

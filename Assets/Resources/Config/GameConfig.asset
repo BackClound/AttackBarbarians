@@ -1,5 +1,5 @@
 %YAML 1.1
-%TAG !u! tag:unity3d.com,2011:
+%TAG !u! tag:yousandi.cn,2023:
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14,7 +14,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameConfig
   startGameOnBootstrap: 1
   enableRuntimeLogs: 1
+  skipUpgradeChoosingOnBootstrap: 0
+  defaultWaveTransitionSeconds: 1.5
   configDatabase: {fileID: 11400000, guid: 2120aa53441b44efb849c282ba132f89, type: 2}
   validateConfigOnBootstrap: 1
+  defaultMapConfigId: map.default
+  eliteModeConfig: {fileID: 0}
+  startWithEliteMode: 0
+  enableSkillUnlockOverrides: 1
+  skillUnlockOverrides:
+  - skill: {fileID: 11400000, guid: 2f71c103b9b6a405780875dafbd6aa33, type: 2}
+    skillConfigId: 
+    state: 0
+    level: 3
+  - skill: {fileID: 11400000, guid: 88ebcc46538224c9ab3fb5766606e5e7, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  - skill: {fileID: 11400000, guid: d38451c7962274401822f4362852e9ba, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  - skill: {fileID: 11400000, guid: 9623d4faacf1c48d4ae5e2aa1c4c58ae, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  - skill: {fileID: 11400000, guid: f7415046b87e49f0b74755b50e875dab, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  - skill: {fileID: 11400000, guid: f2f8f5ef5c4dd43309bae25644bd1184, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  - skill: {fileID: 11400000, guid: 65d855f82482b4009b006a7391325a29, type: 2}
+    skillConfigId: 
+    state: 1
+    level: 0
+  enableStartupBuffs: 1
+  startupBuffs:
+  - buff: {fileID: 0}
+    buffConfigId: buff.skill.lightning_chain
+    stacks: 1
+  - buff: {fileID: 0}
+    buffConfigId: buff.skill.lightning_bolt_count.t1
+    stacks: 1
+  - buff: {fileID: 0}
+    buffConfigId: buff.skill.lightning_chain_targets.t2
+    stacks: 1
   defaultPoolPrewarmCount: 8
   allowPoolGrowth: 1
+  performanceBudget: {fileID: 0}
+  saveFileName: save.json
+  enableAutoSave: 1
+  autoSaveDebounceSeconds: 2

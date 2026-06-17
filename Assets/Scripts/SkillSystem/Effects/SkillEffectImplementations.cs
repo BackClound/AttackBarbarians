@@ -42,14 +42,14 @@ public static class SkillEffectFactory
 /// </summary>
 public sealed class LightningSkillEffect : ISkillEffect
 {
-    private readonly List<Enemy> scratch = new List<Enemy>(16);
+    private readonly List<Enemy> boltTargets = new List<Enemy>(8);
     private readonly List<Enemy> explosionScratch = new List<Enemy>(16);
 
     /// <summary>技能类型：闪电。</summary>
     public SkillType SkillType => SkillType.Lightning;
 
     /// <summary>
-    /// 自动施法：从主目标出发链式伤害，可选麻痹与末端 AoE。
+    /// 自动施法：多道闪电各自命中不同首目标，链式延伸不受玩家攻击范围限制。
     /// </summary>
     /// <param name="context">技能上下文。</param>
     /// <param name="runtime">闪电运行时。</param>
@@ -61,20 +61,28 @@ public sealed class LightningSkillEffect : ISkillEffect
             return false;
         }
 
-        if (!context.TryGetPrimaryTarget(out Enemy primary))
+        SkillBuffProfile buff = runtime.BuffProfile;
+        int bolts = Mathf.Max(1, buff.LightningBolts);
+        int chainLen = Mathf.Max(1, buff.ChainTargets);
+        float linkDistance = runtime.Config.AreaRadius * 2f;
+
+        int boltCount = context.PickDistinctCombatTargets(boltTargets, bolts);
+        if (boltCount <= 0)
         {
             return false;
         }
 
-        SkillBuffProfile buff = runtime.BuffProfile;
-        int bolts = Mathf.Max(1, buff.LightningBolts);
-        int chainLen = Mathf.Max(1, buff.ChainTargets);
+        Vector2 playerOrigin = context.GetLightningCastOrigin();
 
-        for (int b = 0; b < bolts; b++)
+        for (int b = 0; b < boltCount; b++)
         {
-            Enemy start = b == 0 ? primary : primary;
-            List<Enemy> chain = context.GetChainTargets(start, chainLen, runtime.Config.AreaRadius * 2f);
-            Vector2 from = context.CastOrigin != null ? context.CastOrigin.position : context.Player.transform.position;
+            Enemy boltStart = boltTargets[b];
+            if (boltStart == null)
+            {
+                continue;
+            }
+
+            List<Enemy> chain = context.GetLightningChainTargets(boltStart, chainLen, linkDistance);
             for (int i = 0; i < chain.Count; i++)
             {
                 Enemy target = chain[i];
@@ -84,7 +92,12 @@ public sealed class LightningSkillEffect : ISkillEffect
                 }
 
                 Vector2 to = target.transform.position;
-                SkillCastVfxPlayer.PlayLightningSegment(from, to, runtime.Config.SkillPrefab, chainLen);
+                // 首段：Player → 敌人；链式段：敌人 A → 敌人 B
+                Vector2 segmentFrom = i == 0
+                    ? playerOrigin
+                    : (Vector2)chain[i - 1].transform.position;
+
+                SkillCastVfxPlayer.PlayLightningSegment(segmentFrom, to, runtime.Config.SkillPrefab, chainLen);
                 DamageInfo info = context.BuildDamageInfo(runtime, target.gameObject);
                 DamagePipeline.Apply(info);
 
@@ -94,11 +107,7 @@ public sealed class LightningSkillEffect : ISkillEffect
                     status.ApplyStun(buff.LightningStunDuration);
                 }
 
-                if (i < chain.Count - 1)
-                {
-                    from = to;
-                }
-                else if (buff.LightningEndExplosion)
+                if (i == chain.Count - 1 && buff.LightningEndExplosion)
                 {
                     context.QueryEnemiesInCircle(to, buff.LightningExplosionRadius, explosionScratch);
                     for (int e = 0; e < explosionScratch.Count; e++)
