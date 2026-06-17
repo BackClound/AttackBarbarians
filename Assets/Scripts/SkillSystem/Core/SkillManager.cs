@@ -71,6 +71,17 @@ public class SkillManager : MonoBehaviour
             unlockService.ApplyUnlocksToPlayerSkillManager();
         }
 
+        BuffManager buffManager = GetComponent<BuffManager>();
+        if (buffManager == null)
+        {
+            buffManager = GetComponentInChildren<BuffManager>();
+        }
+
+        if (ServiceLocator.TryGet(out SaveManager saveManager))
+        {
+            MetaProgressBuffBootstrap.TryApplyPermanentSkillBuffs(saveManager, buffManager);
+        }
+
         PlaytestBootstrap.TryApplyStartupBuffs();
     }
 

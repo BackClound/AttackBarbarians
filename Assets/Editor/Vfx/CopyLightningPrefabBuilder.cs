@@ -56,6 +56,8 @@ public static class CopyLightningPrefabBuilder
         }
 
         GameObject root = new GameObject("CopyLightning");
+        MeshFilter meshFilter = root.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = root.AddComponent<MeshRenderer>();
         SkillLightningLinkVfx link = root.AddComponent<SkillLightningLinkVfx>();
         SerializedObject so = new SerializedObject(link);
         so.FindProperty("materialResourcePath").stringValue = "VFX/Skill/M_CopyLightning";
@@ -63,9 +65,6 @@ public static class CopyLightningPrefabBuilder
         so.FindProperty("baseIntensity").floatValue = 4.5f;
         so.FindProperty("thicknessScale").floatValue = 0.7f;
         so.ApplyModifiedPropertiesWithoutUndo();
-
-        MeshFilter meshFilter = root.GetComponent<MeshFilter>();
-        MeshRenderer meshRenderer = root.GetComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = material;
         meshRenderer.sortingLayerName = "Bullet";
         meshRenderer.sortingOrder = 50;

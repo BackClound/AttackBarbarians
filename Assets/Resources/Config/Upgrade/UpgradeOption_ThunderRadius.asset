@@ -11,24 +11,24 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8800af4b187049ada2bb0decfa19516, type: 3}
   m_Name: UpgradeOption_ThunderRadius
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   configId: upgrade.thunder_radius
   displayName: Thunder Radius
   icon: {fileID: 0}
-  description: Thunder Radius
+  description: "\u843d\u96f7\u8303\u56f4\u6269\u5927"
   rarity: 0
   weight: 100
   effectType: 1
-  maxStacks: 99
+  maxStacks: 1
   minWave: 1
   maxWave: 0
-  mutuallyExclusiveGroup: 
+  mutuallyExclusiveGroup:
   prerequisiteOptionIds: []
-  buffConfigId: 
+  buffConfigId:
   buffStacks: 1
-  skillConfigId: 
+  skillConfigId:
   skillLevelDelta: 1
   skillBuffKind: 11
-  skillBuffTier: 2
+  skillBuffTier: 1
   resourceAmount: 10
   directModifiers: []

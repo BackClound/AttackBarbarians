@@ -11,24 +11,24 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8800af4b187049ada2bb0decfa19516, type: 3}
   m_Name: UpgradeOption_LightningChain
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   configId: upgrade.lightning_chain
   displayName: Lightning Chain
   icon: {fileID: 0}
-  description: Lightning Chain
+  description: "\u94fe\u5f0f\u8fde\u63a5 2 \u4e2a\u76ee\u6807"
   rarity: 0
   weight: 100
   effectType: 1
-  maxStacks: 99
+  maxStacks: 1
   minWave: 1
   maxWave: 0
-  mutuallyExclusiveGroup: 
+  mutuallyExclusiveGroup:
   prerequisiteOptionIds: []
-  buffConfigId: 
+  buffConfigId:
   buffStacks: 1
-  skillConfigId: 
+  skillConfigId:
   skillLevelDelta: 1
   skillBuffKind: 7
-  skillBuffTier: 3
+  skillBuffTier: 1
   resourceAmount: 10
   directModifiers: []

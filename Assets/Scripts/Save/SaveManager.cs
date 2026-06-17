@@ -303,6 +303,7 @@ public class SaveManager : MonoBehaviour, IGameSystem
         run.currentHp = hp;
         run.maxHp = maxHp;
         run.activeBuffs?.Clear();
+        run.selectedUpgrades?.Clear();
         currentData.statistics.totalRuns++;
         MarkDirty();
     }

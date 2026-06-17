@@ -1,4 +1,6 @@
 #if UNITY_EDITOR
+using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -15,50 +17,118 @@ public static class UpgradeConfigBootstrapMenu
     {
         Directory.CreateDirectory(UpgradeFolder);
 
+        var allOptions = new List<UpgradeOptionSO>(160);
+
         UpgradeOptionSO attackUp = CreateOrLoadOption(
             "UpgradeOption_AttackUp",
             GameConstants.ConfigIds.UpgradeAttackUp,
             "Attack Up",
-            "+5 base damage",
+            "+5 基础伤害",
             UpgradeEffectType.StatBuff,
             buffConfigId: GameConstants.ConfigIds.BuffAttackUp);
+        allOptions.Add(attackUp);
 
-        UpgradeOptionSO shootPierce = CreateOrLoadOption(
-            "UpgradeOption_ShootPierce",
-            GameConstants.ConfigIds.UpgradeShootPierce,
-            "Piercing Arrows",
-            "Shooting gains pierce",
-            UpgradeEffectType.SkillBuff,
-            skillBuffKind: SkillBuffKind.ShootPierce);
+        foreach (SkillBuffKind kind in Enum.GetValues(typeof(SkillBuffKind)))
+        {
+            if (kind == SkillBuffKind.None || !SkillBuffTierSpecUtility.HasMultipleTiers(kind))
+            {
+                continue;
+            }
+
+            int maxTier = SkillBuffTierSpecUtility.GetMaxTier(kind);
+            for (int tier = 1; tier <= maxTier; tier++)
+            {
+                string fileName = SkillBuffTierSpecUtility.BuildUpgradeFileName(kind, tier);
+                string configId = SkillBuffTierSpecUtility.BuildUpgradeConfigId(kind, tier);
+                string displayName = SkillBuffTierSpecUtility.BuildUpgradeDisplayName(kind, tier);
+                string description = SkillBuffTierSpecUtility.BuildDescription(kind, tier);
+
+                UpgradeOptionSO option = CreateOrLoadOption(
+                    fileName,
+                    configId,
+                    displayName,
+                    description,
+                    UpgradeEffectType.SkillBuff,
+                    skillBuffKind: kind,
+                    skillBuffTier: tier,
+                    maxStacks: 1);
+                allOptions.Add(option);
+            }
+        }
 
         UpgradeOptionSO unlockLightning = CreateOrLoadOption(
             "UpgradeOption_UnlockLightning",
             GameConstants.ConfigIds.UpgradeUnlockLightning,
             "Unlock Lightning",
-            "Unlock lightning skill",
+            "解锁闪电技能",
             UpgradeEffectType.SkillUnlock,
-            skillConfigId: GameConstants.ConfigIds.SkillLightning);
+            skillConfigId: GameConstants.ConfigIds.SkillLightning,
+            maxStacks: 1);
+        allOptions.Add(unlockLightning);
 
-        UpgradeOptionSO goldBonus = CreateOrLoadOption(
-            "UpgradeOption_GoldBonus",
-            GameConstants.ConfigIds.UpgradeGoldBonus,
-            "Gold Bonus",
-            "+50 gold",
-            UpgradeEffectType.ResourceGold,
-            resourceAmount: 50);
+        UpgradeOptionSO unlockThunder = CreateOrLoadOption(
+            "UpgradeOption_UnlockThunder",
+            GameConstants.ConfigIds.UpgradeUnlockThunder,
+            "Unlock Thunder",
+            "解锁落雷技能",
+            UpgradeEffectType.SkillUnlock,
+            skillConfigId: GameConstants.ConfigIds.SkillThunder,
+            maxStacks: 1);
+        allOptions.Add(unlockThunder);
+
+        UpgradeOptionSO unlockHeal = CreateOrLoadOption(
+            "UpgradeOption_UnlockHeal",
+            GameConstants.ConfigIds.UpgradeUnlockHeal,
+            "Unlock Heal",
+            "解锁恢复技能",
+            UpgradeEffectType.SkillUnlock,
+            skillConfigId: GameConstants.ConfigIds.SkillHeal,
+            maxStacks: 1);
+        allOptions.Add(unlockHeal);
+
+        UpgradeOptionSO unlockIce = CreateOrLoadOption(
+            "UpgradeOption_UnlockIce",
+            GameConstants.ConfigIds.UpgradeUnlockIce,
+            "Unlock Ice",
+            "解锁冰霜技能",
+            UpgradeEffectType.SkillUnlock,
+            skillConfigId: GameConstants.ConfigIds.SkillIce,
+            maxStacks: 1);
+        allOptions.Add(unlockIce);
+
+        UpgradeOptionSO unlockFireRain = CreateOrLoadOption(
+            "UpgradeOption_UnlockFireRain",
+            GameConstants.ConfigIds.UpgradeUnlockFireRain,
+            "Unlock Fire Rain",
+            "解锁火雨技能",
+            UpgradeEffectType.SkillUnlock,
+            skillConfigId: GameConstants.ConfigIds.SkillFireRain,
+            maxStacks: 1);
+        allOptions.Add(unlockFireRain);
+
+        UpgradeOptionSO unlockWaterWave = CreateOrLoadOption(
+            "UpgradeOption_UnlockWaterWave",
+            GameConstants.ConfigIds.UpgradeUnlockWaterWave,
+            "Unlock Water Wave",
+            "解锁水浪技能",
+            UpgradeEffectType.SkillUnlock,
+            skillConfigId: GameConstants.ConfigIds.SkillWaterWave,
+            maxStacks: 1);
+        allOptions.Add(unlockWaterWave);
 
         RewardPoolSO pool = CreateOrLoadPool(
             "RewardPool_Default",
             GameConstants.ConfigIds.RewardPoolDefault,
-            attackUp,
-            shootPierce,
-            unlockLightning,
-            goldBonus);
+            allOptions.ToArray());
 
-        RegisterInDatabase(attackUp, shootPierce, unlockLightning, goldBonus, pool);
+        var databaseItems = new List<UnityEngine.Object>(allOptions.Count + 1);
+        databaseItems.AddRange(allOptions);
+        databaseItems.Add(pool);
+        RegisterInDatabase(databaseItems.ToArray());
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[UpgradeConfigBootstrap] 默认升级资产已创建并写入 ConfigDatabase。");
+        Debug.Log($"[UpgradeConfigBootstrap] 已生成/更新 {allOptions.Count} 个升级选项与 RewardPool_Default。");
     }
 
     private static UpgradeOptionSO CreateOrLoadOption(
@@ -70,6 +140,8 @@ public static class UpgradeConfigBootstrapMenu
         string buffConfigId = null,
         string skillConfigId = null,
         SkillBuffKind skillBuffKind = SkillBuffKind.None,
+        int skillBuffTier = 1,
+        int maxStacks = 99,
         long resourceAmount = 0)
     {
         string path = $"{UpgradeFolder}/{fileName}.asset";
@@ -85,9 +157,11 @@ public static class UpgradeConfigBootstrapMenu
         so.FindProperty("displayName").stringValue = displayName;
         so.FindProperty("description").stringValue = description;
         so.FindProperty("effectType").enumValueIndex = (int)effectType;
+        so.FindProperty("maxStacks").intValue = maxStacks;
         so.FindProperty("buffConfigId").stringValue = buffConfigId ?? string.Empty;
         so.FindProperty("skillConfigId").stringValue = skillConfigId ?? string.Empty;
         so.FindProperty("skillBuffKind").enumValueIndex = (int)skillBuffKind;
+        so.FindProperty("skillBuffTier").intValue = skillBuffTier;
         so.FindProperty("resourceAmount").longValue = resourceAmount;
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(asset);
@@ -124,12 +198,7 @@ public static class UpgradeConfigBootstrapMenu
         return pool;
     }
 
-    private static void RegisterInDatabase(
-        UpgradeOptionSO attackUp,
-        UpgradeOptionSO shootPierce,
-        UpgradeOptionSO unlockLightning,
-        UpgradeOptionSO goldBonus,
-        RewardPoolSO pool)
+    private static void RegisterInDatabase(params UnityEngine.Object[] items)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(
             "Assets/Resources/Config/ConfigDatabase.asset");
@@ -140,16 +209,24 @@ public static class UpgradeConfigBootstrapMenu
         }
 
         SerializedObject so = new SerializedObject(database);
-        AddUnique(so.FindProperty("upgradeOptions"), attackUp);
-        AddUnique(so.FindProperty("upgradeOptions"), shootPierce);
-        AddUnique(so.FindProperty("upgradeOptions"), unlockLightning);
-        AddUnique(so.FindProperty("upgradeOptions"), goldBonus);
-        AddUnique(so.FindProperty("rewardPools"), pool);
+        for (int i = 0; i < items.Length; i++)
+        {
+            UnityEngine.Object item = items[i];
+            if (item is UpgradeOptionSO option)
+            {
+                AddUnique(so.FindProperty("upgradeOptions"), option);
+            }
+            else if (item is RewardPoolSO pool)
+            {
+                AddUnique(so.FindProperty("rewardPools"), pool);
+            }
+        }
+
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(database);
     }
 
-    private static void AddUnique(SerializedProperty list, Object item)
+    private static void AddUnique(SerializedProperty list, UnityEngine.Object item)
     {
         if (list == null || item == null)
         {

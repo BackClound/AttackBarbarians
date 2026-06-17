@@ -57,9 +57,9 @@ public static class SkillLightningLinkPrefabBuilder
         }
 
         GameObject root = new GameObject("SkillLightningLink");
+        MeshFilter meshFilter = root.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = root.AddComponent<MeshRenderer>();
         root.AddComponent<SkillLightningLinkVfx>();
-        MeshFilter meshFilter = root.GetComponent<MeshFilter>();
-        MeshRenderer meshRenderer = root.GetComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = material;
         meshRenderer.sortingLayerName = "Bullet";
         meshRenderer.sortingOrder = 50;

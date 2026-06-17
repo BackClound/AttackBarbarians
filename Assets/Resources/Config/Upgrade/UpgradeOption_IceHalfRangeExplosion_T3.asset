@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8800af4b187049ada2bb0decfa19516, type: 3}
+  m_Name: UpgradeOption_IceHalfRangeExplosion_T3
+  m_EditorClassIdentifier:
+  configId: upgrade.ice_half_range_explosion.t3
+  displayName: Mid-Range Blast T3
+  icon: {fileID: 0}
+  description: "\u534a\u7a0b\u8303\u56f4\u7206\u70b8\u5e76\u51b0\u51bb"
+  rarity: 0
+  weight: 100
+  effectType: 1
+  maxStacks: 1
+  minWave: 1
+  maxWave: 0
+  mutuallyExclusiveGroup:
+  prerequisiteOptionIds: []
+  buffConfigId:
+  buffStacks: 1
+  skillConfigId:
+  skillLevelDelta: 1
+  skillBuffKind: 26
+  skillBuffTier: 3
+  resourceAmount: 10
+  directModifiers: []

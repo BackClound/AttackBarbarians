@@ -92,8 +92,15 @@ public static class UpgradeApplicator
     /// <returns>应用成功返回 <c>true</c>。</returns>
     private static bool ApplySkillBuff(UpgradeOptionSO option, PlayerSkillManager skillManager)
     {
-        if (skillManager == null || option.SkillBuffKind == SkillBuffKind.None)
+        if (skillManager == null || skillManager.SkillManager == null || option.SkillBuffKind == SkillBuffKind.None)
         {
+            return false;
+        }
+
+        SkillType target = SkillBuffCatalog.GetTargetSkill(option.SkillBuffKind);
+        if (target != SkillType.None && !skillManager.SkillManager.IsSkillUnlocked(target))
+        {
+            Debug.LogWarning($"[UpgradeApplicator] 技能未解锁，无法应用专属 Buff: {option.SkillBuffKind} -> {target}");
             return false;
         }
 
@@ -112,7 +119,8 @@ public static class UpgradeApplicator
             return false;
         }
 
-        skillManager.SkillManager.UnlockSkill(option.SkillConfigId, 1);
+        // 本系统的三选一为本局成长：技能解锁不写入元进度存档。
+        skillManager.SkillManager.UnlockSkill(option.SkillConfigId, 1, persistToSave: false);
         return true;
     }
 

@@ -73,13 +73,13 @@ public static class BuffConfigBootstrapMenu
                 continue;
             }
 
-            int maxTier = GetMaxTier(kind);
+            int maxTier = SkillBuffTierSpecUtility.GetMaxTier(kind);
             for (int tier = 1; tier <= maxTier; tier++)
             {
                 specs.Add(new BuffTierSpec(
                     kind,
                     tier,
-                    description: BuildDescription(kind, tier)));
+                    description: SkillBuffTierSpecUtility.BuildDescription(kind, tier)));
             }
         }
 
@@ -121,142 +121,6 @@ public static class BuffConfigBootstrapMenu
                 return;
             }
         }
-    }
-
-    private static int GetMaxTier(SkillBuffKind kind)
-    {
-        switch (kind)
-        {
-            case SkillBuffKind.ShootTrajectoryLines:
-            case SkillBuffKind.LightningBoltCount:
-                return 4;
-            case SkillBuffKind.LightningChainTargets:
-                return 4;
-            case SkillBuffKind.LightningEndExplosion:
-            case SkillBuffKind.ThunderRadius:
-            case SkillBuffKind.FireRainRadius:
-            case SkillBuffKind.FireRainDuration:
-            case SkillBuffKind.WaterSlowDuration:
-            case SkillBuffKind.IceExplosionRadius:
-            case SkillBuffKind.HealMaxHpPercent:
-                return 5;
-            case SkillBuffKind.ShootPierce:
-            case SkillBuffKind.WaterSlowStrength:
-            case SkillBuffKind.IceFreezeDuration:
-            case SkillBuffKind.IceProjectileSize:
-            case SkillBuffKind.IceHalfRangeExplosion:
-            case SkillBuffKind.ThunderPersistentZone:
-                return 3;
-            case SkillBuffKind.ShootVolleyCount:
-            case SkillBuffKind.ShootBounce:
-            case SkillBuffKind.ShootSplitOnHit:
-            case SkillBuffKind.ThunderStunDuration:
-            case SkillBuffKind.FireRainChainOnKill:
-            case SkillBuffKind.WaterWaveCount:
-            case SkillBuffKind.WaterWaveSize:
-            case SkillBuffKind.IceTrajectoryLines:
-            case SkillBuffKind.IceVolleyCount:
-                return 2;
-            case SkillBuffKind.GlobalAttackSpeed:
-            case SkillBuffKind.GlobalBaseDamage:
-            case SkillBuffKind.GlobalCritChance:
-            case SkillBuffKind.GlobalCritDamage:
-            case SkillBuffKind.GlobalCooldownReduction:
-                return 5;
-            case SkillBuffKind.ThunderStrikeCount:
-                return 4;
-            default:
-                return 1;
-        }
-    }
-
-    private static string BuildDescription(SkillBuffKind kind, int tier)
-    {
-        switch (kind)
-        {
-            case SkillBuffKind.ShootTrajectoryLines:
-                return $"扇形弹道 {GetCountAtTier(new[] { 2, 3, 4, 5 }, tier)} 条";
-            case SkillBuffKind.ShootVolleyCount:
-                return $"每次齐射 {GetCountAtTier(new[] { 2, 3 }, tier)} 发";
-            case SkillBuffKind.ShootPierce:
-                return $"穿透 +{GetCountAtTier(new[] { 1, 2, 3 }, tier)}";
-            case SkillBuffKind.ShootBounce:
-                return $"弹射 {tier} 次";
-            case SkillBuffKind.ShootSplitOnHit:
-                return $"命中分裂 {tier} 次";
-            case SkillBuffKind.LightningBoltCount:
-                return $"并行闪电 {GetCountAtTier(new[] { 2, 3, 4, 5 }, tier)} 道";
-            case SkillBuffKind.LightningChainTargets:
-                return $"链式连接 {GetCountAtTier(new[] { 2, 3, 4, 5 }, tier)} 个目标";
-            case SkillBuffKind.LightningEndExplosion:
-                return "链末端范围爆炸";
-            case SkillBuffKind.LightningStun:
-                return "命中附加麻痹";
-            case SkillBuffKind.ThunderStrikeCount:
-                return $"落雷 {GetCountAtTier(new[] { 2, 3, 4, 5 }, tier)} 次";
-            case SkillBuffKind.ThunderRadius:
-                return "落雷范围扩大";
-            case SkillBuffKind.ThunderStunAll:
-                return "范围内全体麻痹";
-            case SkillBuffKind.ThunderStunDuration:
-                return "麻痹时长提升";
-            case SkillBuffKind.ThunderPersistentZone:
-                return "生成持续伤害区域";
-            case SkillBuffKind.FireRainRadius:
-                return "火雨范围扩大";
-            case SkillBuffKind.FireRainDuration:
-                return "火雨持续时间延长";
-            case SkillBuffKind.FireRainChainOnKill:
-                return tier >= 2 ? "击杀连锁附近 3 敌" : "击杀连锁附近 2 敌";
-            case SkillBuffKind.WaterWaveCount:
-                return tier >= 2 ? "水浪 3 道" : "水浪 2 道";
-            case SkillBuffKind.WaterSlowStrength:
-                return "减速强度提升";
-            case SkillBuffKind.WaterSlowDuration:
-                return "减速时长延长";
-            case SkillBuffKind.WaterWaveSize:
-                return "水浪体积扩大";
-            case SkillBuffKind.IceTrajectoryLines:
-                return tier >= 2 ? "冰霜扇形 3 条" : "冰霜扇形 2 条";
-            case SkillBuffKind.IceVolleyCount:
-                return tier >= 2 ? "冰霜齐射 3 发" : "冰霜齐射 2 发";
-            case SkillBuffKind.IceFreezeDuration:
-                return "冰冻时长延长";
-            case SkillBuffKind.IceProjectileSize:
-                return "冰霜弹道体积扩大";
-            case SkillBuffKind.IceHalfRangeExplosion:
-                return "半程范围爆炸并冰冻";
-            case SkillBuffKind.IceExplosionRadius:
-                return "爆炸范围扩大";
-            case SkillBuffKind.HealRegenPerSecond:
-                return "每秒恢复 1% 最大生命";
-            case SkillBuffKind.HealMaxHpPercent:
-                return "最大生命百分比提升";
-            case SkillBuffKind.HealPeriodicTenPercent:
-                return "每分钟恢复 10% 最大生命";
-            case SkillBuffKind.HealPeakGrowthEvery3Min:
-                return "每 3 分钟峰值 +10% 最大生命";
-            case SkillBuffKind.HealOneTimeFull:
-                return "一次性满血";
-            case SkillBuffKind.GlobalAttackSpeed:
-                return $"全局攻速 +{tier * 10}%";
-            case SkillBuffKind.GlobalBaseDamage:
-                return $"全局伤害 +{tier * 10}%";
-            case SkillBuffKind.GlobalCritChance:
-                return $"全局暴击率 +{tier * 10}%";
-            case SkillBuffKind.GlobalCritDamage:
-                return $"全局暴击伤害 +{tier * 10}%";
-            case SkillBuffKind.GlobalCooldownReduction:
-                return $"全局冷却缩减 {tier * 10}%";
-            default:
-                return kind.ToString();
-        }
-    }
-
-    private static int GetCountAtTier(int[] table, int tier)
-    {
-        tier = Mathf.Clamp(tier, 1, table.Length);
-        return table[tier - 1];
     }
 
     private static BuffDataSO CreateOrLoadStatBuff()
@@ -318,7 +182,7 @@ public static class BuffConfigBootstrapMenu
         }
 
         SkillType target = SkillBuffCatalog.GetTargetSkill(spec.Kind);
-        string displayName = GetMaxTier(spec.Kind) > 1
+        string displayName = SkillBuffTierSpecUtility.GetMaxTier(spec.Kind) > 1
             ? $"{spec.Kind} T{spec.Tier}"
             : spec.Kind.ToString();
 
@@ -334,7 +198,7 @@ public static class BuffConfigBootstrapMenu
         so.FindProperty("skillBuffKind").enumValueIndex = (int)spec.Kind;
         so.FindProperty("skillBuffTarget").enumValueIndex = (int)target;
         so.FindProperty("skillBuffTier").intValue = spec.Tier;
-        so.FindProperty("description").stringValue = spec.Description ?? BuildDescription(spec.Kind, spec.Tier);
+        so.FindProperty("description").stringValue = spec.Description ?? SkillBuffTierSpecUtility.BuildDescription(spec.Kind, spec.Tier);
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(buff);
         return buff;
@@ -360,7 +224,7 @@ public static class BuffConfigBootstrapMenu
 
     private static string BuildDefaultFileName(SkillBuffKind kind, int tier)
     {
-        return GetMaxTier(kind) > 1
+        return SkillBuffTierSpecUtility.GetMaxTier(kind) > 1
             ? $"BuffData_{kind}_T{tier}"
             : $"BuffData_{kind}";
     }
@@ -368,7 +232,7 @@ public static class BuffConfigBootstrapMenu
     private static string BuildDefaultConfigId(SkillBuffKind kind, int tier)
     {
         string snake = ToSnakeCase(kind.ToString());
-        return GetMaxTier(kind) > 1
+        return SkillBuffTierSpecUtility.GetMaxTier(kind) > 1
             ? $"buff.skill.{snake}.t{tier}"
             : $"buff.skill.{snake}";
     }

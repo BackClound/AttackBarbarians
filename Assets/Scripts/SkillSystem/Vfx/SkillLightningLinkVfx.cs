@@ -103,11 +103,48 @@ public class SkillLightningLinkVfx : MonoBehaviour
         meshRenderer.SetPropertyBlock(propertyBlock);
     }
 
+    private void Reset()
+    {
+        CacheComponentReferences();
+    }
+
+    private void CacheComponentReferences()
+    {
+        if (meshFilter == null)
+        {
+            meshFilter = GetComponent<MeshFilter>();
+        }
+
+        if (meshRenderer == null)
+        {
+            meshRenderer = GetComponent<MeshRenderer>();
+        }
+    }
+
+    private void EnsureRequiredComponents()
+    {
+        CacheComponentReferences();
+
+        if (meshFilter == null)
+        {
+            meshFilter = gameObject.AddComponent<MeshFilter>();
+        }
+
+        if (meshRenderer == null)
+        {
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        }
+
+        propertyBlock ??= new MaterialPropertyBlock();
+    }
+
     private void EnsureComponents()
     {
-        meshFilter ??= GetComponent<MeshFilter>();
-        meshRenderer ??= GetComponent<MeshRenderer>();
-        propertyBlock ??= new MaterialPropertyBlock();
+        EnsureRequiredComponents();
+        if (meshFilter == null || meshRenderer == null)
+        {
+            return;
+        }
 
         if (meshFilter.sharedMesh == null)
         {
@@ -192,7 +229,14 @@ public class SkillLightningLinkVfx : MonoBehaviour
             return;
         }
 
-        EnsureComponents();
+        // OnValidate 可能在 RequireComponent 尚未挂上时触发，此处仅缓存引用，不 AddComponent。
+        CacheComponentReferences();
+        if (meshFilter == null || meshRenderer == null)
+        {
+            return;
+        }
+
+        propertyBlock ??= new MaterialPropertyBlock();
     }
 #endif
 
