@@ -93,7 +93,7 @@ def rebuild_reward_pool() -> None:
     pool_path = UPGRADE_DIR / "RewardPool_Default.asset"
     meta_path = pool_path.with_suffix(pool_path.suffix + ".meta")
     pool_guid_match = META_GUID.search(meta_path.read_text(encoding="utf-8"))
-    pool_script = "Dnwa5nmqUSgc/hntxZ6yFQS+Lg+sKvGZzx5CedoxB56fan95Rdooj60="
+    pool_script = "165cc72cc3f594281af4630af166481f"
 
     # Order: AttackUp, all skill buff tiers (exclude unlock), unlock cards
     unlock_names = {

@@ -13,7 +13,7 @@ UPGRADE_DIR = ROOT / "Assets/Resources/Config/Upgrade"
 CONFIG_DB = ROOT / "Assets/Resources/Config/ConfigDatabase.asset"
 POOL_ASSET = UPGRADE_DIR / "RewardPool_Default.asset"
 SCRIPT_GUID = "a8800af4b187049ada2bb0decfa19516"
-POOL_SCRIPT_GUID = "Dnwa5nmqUSgc/hntxZ6yFQS+Lg+sKvGZzx5CedoxB56fan95Rdooj60="
+POOL_SCRIPT_GUID = "165cc72cc3f594281af4630af166481f"
 
 SKILL_BUFF_KINDS = [
     "None",
