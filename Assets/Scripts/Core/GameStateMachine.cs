@@ -93,24 +93,14 @@ public sealed class GameStateMachine
     /// </summary>
     public void Shutdown()
     {
-        Time.timeScale = 1f;
+        GameRunSpeedSettings.Reset();
     }
 
     /// <summary>根据状态设置 <see cref="Time.timeScale"/>。</summary>
     /// <param name="state">当前或目标状态。</param>
     private static void ApplyTimeScaleForState(GameState state)
     {
-        switch (state)
-        {
-            case GameState.Paused:
-            case GameState.UpgradeChoosing:
-            case GameState.GameOver:
-                Time.timeScale = 0f;
-                break;
-            default:
-                Time.timeScale = 1f;
-                break;
-        }
+        GameRunSpeedSettings.ApplyToUnityTimeScale(state);
     }
 
     /// <summary>记录非法跳转警告。</summary>

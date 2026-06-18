@@ -194,6 +194,7 @@ public static class GameConstants
         public const string DailyRewardCatalog = "Config/DailyReward/DailyRewardCatalog_Default";
         public const string AdConfig = "Config/Ad/AdConfig_Default";
         public const string PerformanceBudget = "Config/Performance/PerformanceBudget_Default";
+        public const string WaveProgression = "Config/Wave/WaveProgression_Default";
     }
 
     /// <summary>配置表条目 ID，与 ScriptableObject 资产一一对应。</summary>

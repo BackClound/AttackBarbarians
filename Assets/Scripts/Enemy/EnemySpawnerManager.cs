@@ -183,7 +183,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
         }
 
         controller.InitializeForSpawn(enemyConfigId, statMultiplier, waveIndex);
-        EnsureBossController(instance).Initialize(bossConfigId, statMultiplier);
+        EnsureBossController(instance).Initialize(bossConfigId, statMultiplier, waveIndex);
 
         AliveEnemyCount++;
         AliveBossCount++;

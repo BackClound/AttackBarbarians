@@ -17,6 +17,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private SkillUnlockTableSO skillUnlockTable;
     [SerializeField] private List<BuffDataSO> buffs = new List<BuffDataSO>();
     [SerializeField] private List<WaveDataSO> waves = new List<WaveDataSO>();
+    [SerializeField] private WaveProgressionConfigSO waveProgression;
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
     [SerializeField] private List<BossSkillDataSO> bossSkills = new List<BossSkillDataSO>();
     [SerializeField] private List<SpecialEnemyAbilityDataSO> specialEnemyAbilities = new List<SpecialEnemyAbilityDataSO>();
@@ -46,6 +47,8 @@ public class ConfigDatabaseSO : ScriptableObject
     public IReadOnlyList<BuffDataSO> Buffs => buffs;
     /// <summary>所有波次配置条目列表。</summary>
     public IReadOnlyList<WaveDataSO> Waves => waves;
+    /// <summary>局内波次成长曲线配置。</summary>
+    public WaveProgressionConfigSO WaveProgression => waveProgression;
     /// <summary>所有 Boss 配置条目列表。</summary>
     public IReadOnlyList<BossDataSO> Bosses => bosses;
     /// <summary>所有 Boss 技能配置条目列表。</summary>

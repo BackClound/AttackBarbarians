@@ -22,6 +22,7 @@ public class BossController : MonoBehaviour
     private Entity_Stats entityStats;
     private BossDataSO bossData;
     private string bossConfigId = string.Empty;
+    private int spawnWaveIndex = 1;
     private bool isInitialized;
     private bool defeatRaised;
 
@@ -47,11 +48,13 @@ public class BossController : MonoBehaviour
     /// 由 <see cref="EnemySpawnerManager.TrySpawnBoss"/> 在敌人初始化后调用。
     /// </summary>
     /// <param name="configId">Boss 配置 Id。</param>
-    /// <param name="waveStatMultiplier">波次属性倍率。</param>
-    public void Initialize(string configId, float waveStatMultiplier)
+    /// <param name="waveStatMultiplier">外部属性倍率（地图 / 条目）。</param>
+    /// <param name="waveIndex">当前波次序号。</param>
+    public void Initialize(string configId, float waveStatMultiplier, int waveIndex)
     {
         Shutdown();
         bossConfigId = configId ?? string.Empty;
+        spawnWaveIndex = Mathf.Max(1, waveIndex);
         defeatRaised = false;
 
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||
@@ -173,7 +176,18 @@ public class BossController : MonoBehaviour
             }
         }
 
-        EnemyStatScaling.ApplyMultiplier(bossSnapshot, waveStatMultiplier);
+        if (RunProgressionContext.IsActive)
+        {
+            EnemyStatScaling.ApplyWaveScaling(
+                bossSnapshot,
+                spawnWaveIndex,
+                waveStatMultiplier,
+                RunProgressionContext.Config);
+        }
+        else
+        {
+            EnemyStatScaling.ApplyMultiplier(bossSnapshot, waveStatMultiplier);
+        }
 
         if (RunDifficultyContext.IsEliteMode && RunDifficultyContext.EliteConfig != null)
         {

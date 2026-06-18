@@ -24,6 +24,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     private IEnemyAbility[] abilities;
     private CollisionProfile collisionProfile;
     private float waveStatMultiplier = 1f;
+    private int spawnWaveIndex = 1;
     private float meleeDamage = 10f;
     private float wallRayDistance = 1.5f;
     private LayerMask wallLayerMask;
@@ -62,6 +63,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
         bool markAsSpecial = false)
     {
         waveStatMultiplier = Mathf.Max(0.1f, statMultiplier);
+        spawnWaveIndex = Mathf.Max(1, waveIndex);
         SpecialEnemySpawnContext.Set(waveIndex, statMultiplier);
         if (enemy != null)
         {
@@ -102,6 +104,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     {
         isInitialized = false;
         waveStatMultiplier = 1f;
+        spawnWaveIndex = 1;
         enemy?.OnDespawn();
     }
 
@@ -221,7 +224,21 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             return 0;
         }
 
-        int reward = Mathf.Max(1, Mathf.RoundToInt(baseExp));
+        float typeWeight = ResolveExperienceTypeWeight();
+        int reward;
+        if (RunProgressionContext.IsActive)
+        {
+            reward = WaveProgressionCalculator.GetKillExperience(
+                Mathf.RoundToInt(baseExp),
+                spawnWaveIndex,
+                typeWeight,
+                RunProgressionContext.Config,
+                RunDifficultyContext.ExpGainDifficultyMult);
+        }
+        else
+        {
+            reward = Mathf.Max(1, Mathf.RoundToInt(baseExp));
+        }
         if (enemy != null && enemy.TryGetComponent(out BossController boss) && boss.IsReady)
         {
             reward += boss.BonusExperience;
@@ -262,6 +279,33 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
             data.SpecialBonusExperience);
     }
 
+    /// <summary>按敌人类型解析经验权重。</summary>
+    private float ResolveExperienceTypeWeight()
+    {
+        if (!RunProgressionContext.IsActive || RunProgressionContext.Config == null || enemy == null)
+        {
+            return 1f;
+        }
+
+        WaveProgressionConfigSO cfg = RunProgressionContext.Config;
+        if (enemy.IsBoss)
+        {
+            return cfg.NormalEnemyExpWeight;
+        }
+
+        if (enemy.IsElite)
+        {
+            return cfg.EliteEnemyExpWeight;
+        }
+
+        if (enemy.IsSpecial)
+        {
+            return cfg.SpecialEnemyExpWeight;
+        }
+
+        return cfg.NormalEnemyExpWeight;
+    }
+
     /// <summary>确保存在 <see cref="SpecialEnemyController"/> 组件。</summary>
     /// <returns>特殊敌人控制器实例。</returns>
     private SpecialEnemyController EnsureSpecialEnemyController()
@@ -278,7 +322,18 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     private void ApplyScaledStats()
     {
         scaledSnapshot.CopyFrom(runtimeData.Stats);
-        EnemyStatScaling.ApplyMultiplier(scaledSnapshot, waveStatMultiplier);
+        if (RunProgressionContext.IsActive)
+        {
+            EnemyStatScaling.ApplyWaveScaling(
+                scaledSnapshot,
+                spawnWaveIndex,
+                waveStatMultiplier,
+                RunProgressionContext.Config);
+        }
+        else
+        {
+            EnemyStatScaling.ApplyMultiplier(scaledSnapshot, waveStatMultiplier);
+        }
         ApplyEliteScaling();
         ConfigStatBridge.ApplyToEntityStats(scaledSnapshot, entityStats);
     }
@@ -310,9 +365,26 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 
         enemy.moveSpeed = scaledSnapshot.Get(StatType.MoveSpeed);
         enemy.cooldownThreshold = data.AttackCooldown;
-        meleeDamage = data.ContactDamage > 0f
-            ? data.ContactDamage
-            : scaledSnapshot.Get(StatType.Damage);
+        if (data.ContactDamage > 0f)
+        {
+            if (RunProgressionContext.IsActive)
+            {
+                float damageMult = WaveProgressionCalculator.GetStatMultiplier(
+                                         StatType.Damage,
+                                         spawnWaveIndex,
+                                         RunProgressionContext.Config) *
+                                     waveStatMultiplier;
+                meleeDamage = data.ContactDamage * damageMult;
+            }
+            else
+            {
+                meleeDamage = data.ContactDamage * waveStatMultiplier;
+            }
+        }
+        else
+        {
+            meleeDamage = scaledSnapshot.Get(StatType.Damage);
+        }
         wallRayDistance = data.AttackDistance;
         enemy?.SetAttackProbeDistance(wallRayDistance);
     }
@@ -401,7 +473,38 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 public static class EnemyStatScaling
 {
     /// <summary>
-    /// 将波次倍率应用到快照中的核心战斗属性。
+    /// V2：按属性曲线应用波次缩放，再乘外部倍率（地图 / 条目）。
+    /// </summary>
+    public static void ApplyWaveScaling(
+        StatRuntimeSnapshot snapshot,
+        int waveIndex,
+        float externalMultiplier,
+        WaveProgressionConfigSO cfg)
+    {
+        if (snapshot == null || cfg == null)
+        {
+            return;
+        }
+
+        externalMultiplier = Mathf.Max(0.01f, externalMultiplier);
+        waveIndex = Mathf.Max(1, waveIndex);
+
+        ApplyMultiplicativeStat(snapshot, StatType.MaxHp, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.Damage, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.FireDamage, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.IceDamage, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.LightningDamage, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.MoveSpeed, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeed, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeedMulti, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.Armor, waveIndex, cfg, externalMultiplier);
+
+        ApplyAdditiveStat(snapshot, StatType.CritChance, waveIndex, cfg);
+        ApplyAdditiveStat(snapshot, StatType.CritPower, waveIndex, cfg);
+    }
+
+    /// <summary>
+    /// 将统一波次倍率应用到快照中的核心战斗属性（Legacy）。
     /// </summary>
     /// <param name="snapshot">属性快照。</param>
     /// <param name="multiplier">波次缩放倍率。</param>
@@ -421,6 +524,37 @@ public static class EnemyStatScaling
         ScaleStat(snapshot, StatType.IceDamage, multiplier);
         ScaleStat(snapshot, StatType.LightningDamage, multiplier);
         ScaleStat(snapshot, StatType.Armor, multiplier);
+    }
+
+    private static void ApplyMultiplicativeStat(
+        StatRuntimeSnapshot snapshot,
+        StatType statType,
+        int waveIndex,
+        WaveProgressionConfigSO cfg,
+        float externalMultiplier)
+    {
+        float mult = WaveProgressionCalculator.GetStatMultiplier(statType, waveIndex, cfg) * externalMultiplier;
+        if (Mathf.Approximately(mult, 1f))
+        {
+            return;
+        }
+
+        ScaleStat(snapshot, statType, mult);
+    }
+
+    private static void ApplyAdditiveStat(
+        StatRuntimeSnapshot snapshot,
+        StatType statType,
+        int waveIndex,
+        WaveProgressionConfigSO cfg)
+    {
+        float bonus = WaveProgressionCalculator.GetStatAdditiveBonus(statType, waveIndex, cfg);
+        if (Mathf.Approximately(bonus, 0f))
+        {
+            return;
+        }
+
+        snapshot.Set(statType, snapshot.Get(statType) + bonus);
     }
 
     /// <summary>缩放快照中的单个属性。</summary>

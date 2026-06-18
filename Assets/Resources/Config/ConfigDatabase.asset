@@ -156,6 +156,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 94b96c775ff6b446bab57c378ab7ca31, type: 2}
   waves:
   - {fileID: 11400000, guid: d323b39826634a8fb69b55d9e2a1ef57, type: 2}
+  waveProgression: {fileID: 11400000, guid: 20b3b9694e1a4b5a9ae8abec10011486, type: 2}
   bosses:
   - {fileID: 11400000, guid: 8dcbb77b23e5c4995a326908774894f4, type: 2}
   bossSkills:

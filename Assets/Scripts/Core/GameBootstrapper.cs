@@ -175,6 +175,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private GameManager gameManager;
 
     /// <summary>
+    /// [作用域: 全局] 测试用运行倍速（Time.timeScale 快进，1~5x）。
+    /// </summary>
+    [SerializeField] private GameRunSpeedController gameRunSpeedController;
+
+    /// <summary>
     /// [作用域: 全局] 技能解锁与 Meta 进度。
     /// 初始化顺序：Resolve #15 → Register #16（主场景）/ #25（战斗场景）→ Initialize 同 Register 序号。
     /// </summary>
@@ -407,6 +412,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         performanceManager = ResolveOrCreate(performanceManager);
         poolManager = ResolveOrCreate(poolManager);
         gameManager = ResolveOrCreate(gameManager);
+        gameRunSpeedController = ResolveOrCreate(gameRunSpeedController);
         skillUnlockService = ResolveOrCreate(skillUnlockService);
         contentRegistry = ResolveOrCreate(contentRegistry);
         audioManager = ResolveOrCreate(audioManager);
@@ -454,6 +460,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         RegisterSystem(performanceManager);
         RegisterSystem(poolManager);
         RegisterSystem(gameManager);
+        RegisterSystem(gameRunSpeedController);
 
         if (IncludesBattleManagers())
         {
@@ -501,8 +508,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
             systems[i].Initialize();
         }
 
-        RunDifficultyBootstrap.ApplyFromGameConfig(configManager != null ? configManager.GameConfig : null);
-        PlaytestBootstrap.Initialize(configManager != null ? configManager.GameConfig : null);
+        GameConfig gameConfig = configManager != null ? configManager.GameConfig : null;
+        ConfigDatabaseSO database = configManager != null ? configManager.Database : null;
+        RunDifficultyBootstrap.ApplyFromGameConfig(gameConfig);
+        WaveProgressionBootstrap.ApplyFromGameConfig(gameConfig, database);
+        PlaytestBootstrap.Initialize(gameConfig);
     }
 
     /// <summary>从 <see cref="GameConfig"/> 读取预热数量与扩容策略并配置 <see cref="PoolManager"/>。</summary>

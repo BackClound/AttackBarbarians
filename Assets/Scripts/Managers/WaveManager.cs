@@ -117,12 +117,13 @@ public class WaveManager : MonoBehaviour, IGameSystem
         bossSpawned = false;
         bossDefeated = !currentWaveData.HasBoss;
         waveActive = true;
+        RunProgressionContext.SetCurrentWave(currentWaveIndex);
         spawner.ConfigureWavePool(currentWaveData);
 
         GameEvents.RaiseWaveStarted(this, new WaveEventArgs(
             currentWaveIndex,
-            currentWaveData.WaveDuration,
-            currentWaveData.MaxSpawnCount));
+            GetEffectiveWaveDuration(),
+            GetEffectiveMaxSpawnCount()));
     }
 
     /// <summary>停止当前波次刷怪。</summary>
@@ -184,14 +185,13 @@ public class WaveManager : MonoBehaviour, IGameSystem
     /// <summary>按概率额外生成特殊敌人。</summary>
     private void TrySpawnBonusSpecial()
     {
-        float chance = currentWaveData.SpecialSpawnChance;
+        float chance = ResolveSpecialSpawnChance();
         if (chance <= 0f || Random.value > chance)
         {
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
-                           MapRuntimeContext.EnemyStatMultiplier;
+        float multiplier = ResolveSpawnExternalMultiplier();
         spawner.TrySpawnBonusSpecial(multiplier, currentWaveIndex);
     }
 
@@ -208,14 +208,13 @@ public class WaveManager : MonoBehaviour, IGameSystem
     /// <summary>按概率额外生成精英敌人。</summary>
     private void TrySpawnBonusElite()
     {
-        float chance = currentWaveData.EliteSpawnChance;
+        float chance = ResolveEliteSpawnChance();
         if (chance <= 0f || Random.value > chance)
         {
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
-                           MapRuntimeContext.EnemyStatMultiplier;
+        float multiplier = ResolveSpawnExternalMultiplier();
         spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: true);
     }
 
@@ -232,8 +231,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
-                           MapRuntimeContext.EnemyStatMultiplier;
+        float multiplier = ResolveSpawnExternalMultiplier();
         if (spawner.TrySpawnBoss(currentWaveData.BossConfigId, multiplier, currentWaveIndex))
         {
             bossSpawned = true;
@@ -248,15 +246,62 @@ public class WaveManager : MonoBehaviour, IGameSystem
     /// <returns>生成成功返回 true，否则返回 false。</returns>
     private bool TrySpawnOne()
     {
-        float multiplier = currentWaveData.GetStatMultiplierForWave(currentWaveIndex) *
-                           MapRuntimeContext.EnemyStatMultiplier;
+        float multiplier = ResolveSpawnExternalMultiplier();
         return spawner.TrySpawnEnemy(null, multiplier, currentWaveIndex, waveElapsed, markAsElite: false);
+    }
+
+    /// <summary>Legacy 线性倍率或 V2 外部倍率（地图 / 难度 / 条目在 Spawner 层叠乘）。</summary>
+    private float ResolveSpawnExternalMultiplier()
+    {
+        float mapAndDifficulty = MapRuntimeContext.EnemyStatMultiplier *
+                                 RunDifficultyContext.EnemyStatDifficultyMult;
+
+        if (RunProgressionContext.IsActive)
+        {
+            return mapAndDifficulty;
+        }
+
+        return currentWaveData.GetLegacyStatMultiplierForWave(currentWaveIndex) * mapAndDifficulty;
+    }
+
+    private float ResolveEliteSpawnChance()
+    {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetEliteSpawnChance(
+                currentWaveIndex,
+                RunProgressionContext.Config,
+                currentWaveData.EliteSpawnChance);
+        }
+
+        return currentWaveData.EliteSpawnChance;
+    }
+
+    private float ResolveSpecialSpawnChance()
+    {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetSpecialSpawnChance(
+                currentWaveIndex,
+                RunProgressionContext.Config,
+                currentWaveData.SpecialSpawnChance);
+        }
+
+        return currentWaveData.SpecialSpawnChance;
     }
 
     /// <summary>获取含地图修正的有效刷怪间隔。</summary>
     /// <returns>刷怪间隔（秒）。</returns>
     private float GetEffectiveSpawnInterval()
     {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetSpawnInterval(
+                currentWaveIndex,
+                RunProgressionContext.Config,
+                MapRuntimeContext.SpawnIntervalMultiplier);
+        }
+
         return currentWaveData.SpawnInterval * MapRuntimeContext.SpawnIntervalMultiplier;
     }
 
@@ -264,8 +309,29 @@ public class WaveManager : MonoBehaviour, IGameSystem
     /// <returns>最大刷怪数量。</returns>
     private int GetEffectiveMaxSpawnCount()
     {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetMaxSpawnCount(
+                currentWaveIndex,
+                RunProgressionContext.Config,
+                MapRuntimeContext.MaxSpawnCountMultiplier);
+        }
+
         return Mathf.Max(1, Mathf.RoundToInt(
             currentWaveData.MaxSpawnCount * MapRuntimeContext.MaxSpawnCountMultiplier));
+    }
+
+    /// <summary>获取有效波次时长。</summary>
+    private float GetEffectiveWaveDuration()
+    {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetWaveDuration(
+                currentWaveIndex,
+                RunProgressionContext.Config);
+        }
+
+        return currentWaveData.WaveDuration;
     }
 
     /// <summary>检测是否满足波次完成条件。</summary>
@@ -278,7 +344,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
 
         bool allSpawned = spawnedThisWave >= GetEffectiveMaxSpawnCount();
         bool noAlive = spawner.AliveEnemyCount <= 0;
-        bool timedOut = waveElapsed >= currentWaveData.WaveDuration;
+        bool timedOut = waveElapsed >= GetEffectiveWaveDuration();
         bool bossCleared = !currentWaveData.HasBoss || !currentWaveData.RequireBossDefeatToComplete ||
                            (bossSpawned && bossDefeated && spawner.AliveBossCount <= 0);
         bool bossOnlyComplete = currentWaveData.HasBoss && currentWaveData.RequireBossDefeatToComplete &&

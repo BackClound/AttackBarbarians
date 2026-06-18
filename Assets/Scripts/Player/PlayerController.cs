@@ -241,13 +241,35 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         var data = runtimeStats.Data;
         data.AddExperience(amount);
 
-        while (data.CurrentExperienceValue >= ActiveData.ExperiencePerLevel)
+        float need = GetNeedExperienceForCurrentLevel();
+        while (data.CurrentExperienceValue >= need)
         {
-            data.AddExperience(-ActiveData.ExperiencePerLevel);
+            data.AddExperience(-need);
             int newLevel = data.CurrentLevel + 1;
             data.SetLevel(newLevel);
             GameEvents.RaisePlayerLevelUp(this, newLevel);
+            need = GetNeedExperienceForCurrentLevel();
         }
+    }
+
+    /// <summary>当前等级升级所需经验（V2 曲线或 Legacy 固定值）。</summary>
+    public float GetNeedExperienceForCurrentLevel()
+    {
+        if (!IsReady || ActiveData == null)
+        {
+            return 100f;
+        }
+
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetNeedExperience(
+                runtimeStats.Data.CurrentLevel,
+                RunProgressionContext.CurrentWave,
+                RunProgressionContext.Config,
+                RunDifficultyContext.ExpNeedDifficultyMult);
+        }
+
+        return ActiveData.ExperiencePerLevel;
     }
 
     /// <summary>配置目标扫描器参数（射程、Layer、策略等）。</summary>

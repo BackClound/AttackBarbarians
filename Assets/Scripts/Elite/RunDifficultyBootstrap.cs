@@ -29,12 +29,24 @@ public static class RunDifficultyBootstrap
 
         RunDifficultyContext.EliteConfig = eliteConfig;
         RunDifficultyContext.IsEliteMode = gameConfig.StartWithEliteMode;
+        RunDifficultyContext.GameDifficulty = ResolveGameDifficulty();
 
         if (gameConfig.EnableRuntimeLogs)
         {
             Debug.Log(
                 $"[RunDifficultyBootstrap] EliteMode={RunDifficultyContext.IsEliteMode} " +
-                $"config={(eliteConfig != null ? eliteConfig.name : "null")}");
+                $"config={(eliteConfig != null ? eliteConfig.name : "null")} " +
+                $"difficulty={RunDifficultyContext.GameDifficulty}");
         }
+    }
+
+    private static int ResolveGameDifficulty()
+    {
+        if (ServiceLocator.TryGet(out SaveManager saveManager) && saveManager.Current?.settings != null)
+        {
+            return UnityEngine.Mathf.Clamp(saveManager.Current.settings.gameDifficulty, 0, 2);
+        }
+
+        return 1;
     }
 }

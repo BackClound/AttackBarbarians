@@ -25,6 +25,9 @@ public class GameConfig : ScriptableObject
     [Header("Config")]
     [SerializeField] private ConfigDatabaseSO configDatabase;
     [SerializeField] private bool validateConfigOnBootstrap = true;
+    [Tooltip("启用后使用 WaveProgressionConfigSO 分属性曲线；关闭则回退 WaveDataSO.statScalePerWave 线性缩放。")]
+    [SerializeField] private bool useWaveProgressionV2 = true;
+    [SerializeField] private WaveProgressionConfigSO waveProgressionConfig;
     [SerializeField] private string defaultMapConfigId = GameConstants.ConfigIds.MapDefault;
     [SerializeField] private EliteModeConfigSO eliteModeConfig;
     [Tooltip("调试：开局启用精英模式全局倍率。")]
@@ -60,6 +63,10 @@ public class GameConfig : ScriptableObject
     public float DefaultWaveTransitionSeconds => Mathf.Max(0f, defaultWaveTransitionSeconds);
     /// <summary>全局配置数据库引用。</summary>
     public ConfigDatabaseSO ConfigDatabase => configDatabase;
+    /// <summary>是否启用 V2 波次成长曲线。</summary>
+    public bool UseWaveProgressionV2 => useWaveProgressionV2;
+    /// <summary>波次成长曲线配置（优先于 ConfigDatabase 条目）。</summary>
+    public WaveProgressionConfigSO WaveProgressionConfig => waveProgressionConfig;
     /// <summary>Bootstrap 时是否校验配置完整性。</summary>
     public bool ValidateConfigOnBootstrap => validateConfigOnBootstrap;
     /// <summary>默认地图配置 ID。</summary>

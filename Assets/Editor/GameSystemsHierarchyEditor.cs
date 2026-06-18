@@ -214,6 +214,7 @@ public static class GameSystemsHierarchyEditor
                 "gameManager",
                 battleOnly: false,
                 includeBattleManagers ? typeof(GameFlowManager) : null),
+            new("GameRunSpeedController", typeof(GameRunSpeedController), "gameRunSpeedController"),
             new("SkillUnlockService", typeof(SkillUnlockService), "skillUnlockService"),
             new("ContentRegistry", typeof(ContentRegistry), "contentRegistry"),
             new("AudioManager", typeof(AudioManager), "audioManager"),

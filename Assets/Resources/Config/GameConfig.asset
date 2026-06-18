@@ -18,6 +18,8 @@ MonoBehaviour:
   defaultWaveTransitionSeconds: 1.5
   configDatabase: {fileID: 11400000, guid: 2120aa53441b44efb849c282ba132f89, type: 2}
   validateConfigOnBootstrap: 1
+  useWaveProgressionV2: 1
+  waveProgressionConfig: {fileID: 11400000, guid: 20b3b9694e1a4b5a9ae8abec10011486, type: 2}
   defaultMapConfigId: map.default
   eliteModeConfig: {fileID: 0}
   startWithEliteMode: 0

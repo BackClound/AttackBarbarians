@@ -117,6 +117,8 @@ public class GameplayHudTopPanel : MonoBehaviour
         {
             UpdateWaveDisplay(args.WaveIndex);
         }
+
+        RefreshExperience();
     }
 
     private void OnPlayerLevelUp(GameEventContext ctx) => RefreshExperience();
@@ -159,7 +161,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         }
 
         PlayerRuntimeData data = controller.RuntimeStats.Data;
-        float perLevel = Mathf.Max(1f, controller.ActiveData.ExperiencePerLevel);
+        float perLevel = Mathf.Max(1f, controller.GetNeedExperienceForCurrentLevel());
         float ratio = Mathf.Clamp01(data.CurrentExperienceValue / perLevel);
 
         if (expSlider != null)

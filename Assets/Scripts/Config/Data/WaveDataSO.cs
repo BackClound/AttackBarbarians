@@ -16,7 +16,7 @@ public class WaveDataSO : ConfigDataBase
     [SerializeField] private float waveDuration = 30f;
     [SerializeField] private float spawnInterval = 1.5f;
     [SerializeField] private int maxSpawnCount = 20;
-    [Tooltip("每经过一波，敌人四维属性额外乘算 (waveIndex-1)*该系数。")]
+    [Tooltip("Legacy：每经过一波，敌人四维属性线性乘算 (waveIndex-1)*系数。V2 启用时由 WaveProgressionConfigSO 替代。")]
     [SerializeField] private float statScalePerWave = 0.08f;
 
     [Header("Enemies")]
@@ -60,15 +60,22 @@ public class WaveDataSO : ConfigDataBase
     public string RewardTableId => rewardTableId;
 
     /// <summary>
-    /// 按当前波次索引计算敌人属性倍率（波次越高倍率越大）。
+    /// Legacy：按波次序号计算线性敌人属性倍率。
     /// </summary>
-    /// <param name="currentWaveIndex">当前波次序号（从 1 开始）。</param>
-    /// <returns>属性乘算倍率，最低为 1。</returns>
-    public float GetStatMultiplierForWave(int currentWaveIndex)
+    public float GetLegacyStatMultiplierForWave(int currentWaveIndex)
     {
         int index = Mathf.Max(1, currentWaveIndex);
         return 1f + (index - 1) * StatScalePerWave;
     }
+
+    /// <summary>
+    /// Legacy：按当前波次索引计算敌人属性倍率（波次越高倍率越大）。
+    /// </summary>
+    /// <param name="currentWaveIndex">当前波次序号（从 1 开始）。</param>
+    /// <returns>属性乘算倍率，最低为 1。</returns>
+    [System.Obsolete("Use WaveProgressionConfigSO + WaveProgressionCalculator when RunProgressionContext.IsActive.")]
+    public float GetStatMultiplierForWave(int currentWaveIndex) =>
+        GetLegacyStatMultiplierForWave(currentWaveIndex);
 
     /// <summary>
     /// 收集波次配置的校验错误与警告。
