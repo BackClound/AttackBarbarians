@@ -20,7 +20,7 @@ public abstract class UiPanelBase : MonoBehaviour
     /// <summary>当前面板是否处于可见状态。</summary>
     public bool IsVisible { get; private set; }
 
-    /// <summary>初始化根节点引用、过渡组件，并默认隐藏面板。</summary>
+    /// <summary>初始化根节点引用、过渡组件；若场景中为隐藏态则仅同步视觉，避免在首次 Show 激活时反注册。</summary>
     protected virtual void Awake()
     {
         if (root == null)
@@ -33,7 +33,11 @@ public abstract class UiPanelBase : MonoBehaviour
             transition = GetComponent<UiPanelTransition>();
         }
 
-        SetVisibleImmediate(false);
+        IsVisible = root != null && root.activeSelf;
+        if (!IsVisible && transition != null)
+        {
+            transition.SnapHidden();
+        }
     }
 
     private void EnsureTransitionReference()
@@ -44,19 +48,19 @@ public abstract class UiPanelBase : MonoBehaviour
         }
     }
 
+    /// <summary>根节点是否处于激活显示（用于纠正 <see cref="IsVisible"/> 与场景状态不同步）。</summary>
+    public bool IsRootActive => root != null && root.activeSelf;
+
     /// <summary>显示面板：激活根节点、触发 <see cref="OnShow"/> 并播放进场动画。</summary>
     public virtual void Show()
     {
-        if (IsVisible)
+        if (IsVisible && IsRootActive)
         {
             return;
         }
 
+        EnsureRootActive();
         IsVisible = true;
-        if (root != null)
-        {
-            root.SetActive(true);
-        }
 
         OnShow();
         EnsureTransitionReference();
@@ -73,7 +77,7 @@ public abstract class UiPanelBase : MonoBehaviour
     /// <summary>隐藏面板：触发 <see cref="OnHide"/> 并播放退场动画后停用根节点。</summary>
     public virtual void Hide()
     {
-        if (!IsVisible)
+        if (!IsVisible && !IsRootActive)
         {
             return;
         }
@@ -81,19 +85,47 @@ public abstract class UiPanelBase : MonoBehaviour
         IsVisible = false;
         OnHide();
 
-        if (useTransition && transition != null)
+        if (useTransition && transition != null && IsRootActive)
         {
-            transition.PlayHide(() =>
-            {
-                if (root != null)
-                {
-                    root.SetActive(false);
-                }
-            });
+            transition.PlayHide(DeactivateRoot);
         }
         else
         {
-            SetVisibleImmediate(false);
+            ForceHideImmediate();
+        }
+    }
+
+    /// <summary>立即隐藏面板，跳过退场动画（流程兜底用）。</summary>
+    public void ForceHideImmediate()
+    {
+        IsVisible = false;
+        EnsureTransitionReference();
+        if (transition != null)
+        {
+            transition.SnapHidden();
+        }
+
+        DeactivateRoot();
+    }
+
+    private void EnsureRootActive()
+    {
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
+        }
+
+        if (root != null && !root.activeSelf)
+        {
+            root.SetActive(true);
+        }
+    }
+
+    private void DeactivateRoot()
+    {
+        if (root != null)
+        {
+            root.SetActive(false);
         }
     }
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -6,20 +5,16 @@ using UnityEngine;
 /// </summary>
 /// <remarks>
 /// <para><b>是否需要挂载：</b>是（MonoBehaviour）。由 <see cref="GameBootstrapper"/> 解析并初始化。</para>
-/// <para><b>推荐挂载对象：</b><c>GameSystems</c> 根物体或子物体 <c>GameFlowManager</c>。</para>
+/// <para><b>推荐挂载对象：</b><c>GameSystems</c> 子物体或子物体 <c>GameFlowManager</c>。</para>
 /// <para><b>不要挂载到：</b>Player、Enemy、UI Canvas。</para>
 /// <para><b>测试：</b>Inspector 右键组件可调用 <see cref="SimulateWaveCompletedForTest"/>；升级阶段调用 <see cref="ConfirmUpgradeSelection"/>。</para>
 /// </remarks>
 public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
 {
-    [Header("Flow")]
-    [Tooltip("≤0 时使用 GameConfig.DefaultWaveTransitionSeconds。")]
-    [SerializeField] private float waveTransitionSeconds;
     [SerializeField] private bool skipUpgradeChoosingInEditor;
 
     private GameManager gameManager;
     private ConfigManager configManager;
-    private Coroutine waveTransitionRoutine;
     private bool isInitialized;
 
     /// <summary>管理器是否已完成初始化。</summary>
@@ -53,10 +48,9 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
     /// <param name="deltaTime">帧间隔时间（秒）。</param>
     public void Tick(float deltaTime) { }
 
-    /// <summary>取消订阅、停止协程并重置流程状态。</summary>
+    /// <summary>取消订阅并重置流程状态。</summary>
     public void Shutdown()
     {
-        StopWaveTransitionRoutine();
         GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
         GameEvents.UnsubscribeWaveCompleted(OnWaveCompleted);
         GameEvents.UnsubscribePlayerDied(OnPlayerDied);
@@ -64,7 +58,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         isInitialized = false;
     }
 
-    /// <summary>波次系统完成后调用；若当前为 Playing 则进入 WaveTransition。</summary>
+    /// <summary>波次系统完成后调用；若当前为 Playing 则直接进入升级三选一（无过渡横幅）。</summary>
     public void NotifyWaveCompleted(WaveEventArgs args)
     {
         if (gameManager == null || gameManager.CurrentState != GameState.Playing)
@@ -74,10 +68,10 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
 
         if (enableFlowLogs())
         {
-            Debug.Log($"[GameFlowManager] Wave {args.WaveIndex} completed -> WaveTransition.");
+            Debug.Log($"[GameFlowManager] Wave {args.WaveIndex} completed -> UpgradeChoosing.");
         }
 
-        gameManager.BeginWaveTransition();
+        BeginPostWaveFlow();
     }
 
     /// <summary>升级 UI 确认后调用，返回 Playing。</summary>
@@ -104,11 +98,11 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         gameManager.CompleteUpgradeAndResume();
     }
 
-    /// <summary>无波次模块时用于验证 WaveTransition → UpgradeChoosing → Playing 闭环。</summary>
+    /// <summary>无波次模块时用于验证波次结算 → UpgradeChoosing → Playing 闭环。</summary>
     [ContextMenu("Debug/Simulate Wave Completed")]
     public void SimulateWaveCompletedForTest()
     {
-        NotifyWaveCompleted(new WaveEventArgs(1, waveTransitionSeconds, 0));
+        NotifyWaveCompleted(new WaveEventArgs(1, GameConstants.Progression.WaveDurationSeconds, 0));
     }
 
     /// <summary>调试：模拟确认升级选择。</summary>
@@ -145,7 +139,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         gameManager.GameOver();
     }
 
-    /// <summary>根据新状态驱动 UI、音频与流程协程。</summary>
+    /// <summary>根据新状态驱动 UI、音频与流程。</summary>
     /// <param name="ctx">事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx)
     {
@@ -156,10 +150,6 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
 
         switch (change.NewState)
         {
-            case GameState.WaveTransition:
-                BeginWaveTransitionSequence();
-                break;
-
             case GameState.UpgradeChoosing:
                 OpenUpgradeFlow();
                 break;
@@ -185,30 +175,10 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         }
     }
 
-    /// <summary>进入 WaveTransition 时打开过渡 UI 并启动计时协程。</summary>
-    private void BeginWaveTransitionSequence()
+    /// <summary>波次结算后直接进入升级或战斗（跳过 WaveTransition 预告 UI）。</summary>
+    private void BeginPostWaveFlow()
     {
-        StopWaveTransitionRoutine();
-        GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.WaveTransition);
-        waveTransitionRoutine = StartCoroutine(WaveTransitionRoutine());
-    }
-
-    /// <summary>波次过渡计时结束后进入升级或返回 Playing。</summary>
-    /// <returns>协程迭代器。</returns>
-    private IEnumerator WaveTransitionRoutine()
-    {
-        float duration = ResolveWaveTransitionSeconds();
-        if (duration > 0f)
-        {
-            yield return new WaitForSecondsRealtime(duration);
-        }
-
-        waveTransitionRoutine = null;
-
-        if (gameManager == null || gameManager.CurrentState != GameState.WaveTransition)
-        {
-            yield break;
-        }
+        CloseWaveTransitionPanel();
 
         if (ShouldSkipUpgradeChoosing())
         {
@@ -218,7 +188,7 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
             }
 
             gameManager.CompleteUpgradeAndResume();
-            yield break;
+            return;
         }
 
         gameManager.BeginUpgradeChoosing();
@@ -227,10 +197,22 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
     /// <summary>打开升级三选一 UI 并广播事件。</summary>
     private void OpenUpgradeFlow()
     {
+        CloseWaveTransitionPanel();
         IsAwaitingUpgradeSelection = true;
         GameEvents.RaiseUpgradeSelectionOpened(this);
         GameEvents.RaiseUiPanelOpened(this, GameConstants.UiPanelIds.Upgrade);
         GameEvents.RaiseAudioPlayMusic(this, GameConstants.AudioIds.MusicUpgrade);
+    }
+
+    /// <summary>关闭波次过渡横幅（兼容旧场景引用）。</summary>
+    private static void CloseWaveTransitionPanel()
+    {
+        GameEvents.RaiseUiPanelClosed(null, GameConstants.UiPanelIds.WaveTransition);
+        if (UIManager.Instance != null &&
+            UIManager.Instance.TryGetPanel(GameConstants.UiPanelIds.WaveTransition, out UiPanelBase panel))
+        {
+            panel.ForceHideImmediate();
+        }
     }
 
     /// <summary>返回 Playing 时关闭流程相关 UI 面板。</summary>
@@ -240,35 +222,6 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.WaveTransition);
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Upgrade);
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Pause);
-    }
-
-    /// <summary>停止进行中的波次过渡协程。</summary>
-    private void StopWaveTransitionRoutine()
-    {
-        if (waveTransitionRoutine == null)
-        {
-            return;
-        }
-
-        StopCoroutine(waveTransitionRoutine);
-        waveTransitionRoutine = null;
-    }
-
-    /// <summary>解析波次过渡等待时长。</summary>
-    /// <returns>过渡时长（秒）。</returns>
-    private float ResolveWaveTransitionSeconds()
-    {
-        if (waveTransitionSeconds > 0f)
-        {
-            return waveTransitionSeconds;
-        }
-
-        if (configManager != null && configManager.GameConfig != null)
-        {
-            return configManager.GameConfig.DefaultWaveTransitionSeconds;
-        }
-
-        return 1.5f;
     }
 
     /// <summary>判断是否应跳过升级三选一阶段。</summary>

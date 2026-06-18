@@ -142,10 +142,18 @@ public class UIManager : GameEventSubscriberBase
     /// <param name="panelId">面板标识。</param>
     public void HidePanel(string panelId)
     {
-        if (panelById.TryGetValue(panelId, out UiPanelBase panel))
+        if (!panelById.TryGetValue(panelId, out UiPanelBase panel))
         {
-            panel.Hide();
+            return;
         }
+
+        if (panelId == GameConstants.UiPanelIds.WaveTransition)
+        {
+            panel.ForceHideImmediate();
+            return;
+        }
+
+        panel.Hide();
     }
 
     /// <summary>将所有面板注册到 PanelId 字典。</summary>
@@ -216,7 +224,7 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
-    /// <summary>波次完成时预置下一波编号。</summary>
+    /// <summary>波次完成时预置下一波编号（仅更新文案，不提前显示面板）。</summary>
     private void OnWaveCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args)
@@ -257,9 +265,13 @@ public class UIManager : GameEventSubscriberBase
     /// <summary>按新游戏状态显示/隐藏对应面板组合。</summary>
     private void ApplyState(GameState newState, GameState oldState)
     {
+        if (oldState == GameState.WaveTransition && newState != GameState.WaveTransition)
+        {
+            EnsureWaveTransitionHidden();
+        }
+
         bool showHud = newState == GameState.Playing
             || newState == GameState.Paused
-            || newState == GameState.WaveTransition
             || newState == GameState.UpgradeChoosing;
 
         gameplayHud?.SetVisible(showHud);
@@ -279,7 +291,7 @@ public class UIManager : GameEventSubscriberBase
                 pausePanel?.Hide();
                 gameOverPanel?.Hide();
                 upgradePanel?.Hide();
-                waveTransitionPanel?.Hide();
+                EnsureWaveTransitionHidden();
                 gameplayHud?.RefreshAll();
                 break;
 
@@ -287,17 +299,15 @@ public class UIManager : GameEventSubscriberBase
                 pausePanel?.Show();
                 break;
 
-            case GameState.WaveTransition:
-                waveTransitionPanel?.Show();
-                break;
-
             case GameState.UpgradeChoosing:
+                EnsureWaveTransitionHidden();
                 if (upgradePanel == null)
                 {
                     Debug.LogError("[UIManager] UpgradePanel 未绑定，三选一 UI 无法显示。请执行 Attack Barbarians/UI/Build BattleScene UI。");
                 }
 
                 upgradePanel?.Show();
+                gameplayHud?.RefreshAll();
                 break;
 
             case GameState.GameOver:
@@ -317,6 +327,20 @@ public class UIManager : GameEventSubscriberBase
         }
     }
 
+    /// <summary>强制关闭波次过渡面板（纠正 IsVisible 与场景激活不同步）。</summary>
+    private void EnsureWaveTransitionHidden()
+    {
+        if (waveTransitionPanel == null)
+        {
+            return;
+        }
+
+        if (waveTransitionPanel.IsVisible || waveTransitionPanel.IsRootActive)
+        {
+            waveTransitionPanel.ForceHideImmediate();
+        }
+    }
+
     /// <summary>隐藏所有战斗流程相关面板。</summary>
     private void HideAllGameplayPanels()
     {
@@ -327,6 +351,6 @@ public class UIManager : GameEventSubscriberBase
         pausePanel?.Hide();
         gameOverPanel?.Hide();
         upgradePanel?.Hide();
-        waveTransitionPanel?.Hide();
+        EnsureWaveTransitionHidden();
     }
 }

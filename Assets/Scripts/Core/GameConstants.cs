@@ -290,6 +290,19 @@ public static class GameConstants
         public const string UpgradeSelectAll = "ad.upgrade_select_all";
     }
 
+    /// <summary>局内成长节奏相关常量。</summary>
+    public static class Progression
+    {
+        /// <summary>每波最长战斗时间（秒）；超时后自动结算并进入下一波流程。</summary>
+        public const float WaveDurationSeconds = 30f;
+
+        /// <summary>强制基础属性池前需累计的普通升级次数（第 4 次升级触发）。</summary>
+        public const int StatBuffCycleAccumulate = 3;
+
+        /// <summary>累计升级达到该次数时，强制三选一均为基础属性 Buff（不含技能专属）。</summary>
+        public const int StatBuffCycleThreshold = StatBuffCycleAccumulate + 1;
+    }
+
     /// <summary><see cref="PoolManager"/> 对象池 Key 常量。</summary>
     public static class PoolKeys
     {

@@ -97,6 +97,7 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         }
 
         pendingPayload = null;
+        upgradeManager?.ConsumeStatBuffCycleIfNeeded();
         gameFlowManager?.ConfirmUpgradeSelection();
         return true;
     }
@@ -170,6 +171,7 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
 
         usedAdSelectAll++;
         pendingPayload = null;
+        upgradeManager?.ConsumeStatBuffCycleIfNeeded();
         gameFlowManager?.ConfirmUpgradeSelection();
         return true;
     }
@@ -213,6 +215,12 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         }
 
         var context = new UpgradeSelectionContext(ResolveCurrentWave(), ResolvePlayerLevel(), source);
+        if (upgradeManager == null)
+        {
+            upgradeManager = ResolveUpgradeManager();
+        }
+
+        upgradeManager?.NotifyUpgradeSelectionOpened(source);
         if (!RollAndPublish(context))
         {
             Debug.LogError("[RandomRewardManager] 无法生成升级候选，自动恢复战斗以免卡死。");

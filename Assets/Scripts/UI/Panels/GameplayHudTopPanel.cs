@@ -52,6 +52,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         GameEvents.SubscribeGameStarted(OnGameStarted);
         GameEvents.SubscribeRunRewardSettled(OnRunRewardSettled);
         GameEvents.SubscribeResourceChanged(OnResourceChanged);
+        GameEvents.SubscribeOnGameStateChanged(OnGameStateChanged);
         RefreshAll();
     }
 
@@ -64,6 +65,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
         GameEvents.UnsubscribeRunRewardSettled(OnRunRewardSettled);
         GameEvents.UnsubscribeResourceChanged(OnResourceChanged);
+        GameEvents.UnsubscribeOnGameStateChanged(OnGameStateChanged);
     }
 
     /// <summary>合并刷新计时、金币与经验。</summary>
@@ -122,6 +124,8 @@ public class GameplayHudTopPanel : MonoBehaviour
     }
 
     private void OnPlayerLevelUp(GameEventContext ctx) => RefreshExperience();
+
+    private void OnGameStateChanged(GameEventContext ctx) => RefreshExperience();
 
     private void OnResourceChanged(GameEventContext ctx) => RefreshGold();
 

@@ -34,14 +34,27 @@ public class UiPanelTransition : MonoBehaviour
     public void PlayShow()
     {
         StopRoutine();
+        if (!isActiveAndEnabled)
+        {
+            SnapShown();
+            return;
+        }
+
         routine = StartCoroutine(AnimateShow());
     }
 
     /// <summary>播放面板退场动画，完成后执行回调。</summary>
-        /// <param name="onComplete">动画结束后的回调。</param>
+    /// <param name="onComplete">动画结束后的回调。</param>
     public void PlayHide(System.Action onComplete)
     {
         StopRoutine();
+        if (!isActiveAndEnabled)
+        {
+            SnapHidden();
+            onComplete?.Invoke();
+            return;
+        }
+
         routine = StartCoroutine(AnimateHide(onComplete));
     }
 

@@ -62,6 +62,13 @@ internal static class UpgradeRunPoolRules
         return IsSkillBuffTierOption(option) && SkillBuffCatalog.IsGlobalKind(option.SkillBuffKind);
     }
 
+    /// <summary>是否为基础属性 Buff 卡（StatBuff 或 Global SkillBuffKind，不含技能专属 Buff）。</summary>
+    public static bool IsBasicAttributeBuffOption(UpgradeOptionSO option) => IsGlobalBuffOption(option);
+
+    /// <summary>强制属性循环池：仅 StatBuff / Global 属性 Buff，排除技能专属与解锁卡。</summary>
+    public static bool IsForcedStatCycleBuffOption(UpgradeOptionSO option) =>
+        IsBasicAttributeBuffOption(option) && !IsSkillExclusiveBuffOption(option) && !IsSkillUnlockOption(option);
+
     /// <summary>是否为技能专属 Buff（非 Global 的 SkillBuff）。</summary>
     public static bool IsSkillExclusiveBuffOption(UpgradeOptionSO option)
     {

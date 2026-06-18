@@ -4,7 +4,7 @@
 /// <remarks>
 /// <para><b>是否需要挂载：</b>否。</para>
 /// <para><b>典型流转：</b>Bootstrapping → MainMenu → Loading → Playing ↔ Paused；</para>
-/// <para>Playing → WaveTransition → UpgradeChoosing → Playing；Playing → GameOver。</para>
+/// <para>Playing → UpgradeChoosing（波次结算 / 升级）→ Playing；Playing → GameOver。</para>
 /// </remarks>
 public enum GameState
 {

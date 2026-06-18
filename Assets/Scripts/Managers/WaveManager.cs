@@ -23,6 +23,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
     private bool waveActive;
     private bool bossSpawned;
     private bool bossDefeated;
+    private bool advanceWaveAfterUpgrade;
     private bool isInitialized;
 
     /// <summary>管理器是否已完成初始化。</summary>
@@ -104,6 +105,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
     /// <param name="waveIndex">波次序号（从 1 开始）。</param>
     public void StartWave(int waveIndex)
     {
+        advanceWaveAfterUpgrade = false;
         currentWaveIndex = Mathf.Max(1, waveIndex);
         if (!TryResolveWaveData(currentWaveIndex, out currentWaveData))
         {
@@ -130,6 +132,20 @@ public class WaveManager : MonoBehaviour, IGameSystem
     public void StopWave()
     {
         waveActive = false;
+    }
+
+    /// <summary>局内升级后恢复当前波次（不重置进度、不推进波次序号）。</summary>
+    private void ResumeCurrentWave()
+    {
+        if (currentWaveData == null)
+        {
+            StartWave(Mathf.Max(1, currentWaveIndex));
+            return;
+        }
+
+        waveActive = true;
+        RunProgressionContext.SetCurrentWave(currentWaveIndex);
+        TryCompleteWave();
     }
 
     /// <summary>立即尝试生成一名敌人（供调试或脚本触发）。</summary>
@@ -321,20 +337,10 @@ public class WaveManager : MonoBehaviour, IGameSystem
             currentWaveData.MaxSpawnCount * MapRuntimeContext.MaxSpawnCountMultiplier));
     }
 
-    /// <summary>获取有效波次时长。</summary>
-    private float GetEffectiveWaveDuration()
-    {
-        if (RunProgressionContext.IsActive)
-        {
-            return WaveProgressionCalculator.GetWaveDuration(
-                currentWaveIndex,
-                RunProgressionContext.Config);
-        }
+    /// <summary>获取有效波次时长（固定 30 秒上限）。</summary>
+    private float GetEffectiveWaveDuration() => GameConstants.Progression.WaveDurationSeconds;
 
-        return currentWaveData.WaveDuration;
-    }
-
-    /// <summary>检测是否满足波次完成条件。</summary>
+    /// <summary>检测是否满足波次完成条件：全灭或达到 30 秒（Boss 波保留击败 Boss 条件）。</summary>
     private void TryCompleteWave()
     {
         if (!waveActive || currentWaveData == null)
@@ -349,8 +355,9 @@ public class WaveManager : MonoBehaviour, IGameSystem
                            (bossSpawned && bossDefeated && spawner.AliveBossCount <= 0);
         bool bossOnlyComplete = currentWaveData.HasBoss && currentWaveData.RequireBossDefeatToComplete &&
                                 bossSpawned && bossDefeated && spawner.AliveBossCount <= 0;
+        bool allEnemiesCleared = allSpawned && noAlive && bossCleared;
 
-        if (bossOnlyComplete || timedOut || (allSpawned && noAlive && bossCleared))
+        if (bossOnlyComplete || allEnemiesCleared || timedOut)
         {
             CompleteCurrentWave();
         }
@@ -360,6 +367,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
     private void CompleteCurrentWave()
     {
         waveActive = false;
+        advanceWaveAfterUpgrade = true;
         GameEvents.RaiseWaveCompleted(this, new WaveEventArgs(
             currentWaveIndex,
             waveElapsed,
@@ -387,7 +395,15 @@ public class WaveManager : MonoBehaviour, IGameSystem
 
         if (change.NewState == GameState.Playing && change.OldState == GameState.UpgradeChoosing)
         {
-            StartWave(currentWaveIndex + 1);
+            if (advanceWaveAfterUpgrade)
+            {
+                advanceWaveAfterUpgrade = false;
+                StartWave(currentWaveIndex + 1);
+            }
+            else
+            {
+                ResumeCurrentWave();
+            }
         }
         else if (change.NewState == GameState.Playing && change.OldState == GameState.Bootstrapping)
         {

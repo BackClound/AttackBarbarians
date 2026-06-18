@@ -18,6 +18,8 @@ public class RunProgressData
     public float maxHp;
     public List<ConfigIdIntPair> activeBuffs = new List<ConfigIdIntPair>(8);
     public List<ConfigIdIntPair> selectedUpgrades = new List<ConfigIdIntPair>(16);
+    /// <summary>局内累计升级事件次数；达到阈值时强制基础属性 Buff 池，选择后扣减。</summary>
+    public int buffEventCounter;
 
     /// <summary>创建空的局内进度实例。</summary>
     /// <returns>无进行中局数的默认进度对象。</returns>
@@ -35,5 +37,6 @@ public class RunProgressData
         maxHp = 0f;
         activeBuffs?.Clear();
         selectedUpgrades?.Clear();
+        buffEventCounter = 0;
     }
 }

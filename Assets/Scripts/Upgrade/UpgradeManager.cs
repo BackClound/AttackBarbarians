@@ -32,6 +32,45 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     public IReadOnlyList<UpgradeOptionSO> CurrentChoices => currentChoices;
     /// <summary>最近一次解析到的奖励池配置 ID。</summary>
     public string LastResolvedPoolId => lastResolvedPoolId;
+    /// <summary>局内累计升级事件计数（读存档）。</summary>
+    public int BuffEventCounter => GetBuffEventCounter();
+
+    /// <summary>升级选单打开时累计一次升级事件（波次完成 / 玩家升级）。</summary>
+    /// <param name="source">触发来源。</param>
+    public void NotifyUpgradeSelectionOpened(UpgradeTriggerSource source)
+    {
+        if (source == UpgradeTriggerSource.Debug)
+        {
+            return;
+        }
+
+        RunProgressData run = saveManager?.Current?.runProgress;
+        if (run == null)
+        {
+            return;
+        }
+
+        run.buffEventCounter++;
+        saveManager.MarkDirty();
+    }
+
+    /// <summary>玩家确认选择后，若已达四循环阈值则扣减计数。</summary>
+    public void ConsumeStatBuffCycleIfNeeded()
+    {
+        RunProgressData run = saveManager?.Current?.runProgress;
+        if (run == null)
+        {
+            return;
+        }
+
+        if (run.buffEventCounter < GameConstants.Progression.StatBuffCycleThreshold)
+        {
+            return;
+        }
+
+        run.buffEventCounter -= GameConstants.Progression.StatBuffCycleThreshold;
+        saveManager.MarkDirty();
+    }
 
     /// <summary>初始化配置依赖并从存档恢复已选升级。</summary>
     public void Initialize()
@@ -112,8 +151,34 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
             return false;
         }
 
+        bool forceBasicAttributePool = ShouldForceBasicAttributeBuffPool();
+        if (forceBasicAttributePool)
+        {
+            FilterToForcedStatCycleBuffsOnly(rollScratch);
+            unlockRollScratch.Clear();
+
+            if (rollScratch.Count == 0)
+            {
+                Debug.LogWarning("[UpgradeManager] 基础属性 Buff 池为空，重新收集基础属性候选。");
+                BuildRunEligiblePools(
+                    pool,
+                    context,
+                    skillManager,
+                    runUnlockedCount,
+                    metaUnlockedCount,
+                    unlockService,
+                    save,
+                    masterOptionScratch,
+                    rollScratch,
+                    unlockRollScratch);
+                FilterToForcedStatCycleBuffsOnly(rollScratch);
+                unlockRollScratch.Clear();
+            }
+        }
+
         int choiceCount = pool != null ? pool.ChoiceCount : 3;
-        bool requireUnlockCard = runUnlockedCount < UpgradeRunPoolRules.RunSkillUnlockThreshold &&
+        bool requireUnlockCard = !forceBasicAttributePool &&
+                                 runUnlockedCount < UpgradeRunPoolRules.RunSkillUnlockThreshold &&
                                  metaUnlockedCount < UpgradeRunPoolRules.RunSkillUnlockThreshold &&
                                  unlockRollScratch.Count > 0;
         RollChoices(
@@ -838,6 +903,23 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
     }
 
     private bool HasActiveRunSession() => saveManager != null && saveManager.HasActiveRun;
+
+    private int GetBuffEventCounter() =>
+        saveManager?.Current?.runProgress?.buffEventCounter ?? 0;
+
+    private bool ShouldForceBasicAttributeBuffPool() =>
+        GetBuffEventCounter() >= GameConstants.Progression.StatBuffCycleThreshold;
+
+    private static void FilterToForcedStatCycleBuffsOnly(List<UpgradeRollCandidate> candidates)
+    {
+        for (int i = candidates.Count - 1; i >= 0; i--)
+        {
+            if (!UpgradeRunPoolRules.IsForcedStatCycleBuffOption(candidates[i].Option))
+            {
+                candidates.RemoveAt(i);
+            }
+        }
+    }
 
     /// <summary>将局外永久 SkillBuff tier 写入基线，供局内递进抽池使用。</summary>
     private void SeedMetaSkillBuffTiers()
