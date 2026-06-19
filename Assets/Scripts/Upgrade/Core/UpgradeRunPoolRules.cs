@@ -178,6 +178,11 @@ internal static class UpgradeRunPoolRules
             return false;
         }
 
+        if (!SkillBuffFocusPlaytestSettings.PassesFocusFilter(option))
+        {
+            return false;
+        }
+
         if (IsSkillUnlockOption(option))
         {
             // 局内已满 3 技能，或局外已满 3 技能：不再出现解锁卡。

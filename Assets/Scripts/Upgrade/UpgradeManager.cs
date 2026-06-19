@@ -917,6 +917,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
 
     /// <summary>是否应强制仅抽取基础属性 Buff 池。</summary>
     private bool ShouldForceBasicAttributeBuffPool() =>
+        !SkillBuffFocusPlaytestSettings.IsActive &&
         GetBuffEventCounter() >= GameConstants.Progression.StatBuffCycleThreshold;
 
     /// <summary>将候选列表过滤为仅保留强制属性周期 Buff 选项。</summary>
