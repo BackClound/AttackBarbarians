@@ -41,6 +41,7 @@ public static class BuffConfigBootstrapMenu
         public string FolderOverride { get; }
     }
 
+    /// <summary>菜单：按规范生成全部 BuffData 并写入 ConfigDatabase。</summary>
     [MenuItem("Attack Barbarians/Config/Create All Buff Assets")]
     public static void CreateAllBuffAssets()
     {
@@ -63,6 +64,7 @@ public static class BuffConfigBootstrapMenu
         Debug.Log($"[BuffConfigBootstrap] 已生成/更新 {created.Count} 个 Buff 资产并写入 ConfigDatabase。");
     }
 
+    /// <summary>枚举全部 SkillBuffKind 构建 tier 规格列表。</summary>
     private static IEnumerable<BuffTierSpec> BuildAllBuffTierSpecs()
     {
         var specs = new List<BuffTierSpec>(128);
@@ -107,6 +109,11 @@ public static class BuffConfigBootstrapMenu
             folderOverride: SkillBuffFolder));
     }
 
+    /// <summary>在规格列表中替换指定 kind/tier 条目。</summary>
+    /// <param name="specs">规格列表。</param>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
+    /// <param name="replacement">替换规格。</param>
     private static void ReplaceSpec(
         List<BuffTierSpec> specs,
         SkillBuffKind kind,
@@ -123,6 +130,7 @@ public static class BuffConfigBootstrapMenu
         }
     }
 
+    /// <summary>创建或更新 AttackUp 属性 Buff 资产。</summary>
     private static BuffDataSO CreateOrLoadStatBuff()
     {
         string path = $"{BuffRootFolder}/BuffData_AttackUp.asset";
@@ -156,6 +164,8 @@ public static class BuffConfigBootstrapMenu
         return buff;
     }
 
+    /// <summary>根据 BuffTierSpec 创建或更新技能 Buff。</summary>
+    /// <param name="spec">Buff 层级规格。</param>
     private static BuffDataSO CreateOrLoadSkillBuff(BuffTierSpec spec)
     {
         string subFolder = GetSkillSubFolder(spec.Kind);
@@ -204,6 +214,8 @@ public static class BuffConfigBootstrapMenu
         return buff;
     }
 
+    /// <summary>按目标技能返回 Buff 子目录名。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
     private static string GetSkillSubFolder(SkillBuffKind kind)
     {
         switch (SkillBuffCatalog.GetTargetSkill(kind))
@@ -222,6 +234,9 @@ public static class BuffConfigBootstrapMenu
         }
     }
 
+    /// <summary>生成 Buff 资产默认文件名。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     private static string BuildDefaultFileName(SkillBuffKind kind, int tier)
     {
         return SkillBuffTierSpecUtility.GetMaxTier(kind) > 1
@@ -229,6 +244,9 @@ public static class BuffConfigBootstrapMenu
             : $"BuffData_{kind}";
     }
 
+    /// <summary>生成 Buff 默认 configId。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     private static string BuildDefaultConfigId(SkillBuffKind kind, int tier)
     {
         string snake = ToSnakeCase(kind.ToString());
@@ -237,6 +255,8 @@ public static class BuffConfigBootstrapMenu
             : $"buff.skill.{snake}";
     }
 
+    /// <summary>将 PascalCase 转为 snake_case。</summary>
+    /// <param name="value">源字符串。</param>
     private static string ToSnakeCase(string value)
     {
         if (string.IsNullOrEmpty(value))
@@ -259,6 +279,8 @@ public static class BuffConfigBootstrapMenu
         return builder.ToString();
     }
 
+    /// <summary>将全部 Buff 去重注册到 ConfigDatabase。</summary>
+    /// <param name="buffs">Buff 列表。</param>
     private static void RegisterInDatabase(IReadOnlyList<BuffDataSO> buffs)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(DatabasePath);
@@ -279,6 +301,9 @@ public static class BuffConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>向列表去重追加引用。</summary>
+    /// <param name="list">列表属性。</param>
+    /// <param name="item">待追加对象。</param>
     private static void AddUnique(SerializedProperty list, UnityEngine.Object item)
     {
         if (list == null || item == null)

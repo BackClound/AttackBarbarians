@@ -11,6 +11,7 @@ public static class SkillConfigBootstrapMenu
     private const string SkillFolder = "Assets/Resources/Config/Skill";
     private const string BuffFolder = "Assets/Resources/Config/Buff/Skill";
     private const string UpgradeFolder = "Assets/Resources/Config/Upgrade";
+    /// <summary>菜单：生成扩展技能解锁表、Buff 与升级选项。</summary>
 
     [MenuItem("Attack Barbarians/Config/Create More Skills Assets")]
     public static void CreateMoreSkillsAssets()
@@ -86,6 +87,7 @@ public static class SkillConfigBootstrapMenu
         Debug.Log("[SkillConfigBootstrap] More Skills 配置已生成。");
     }
 
+    /// <summary>创建或更新 SkillUnlockTable 默认条目。</summary>
     private static SkillUnlockTableSO CreateOrLoadUnlockTable()
     {
         string path = $"{SkillFolder}/SkillUnlockTable_Default.asset";
@@ -111,6 +113,11 @@ public static class SkillConfigBootstrapMenu
         return table;
     }
 
+    /// <summary>写入单条技能解锁配置。</summary>
+    /// <param name="element">entries 数组元素。</param>
+    /// <param name="skillId">技能 ID。</param>
+    /// <param name="seconds">所需游玩秒数。</param>
+    /// <param name="defaultUnlocked">是否默认解锁。</param>
     private static void SetUnlockEntry(SerializedProperty element, string skillId, long seconds, bool defaultUnlocked)
     {
         element.FindPropertyRelative("skillConfigId").stringValue = skillId;
@@ -118,6 +125,11 @@ public static class SkillConfigBootstrapMenu
         element.FindPropertyRelative("unlockedByDefault").boolValue = defaultUnlocked;
     }
 
+    /// <summary>创建或更新技能 Buff 资产。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     private static BuffDataSO CreateSkillBuff(string fileName, string configId, SkillBuffKind kind, int tier)
     {
         string path = $"{BuffFolder}/{fileName}.asset";
@@ -140,11 +152,22 @@ public static class SkillConfigBootstrapMenu
         return buff;
     }
 
+    /// <summary>创建技能解锁类 UpgradeOption。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="title">标题。</param>
+    /// <param name="skillId">技能 ID。</param>
     private static UpgradeOptionSO CreateUnlockOption(string fileName, string configId, string title, string skillId)
     {
         return CreateOption(fileName, configId, title, UpgradeEffectType.SkillUnlock, skillId, SkillBuffKind.None, 0);
     }
 
+    /// <summary>创建 SkillBuff 类 UpgradeOption。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="title">标题。</param>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     private static UpgradeOptionSO CreateSkillBuffOption(
         string fileName,
         string configId,
@@ -155,6 +178,14 @@ public static class SkillConfigBootstrapMenu
         return CreateOption(fileName, configId, title, UpgradeEffectType.SkillBuff, string.Empty, kind, tier);
     }
 
+    /// <summary>创建或更新 UpgradeOption 资产。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="title">标题。</param>
+    /// <param name="effectType">效果类型。</param>
+    /// <param name="skillId">技能 ID。</param>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     private static UpgradeOptionSO CreateOption(
         string fileName,
         string configId,
@@ -185,6 +216,9 @@ public static class SkillConfigBootstrapMenu
         return option;
     }
 
+    /// <summary>将解锁表与 Buff/升级选项注册到 ConfigDatabase。</summary>
+    /// <param name="unlockTable">解锁表。</param>
+    /// <param name="items">Buff 与升级选项。</param>
     private static void RegisterInDatabase(
         SkillUnlockTableSO unlockTable,
         params Object[] items)
@@ -216,6 +250,9 @@ public static class SkillConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>向列表去重追加引用。</summary>
+    /// <param name="list">列表属性。</param>
+    /// <param name="item">待追加对象。</param>
     private static void AddUnique(SerializedProperty list, Object item)
     {
         if (list == null || item == null)

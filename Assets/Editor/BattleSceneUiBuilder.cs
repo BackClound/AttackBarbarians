@@ -26,6 +26,7 @@ public static class BattleSceneUiBuilder
     private static readonly Color CardHeader = Hex("#6B4A2E");
     private static readonly Color Scrim = new Color(0f, 0f, 0f, 0.62f);
 
+    /// <summary>菜单：打开 BattleScene 并重建局内 UI 层级。</summary>
     [MenuItem("Attack Barbarians/UI/Build BattleScene UI")]
     public static void BuildBattleSceneUi()
     {
@@ -49,6 +50,7 @@ public static class BattleSceneUiBuilder
         Debug.Log("[BattleSceneUiBuilder] BattleScene UI 已搭建完成。");
     }
 
+    /// <summary>确保场景中存在 EventSystem。</summary>
     private static void EnsureEventSystem()
     {
         if (UnityEngine.Object.FindObjectOfType<EventSystem>() != null)
@@ -68,6 +70,7 @@ public static class BattleSceneUiBuilder
         }
     }
 
+    /// <summary>创建 UICanvas、UIManager 及全部局内面板。</summary>
     private static void CreateUiCanvas()
     {
         GameObject canvasObject = new GameObject(
@@ -106,6 +109,8 @@ public static class BattleSceneUiBuilder
         uiSo.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建 GameplayHUD 及 TopBar/SkillRail/WallStats 子面板。</summary>
+    /// <param name="canvasRoot">Canvas 根节点。</param>
     private static GameplayHudPresenter CreateGameplayHud(RectTransform canvasRoot)
     {
         GameObject hudRoot = new GameObject("GameplayHUD", typeof(RectTransform), typeof(GameplayHudPresenter));
@@ -129,6 +134,8 @@ public static class BattleSceneUiBuilder
         return presenter;
     }
 
+    /// <summary>创建顶部 HUD：暂停、计时、经验与波次。</summary>
+    /// <param name="parent">SafeArea 父节点。</param>
     private static GameplayHudTopPanel CreateTopPanel(Transform parent)
     {
         GameObject root = new GameObject("TopBar", typeof(RectTransform), typeof(UiRectLayout), typeof(GameplayHudTopPanel));
@@ -163,6 +170,8 @@ public static class BattleSceneUiBuilder
         return panel;
     }
 
+    /// <summary>创建右侧技能栏与 4 个技能槽位。</summary>
+    /// <param name="parent">SafeArea 父节点。</param>
     private static GameplayHudSkillRailPanel CreateSkillRail(Transform parent)
     {
         GameObject root = new GameObject("SkillRail", typeof(RectTransform), typeof(UiRectLayout), typeof(GameplayHudSkillRailPanel));
@@ -195,6 +204,10 @@ public static class BattleSceneUiBuilder
         return panel;
     }
 
+    /// <summary>创建单个技能槽视图。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
     private static GameplaySkillSlotView CreateSkillSlot(RectTransform parent, string name, Vector2 position)
     {
         Image background = CreatePanel(parent, name, position, new Vector2(120f, 132f), PanelSteel);
@@ -221,6 +234,8 @@ public static class BattleSceneUiBuilder
         return view;
     }
 
+    /// <summary>创建底部城墙/玩家属性面板。</summary>
+    /// <param name="parent">SafeArea 父节点。</param>
     private static GameplayHudWallPanel CreateWallPanel(Transform parent)
     {
         GameObject root = new GameObject("WallStats", typeof(RectTransform), typeof(UiRectLayout), typeof(GameplayHudWallPanel));
@@ -254,6 +269,8 @@ public static class BattleSceneUiBuilder
         return panel;
     }
 
+    /// <summary>创建三选一升级弹窗面板。</summary>
+    /// <param name="canvasRoot">Canvas 根节点。</param>
     private static UpgradePanelUI CreateUpgradePanel(RectTransform canvasRoot)
     {
         GameObject panelRoot = new GameObject("UpgradePanel", typeof(RectTransform), typeof(UpgradePanelUI), typeof(UiPanelTransition));
@@ -301,6 +318,10 @@ public static class BattleSceneUiBuilder
         return panel;
     }
 
+    /// <summary>创建单张升级选项卡片。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
     private static UpgradeChoiceCardView CreateUpgradeChoiceCard(RectTransform parent, string name, Vector2 position)
     {
         Image background = CreatePanel(parent, name, position, new Vector2(280f, 520f), PanelSteel);
@@ -353,6 +374,12 @@ public static class BattleSceneUiBuilder
         return card;
     }
 
+    /// <summary>创建带 AD 角标的激励广告按钮。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="label">按钮文本。</param>
     private static UiRewardedAdButton CreateRewardedAdButton(RectTransform parent, string name, Vector2 position, Vector2 size, string label)
     {
         Image background = CreatePanel(parent, name, position, size, PrimaryCyan);
@@ -372,6 +399,8 @@ public static class BattleSceneUiBuilder
         return widget;
     }
 
+    /// <summary>创建波次过渡提示面板。</summary>
+    /// <param name="canvasRoot">Canvas 根节点。</param>
     private static WaveTransitionPanelUI CreateWaveTransitionPanel(RectTransform canvasRoot)
     {
         WaveTransitionPanelUI panel = CreateSimpleOverlayPanel<WaveTransitionPanelUI>(
@@ -426,6 +455,12 @@ public static class BattleSceneUiBuilder
         return panel;
     }
 
+    /// <summary>创建 Slider 控件。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="fillColor">填充色。</param>
     private static Slider CreateSlider(RectTransform parent, string name, Vector2 position, Vector2 size, Color fillColor)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(Slider));
@@ -450,6 +485,13 @@ public static class BattleSceneUiBuilder
         return slider;
     }
 
+    /// <summary>创建带标签的 Button。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="label">标签文本。</param>
+    /// <param name="color">背景色。</param>
     private static Button CreateButton(RectTransform parent, string name, Vector2 position, Vector2 size, string label, Color color)
     {
         Image background = CreatePanel(parent, name, position, size, color);
@@ -459,6 +501,12 @@ public static class BattleSceneUiBuilder
         return button;
     }
 
+    /// <summary>创建 Image 面板。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">颜色。</param>
     private static Image CreatePanel(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -473,6 +521,15 @@ public static class BattleSceneUiBuilder
         return image;
     }
 
+    /// <summary>创建 TMP 文本节点。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="text">文本。</param>
+    /// <param name="fontSize">字号。</param>
+    /// <param name="color">颜色。</param>
+    /// <param name="alignment">对齐。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
     private static TMP_Text CreateText(
         RectTransform parent,
         string name,
@@ -500,6 +557,8 @@ public static class BattleSceneUiBuilder
         return tmp;
     }
 
+    /// <summary>将 RectTransform 四向拉伸铺满父节点。</summary>
+    /// <param name="rect">目标 RectTransform。</param>
     private static void StretchFull(RectTransform rect)
     {
         rect.anchorMin = Vector2.zero;
@@ -509,6 +568,8 @@ public static class BattleSceneUiBuilder
         rect.localScale = Vector3.one;
     }
 
+    /// <summary>解析 HTML 颜色字符串。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html) =>
         ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;
 }

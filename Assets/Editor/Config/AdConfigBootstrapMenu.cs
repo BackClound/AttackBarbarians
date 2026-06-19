@@ -11,6 +11,7 @@ public static class AdConfigBootstrapMenu
     private const string AdFolder = "Assets/Resources/Config/Ad";
     private const string ConfigPath = AdFolder + "/AdConfig_Default.asset";
 
+    /// <summary>菜单：创建/更新默认 AdConfig 资产。</summary>
     [MenuItem("Attack Barbarians/Ad/Create Default Ad Config")]
     public static void CreateDefaultAdConfig()
     {

@@ -15,6 +15,7 @@ public static class UpgradeCardConfigBootstrapMenu
     private const string ShopFolder = "Assets/Resources/Config/Shop";
     private const string DailyFolder = "Assets/Resources/Config/DailyReward";
 
+    /// <summary>菜单：创建全部升级卡、奖池并更新商店/签到引用。</summary>
     [MenuItem("Attack Barbarians/Upgrade Card/Create All Upgrade Cards & Reward Pools")]
     public static void CreateAllUpgradeCardAssets()
     {
@@ -176,16 +177,25 @@ public static class UpgradeCardConfigBootstrapMenu
         return pools;
     }
 
+    /// <summary>创建指定技能的升级卡。</summary>
+    /// <param name="configId">卡片 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="skillConfigId">技能 ID。</param>
     private static UpgradeCardSO CreateSkillCard(string configId, string displayName, string skillConfigId)
     {
         return CreateCard(configId, displayName, UpgradeCardCategory.Skill, UpgradeRarity.Common, skillConfigId, StatType.None);
     }
+    /// <summary>创建指定属性的升级卡。</summary>
+    /// <param name="configId">卡片 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="statType">属性类型。</param>
 
     private static UpgradeCardSO CreateAttributeCard(string configId, string displayName, StatType statType)
     {
         return CreateCard(configId, displayName, UpgradeCardCategory.Attribute, UpgradeRarity.Common, null, statType);
     }
 
+    /// <summary>创建通用技能升级卡。</summary>
     private static UpgradeCardSO CreateGenericSkillCard()
     {
         return CreateCard(
@@ -198,6 +208,7 @@ public static class UpgradeCardConfigBootstrapMenu
             "随机获得一张技能升级卡");
     }
 
+    /// <summary>创建通用属性升级卡。</summary>
     private static UpgradeCardSO CreateGenericAttributeCard()
     {
         return CreateCard(
@@ -210,6 +221,14 @@ public static class UpgradeCardConfigBootstrapMenu
             "随机获得一张属性升级卡");
     }
 
+    /// <summary>创建或更新 UpgradeCardSO。</summary>
+    /// <param name="configId">卡片 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="category">卡片类别。</param>
+    /// <param name="rarity">稀有度。</param>
+    /// <param name="skillConfigId">技能 ID。</param>
+    /// <param name="statType">属性类型。</param>
+    /// <param name="description">描述。</param>
     private static UpgradeCardSO CreateCard(
         string configId,
         string displayName,
@@ -243,6 +262,11 @@ public static class UpgradeCardConfigBootstrapMenu
         return card;
     }
 
+    /// <summary>创建或更新 UpgradeCardRewardPoolSO。</summary>
+    /// <param name="configId">奖池 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="drawCount">抽取数量。</param>
+    /// <param name="entries">加权条目。</param>
     private static UpgradeCardRewardPoolSO CreatePool(
         string configId,
         string displayName,
@@ -284,6 +308,9 @@ public static class UpgradeCardConfigBootstrapMenu
         return new List<(UpgradeCardSO, int)>(entries);
     }
 
+    /// <summary>将全部卡片与奖池写入 ConfigDatabase。</summary>
+    /// <param name="cards">卡片字典。</param>
+    /// <param name="pools">奖池字典。</param>
     private static void RegisterInDatabase(
         Dictionary<string, UpgradeCardSO> cards,
         Dictionary<string, UpgradeCardRewardPoolSO> pools)
@@ -324,6 +351,7 @@ public static class UpgradeCardConfigBootstrapMenu
         }
     }
 
+    /// <summary>更新商店补给箱商品的奖池与抽取次数引用。</summary>
     private static void UpdateShopCrates()
     {
         UpdateShopItem(
@@ -352,6 +380,10 @@ public static class UpgradeCardConfigBootstrapMenu
             1);
     }
 
+    /// <summary>更新单个商店商品的 rewardConfigId 与 rewardAmount。</summary>
+    /// <param name="configId">商品 ID。</param>
+    /// <param name="poolConfigId">奖池 ID。</param>
+    /// <param name="drawCount">抽取次数。</param>
     private static void UpdateShopItem(string configId, string poolConfigId, int drawCount)
     {
         string safeName = configId.Replace('.', '_');
@@ -369,6 +401,7 @@ public static class UpgradeCardConfigBootstrapMenu
         EditorUtility.SetDirty(item);
     }
 
+    /// <summary>更新七日签到条目的升级卡奖池引用。</summary>
     private static void UpdateDailyRewards()
     {
         for (int day = 1; day <= 7; day++)

@@ -66,6 +66,8 @@ public static class UpgradeOptionPresentationResolver
         return option.Description ?? string.Empty;
     }
 
+    /// <summary>解析升级选项展示图标（选项直引或关联技能/Buff）。</summary>
+    /// <param name="option">升级选项配置。</param>
     private static Sprite ResolveIcon(UpgradeOptionSO option)
     {
         if (option.Icon != null)
@@ -86,6 +88,9 @@ public static class UpgradeOptionPresentationResolver
         return null;
     }
 
+    /// <summary>按 SkillConfigId 或 SkillBuffKind 解析关联技能数据。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="skill">输出技能数据。</param>
     private static bool TryResolveSkillData(UpgradeOptionSO option, out SkillDataSO skill)
     {
         skill = null;
@@ -114,6 +119,9 @@ public static class UpgradeOptionPresentationResolver
         return false;
     }
 
+    /// <summary>按 BuffConfigId 解析关联 Buff 数据。</summary>
+    /// <param name="option">升级选项配置。</param>
+    /// <param name="buff">输出 Buff 数据。</param>
     private static bool TryResolveBuffData(UpgradeOptionSO option, out BuffDataSO buff)
     {
         buff = null;
@@ -126,6 +134,9 @@ public static class UpgradeOptionPresentationResolver
         return configManager.TryGetBuff(option.BuffConfigId, out buff);
     }
 
+    /// <summary>将 SkillType 映射为技能配置 ID。</summary>
+    /// <param name="skillType">技能类型。</param>
+    /// <param name="configId">输出配置 ID。</param>
     private static bool TryGetSkillConfigId(SkillType skillType, out string configId)
     {
         switch (skillType)

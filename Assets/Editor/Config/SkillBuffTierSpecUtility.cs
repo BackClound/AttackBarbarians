@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 internal static class SkillBuffTierSpecUtility
 {
+    /// <summary>返回指定 SkillBuffKind 的最大 tier。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
     public static int GetMaxTier(SkillBuffKind kind)
     {
         switch (kind)
@@ -53,7 +55,12 @@ internal static class SkillBuffTierSpecUtility
         }
     }
 
+    /// <summary>判断 SkillBuff 是否存在多 tier。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
     public static bool HasMultipleTiers(SkillBuffKind kind) => GetMaxTier(kind) > 1;
+    /// <summary>生成指定 kind/tier 的中文效果描述。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
 
     public static string BuildDescription(SkillBuffKind kind, int tier)
     {
@@ -130,11 +137,17 @@ internal static class SkillBuffTierSpecUtility
         }
     }
 
+    /// <summary>生成升级选项显示名。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     public static string BuildUpgradeDisplayName(SkillBuffKind kind, int tier)
     {
         string label = GetUpgradeLabel(kind);
         return tier <= 1 ? label : $"{label} T{tier}";
     }
+    /// <summary>生成升级选项资产文件名。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
 
     public static string BuildUpgradeFileName(SkillBuffKind kind, int tier)
     {
@@ -148,6 +161,9 @@ internal static class SkillBuffTierSpecUtility
             : $"UpgradeOption_{kind}";
     }
 
+    /// <summary>生成升级选项 configId。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
     public static string BuildUpgradeConfigId(SkillBuffKind kind, int tier)
     {
         if (TryGetLegacyUpgradeConfigId(kind, tier, out string legacy))
@@ -161,6 +177,10 @@ internal static class SkillBuffTierSpecUtility
             : $"upgrade.{snake}.t{tier}";
     }
 
+    /// <summary>尝试获取遗留升级选项文件名。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
+    /// <param name="fileName">输出文件名。</param>
     public static bool TryGetLegacyUpgradeFileName(SkillBuffKind kind, int tier, out string fileName)
     {
         switch (kind)
@@ -189,6 +209,10 @@ internal static class SkillBuffTierSpecUtility
         }
     }
 
+    /// <summary>尝试获取遗留升级选项 configId。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
+    /// <param name="tier">层级。</param>
+    /// <param name="configId">输出 configId。</param>
     public static bool TryGetLegacyUpgradeConfigId(SkillBuffKind kind, int tier, out string configId)
     {
         switch (kind)
@@ -217,6 +241,8 @@ internal static class SkillBuffTierSpecUtility
         }
     }
 
+    /// <summary>返回升级选项英文标签。</summary>
+    /// <param name="kind">SkillBuff 种类。</param>
     private static string GetUpgradeLabel(SkillBuffKind kind)
     {
         switch (kind)
@@ -257,11 +283,16 @@ internal static class SkillBuffTierSpecUtility
         }
     }
 
+    /// <summary>按 tier 查表返回数值。</summary>
+    /// <param name="table">数值表。</param>
+    /// <param name="tier">层级。</param>
     private static int GetCountAtTier(int[] table, int tier)
     {
         tier = Mathf.Clamp(tier, 1, table.Length);
         return table[tier - 1];
     }
+    /// <summary>将 PascalCase 转为 snake_case。</summary>
+    /// <param name="value">源字符串。</param>
 
     private static string ToSnakeCase(string value)
     {

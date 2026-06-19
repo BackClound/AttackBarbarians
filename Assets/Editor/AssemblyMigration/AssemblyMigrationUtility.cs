@@ -14,16 +14,22 @@ public static class AssemblyMigrationUtility
     private const string AsmrefFileName = "AttackBarbarians.asmref";
     private const string PhasePrefsKey = "AttackBarbarians.AssemblyMigrationPhase";
 
+    /// <summary>读取 EditorPrefs 中已应用的迁移阶段。</summary>
     public static AssemblyMigrationPhase GetAppliedPhase()
     {
         return (AssemblyMigrationPhase)EditorPrefs.GetInt(PhasePrefsKey, (int)AssemblyMigrationPhase.None);
     }
 
+    /// <summary>写入已应用的迁移阶段到 EditorPrefs。</summary>
+    /// <param name="phase">目标阶段。</param>
     public static void SetAppliedPhase(AssemblyMigrationPhase phase)
     {
         EditorPrefs.SetInt(PhasePrefsKey, (int)phase);
     }
 
+    /// <summary>按序搬移资源、应用 asmref 并推进至目标阶段。</summary>
+    /// <param name="targetPhase">目标阶段。</param>
+    /// <param name="report">操作日志输出。</param>
     public static bool ApplyThroughPhase(AssemblyMigrationPhase targetPhase, out string report)
     {
         var log = new StringBuilder(512);
@@ -66,6 +72,8 @@ public static class AssemblyMigrationUtility
         return true;
     }
 
+    /// <summary>移除全部 asmref 并重置阶段记录。</summary>
+    /// <param name="report">操作日志输出。</param>
     public static bool ResetAll(out string report)
     {
         var log = new StringBuilder(256);
@@ -93,6 +101,7 @@ public static class AssemblyMigrationUtility
         return true;
     }
 
+    /// <summary>生成各目录 asmref 与 asmdef 状态报告文本。</summary>
     public static string BuildStatusReport()
     {
         var log = new StringBuilder(1024);
@@ -124,6 +133,9 @@ public static class AssemblyMigrationUtility
         return log.ToString();
     }
 
+    /// <summary>执行目标阶段所需的资源搬移。</summary>
+    /// <param name="targetPhase">目标阶段。</param>
+    /// <param name="log">日志构建器。</param>
     private static bool RunAssetMoves(AssemblyMigrationPhase targetPhase, StringBuilder log)
     {
         foreach (AssemblyMigrationCatalog.AssetMove move in AssemblyMigrationCatalog.GetMovesUpTo(targetPhase))
@@ -158,6 +170,9 @@ public static class AssemblyMigrationUtility
         return true;
     }
 
+    /// <summary>在指定目录写入 asmref 绑定。</summary>
+    /// <param name="binding">文件夹绑定信息。</param>
+    /// <param name="log">日志构建器。</param>
     private static bool TryApplyAsmref(AssemblyMigrationCatalog.FolderBinding binding, StringBuilder log)
     {
         if (!Directory.Exists(binding.Folder))
@@ -193,6 +208,9 @@ public static class AssemblyMigrationUtility
         return true;
     }
 
+    /// <summary>删除不在当前激活列表中的过期 asmref。</summary>
+    /// <param name="activeBindings">当前生效的绑定列表。</param>
+    /// <param name="log">日志构建器。</param>
     private static void RemoveStaleAsmrefs(
         IReadOnlyList<AssemblyMigrationCatalog.FolderBinding> activeBindings,
         StringBuilder log)
@@ -219,6 +237,8 @@ public static class AssemblyMigrationUtility
         }
     }
 
+    /// <summary>返回目录下 asmref 文件路径。</summary>
+    /// <param name="folder">目标文件夹。</param>
     private static string GetAsmrefPath(string folder) => $"{folder}/{AsmrefFileName}";
 }
 #endif

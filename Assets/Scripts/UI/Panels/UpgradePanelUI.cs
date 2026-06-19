@@ -61,6 +61,7 @@ public class UpgradePanelUI : UiPanelBase
         ClearCards();
     }
 
+    /// <summary>解析 RandomRewardManager 与 AdRewardService 引用。</summary>
     private void ResolveManagers()
     {
         if (!ServiceLocator.TryGet(out randomRewardManager))
@@ -74,6 +75,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>绑定刷新与全选激励广告按钮的文案与点击事件。</summary>
     private void BindAdButtons()
     {
         if (refreshAdButton != null)
@@ -91,6 +93,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>刷新广告按钮点击：请求重新抽取升级选项。</summary>
     private void OnRefreshAdClicked()
     {
         PlayUiSfx("audio.sfx.ui_click");
@@ -98,6 +101,7 @@ public class UpgradePanelUI : UiPanelBase
         adRewardService?.TryShowRewardedForUpgradeReroll();
     }
 
+    /// <summary>全选广告按钮点击：请求观看广告并领取全部选项。</summary>
     private void OnSelectAllAdClicked()
     {
         PlayUiSfx("audio.sfx.ui_click");
@@ -105,6 +109,7 @@ public class UpgradePanelUI : UiPanelBase
         adRewardService?.TryShowRewardedForUpgradeSelectAll();
     }
 
+    /// <summary>刷新当局剩余广告次数与按钮可交互状态。</summary>
     private void RefreshAdQuota()
     {
         ResolveManagers();
@@ -131,6 +136,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>订阅升级选项就绪与广告奖励完成事件。</summary>
     private void TrySubscribeChoices()
     {
         if (isSubscribedToChoices)
@@ -143,6 +149,7 @@ public class UpgradePanelUI : UiPanelBase
         isSubscribedToChoices = true;
     }
 
+    /// <summary>取消升级选项与广告相关事件订阅。</summary>
     private void UnsubscribeChoices()
     {
         if (!isSubscribedToChoices)
@@ -155,6 +162,8 @@ public class UpgradePanelUI : UiPanelBase
         isSubscribedToChoices = false;
     }
 
+    /// <summary>广告奖励完成后刷新配额或清空卡片（全选时）。</summary>
+    /// <param name="ctx">广告奖励事件上下文。</param>
     private void OnAdRewardCompleted(GameEventContext ctx)
     {
         if (ctx.Payload is not AdRewardCompletedEventArgs args)
@@ -177,6 +186,8 @@ public class UpgradePanelUI : UiPanelBase
         TryDisplayPendingChoices();
     }
 
+    /// <summary>升级选项就绪时展示三选一卡片。</summary>
+    /// <param name="ctx">选项就绪事件上下文。</param>
     private void OnUpgradeChoicesReady(GameEventContext ctx)
     {
         if (ctx.Payload is not UpgradeChoicesPayload payload)
@@ -188,6 +199,7 @@ public class UpgradePanelUI : UiPanelBase
         RefreshAdQuota();
     }
 
+    /// <summary>若已有待选 payload 则立即展示。</summary>
     private void TryDisplayPendingChoices()
     {
         if (randomRewardManager == null)
@@ -201,6 +213,8 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>将候选列表绑定到卡片视图。</summary>
+    /// <param name="payload">三选一选项数据。</param>
     private void DisplayChoices(UpgradeChoicesPayload payload)
     {
         if (choiceCards == null)
@@ -229,6 +243,8 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>玩家选中卡片后提交选择并清空展示。</summary>
+    /// <param name="index">卡片索引。</param>
     private void OnCardSelected(int index)
     {
         PlayUiSfx("audio.sfx.ui_confirm");
@@ -240,6 +256,7 @@ public class UpgradePanelUI : UiPanelBase
         }
     }
 
+    /// <summary>清空所有卡片绑定与显示。</summary>
     private void ClearCards()
     {
         if (choiceCards == null)

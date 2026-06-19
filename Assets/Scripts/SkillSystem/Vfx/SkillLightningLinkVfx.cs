@@ -34,11 +34,16 @@ public class SkillLightningLinkVfx : MonoBehaviour
     public float ReferenceLength => referenceLength;
     public float ThicknessScale => thicknessScale;
 
+    /// <summary>缓存 Mesh 与 Renderer 组件引用。</summary>
     private void Awake()
     {
         EnsureComponents();
     }
 
+    /// <summary>将闪电四边形对齐到起点与终点，并按距离拉伸。</summary>
+    /// <param name="from">起点（世界坐标）。</param>
+    /// <param name="to">终点（世界坐标）。</param>
+    /// <param name="depth">Z 轴深度。</param>
     public void ApplyLink(Vector2 from, Vector2 to, float depth)
     {
         EnsureComponents();
@@ -61,6 +66,8 @@ public class SkillLightningLinkVfx : MonoBehaviour
         meshRenderer.enabled = true;
     }
 
+    /// <summary>启动 Shader 强度与淡出动画。</summary>
+    /// <param name="durationSeconds">播放时长（秒）。</param>
     public void PlayVisuals(float durationSeconds)
     {
         EnsureComponents();
@@ -77,6 +84,7 @@ public class SkillLightningLinkVfx : MonoBehaviour
         meshRenderer.enabled = true;
     }
 
+    /// <summary>每帧更新淡出参数，播放结束后隐藏渲染器。</summary>
     private void Update()
     {
         if (!isPlaying || meshRenderer == null)
@@ -103,11 +111,13 @@ public class SkillLightningLinkVfx : MonoBehaviour
         meshRenderer.SetPropertyBlock(propertyBlock);
     }
 
+    /// <summary>Inspector Reset 时缓存组件引用。</summary>
     private void Reset()
     {
         CacheComponentReferences();
     }
 
+    /// <summary>获取或缓存 MeshFilter / MeshRenderer。</summary>
     private void CacheComponentReferences()
     {
         if (meshFilter == null)
@@ -121,6 +131,7 @@ public class SkillLightningLinkVfx : MonoBehaviour
         }
     }
 
+    /// <summary>确保 MeshFilter、MeshRenderer 与属性块存在。</summary>
     private void EnsureRequiredComponents()
     {
         CacheComponentReferences();
@@ -138,6 +149,7 @@ public class SkillLightningLinkVfx : MonoBehaviour
         propertyBlock ??= new MaterialPropertyBlock();
     }
 
+    /// <summary>加载网格与材质并完成渲染排序配置。</summary>
     private void EnsureComponents()
     {
         EnsureRequiredComponents();
@@ -170,6 +182,7 @@ public class SkillLightningLinkVfx : MonoBehaviour
         meshRenderer.sortingOrder = 50;
     }
 
+    /// <summary>从 Resources 或 Shader 回退链解析运行时材质。</summary>
     private void EnsureRuntimeMaterial()
     {
         if (meshRenderer == null)
@@ -213,6 +226,8 @@ public class SkillLightningLinkVfx : MonoBehaviour
         }
     }
 
+    /// <summary>材质与 Shader 是否可用于渲染。</summary>
+    /// <param name="material">待检测材质。</param>
     private static bool IsMaterialValid(Material material)
     {
         return material != null
@@ -222,6 +237,7 @@ public class SkillLightningLinkVfx : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    /// <summary>编辑模式下校验序列化字段并缓存组件（不主动 AddComponent）。</summary>
     private void OnValidate()
     {
         if (Application.isPlaying)
@@ -240,6 +256,9 @@ public class SkillLightningLinkVfx : MonoBehaviour
     }
 #endif
 
+    /// <summary>程序化生成闪电束四边形网格。</summary>
+    /// <param name="width">束宽。</param>
+    /// <param name="length">参考长度。</param>
     private static Mesh CreateBeamMesh(float width, float length)
     {
         float halfW = width * 0.5f;

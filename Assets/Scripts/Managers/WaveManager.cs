@@ -120,7 +120,7 @@ public class WaveManager : MonoBehaviour, IGameSystem
         bossDefeated = !currentWaveData.HasBoss;
         waveActive = true;
         RunProgressionContext.SetCurrentWave(currentWaveIndex);
-        spawner.ConfigureWavePool(currentWaveData);
+        spawner.ConfigureWavePool(currentWaveData, GetEffectiveWaveDuration());
 
         GameEvents.RaiseWaveStarted(this, new WaveEventArgs(
             currentWaveIndex,
@@ -280,6 +280,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         return currentWaveData.GetLegacyStatMultiplierForWave(currentWaveIndex) * mapAndDifficulty;
     }
 
+    /// <summary>解析当前波次的精英怪生成概率（含波次递进曲线）。</summary>
+    /// <returns>0~1 之间的生成概率。</returns>
     private float ResolveEliteSpawnChance()
     {
         if (RunProgressionContext.IsActive)
@@ -293,6 +295,8 @@ public class WaveManager : MonoBehaviour, IGameSystem
         return currentWaveData.EliteSpawnChance;
     }
 
+    /// <summary>解析当前波次的特殊敌人生成概率（含波次递进曲线）。</summary>
+    /// <returns>0~1 之间的生成概率。</returns>
     private float ResolveSpecialSpawnChance()
     {
         if (RunProgressionContext.IsActive)
@@ -337,10 +341,25 @@ public class WaveManager : MonoBehaviour, IGameSystem
             currentWaveData.MaxSpawnCount * MapRuntimeContext.MaxSpawnCountMultiplier));
     }
 
-    /// <summary>获取有效波次时长（固定 30 秒上限）。</summary>
-    private float GetEffectiveWaveDuration() => GameConstants.Progression.WaveDurationSeconds;
+    /// <summary>获取有效波次时长（V2：每 5 波 +5s；Legacy：<see cref="WaveDataSO.WaveDuration"/>）。</summary>
+    private float GetEffectiveWaveDuration()
+    {
+        if (RunProgressionContext.IsActive)
+        {
+            return WaveProgressionCalculator.GetWaveDuration(
+                currentWaveIndex,
+                RunProgressionContext.Config);
+        }
 
-    /// <summary>检测是否满足波次完成条件：全灭或达到 30 秒（Boss 波保留击败 Boss 条件）。</summary>
+        if (currentWaveData != null)
+        {
+            return currentWaveData.WaveDuration;
+        }
+
+        return GameConstants.Progression.WaveDurationSeconds;
+    }
+
+    /// <summary>检测是否满足波次完成条件：全灭或达到波次时长（Boss 波保留击败 Boss 条件）。</summary>
     private void TryCompleteWave()
     {
         if (!waveActive || currentWaveData == null)

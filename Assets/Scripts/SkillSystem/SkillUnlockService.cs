@@ -12,6 +12,7 @@ using UnityEngine;
 /// </remarks>
 public class SkillUnlockService : MonoBehaviour, IGameSystem
 {
+    /// <summary>无解锁表配置时的兜底解锁规则（技能 ID + 所需游玩秒数）。</summary>
     private struct FallbackUnlockRule
     {
         public string SkillId;

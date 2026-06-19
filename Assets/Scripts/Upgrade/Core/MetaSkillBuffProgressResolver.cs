@@ -97,6 +97,7 @@ internal static class MetaSkillBuffProgressResolver
         }
     }
 
+    /// <summary>从永久升级存档合并 SkillBuff 最高 tier。</summary>
     private static void MergeFromPermanentUpgrades(
         IDictionary<SkillBuffKind, int> destination,
         SaveData save,
@@ -125,6 +126,7 @@ internal static class MetaSkillBuffProgressResolver
         }
     }
 
+    /// <summary>从 GameConfig 开局 Buff 合并 SkillBuff tier。</summary>
     private static void MergeFromStartupBuffs(
         IDictionary<SkillBuffKind, int> destination,
         GameConfig gameConfig,
@@ -148,6 +150,9 @@ internal static class MetaSkillBuffProgressResolver
         }
     }
 
+    /// <summary>解析单条开局 Buff 配置为 BuffDataSO。</summary>
+    /// <param name="entry">开局 Buff 条目。</param>
+    /// <param name="configManager">配置管理器。</param>
     private static BuffDataSO ResolveStartupBuff(GameConfigStartupBuffEntry entry, ConfigManager configManager)
     {
         if (entry == null)
@@ -169,6 +174,10 @@ internal static class MetaSkillBuffProgressResolver
         return configManager.TryGetBuff(configId, out BuffDataSO buff) ? buff : null;
     }
 
+    /// <summary>记录某 SkillBuffKind 已拥有的最高 tier。</summary>
+    /// <param name="destination">目标字典。</param>
+    /// <param name="kind">Buff 种类。</param>
+    /// <param name="tier">tier 等级。</param>
     private static void RecordHighestTier(
         IDictionary<SkillBuffKind, int> destination,
         SkillBuffKind kind,

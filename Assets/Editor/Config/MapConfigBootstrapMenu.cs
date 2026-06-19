@@ -10,6 +10,7 @@ public static class MapConfigBootstrapMenu
 {
     private const string MapFolder = "Assets/Resources/Config/Map";
     private const string EventFolder = "Assets/Resources/Config/Map/Events";
+    /// <summary>菜单：创建默认地图与局内事件配置。</summary>
 
     [MenuItem("Attack Barbarians/Config/Create Default Map Assets")]
     public static void CreateDefaultMapAssets()
@@ -26,6 +27,7 @@ public static class MapConfigBootstrapMenu
         Debug.Log("[MapConfigBootstrap] 默认地图与局内事件资产已创建/更新。");
     }
 
+    /// <summary>创建或更新默认 MapData 资产。</summary>
     private static MapDataSO CreateOrLoadMap()
     {
         string path = $"{MapFolder}/MapData_Default.asset";
@@ -65,6 +67,7 @@ public static class MapConfigBootstrapMenu
         return map;
     }
 
+    /// <summary>创建或更新兽潮局内事件配置。</summary>
     private static GameplayEventDataSO CreateOrLoadSwarmEvent()
     {
         string path = $"{EventFolder}/GameplayEvent_Swarm.asset";
@@ -99,6 +102,8 @@ public static class MapConfigBootstrapMenu
         return eventData;
     }
 
+    /// <summary>将地图与事件注册到 ConfigDatabase。</summary>
+    /// <param name="items">待注册资产。</param>
     private static void RegisterInDatabase(params Object[] items)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(
@@ -127,6 +132,9 @@ public static class MapConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>向 SerializedProperty 列表去重追加引用。</summary>
+    /// <param name="list">列表属性。</param>
+    /// <param name="item">待追加对象。</param>
     private static void AddUnique(SerializedProperty list, Object item)
     {
         if (list == null || item == null)

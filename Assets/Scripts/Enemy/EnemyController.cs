@@ -526,6 +526,7 @@ public static class EnemyStatScaling
         ScaleStat(snapshot, StatType.Armor, multiplier);
     }
 
+    /// <summary>按波次曲线对外部倍率做乘法缩放并写入快照。</summary>
     private static void ApplyMultiplicativeStat(
         StatRuntimeSnapshot snapshot,
         StatType statType,
@@ -542,6 +543,7 @@ public static class EnemyStatScaling
         ScaleStat(snapshot, statType, mult);
     }
 
+    /// <summary>按波次曲线对指定属性施加加法加成。</summary>
     private static void ApplyAdditiveStat(
         StatRuntimeSnapshot snapshot,
         StatType statType,

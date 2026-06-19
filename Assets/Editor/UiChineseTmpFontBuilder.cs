@@ -12,6 +12,7 @@ using UnityEngine.TextCore.LowLevel;
 public static class UiChineseTmpFontBuilder
 {
     private const string MainScenePath = "Assets/Scenes/MainScene.unity";
+    /// <summary>菜单：生成 Noto Sans SC SDF 并注册全局 Fallback。</summary>
 
     [MenuItem("Attack Barbarians/UI/Setup Chinese TMP Font")]
     public static void SetupChineseTmpFont()
@@ -28,6 +29,7 @@ public static class UiChineseTmpFontBuilder
         Debug.Log($"[UiChineseTmpFontBuilder] 中文字体已就绪：{UiTmpFontPaths.SdfFontAssetPath}");
     }
 
+    /// <summary>菜单：将中文字体应用到 MainScene 全部 TMP 并挂载 Bootstrap。</summary>
     [MenuItem("Attack Barbarians/UI/Apply Chinese Font To MainScene")]
     public static void ApplyChineseFontToMainScene()
     {
@@ -51,6 +53,7 @@ public static class UiChineseTmpFontBuilder
         Debug.Log($"[UiChineseTmpFontBuilder] MainScene 已更新 {count} 个 TMP 文本，并挂载 UiTmpChineseFontBootstrap。");
     }
 
+    /// <summary>创建或加载可用的中文 TMP_FontAsset。</summary>
     public static TMP_FontAsset CreateOrLoadChineseFontAsset()
     {
         TMP_FontAsset existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(UiTmpFontPaths.SdfFontAssetPath);
@@ -143,6 +146,8 @@ public static class UiChineseTmpFontBuilder
         AssetDatabase.Refresh();
     }
 
+    /// <summary>将中文字体加入 TMP Settings 全局 Fallback 列表。</summary>
+    /// <param name="chineseFont">中文字体资产。</param>
     private static void RegisterGlobalFallback(TMP_FontAsset chineseFont)
     {
         TMP_Settings settings = Resources.Load<TMP_Settings>("TMP Settings");
@@ -167,6 +172,8 @@ public static class UiChineseTmpFontBuilder
         }
     }
 
+    /// <summary>将中文字体加入 LiberationSans Fallback 表。</summary>
+    /// <param name="chineseFont">中文字体资产。</param>
     private static void RegisterLiberationFallback(TMP_FontAsset chineseFont)
     {
         TMP_FontAsset liberation = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
@@ -192,6 +199,9 @@ public static class UiChineseTmpFontBuilder
         }
     }
 
+    /// <summary>检查 SerializedProperty 列表是否已包含指定字体。</summary>
+    /// <param name="list">字体列表属性。</param>
+    /// <param name="font">目标字体。</param>
     private static bool ContainsFontReference(SerializedProperty list, TMP_FontAsset font)
     {
         for (int i = 0; i < list.arraySize; i++)
@@ -205,6 +215,8 @@ public static class UiChineseTmpFontBuilder
         return false;
     }
 
+    /// <summary>为场景中全部 TMP_Text 替换为中文字体。</summary>
+    /// <param name="chineseFont">中文字体资产。</param>
     private static int ApplyToScene(TMP_FontAsset chineseFont)
     {
         TMP_Text[] texts = Object.FindObjectsOfType<TMP_Text>(true);
@@ -227,6 +239,7 @@ public static class UiChineseTmpFontBuilder
         return count;
     }
 
+    /// <summary>确保 MainSceneUI 上挂载 UiTmpChineseFontBootstrap。</summary>
     private static void EnsureBootstrapOnMainSceneUi()
     {
         GameObject canvas = GameObject.Find("MainSceneUI");

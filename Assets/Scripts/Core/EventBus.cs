@@ -46,10 +46,11 @@ public sealed class EventBus : IGameSystem
         IsInitialized = true;
     }
 
-    /// <inheritdoc/>
+    /// <summary>每帧更新（事件总线无逐帧逻辑）。</summary>
+    /// <param name="deltaTime">帧间隔（秒）。</param>
     public void Tick(float deltaTime) { }
 
-    /// <inheritdoc/>
+    /// <summary>清空所有订阅并重置初始化状态。</summary>
     public void Shutdown()
     {
         listeners.Clear();

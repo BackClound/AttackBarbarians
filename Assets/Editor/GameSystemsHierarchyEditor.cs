@@ -37,6 +37,7 @@ public static class GameSystemsHierarchyEditor
         }
     }
 
+    /// <summary>菜单：整理当前激活场景的 GameSystems 层级。</summary>
     [MenuItem("Attack Barbarians/Scene/Ensure GameSystems Hierarchy (Current Scene)")]
     public static void EnsureCurrentScene()
     {
@@ -53,11 +54,13 @@ public static class GameSystemsHierarchyEditor
         Debug.Log($"[GameSystemsHierarchyEditor] 已整理当前场景 GameSystems（战斗 Manager: {includeBattle}）。");
     }
 
+    /// <summary>菜单：打开 MainScene 并整理 GameSystems（不含战斗 Manager）。</summary>
     [MenuItem("Attack Barbarians/Scene/Ensure GameSystems Hierarchy (MainScene)")]
     public static void EnsureMainScene()
     {
         EnsureScene(MainScenePath, includeBattleManagers: false);
     }
+    /// <summary>菜单：打开 BattleScene 并整理 GameSystems（含战斗 Manager）。</summary>
 
     [MenuItem("Attack Barbarians/Scene/Ensure GameSystems Hierarchy (BattleScene)")]
     public static void EnsureBattleScene()
@@ -69,6 +72,7 @@ public static class GameSystemsHierarchyEditor
         }
     }
 
+    /// <summary>菜单：依次整理 MainScene 与 BattleScene。</summary>
     [MenuItem("Attack Barbarians/Scene/Ensure GameSystems Hierarchy (All Scenes)")]
     public static void EnsureAllScenes()
     {
@@ -89,6 +93,9 @@ public static class GameSystemsHierarchyEditor
         Apply(gameSystemsRoot, includeBattleManagers: true);
     }
 
+    /// <summary>按 Resolve 顺序创建/排序子 Manager 并绑定 Bootstrapper。</summary>
+    /// <param name="gameSystemsRoot">GameSystems 根对象。</param>
+    /// <param name="includeBattleManagers">是否包含战斗专用 Manager。</param>
     public static void Apply(GameObject gameSystemsRoot, bool includeBattleManagers)
     {
         if (gameSystemsRoot == null)
@@ -122,6 +129,9 @@ public static class GameSystemsHierarchyEditor
         WireBootstrapper(bootstrapper, entries, orderedTransforms);
     }
 
+    /// <summary>打开指定场景并整理 GameSystems 后保存。</summary>
+    /// <param name="scenePath">场景路径。</param>
+    /// <param name="includeBattleManagers">是否包含战斗 Manager。</param>
     private static void EnsureScene(string scenePath, bool includeBattleManagers)
     {
         Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -137,11 +147,14 @@ public static class GameSystemsHierarchyEditor
         Debug.Log($"[GameSystemsHierarchyEditor] 已保存 {scenePath}（战斗 Manager: {includeBattleManagers}）。");
     }
 
+    /// <summary>在当前激活场景中查找 GameSystems 根节点。</summary>
     private static GameObject FindGameSystemsInActiveScene()
     {
         return FindGameSystemsInScene(SceneManager.GetActiveScene());
     }
 
+    /// <summary>在指定场景中查找 GameSystems 根节点。</summary>
+    /// <param name="scene">目标场景。</param>
     private static GameObject FindGameSystemsInScene(Scene scene)
     {
         if (!scene.IsValid())
@@ -160,6 +173,8 @@ public static class GameSystemsHierarchyEditor
         return null;
     }
 
+    /// <summary>根据 Bootstrapper 配置判断是否应挂载战斗 Manager。</summary>
+    /// <param name="gameSystems">GameSystems 根对象。</param>
     private static bool ShouldIncludeBattleManagers(GameObject gameSystems)
     {
         GameBootstrapper bootstrapper = gameSystems.GetComponent<GameBootstrapper>();
@@ -191,6 +206,8 @@ public static class GameSystemsHierarchyEditor
         return postFlow != BootstrapPostFlow.OpenMainMenu;
     }
 
+    /// <summary>构建 Manager 条目列表（主场景或含战斗扩展）。</summary>
+    /// <param name="includeBattleManagers">是否包含战斗 Manager。</param>
     private static IReadOnlyList<ManagerEntry> BuildEntries(bool includeBattleManagers)
     {
         var entries = new List<ManagerEntry>(32)
@@ -246,6 +263,10 @@ public static class GameSystemsHierarchyEditor
         return entries;
     }
 
+    /// <summary>查找或创建 Manager 子物体并挂载组件。</summary>
+    /// <param name="root">GameSystems Transform。</param>
+    /// <param name="entry">Manager 条目。</param>
+    /// <param name="claimed">已占用 Transform 集合。</param>
     private static Transform FindOrCreateChild(
         Transform root,
         ManagerEntry entry,
@@ -298,6 +319,10 @@ public static class GameSystemsHierarchyEditor
         return existing;
     }
 
+    /// <summary>在子物体中按组件类型查找未占用的 Transform。</summary>
+    /// <param name="root">父 Transform。</param>
+    /// <param name="componentType">组件类型。</param>
+    /// <param name="claimed">已占用集合。</param>
     private static Transform FindExistingChild(Transform root, Type componentType, HashSet<Transform> claimed)
     {
         for (int i = 0; i < root.childCount; i++)
@@ -317,6 +342,9 @@ public static class GameSystemsHierarchyEditor
         return null;
     }
 
+    /// <summary>确保 GameObject 上存在指定组件。</summary>
+    /// <param name="gameObject">目标对象。</param>
+    /// <param name="componentType">组件类型。</param>
     private static Component EnsureComponent(GameObject gameObject, Type componentType)
     {
         Component existing = gameObject.GetComponent(componentType);
@@ -328,6 +356,10 @@ public static class GameSystemsHierarchyEditor
         return Undo.AddComponent(gameObject, componentType);
     }
 
+    /// <summary>将有序子 Manager 引用写入 GameBootstrapper 序列化字段。</summary>
+    /// <param name="bootstrapper">Bootstrapper 组件。</param>
+    /// <param name="entries">Manager 条目列表。</param>
+    /// <param name="orderedTransforms">排序后的 Transform 列表。</param>
     private static void WireBootstrapper(
         GameBootstrapper bootstrapper,
         IReadOnlyList<ManagerEntry> entries,

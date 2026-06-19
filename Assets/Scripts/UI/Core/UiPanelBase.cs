@@ -40,6 +40,7 @@ public abstract class UiPanelBase : MonoBehaviour
         }
     }
 
+    /// <summary>懒加载 <see cref="UiPanelTransition"/> 组件引用。</summary>
     private void EnsureTransitionReference()
     {
         if (transition == null)
@@ -108,6 +109,7 @@ public abstract class UiPanelBase : MonoBehaviour
         DeactivateRoot();
     }
 
+    /// <summary>确保面板根物体与 GameObject 处于激活状态。</summary>
     private void EnsureRootActive()
     {
         if (!gameObject.activeSelf)
@@ -121,6 +123,7 @@ public abstract class UiPanelBase : MonoBehaviour
         }
     }
 
+    /// <summary>停用面板根节点（退场动画结束后调用）。</summary>
     private void DeactivateRoot()
     {
         if (root != null)

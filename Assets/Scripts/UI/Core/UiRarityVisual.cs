@@ -84,6 +84,8 @@ public class UiRarityVisual : MonoBehaviour
         Refresh();
     }
 
+    /// <summary>获取或添加 Image 的 Outline 描边组件。</summary>
+    /// <param name="image">目标 Image。</param>
     private static Outline GetOrAddOutline(Image image)
     {
         Outline outline = image.GetComponent<Outline>();

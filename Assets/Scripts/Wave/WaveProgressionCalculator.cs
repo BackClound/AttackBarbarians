@@ -149,6 +149,9 @@ public static class WaveProgressionCalculator
         return Mathf.Clamp(baseChance + cfg.SpecialChancePerWave * (wave - 1), 0f, cfg.SpecialChanceMax);
     }
 
+    /// <summary>按幂函数曲线计算乘法缩放系数。</summary>
+    /// <param name="wave">波次索引。</param>
+    /// <param name="curve">曲线配置。</param>
     private static float EvaluateMultiplicativeCurve(int wave, WaveStatCurve curve)
     {
         wave = Mathf.Max(1, wave);

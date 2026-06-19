@@ -60,7 +60,8 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 
     /// <summary>配置当前波次的敌人生成池。</summary>
     /// <param name="waveData">波次配置。</param>
-    public void ConfigureWavePool(WaveDataSO waveData)
+    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 <see cref="WaveDataSO.WaveDuration"/>。</param>
+    public void ConfigureWavePool(WaveDataSO waveData, float effectiveWaveDurationSeconds = 0f)
     {
         activeWaveData = waveData;
         if (!ServiceLocator.TryGet(out ConfigManager configManager))
@@ -68,7 +69,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
             return;
         }
 
-        spawnSelector.Configure(waveData, configManager);
+        spawnSelector.Configure(waveData, configManager, effectiveWaveDurationSeconds);
         specialSelector.Configure(waveData, configManager);
     }
 

@@ -13,6 +13,7 @@ public static class WaveProgressionConfigBootstrapMenu
     private const string DatabasePath = "Assets/Resources/Config/ConfigDatabase.asset";
     private const string GameConfigPath = "Assets/Resources/Config/GameConfig.asset";
 
+    /// <summary>菜单：创建默认 WaveProgression 配置。</summary>
     [MenuItem("Attack Barbarians/Config/Create Default Wave Progression")]
     public static void CreateDefaultWaveProgression()
     {
@@ -33,6 +34,8 @@ public static class WaveProgressionConfigBootstrapMenu
         Debug.Log("[WaveProgressionBootstrap] 默认波次成长资产已创建/更新。");
     }
 
+    /// <summary>将 WaveProgression 注册到 ConfigDatabase。</summary>
+    /// <param name="progression">波次成长配置。</param>
     private static void RegisterInDatabase(WaveProgressionConfigSO progression)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(DatabasePath);
@@ -48,6 +51,8 @@ public static class WaveProgressionConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>启用 GameConfig 的 WaveProgression V2 并绑定引用。</summary>
+    /// <param name="progression">波次成长配置。</param>
     private static void RegisterInGameConfig(WaveProgressionConfigSO progression)
     {
         GameConfig gameConfig = AssetDatabase.LoadAssetAtPath<GameConfig>(GameConfigPath);

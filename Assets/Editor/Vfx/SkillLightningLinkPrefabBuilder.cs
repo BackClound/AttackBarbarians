@@ -13,18 +13,20 @@ public static class SkillLightningLinkPrefabBuilder
     public const string MeshPath = "Assets/Resources/VFX/Skill/SkillLightningBeam.asset";
     public const string ShaderPath = "Assets/Shaders/Skill/SH_SkillLightningLink_URP.shader";
 
+    /// <summary>编辑器加载时延迟检查并补全缺失 Prefab。</summary>
     [InitializeOnLoadMethod]
     private static void EnsurePrefabOnLoad()
     {
         EditorApplication.delayCall += TryBuildIfMissing;
     }
-
+    /// <summary>菜单：强制生成 SkillLightningLink Prefab 及依赖资产。</summary>
     [MenuItem("Attack Barbarians/VFX/Create Skill Lightning Link Prefab")]
     public static void CreateFromMenu()
     {
         CreateOrUpdatePrefab(force: true);
     }
 
+    /// <summary>若 Prefab/材质/Mesh 缺失则自动生成。</summary>
     private static void TryBuildIfMissing()
     {
         if (!File.Exists(PrefabPath) || !File.Exists(MaterialPath) || !File.Exists(MeshPath))
@@ -33,6 +35,8 @@ public static class SkillLightningLinkPrefabBuilder
         }
     }
 
+    /// <summary>创建或更新 SkillLightningLink Prefab。</summary>
+    /// <param name="force">是否强制重建。</param>
     private static void CreateOrUpdatePrefab(bool force)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(PrefabPath) ?? string.Empty);
@@ -77,6 +81,7 @@ public static class SkillLightningLinkPrefabBuilder
         AssetDatabase.Refresh();
     }
 
+    /// <summary>创建或加载链状闪电材质。</summary>
     private static Material CreateOrLoadMaterial()
     {
         Shader shader = AssetDatabase.LoadAssetAtPath<Shader>(ShaderPath);
@@ -106,6 +111,8 @@ public static class SkillLightningLinkPrefabBuilder
         return material;
     }
 
+    /// <summary>写入链状闪电材质默认 Shader 参数。</summary>
+    /// <param name="material">目标材质。</param>
     private static void ApplyMaterialDefaults(Material material)
     {
         material.SetColor("_Color", new Color(0.2f, 0.4f, 1f, 0.95f));
@@ -120,6 +127,9 @@ public static class SkillLightningLinkPrefabBuilder
         material.renderQueue = 3000;
     }
 
+    /// <summary>加载或创建光束 Mesh 资产。</summary>
+    /// <param name="width">光束宽度。</param>
+    /// <param name="length">光束长度。</param>
     private static Mesh CreateOrLoadBeamMesh(float width, float length)
     {
         Mesh existing = AssetDatabase.LoadAssetAtPath<Mesh>(MeshPath);
@@ -133,6 +143,9 @@ public static class SkillLightningLinkPrefabBuilder
         return mesh;
     }
 
+    /// <summary>程序化生成四顶点光束 Mesh。</summary>
+    /// <param name="width">光束宽度。</param>
+    /// <param name="length">光束长度。</param>
     private static Mesh CreateBeamMesh(float width, float length)
     {
         float halfW = width * 0.5f;

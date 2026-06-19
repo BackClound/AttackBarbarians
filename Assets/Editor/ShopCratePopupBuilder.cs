@@ -9,6 +9,7 @@ using UnityEngine.UI;
 /// </summary>
 public static class ShopCratePopupBuilder
 {
+    /// <summary>菜单：在 MainScene 搭建补给箱奖励/预览弹窗。</summary>
     [MenuItem("Attack Barbarians/UI/Build Shop Crate Popups In MainScene")]
     public static void BuildShopCratePopupsInMainScene()
     {
@@ -23,7 +24,6 @@ public static class ShopCratePopupBuilder
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(shopView.gameObject.scene);
         Debug.Log("[ShopCratePopupBuilder] 商城抽取弹窗已搭建并绑定。");
     }
-
     private static readonly Color PanelDeep = Hex("#071632");
     private static readonly Color PanelBlue = Hex("#0C2A5A");
     private static readonly Color NeonBlue = Hex("#4DB7FF");
@@ -32,6 +32,9 @@ public static class ShopCratePopupBuilder
     private static readonly Color TextWhite = Hex("#F5FAFF");
     private static readonly Color Scrim = new Color(0f, 0f, 0f, 0.72f);
 
+    /// <summary>创建弹窗层级并绑定 ShopSceneView 引用。</summary>
+    /// <param name="shopPageRoot">商城页根节点。</param>
+    /// <param name="shopView">商城视图。</param>
     public static void BuildAndWire(Transform shopPageRoot, ShopSceneView shopView)
     {
         if (shopPageRoot == null || shopView == null)
@@ -61,6 +64,11 @@ public static class ShopCratePopupBuilder
         shopSo.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>为 ShopCrateWidget 写入预览奖池与按钮引用。</summary>
+    /// <param name="widget">补给箱 Widget。</param>
+    /// <param name="previewPoolId">预览奖池 ID。</param>
+    /// <param name="crateTitle">补给箱标题。</param>
+    /// <param name="previewButton">预览按钮。</param>
     public static void WireCrateWidget(
         ShopCrateWidget widget,
         string previewPoolId,
@@ -79,6 +87,9 @@ public static class ShopCratePopupBuilder
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建抽取结果奖励弹窗面板。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="cardPrefab">卡片槽预制引用。</param>
     private static ShopCrateRewardPopupPanel CreateRewardPopup(Transform parent, UpgradeCardDisplayView cardPrefab)
     {
         RectTransform root = CreateStretchHost(parent, "ShopCrateRewardPopup");
@@ -119,6 +130,11 @@ public static class ShopCratePopupBuilder
         return popup;
     }
 
+    /// <summary>创建奖励卡片 Grid ScrollView。</summary>
+    /// <param name="panel">弹窗面板。</param>
+    /// <param name="cardPrefab">卡片预制。</param>
+    /// <param name="cardGrid">输出 Grid 根节点。</param>
+    /// <param name="rewardCardPrefab">输出槽位预制实例。</param>
     private static ScrollRect CreateRewardCardScroll(
         RectTransform panel,
         UpgradeCardDisplayView cardPrefab,
@@ -165,6 +181,9 @@ public static class ShopCratePopupBuilder
         return scroll;
     }
 
+    /// <summary>创建奖池预览弹窗面板。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="cardPrefab">卡片槽预制。</param>
     private static ShopCratePoolPreviewPanel CreatePoolPreviewPopup(Transform parent, UpgradeCardDisplayView cardPrefab)
     {
         RectTransform root = CreateStretchHost(parent, "ShopCratePoolPreview");
@@ -226,12 +245,20 @@ public static class ShopCratePopupBuilder
         return popup;
     }
 
+    /// <summary>创建升级卡槽位预制模板。</summary>
+    /// <param name="parent">父节点。</param>
     private static UpgradeCardDisplayView CreateCardSlotPrefab(Transform parent)
     {
         RectTransform host = CreatePanelHost(parent, "UpgradeCardSlotPrefab", Vector2.zero, new Vector2(280f, 380f));
         host.gameObject.SetActive(false);
         return BuildCardView(host, "Card");
     }
+    /// <summary>从预制实例化卡片槽并设置尺寸。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">实例名称。</param>
+    /// <param name="prefab">源预制。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
 
     private static UpgradeCardDisplayView CreateCardInstance(
         RectTransform parent,
@@ -252,6 +279,9 @@ public static class ShopCratePopupBuilder
         return instance;
     }
 
+    /// <summary>构建 UpgradeCardDisplayView 完整卡片 UI。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
     private static UpgradeCardDisplayView BuildCardView(RectTransform parent, string name)
     {
         Image border = CreatePanel(parent, name, Vector2.zero, parent.sizeDelta, PanelDeep);
@@ -297,6 +327,9 @@ public static class ShopCratePopupBuilder
         return view;
     }
 
+    /// <summary>创建全拉伸 RectTransform 宿主。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="name">节点名称。</param>
     private static RectTransform CreateStretchHost(Transform parent, string name)
     {
         GameObject go = new GameObject(name, typeof(RectTransform));
@@ -306,6 +339,10 @@ public static class ShopCratePopupBuilder
         return rect;
     }
 
+    /// <summary>创建全拉伸 Image。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="color">颜色。</param>
     private static Image CreateStretchImage(RectTransform parent, string name, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -317,12 +354,22 @@ public static class ShopCratePopupBuilder
         return image;
     }
 
+    /// <summary>创建居中面板 Image。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">颜色。</param>
     private static RectTransform CreateCenterPanel(RectTransform parent, string name, Vector2 size, Color color)
     {
         Image panel = CreatePanel(parent, name, Vector2.zero, size, color);
         return panel.rectTransform;
     }
 
+    /// <summary>创建居中锚点 RectTransform 宿主。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
     private static RectTransform CreatePanelHost(Transform parent, string name, Vector2 position, Vector2 size)
     {
         GameObject go = new GameObject(name, typeof(RectTransform));
@@ -336,6 +383,12 @@ public static class ShopCratePopupBuilder
         return rect;
     }
 
+    /// <summary>创建带 Outline 的 Image 面板。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">颜色。</param>
     private static Image CreatePanel(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Outline));
@@ -354,6 +407,15 @@ public static class ShopCratePopupBuilder
         return image;
     }
 
+    /// <summary>创建 TMP 文本。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="text">文本。</param>
+    /// <param name="fontSize">字号。</param>
+    /// <param name="color">颜色。</param>
+    /// <param name="alignment">对齐。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
     private static TMP_Text CreateText(
         RectTransform parent,
         string name,
@@ -387,6 +449,14 @@ public static class ShopCratePopupBuilder
         return label;
     }
 
+    /// <summary>创建操作 Button。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="label">标签。</param>
+    /// <param name="accent">强调色。</param>
+    /// <param name="labelText">输出标签引用。</param>
     private static Button CreateActionButton(
         RectTransform parent,
         string name,
@@ -403,6 +473,8 @@ public static class ShopCratePopupBuilder
         return button;
     }
 
+    /// <summary>解析 HTML 颜色字符串。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html)
     {
         return ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;

@@ -12,6 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(RectTransform))]
 public class UiRectLayout : MonoBehaviour
 {
+    /// <summary>RectTransform 对齐预设，决定锚点与拉伸方式。</summary>
     public enum LayoutPreset
     {
         /// <summary>全屏拉伸。</summary>

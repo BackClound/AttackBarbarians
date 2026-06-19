@@ -58,6 +58,8 @@ public static class GameRunSpeedSettings
         Time.timeScale = 1f;
     }
 
+    /// <summary>从 GameManager 解析当前游戏状态；未就绪时返回 Bootstrapping。</summary>
+    /// <returns>当前 <see cref="GameState"/>。</returns>
     private static GameState ResolveCurrentState()
     {
         if (ServiceLocator.TryGet(out GameManager gameManager) && gameManager.IsInitialized)
@@ -68,6 +70,8 @@ public static class GameRunSpeedSettings
         return GameState.Bootstrapping;
     }
 
+    /// <summary>在运行时日志开关开启时输出倍速变更信息。</summary>
+    /// <param name="message">日志正文。</param>
     private static void LogIfEnabled(string message)
     {
         if (!ServiceLocator.TryGet(out ConfigManager configManager) ||

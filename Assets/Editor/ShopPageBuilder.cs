@@ -35,6 +35,7 @@ public static class ShopPageBuilder
     private static readonly Color NeonPurple = Hex("#A95CFF");
     private static readonly Color TextWhite = Hex("#F5FAFF");
 
+    /// <summary>菜单：在 MainScene 搭建商城页并绑定 MainSceneView。</summary>
     [MenuItem("Attack Barbarians/UI/Build Shop Page In MainScene")]
     public static void BuildShopPageInMainScene()
     {
@@ -65,6 +66,7 @@ public static class ShopPageBuilder
         Debug.Log("[ShopPageBuilder] 商城页面已搭建并绑定到 MainScene。");
     }
 
+    /// <summary>菜单：修复商城 ScrollView 顶栏/底栏固定与内容纵向布局。</summary>
     [MenuItem("Attack Barbarians/UI/Fix Shop Scroll Layout In MainScene")]
     public static void FixShopScrollLayoutInMainScene()
     {
@@ -104,6 +106,8 @@ public static class ShopPageBuilder
         Debug.Log("[ShopPageBuilder] ShopScrollHost 布局已修复：内容自顶向下排列，顶栏/底栏固定不滚动。");
     }
 
+    /// <summary>配置 ScrollView Content 的 VerticalLayoutGroup 与 ContentSizeFitter。</summary>
+    /// <param name="content">Content RectTransform。</param>
     private static void ApplyScrollContentLayout(RectTransform content)
     {
         if (content == null)
@@ -141,6 +145,9 @@ public static class ShopPageBuilder
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
     }
 
+    /// <summary>为 Scroll 区块设置固定高度与 LayoutElement。</summary>
+    /// <param name="section">区块 RectTransform。</param>
+    /// <param name="height">区块高度。</param>
     private static void ApplyScrollSectionLayout(RectTransform section, float height)
     {
         if (section == null)
@@ -165,6 +172,8 @@ public static class ShopPageBuilder
         element.flexibleWidth = 1f;
     }
 
+    /// <summary>创建完整商城页面层级并返回 ShopSceneView。</summary>
+    /// <param name="canvasRoot">Canvas 根节点。</param>
     private static ShopSceneView CreateShopPage(RectTransform canvasRoot)
     {
         UiPageStructureEditorUtility.PageShell shell = UiPageStructureEditorUtility.CreatePageShell(
@@ -248,10 +257,24 @@ public static class ShopPageBuilder
         return shopView;
     }
 
+    /// <summary>创建商城 TopBar 四槽资源条。</summary>
+    /// <param name="root">TopBar 根节点。</param>
+    /// <param name="panel">ShopResourcePanel。</param>
     private static void CreateShopResources(RectTransform root, ShopResourcePanel panel)
     {
         TopResourceBarEditorUtility.Build(root, panel, TopResourceBarEditorUtility.ShopBarPositions);
     }
+    /// <summary>创建补给箱 Widget（单抽/十连/广告/预览）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="accent">强调色。</param>
+    /// <param name="singleId">单抽商品 ID。</param>
+    /// <param name="tenId">十连商品 ID。</param>
+    /// <param name="adId">广告抽商品 ID。</param>
+    /// <param name="previewPoolId">预览奖池 ID。</param>
+    /// <param name="crateTitle">补给箱标题。</param>
 
     private static ShopCrateWidget CreateCrateWidget(
         RectTransform parent,
@@ -298,6 +321,11 @@ public static class ShopPageBuilder
         return widget;
     }
 
+    /// <summary>创建金币补给 Widget（低/标准档与广告领取）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
     private static ShopGoldSupplyWidget CreateGoldSupplyWidget(RectTransform parent, string name, Vector2 position, Vector2 size)
     {
         Image background = CreatePanel(parent, name, position, size, PanelDeep);
@@ -361,6 +389,9 @@ public static class ShopPageBuilder
         };
     }
 
+    /// <summary>创建广告券兑换中心 UI 并绑定面板。</summary>
+    /// <param name="root">父级。</param>
+    /// <param name="panel">兑换面板组件。</param>
     private static void CreateExchangeSection(RectTransform root, ShopAdTicketExchangePanel panel)
     {
         Image background = CreatePanel(root, "ExchangeBackground", Vector2.zero, root.sizeDelta, PanelBlue);
@@ -396,6 +427,13 @@ public static class ShopPageBuilder
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建兑换列（标题 + 多行兑换项）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">列名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="columnTitle">列标题。</param>
+    /// <param name="configIds">兑换商品 ID 数组。</param>
+    /// <param name="accent">强调色。</param>
     private static ShopExchangeRowWidget[] CreateExchangeColumn(
         RectTransform parent,
         string name,
@@ -416,6 +454,12 @@ public static class ShopPageBuilder
         return rows;
     }
 
+    /// <summary>创建单行兑换项 Widget。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">行名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="configId">兑换商品 ID。</param>
+    /// <param name="accent">强调色。</param>
     private static ShopExchangeRowWidget CreateExchangeRow(RectTransform parent, string name, Vector2 position, string configId, Color accent)
     {
         Image rowBg = CreatePanel(parent, name, position, new Vector2(280f, 60f), PanelDeep);
@@ -435,6 +479,8 @@ public static class ShopPageBuilder
         return row;
     }
 
+    /// <summary>创建纵向 ScrollRect（Viewport + Content）。</summary>
+    /// <param name="parent">Scroll 宿主。</param>
     private static ScrollRect CreateScrollArea(RectTransform parent)
     {
         GameObject scrollGo = new GameObject("ShopScroll", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
@@ -492,6 +538,9 @@ public static class ShopPageBuilder
         return go.GetComponent<RectTransform>();
     }
 
+    /// <summary>绑定 MainSceneView 的 shopPage/bottomNav/battlePage 引用。</summary>
+    /// <param name="mainView">主场景视图。</param>
+    /// <param name="shopView">商城视图。</param>
     private static void WireMainSceneView(MainSceneView mainView, ShopSceneView shopView)
     {
         RectTransform canvasRoot = mainView.transform as RectTransform;
@@ -507,11 +556,20 @@ public static class ShopPageBuilder
         mainSo.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>按名称查找直接子节点或递归查找。</summary>
+    /// <param name="parent">父 Transform。</param>
+    /// <param name="name">节点名称。</param>
     private static Transform FindChild(Transform parent, string name)
     {
         Transform direct = parent != null ? parent.Find(name) : null;
         return direct != null ? direct : FindChildRecursive(parent, name);
     }
+    /// <summary>创建带 UiRectLayout 的布局宿主节点。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="preset">布局预设。</param>
+    /// <param name="padding">内边距。</param>
+    /// <param name="fixedSize">固定尺寸。</param>
 
     private static RectTransform CreateLayoutHost(
         Transform parent,
@@ -526,11 +584,21 @@ public static class ShopPageBuilder
         return go.GetComponent<RectTransform>();
     }
 
+    /// <summary>委托 UiPageStructureEditorUtility 设置布局。</summary>
+    /// <param name="layout">布局组件。</param>
+    /// <param name="preset">布局预设。</param>
+    /// <param name="padding">内边距。</param>
+    /// <param name="fixedSize">固定尺寸。</param>
     private static void SetLayout(UiRectLayout layout, UiRectLayout.LayoutPreset preset, RectOffset padding, Vector2 fixedSize = default)
     {
         UiPageStructureEditorUtility.SetLayout(layout, preset, padding, fixedSize);
     }
 
+    /// <summary>创建居中锚点的 RectTransform 宿主。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
     private static RectTransform CreatePanelHost(RectTransform parent, string name, Vector2 position, Vector2 size)
     {
         GameObject go = new GameObject(name, typeof(RectTransform));
@@ -544,6 +612,12 @@ public static class ShopPageBuilder
         return rect;
     }
 
+    /// <summary>创建带 Outline 的 Image 面板。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">颜色。</param>
     private static Image CreatePanel(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Outline));
@@ -562,6 +636,15 @@ public static class ShopPageBuilder
         return image;
     }
 
+    /// <summary>创建 TMP 文本（自动绑定中文字体）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="text">文本。</param>
+    /// <param name="fontSize">字号。</param>
+    /// <param name="color">颜色。</param>
+    /// <param name="alignment">对齐。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
     private static TMP_Text CreateText(
         RectTransform parent,
         string name,
@@ -595,6 +678,14 @@ public static class ShopPageBuilder
         return label;
     }
 
+    /// <summary>创建带标签的操作 Button。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="label">标签。</param>
+    /// <param name="accent">强调色。</param>
+    /// <param name="labelText">输出标签 TMP 引用。</param>
     private static Button CreateActionButton(
         RectTransform parent,
         string name,
@@ -611,6 +702,9 @@ public static class ShopPageBuilder
         return button;
     }
 
+    /// <summary>将 ShopExchangeRowWidget 数组写入 SerializedProperty。</summary>
+    /// <param name="arrayProp">数组属性。</param>
+    /// <param name="items">行 Widget 数组。</param>
     private static void SetArray(SerializedProperty arrayProp, ShopExchangeRowWidget[] items)
     {
         arrayProp.arraySize = items.Length;
@@ -620,6 +714,9 @@ public static class ShopPageBuilder
         }
     }
 
+    /// <summary>递归按名称查找子节点。</summary>
+    /// <param name="root">搜索根。</param>
+    /// <param name="name">节点名称。</param>
     private static Transform FindChildRecursive(Transform root, string name)
     {
         if (root.name == name)
@@ -639,11 +736,15 @@ public static class ShopPageBuilder
         return null;
     }
 
+    /// <summary>委托 StretchFull 铺满父节点。</summary>
+    /// <param name="rect">目标 RectTransform。</param>
     private static void StretchToParent(RectTransform rect)
     {
         UiPageStructureEditorUtility.StretchFull(rect);
     }
 
+    /// <summary>解析 HTML 颜色字符串为 Color。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html)
     {
         return ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;

@@ -48,8 +48,12 @@ public class GameplayHudWallPanel : MonoBehaviour
         GameEvents.UnsubscribeGameStarted(OnGameStarted);
     }
 
+    /// <summary>游戏开始时全量刷新城墙区。</summary>
+    /// <param name="ctx">游戏开始事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>玩家生命值变更时更新血条与数值。</summary>
+    /// <param name="ctx">生命变更事件上下文。</param>
     private void OnPlayerHealthChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not PlayerHealthEventArgs args)
@@ -60,6 +64,8 @@ public class GameplayHudWallPanel : MonoBehaviour
         ApplyHealth(args.CurrentHp, args.MaxHp);
     }
 
+    /// <summary>玩家属性变更时更新护甲与攻击显示。</summary>
+    /// <param name="ctx">属性变更事件上下文。</param>
     private void OnPlayerStatsChanged(GameEventContext ctx)
     {
         if (ctx.Payload is PlayerStatsChangedEventArgs args)
@@ -77,6 +83,7 @@ public class GameplayHudWallPanel : MonoBehaviour
         RefreshPlayerName();
     }
 
+    /// <summary>从玩家生命组件读取并应用当前血量。</summary>
     private void RefreshHealthFromPlayer()
     {
         if (!PlayerSceneAccess.TryGetHealth(out Player_Health health))
@@ -88,6 +95,7 @@ public class GameplayHudWallPanel : MonoBehaviour
         ApplyHealth(health.CurrentHp, maxHp);
     }
 
+    /// <summary>从玩家属性快照刷新护甲与攻击。</summary>
     private void RefreshStatsFromPlayer()
     {
         if (!PlayerSceneAccess.TryGetController(out PlayerController controller) || !controller.IsReady)
@@ -100,6 +108,7 @@ public class GameplayHudWallPanel : MonoBehaviour
         ApplyAttack(snapshot.Get(StatType.Damage));
     }
 
+    /// <summary>刷新玩家名称占位文本。</summary>
     private void RefreshPlayerName()
     {
         if (playerNameText == null)
@@ -111,6 +120,9 @@ public class GameplayHudWallPanel : MonoBehaviour
         playerNameText.color = UiTechWastelandPalette.TextPrimary;
     }
 
+    /// <summary>将当前/最大生命写入滑条与文本，低血量时高亮。</summary>
+    /// <param name="currentHp">当前生命。</param>
+    /// <param name="maxHp">最大生命。</param>
     private void ApplyHealth(float currentHp, float maxHp)
     {
         maxHp = maxHp > 0f ? maxHp : 1f;
@@ -130,6 +142,8 @@ public class GameplayHudWallPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将护甲值写入文本。</summary>
+    /// <param name="armor">护甲数值。</param>
     private void ApplyArmor(float armor)
     {
         if (armorValueText != null)
@@ -139,6 +153,8 @@ public class GameplayHudWallPanel : MonoBehaviour
         }
     }
 
+    /// <summary>将攻击力写入文本。</summary>
+    /// <param name="attack">攻击数值。</param>
     private void ApplyAttack(float attack)
     {
         if (attackValueText != null)

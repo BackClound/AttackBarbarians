@@ -70,7 +70,8 @@ public class UiRewardedAdButton : MonoBehaviour
         onClicked = callback;
     }
 
-  private void HandleClick()
+    /// <summary>转发按钮点击到外部绑定回调。</summary>
+    private void HandleClick()
     {
         onClicked?.Invoke();
     }

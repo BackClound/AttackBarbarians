@@ -40,6 +40,8 @@ public static class RunDifficultyBootstrap
         }
     }
 
+    /// <summary>从存档设置读取并钳制游戏难度（0~2）。</summary>
+    /// <returns>难度档位；无存档时默认 1。</returns>
     private static int ResolveGameDifficulty()
     {
         if (ServiceLocator.TryGet(out SaveManager saveManager) && saveManager.Current?.settings != null)

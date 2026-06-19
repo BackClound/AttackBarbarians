@@ -12,6 +12,7 @@ public static class PerformanceConfigBootstrapMenu
     private const string BudgetPath = Folder + "/PerformanceBudget_Default.asset";
     private const string GameConfigPath = "Assets/Resources/Config/GameConfig.asset";
 
+    /// <summary>菜单：创建 PerformanceBudget 并关联 GameConfig。</summary>
     [MenuItem("Attack Barbarians/Performance/Create Default Performance Assets")]
     public static void CreateDefaultPerformanceAssets()
     {

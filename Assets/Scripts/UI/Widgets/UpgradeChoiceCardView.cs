@@ -108,6 +108,10 @@ public class UpgradeChoiceCardView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>设置 TMP 文本内容与颜色。</summary>
+    /// <param name="text">目标文本组件。</param>
+    /// <param name="value">显示内容。</param>
+    /// <param name="color">文字颜色。</param>
     private static void SetText(TMP_Text text, string value, Color color)
     {
         if (text == null)
@@ -119,6 +123,9 @@ public class UpgradeChoiceCardView : MonoBehaviour
         text.color = color;
     }
 
+    /// <summary>将图标写入 Image 并控制显隐。</summary>
+    /// <param name="image">图标 Image。</param>
+    /// <param name="sprite">图标精灵。</param>
     private static void ApplyIcon(Image image, Sprite sprite)
     {
         if (image == null)
@@ -131,6 +138,8 @@ public class UpgradeChoiceCardView : MonoBehaviour
         image.preserveAspect = true;
     }
 
+    /// <summary>配置图标 Image 的显示模式（保持宽高比）。</summary>
+    /// <param name="image">图标 Image。</param>
     private static void ConfigureIconImage(Image image)
     {
         if (image == null)
@@ -142,6 +151,7 @@ public class UpgradeChoiceCardView : MonoBehaviour
         image.type = Image.Type.Simple;
     }
 
+    /// <summary>卡片点击时回调已绑定的选项索引。</summary>
     private void OnClick()
     {
         if (choiceIndex >= 0)

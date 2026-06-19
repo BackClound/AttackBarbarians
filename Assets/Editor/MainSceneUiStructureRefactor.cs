@@ -12,6 +12,7 @@ using UnityEngine.UI;
 public static class MainSceneUiStructureRefactor
 {
     private const string MainScenePath = "Assets/Scenes/MainScene.unity";
+    /// <summary>菜单：将 MainScene UI 重构为 BattlePage/ShopPage/BottomNav 结构。</summary>
 
     [MenuItem("Attack Barbarians/UI/Refactor MainScene Page Structure")]
     public static void RefactorMainScenePageStructure()
@@ -94,6 +95,7 @@ public static class MainSceneUiStructureRefactor
         Debug.Log("[MainSceneUiStructureRefactor] 页面结构已重构：BattlePagePanelRoot / ShopPageRoot / BottomNav。");
     }
 
+    /// <summary>战斗页 UI 组件绑定集合，供结构重构时暂存引用。</summary>
     private struct BattleBindings
     {
         public string battleSceneName;
@@ -110,6 +112,10 @@ public static class MainSceneUiStructureRefactor
         public MainSceneRewardPanel rewardPanel;
     }
 
+    /// <summary>从现有 SafeArea 采集战斗页绑定引用。</summary>
+    /// <param name="safeArea">SafeArea 根节点。</param>
+    /// <param name="background">背景 Transform。</param>
+    /// <param name="bindings">输出绑定集合。</param>
     private static void CaptureBattleBindingsFromScene(Transform safeArea, Transform background, out BattleBindings bindings)
     {
         bindings = new BattleBindings
@@ -129,6 +135,9 @@ public static class MainSceneUiStructureRefactor
         };
     }
 
+    /// <summary>将采集的绑定写回 MainSceneBattlePageView。</summary>
+    /// <param name="battlePage">战斗页视图。</param>
+    /// <param name="bindings">绑定集合。</param>
     private static void ApplyBattleBindings(MainSceneBattlePageView battlePage, BattleBindings bindings)
     {
         if (battlePage == null)
@@ -152,6 +161,9 @@ public static class MainSceneUiStructureRefactor
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>按名称查找直接子节点或递归查找。</summary>
+    /// <param name="parent">父 Transform。</param>
+    /// <param name="name">节点名称。</param>
     private static Transform FindChild(Transform parent, string name)
     {
         if (parent == null)
@@ -163,6 +175,9 @@ public static class MainSceneUiStructureRefactor
         return direct != null ? direct : FindChildRecursive(parent, name);
     }
 
+    /// <summary>递归按名称查找子节点。</summary>
+    /// <param name="root">搜索根节点。</param>
+    /// <param name="name">节点名称。</param>
     private static Transform FindChildRecursive(Transform root, string name)
     {
         if (root.name == name)
@@ -182,6 +197,8 @@ public static class MainSceneUiStructureRefactor
         return null;
     }
 
+    /// <summary>为 SafeArea 设置底栏预留的 UiRectLayout 边距。</summary>
+    /// <param name="safeArea">SafeArea RectTransform。</param>
     private static void EnsureSafeAreaBottomInset(RectTransform safeArea)
     {
         if (safeArea == null)
@@ -201,6 +218,8 @@ public static class MainSceneUiStructureRefactor
             new RectOffset(0, 0, 0, UiPageStructureEditorUtility.SafeAreaBottomInset));
     }
 
+    /// <summary>确保商城页具备 SafeArea 与背景壳层结构。</summary>
+    /// <param name="shopPage">商城页根节点。</param>
     private static void EnsureShopPageShell(Transform shopPage)
     {
         Transform existingSafe = FindChild(shopPage, "SafeAreaRoot");
@@ -242,10 +261,17 @@ public static class MainSceneUiStructureRefactor
         }
     }
 
+    /// <summary>委托 UiPageStructureEditorUtility 拉伸 RectTransform。</summary>
+    /// <param name="rect">目标 RectTransform。</param>
     private static void StretchFull(RectTransform rect)
     {
         UiPageStructureEditorUtility.StretchFull(rect);
     }
+    /// <summary>委托 UiPageStructureEditorUtility 设置 UiRectLayout。</summary>
+    /// <param name="layout">布局组件。</param>
+    /// <param name="preset">布局预设。</param>
+    /// <param name="padding">内边距。</param>
+    /// <param name="fixedSize">固定尺寸。</param>
 
     private static void SetLayout(UiRectLayout layout, UiRectLayout.LayoutPreset preset, RectOffset padding, Vector2 fixedSize = default)
     {

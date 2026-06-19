@@ -10,15 +10,22 @@ public sealed class WaveSpawnSelector
     private readonly List<string> weightedIds = new List<string>(32);
     private readonly List<WaveEnemyEntry> activeEntries = new List<WaveEnemyEntry>(8);
     private WaveDataSO waveData;
+    private float effectiveWaveDuration;
 
     /// <summary>
     /// 根据波次配置构建权重池或条目列表。
     /// </summary>
     /// <param name="wave">波次配置。</param>
     /// <param name="configManager">配置管理器（用于旧式 enemyConfigIds 权重）。</param>
-    public void Configure(WaveDataSO wave, ConfigManager configManager)
+    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 <see cref="WaveDataSO.WaveDuration"/>。</param>
+    public void Configure(WaveDataSO wave, ConfigManager configManager, float effectiveWaveDurationSeconds = 0f)
     {
         waveData = wave;
+        effectiveWaveDuration = effectiveWaveDurationSeconds > 0f
+            ? effectiveWaveDurationSeconds
+            : wave != null
+                ? wave.WaveDuration
+                : GameConstants.Progression.WaveDurationSeconds;
         weightedIds.Clear();
         activeEntries.Clear();
 
@@ -103,7 +110,11 @@ public sealed class WaveSpawnSelector
     private string PickFromEntries(float waveElapsedSeconds)
     {
         weightedIds.Clear();
-        float duration = waveData.WaveDuration;
+        float duration = effectiveWaveDuration > 0f
+            ? effectiveWaveDuration
+            : waveData != null
+                ? waveData.WaveDuration
+                : GameConstants.Progression.WaveDurationSeconds;
 
         for (int i = 0; i < activeEntries.Count; i++)
         {

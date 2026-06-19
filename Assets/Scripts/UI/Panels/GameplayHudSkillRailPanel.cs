@@ -43,8 +43,12 @@ public class GameplayHudSkillRailPanel : MonoBehaviour
         }
     }
 
+    /// <summary>游戏开始时全量刷新技能栏。</summary>
+    /// <param name="ctx">游戏开始事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx) => RefreshAll();
 
+    /// <summary>技能解锁、升级或 Buff 变更时全量刷新。</summary>
+    /// <param name="ctx">相关事件上下文。</param>
     private void OnSkillChanged(GameEventContext ctx) => RefreshAll();
 
     /// <summary>全量刷新技能槽列表。</summary>
@@ -91,6 +95,7 @@ public class GameplayHudSkillRailPanel : MonoBehaviour
         }
     }
 
+    /// <summary>仅刷新可见槽位的冷却遮罩（轻量周期更新）。</summary>
     private void RefreshCooldownsOnly()
     {
         if (skillSlots == null)

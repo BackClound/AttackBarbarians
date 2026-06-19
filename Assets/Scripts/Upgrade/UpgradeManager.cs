@@ -331,6 +331,7 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         currentChoices.Clear();
     }
 
+    /// <summary>开局时施加局外永久 Buff 与 Playtest 开局 Buff。</summary>
     private static void ApplyPersistentRunStartBuffs()
     {
         PlayerSkillManager playerSkills = ResolvePlayerSkillManager();
@@ -561,6 +562,9 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>从候选列表移除指定升级选项。</summary>
+    /// <param name="list">候选列表。</param>
+    /// <param name="option">要移除的选项。</param>
     private static void RemoveCandidateFromList(List<UpgradeRollCandidate> list, UpgradeOptionSO option)
     {
         if (list == null || option == null)
@@ -577,11 +581,13 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>按选项引用从列表移除候选（RemoveCandidateFromList 的别名）。</summary>
     private static void RemoveCandidateByOption(List<UpgradeRollCandidate> list, UpgradeOptionSO option)
     {
         RemoveCandidateFromList(list, option);
     }
 
+    /// <summary>从候选池排除与已选选项互斥组冲突的条目。</summary>
     private static void ExcludeMutualGroup(
         RewardPoolSO pool,
         UpgradeOptionSO picked,
@@ -902,14 +908,18 @@ public class UpgradeManager : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>是否存在进行中的单局存档。</summary>
     private bool HasActiveRunSession() => saveManager != null && saveManager.HasActiveRun;
 
+    /// <summary>读取本局 Buff 事件计数（用于属性 Buff 周期规则）。</summary>
     private int GetBuffEventCounter() =>
         saveManager?.Current?.runProgress?.buffEventCounter ?? 0;
 
+    /// <summary>是否应强制仅抽取基础属性 Buff 池。</summary>
     private bool ShouldForceBasicAttributeBuffPool() =>
         GetBuffEventCounter() >= GameConstants.Progression.StatBuffCycleThreshold;
 
+    /// <summary>将候选列表过滤为仅保留强制属性周期 Buff 选项。</summary>
     private static void FilterToForcedStatCycleBuffsOnly(List<UpgradeRollCandidate> candidates)
     {
         for (int i = candidates.Count - 1; i >= 0; i--)

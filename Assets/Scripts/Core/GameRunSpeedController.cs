@@ -49,6 +49,8 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
         isInitialized = false;
     }
 
+    /// <summary>游戏状态变更时按新状态重新应用运行倍速。</summary>
+    /// <param name="ctx">状态变更事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx)
     {
         if (ctx.Payload is not GameStateChange change)
@@ -59,6 +61,8 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
         GameRunSpeedSettings.ApplyToUnityTimeScale(change.NewState);
     }
 
+    /// <summary>当前构建是否允许响应倍速快捷键。</summary>
+    /// <returns>Editor 或 Development Build 时为 true。</returns>
     private static bool IsHotkeyInputAllowed()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -68,6 +72,7 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
 #endif
     }
 
+    /// <summary>轮询倍速切换快捷键（按当前输入系统分支）。</summary>
     private static void PollHotkeys()
     {
 #if ENABLE_INPUT_SYSTEM
@@ -78,6 +83,7 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
     }
 
 #if ENABLE_INPUT_SYSTEM
+    /// <summary>使用新输入系统检测数字键与 +/- 倍速快捷键。</summary>
     private static void PollHotkeysInputSystem()
     {
         Keyboard keyboard = Keyboard.current;
@@ -104,6 +110,7 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
     }
 #endif
 
+    /// <summary>使用旧输入系统检测数字键与 +/- 倍速快捷键。</summary>
     private static void PollHotkeysLegacyInput()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) GameRunSpeedSettings.SetPlaySpeedMultiplier(1f);
@@ -123,6 +130,8 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
         }
     }
 
+    /// <summary>按步进值增减当前倍速并写回设置。</summary>
+    /// <param name="delta">倍速增量（通常为 ±1）。</param>
     private static void StepMultiplier(float delta)
     {
         float next = GameRunSpeedSettings.PlaySpeedMultiplier + delta;

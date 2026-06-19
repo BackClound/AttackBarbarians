@@ -11,6 +11,7 @@ using UnityEngine;
 public static class UpgradeConfigBootstrapMenu
 {
     private const string UpgradeFolder = "Assets/Resources/Config/Upgrade";
+    /// <summary>菜单：批量生成默认升级选项与 RewardPool。</summary>
 
     [MenuItem("Attack Barbarians/Config/Create Default Upgrade Assets")]
     public static void CreateDefaultUpgradeAssets()
@@ -131,6 +132,12 @@ public static class UpgradeConfigBootstrapMenu
         Debug.Log($"[UpgradeConfigBootstrap] 已生成/更新 {allOptions.Count} 个升级选项与 RewardPool_Default。");
     }
 
+    /// <summary>创建或更新 UpgradeOptionSO。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="description">描述。</param>
+    /// <param name="effectType">效果类型。</param>
     private static UpgradeOptionSO CreateOrLoadOption(
         string fileName,
         string configId,
@@ -168,6 +175,10 @@ public static class UpgradeConfigBootstrapMenu
         return asset;
     }
 
+    /// <summary>创建或更新 RewardPoolSO。</summary>
+    /// <param name="fileName">文件名。</param>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="options">池内升级选项。</param>
     private static RewardPoolSO CreateOrLoadPool(
         string fileName,
         string configId,
@@ -198,6 +209,8 @@ public static class UpgradeConfigBootstrapMenu
         return pool;
     }
 
+    /// <summary>将升级选项与奖励池注册到 ConfigDatabase。</summary>
+    /// <param name="items">待注册资产。</param>
     private static void RegisterInDatabase(params UnityEngine.Object[] items)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(
@@ -226,6 +239,9 @@ public static class UpgradeConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>向列表去重追加引用。</summary>
+    /// <param name="list">列表属性。</param>
+    /// <param name="item">待追加对象。</param>
     private static void AddUnique(SerializedProperty list, UnityEngine.Object item)
     {
         if (list == null || item == null)

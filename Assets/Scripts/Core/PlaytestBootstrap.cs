@@ -76,6 +76,8 @@ public static class PlaytestBootstrap
         return ApplyStartupBuffs(gameConfig);
     }
 
+    /// <summary>延迟若干帧后重试施加开局 Buff，等待 BuffManager 就绪。</summary>
+    /// <param name="gameConfig">游戏全局配置。</param>
     private static IEnumerator ApplyStartupBuffsDeferred(GameConfig gameConfig)
     {
         for (int i = 0; i < StartupBuffRetryFrames; i++)
@@ -164,6 +166,10 @@ public static class PlaytestBootstrap
         return playerSkills != null ? playerSkills.BuffManager : Object.FindFirstObjectByType<BuffManager>();
     }
 
+    /// <summary>按配置 ID 或直引解析开局 Buff 数据。</summary>
+    /// <param name="entry">开局 Buff 配置条目。</param>
+    /// <param name="configManager">配置管理器，用于按 ID 查找。</param>
+    /// <returns>解析到的 Buff 数据；无效时返回 null。</returns>
     private static BuffDataSO ResolveBuffData(GameConfigStartupBuffEntry entry, ConfigManager configManager)
     {
         if (entry == null)

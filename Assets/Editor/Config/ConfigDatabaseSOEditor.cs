@@ -8,6 +8,7 @@ using UnityEngine;
 [CustomEditor(typeof(ConfigDatabaseSO))]
 public class ConfigDatabaseSOEditor : Editor
 {
+    /// <summary>绘制 ConfigDatabase 检视器并显示校验按钮。</summary>
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();

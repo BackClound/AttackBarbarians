@@ -9,6 +9,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// 编辑器工具：一键生成 MainScene 场景层级、GameSystems 与主界面 UI 结构。
+/// </summary>
 public static class MainSceneBuilder
 {
     private const string MainScenePath = "Assets/Scenes/MainScene.unity";
@@ -23,6 +26,7 @@ public static class MainSceneBuilder
     private static readonly Color NeonPurple = Hex("#A95CFF");
     private static readonly Color TextWhite = Hex("#F5FAFF");
 
+    /// <summary>菜单：一键创建 MainScene 场景、GameSystems 与主界面 UI。</summary>
     [MenuItem("Attack Barbarians/UI/Create MainScene")]
     public static void CreateMainScene()
     {
@@ -41,6 +45,7 @@ public static class MainSceneBuilder
         Debug.Log($"[MainSceneBuilder] MainScene created: {MainScenePath}");
     }
 
+    /// <summary>创建主场景正交相机与 AudioListener。</summary>
     private static void CreateCamera()
     {
         GameObject cameraObject = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
@@ -54,6 +59,7 @@ public static class MainSceneBuilder
         camera.orthographicSize = 9.6f;
     }
 
+    /// <summary>创建 EventSystem 与 UI 输入模块。</summary>
     private static void CreateEventSystem()
     {
         GameObject eventSystemObject = new GameObject("EventSystem", typeof(EventSystem));
@@ -68,6 +74,7 @@ public static class MainSceneBuilder
         }
     }
 
+    /// <summary>创建 GameSystems 根节点并配置 Bootstrapper。</summary>
     private static void CreateGameSystems()
     {
         GameObject systemsObject = new GameObject("GameSystems");
@@ -83,6 +90,7 @@ public static class MainSceneBuilder
         GameSystemsHierarchyEditor.ApplyForMainScene(systemsObject);
     }
 
+    /// <summary>创建 MainSceneUI Canvas 及战斗页全部 UI 子结构。</summary>
     private static void CreateMainSceneUi()
     {
         GameObject canvasObject = new GameObject(
@@ -178,6 +186,9 @@ public static class MainSceneBuilder
         serializedView.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建顶部玩家资料区并绑定 MainSceneProfilePanel。</summary>
+    /// <param name="root">父级 RectTransform。</param>
+    /// <param name="profilePanel">资料面板组件。</param>
     private static void CreateProfile(RectTransform root, MainSceneProfilePanel profilePanel)
     {
         Image avatarFrame = CreatePanel(root, "AvatarFrame", new Vector2(-440f, 810f), new Vector2(150f, 150f), PanelDeep);
@@ -198,10 +209,15 @@ public static class MainSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建顶部四槽资源条并绑定 MainSceneResourcePanel。</summary>
+    /// <param name="root">父级 RectTransform。</param>
+    /// <param name="resourcePanel">资源面板组件。</param>
     private static void CreateTopResources(RectTransform root, MainSceneResourcePanel resourcePanel)
     {
         TopResourceBarEditorUtility.Build(root, resourcePanel, TopResourceBarEditorUtility.MainSceneBarPositions);
     }
+    /// <summary>创建右上角系统图标按钮组。</summary>
+    /// <param name="cardPanel">卡片面板容器。</param>
 
     private static void CreateTopButtons(MainSceneCardPanel cardPanel)
     {
@@ -214,6 +230,8 @@ public static class MainSceneBuilder
         AssignCardPanel(cardPanel, cards);
     }
 
+    /// <summary>创建促销/活动横幅与快捷入口按钮。</summary>
+    /// <param name="cardPanel">卡片面板容器。</param>
     private static void CreatePromotionArea(MainSceneCardPanel cardPanel)
     {
         RectTransform parent = cardPanel.transform as RectTransform;
@@ -233,6 +251,8 @@ public static class MainSceneBuilder
         AssignCardPanel(cardPanel, cards.ToArray());
     }
 
+    /// <summary>创建中央城市/能量核心装饰视觉。</summary>
+    /// <param name="root">父级 RectTransform。</param>
     private static void CreateCenterVisual(RectTransform root)
     {
         Image skyline = CreatePanel(root, "CentralSkylinePanel", new Vector2(0f, 115f), new Vector2(520f, 560f), new Color(0.02f, 0.12f, 0.32f, 0.46f));
@@ -242,6 +262,8 @@ public static class MainSceneBuilder
         CreateText(skyline.rectTransform, "FlightShipText", ">>", 54, NeonBlue, TextAlignmentOptions.Center, new Vector2(210f, 115f), new Vector2(120f, 72f));
     }
 
+    /// <summary>创建左侧活动入口图标列。</summary>
+    /// <param name="cardPanel">卡片面板容器。</param>
     private static void CreateLeftSideButtons(MainSceneCardPanel cardPanel)
     {
         RectTransform parent = cardPanel.transform as RectTransform;
@@ -256,6 +278,8 @@ public static class MainSceneBuilder
         AssignCardPanel(cardPanel, cards);
     }
 
+    /// <summary>创建右侧公告/排行等入口图标列。</summary>
+    /// <param name="cardPanel">卡片面板容器。</param>
     private static void CreateRightSideButtons(MainSceneCardPanel cardPanel)
     {
         RectTransform parent = cardPanel.transform as RectTransform;
@@ -268,6 +292,9 @@ public static class MainSceneBuilder
         AssignCardPanel(cardPanel, cards);
     }
 
+    /// <summary>创建在线/通关/离线三类奖励卡片并绑定。</summary>
+    /// <param name="root">父级 RectTransform。</param>
+    /// <param name="rewardPanel">奖励面板组件。</param>
     private static void CreateRewardPanels(RectTransform root, MainSceneRewardPanel rewardPanel)
     {
         GeneralRewardCardPanel online = CreateRewardPanel(root, "OnlineRewardPanel", new Vector2(-245f, -460f), "在线奖励", "00:15:30", "可领取", NeonBlue, MainSceneAction.OnlineReward);
@@ -281,6 +308,8 @@ public static class MainSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建「开始战斗」主行动按钮。</summary>
+    /// <param name="root">父级 RectTransform。</param>
     private static GeneralCardPanel CreatePrimaryAction(RectTransform root)
     {
         GeneralCardPanel start = CreateIconButton(root, "StartBattleButton", new Vector2(0f, -675f), new Vector2(720f, 170f), "开始战斗", "消耗 5", NeonOrange, MainSceneAction.StartBattle);
@@ -301,6 +330,8 @@ public static class MainSceneBuilder
         return start;
     }
 
+    /// <summary>创建底部五页导航按钮组。</summary>
+    /// <param name="cardPanel">卡片面板容器。</param>
     private static void CreateBottomNavigation(MainSceneCardPanel cardPanel)
     {
         MainSceneAction[] actions = { MainSceneAction.Shop, MainSceneAction.Characters, MainSceneAction.Battle, MainSceneAction.Tech, MainSceneAction.Base };
@@ -316,11 +347,17 @@ public static class MainSceneBuilder
         AssignCardPanel(cardPanel, cards);
     }
 
+    /// <summary>创建带 MainSceneCardPanel 的面板宿主节点。</summary>
+    /// <param name="parent">父级 RectTransform。</param>
+    /// <param name="name">节点名称。</param>
     private static MainSceneCardPanel CreateCardPanelHost(RectTransform parent, string name)
     {
         RectTransform host = CreatePanelHost(parent, name, Vector2.zero, Vector2.zero);
         return host.gameObject.AddComponent<MainSceneCardPanel>();
     }
+    /// <summary>将 GeneralCardPanel 数组写入 MainSceneCardPanel.cards。</summary>
+    /// <param name="panel">卡片面板。</param>
+    /// <param name="cards">卡片数组。</param>
 
     private static void AssignCardPanel(MainSceneCardPanel panel, GeneralCardPanel[] cards)
     {
@@ -335,6 +372,11 @@ public static class MainSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>创建居中锚点的空 RectTransform 宿主。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">锚点位置。</param>
+    /// <param name="size">尺寸。</param>
     private static RectTransform CreatePanelHost(RectTransform parent, string name, Vector2 position, Vector2 size)
     {
         GameObject go = new GameObject(name, typeof(RectTransform));
@@ -348,6 +390,12 @@ public static class MainSceneBuilder
         return rect;
     }
 
+    /// <summary>创建带描边的 Image 面板。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">填充色。</param>
     private static Image CreatePanel(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Outline));
@@ -369,6 +417,15 @@ public static class MainSceneBuilder
         return image;
     }
 
+    /// <summary>创建 TMP 文本节点（自动绑定中文字体）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="text">初始文本。</param>
+    /// <param name="fontSize">字号。</param>
+    /// <param name="color">颜色。</param>
+    /// <param name="alignment">对齐方式。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
     private static TMP_Text CreateText(RectTransform parent, string name, string text, int fontSize, Color color, TextAlignmentOptions alignment, Vector2 anchoredPosition, Vector2 size)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -397,6 +454,12 @@ public static class MainSceneBuilder
         return label;
     }
 
+    /// <summary>创建不可交互的经验/进度 Slider。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="anchoredPosition">锚点坐标。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="fillColor">填充色。</param>
     private static Slider CreateSlider(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Color fillColor)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(Slider));
@@ -423,6 +486,15 @@ public static class MainSceneBuilder
         return slider;
     }
 
+    /// <summary>创建 GeneralCardPanel 图标按钮（含红点）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="title">标题。</param>
+    /// <param name="subtitle">副标题。</param>
+    /// <param name="accent">强调色。</param>
+    /// <param name="action">主场景动作枚举。</param>
     private static GeneralCardPanel CreateIconButton(RectTransform parent, string name, Vector2 position, Vector2 size, string title, string subtitle, Color accent, MainSceneAction action)
     {
         Image background = CreatePanel(parent, name, position, size, PanelBlue);
@@ -448,6 +520,15 @@ public static class MainSceneBuilder
         return card;
     }
 
+    /// <summary>创建 GeneralRewardCardPanel 奖励卡片。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="title">标题。</param>
+    /// <param name="timer">计时文本。</param>
+    /// <param name="status">状态文本。</param>
+    /// <param name="accent">强调色。</param>
+    /// <param name="action">主场景动作枚举。</param>
     private static GeneralRewardCardPanel CreateRewardPanel(RectTransform parent, string name, Vector2 position, string title, string timer, string status, Color accent, MainSceneAction action)
     {
         Image background = CreatePanel(parent, name, position, new Vector2(225f, 105f), PanelDeep);
@@ -473,6 +554,9 @@ public static class MainSceneBuilder
         return reward;
     }
 
+    /// <summary>创建 UI_RedDot 红点控件。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="position">位置。</param>
     private static UI_RedDot CreateRedDot(RectTransform parent, Vector2 position)
     {
         Image dot = CreatePanel(parent, "RedDot", position, new Vector2(22f, 22f), Hex("#FF2238"));
@@ -483,6 +567,8 @@ public static class MainSceneBuilder
         return redDot;
     }
 
+    /// <summary>将 RectTransform 拉伸铺满父节点。</summary>
+    /// <param name="rect">目标 RectTransform。</param>
     private static void StretchToParent(RectTransform rect)
     {
         rect.anchorMin = Vector2.zero;
@@ -491,6 +577,7 @@ public static class MainSceneBuilder
         rect.offsetMax = Vector2.zero;
     }
 
+    /// <summary>将 MainScene 与 BattleScene 写入 Build Settings。</summary>
     private static void AddScenesToBuildSettings()
     {
         List<EditorBuildSettingsScene> scenes = EditorBuildSettings.scenes
@@ -502,6 +589,10 @@ public static class MainSceneBuilder
         EditorBuildSettings.scenes = scenes.ToArray();
     }
 
+    /// <summary>在 Build Settings 列表中插入或启用场景。</summary>
+    /// <param name="scenes">场景列表。</param>
+    /// <param name="path">场景资产路径。</param>
+    /// <param name="insertAtStart">是否插入到列表开头。</param>
     private static void UpsertScene(List<EditorBuildSettingsScene> scenes, string path, bool insertAtStart)
     {
         int existingIndex = scenes.FindIndex(scene => scene.path == path);
@@ -529,6 +620,8 @@ public static class MainSceneBuilder
         }
     }
 
+    /// <summary>解析 HTML 颜色字符串为 Color。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html)
     {
         return ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;

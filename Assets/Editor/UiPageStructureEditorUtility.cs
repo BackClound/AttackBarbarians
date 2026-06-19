@@ -16,6 +16,8 @@ public static class UiPageStructureEditorUtility
 
     /// <summary>SafeArea 内为底栏预留的底部边距（逻辑像素）。</summary>
     public static int SafeAreaBottomInset => Mathf.RoundToInt(BottomNavHeight + BottomNavBottomPadding);
+    /// <summary>解析 HTML 颜色字符串。</summary>
+    /// <param name="html">十六进制颜色值。</param>
 
     public static readonly Color DefaultPageBackground = Hex("#06112F");
 
@@ -84,6 +86,10 @@ public static class UiPageStructureEditorUtility
             new Vector2(0f, BottomNavHeight));
     }
 
+    /// <summary>创建全屏拉伸的背景 Image。</summary>
+    /// <param name="parent">父节点。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="color">背景色。</param>
     public static Image CreateStretchBackground(Transform parent, string name, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -95,6 +101,8 @@ public static class UiPageStructureEditorUtility
         return image;
     }
 
+    /// <summary>将 RectTransform 四向拉伸铺满父节点。</summary>
+    /// <param name="rect">目标 RectTransform。</param>
     public static void StretchFull(RectTransform rect)
     {
         if (rect == null)
@@ -109,6 +117,11 @@ public static class UiPageStructureEditorUtility
         rect.localScale = Vector3.one;
     }
 
+    /// <summary>通过 SerializedObject 配置 UiRectLayout 并立即应用。</summary>
+    /// <param name="layout">布局组件。</param>
+    /// <param name="preset">布局预设。</param>
+    /// <param name="padding">内边距。</param>
+    /// <param name="fixedSize">固定尺寸。</param>
     public static void SetLayout(
         UiRectLayout layout,
         UiRectLayout.LayoutPreset preset,
@@ -133,6 +146,9 @@ public static class UiPageStructureEditorUtility
         layout.ApplyLayout();
     }
 
+    /// <summary>将 RectOffset 写入 SerializedProperty。</summary>
+    /// <param name="paddingProp">padding 属性。</param>
+    /// <param name="padding">边距值。</param>
     public static void SetSerializedRectOffset(SerializedProperty paddingProp, RectOffset padding)
     {
         if (paddingProp == null || padding == null)
@@ -146,11 +162,14 @@ public static class UiPageStructureEditorUtility
         paddingProp.FindPropertyRelative("m_Bottom").intValue = padding.bottom;
     }
 
+    /// <summary>解析 HTML 颜色字符串。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html)
     {
         return ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;
     }
 
+    /// <summary>页面壳层引用集合，包含页面根、SafeArea 与背景图。</summary>
     public struct PageShell
     {
         public Transform PageRoot;

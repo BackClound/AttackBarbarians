@@ -176,6 +176,8 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         return true;
     }
 
+    /// <summary>新局开始时重置广告使用次数与待选 payload。</summary>
+    /// <param name="ctx">游戏开始事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx)
     {
         usedAdRerolls = 0;

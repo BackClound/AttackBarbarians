@@ -48,6 +48,7 @@ public static class TopResourceBarEditorUtility
 
     private const string MainScenePath = "Assets/Scenes/MainScene.unity";
 
+    /// <summary>菜单：同步主场景与商城 TopBar 四槽资源条布局。</summary>
     [MenuItem("Attack Barbarians/UI/Sync Top Resource Bars In MainScene")]
     public static void SyncTopResourceBarsInMainScene()
     {
@@ -68,6 +69,10 @@ public static class TopResourceBarEditorUtility
         Debug.Log("[TopResourceBarEditorUtility] 主场景与商城顶部资源条已同步为统一四槽布局。");
     }
 
+    /// <summary>在指定根节点创建四槽资源条并绑定面板。</summary>
+    /// <param name="root">TopBar 根节点。</param>
+    /// <param name="panel">资源条面板。</param>
+    /// <param name="positions">各槽位坐标数组。</param>
     public static void Build(RectTransform root, TopResourceBarPanel panel, Vector2[] positions)
     {
         if (root == null || panel == null || positions == null || positions.Length < 4)
@@ -106,6 +111,12 @@ public static class TopResourceBarEditorUtility
         BindPanel(panel, diamond, gold, adTicket, stamina);
     }
 
+    /// <summary>将四个 UI_ItemSlot 写入 TopResourceBarPanel 字段。</summary>
+    /// <param name="panel">资源条面板。</param>
+    /// <param name="diamond">钻石槽。</param>
+    /// <param name="gold">金币槽。</param>
+    /// <param name="adTicket">广告券槽。</param>
+    /// <param name="stamina">体力槽。</param>
     public static void BindPanel(
         TopResourceBarPanel panel,
         UI_ItemSlot diamond,
@@ -121,6 +132,9 @@ public static class TopResourceBarEditorUtility
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
+    /// <summary>清空并重建指定 TopBar 的四槽布局。</summary>
+    /// <param name="root">TopBar Transform。</param>
+    /// <param name="positions">槽位坐标。</param>
     private static bool RebuildBar(Transform root, Vector2[] positions)
     {
         if (root == null)
@@ -145,6 +159,9 @@ public static class TopResourceBarEditorUtility
         return true;
     }
 
+    /// <summary>递归按名称查找子节点。</summary>
+    /// <param name="root">搜索根。</param>
+    /// <param name="name">节点名称。</param>
     private static Transform FindChildRecursive(Transform root, string name)
     {
         if (root == null)
@@ -169,6 +186,13 @@ public static class TopResourceBarEditorUtility
         return null;
     }
 
+    /// <summary>创建普通货币资源 Pill（图标+数值+加号）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="value">初始数值文本。</param>
+    /// <param name="accent">图标强调色。</param>
+    /// <param name="currency">货币类型。</param>
     private static UI_ItemSlot CreateResourcePill(
         RectTransform parent,
         string name,
@@ -209,6 +233,12 @@ public static class TopResourceBarEditorUtility
         return slot;
     }
 
+    /// <summary>创建体力资源 Pill（含副数值槽位）。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="value">初始数值文本。</param>
+    /// <param name="accent">图标强调色。</param>
     private static UI_ItemSlot CreateStaminaResourcePill(
         RectTransform parent,
         string name,
@@ -259,6 +289,12 @@ public static class TopResourceBarEditorUtility
         return slot;
     }
 
+    /// <summary>创建 Image 面板。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
+    /// <param name="color">颜色。</param>
     private static Image CreatePanel(RectTransform parent, string name, Vector2 position, Vector2 size, Color color)
     {
         GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -274,6 +310,15 @@ public static class TopResourceBarEditorUtility
         return image;
     }
 
+    /// <summary>创建 TMP 文本。</summary>
+    /// <param name="parent">父级。</param>
+    /// <param name="name">节点名称。</param>
+    /// <param name="text">文本。</param>
+    /// <param name="fontSize">字号。</param>
+    /// <param name="color">颜色。</param>
+    /// <param name="alignment">对齐。</param>
+    /// <param name="position">位置。</param>
+    /// <param name="size">尺寸。</param>
     private static TMP_Text CreateText(
         RectTransform parent,
         string name,
@@ -301,6 +346,8 @@ public static class TopResourceBarEditorUtility
         return tmp;
     }
 
+    /// <summary>解析 HTML 颜色字符串。</summary>
+    /// <param name="html">十六进制颜色值。</param>
     private static Color Hex(string html)
     {
         return ColorUtility.TryParseHtmlString(html, out Color color) ? color : Color.white;

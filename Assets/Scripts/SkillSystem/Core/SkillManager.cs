@@ -114,6 +114,8 @@ public class SkillManager : MonoBehaviour
         }
     }
 
+    /// <summary>游戏结束时清理本局技能 Buff 与运行时修饰。</summary>
+    /// <param name="ctx">游戏结束事件上下文。</param>
     private void OnGameOver(GameEventContext ctx)
     {
         ClearRunScopedBuffState();

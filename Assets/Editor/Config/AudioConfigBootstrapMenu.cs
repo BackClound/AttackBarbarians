@@ -33,6 +33,7 @@ public static class AudioConfigBootstrapMenu
         (GameConstants.AudioIds.SfxSkillCast, AudioChannel.Sfx, false),
     };
 
+    /// <summary>菜单：批量创建默认 AudioConfig 并写入 AudioDatabase。</summary>
     [MenuItem("Attack Barbarians/Audio/Create Default Audio Assets")]
     public static void CreateDefaultAudioAssets()
     {
@@ -63,6 +64,10 @@ public static class AudioConfigBootstrapMenu
         Debug.Log("[AudioConfigBootstrap] 默认音频配置已创建/更新。请在各 AudioConfig 上分配 AudioClip。");
     }
 
+    /// <summary>创建或更新单条 AudioConfig。</summary>
+    /// <param name="audioId">音频 ID。</param>
+    /// <param name="channel">音频通道。</param>
+    /// <param name="loop">是否循环。</param>
     private static AudioConfigSO CreateOrUpdateConfig(string audioId, AudioChannel channel, bool loop)
     {
         string safeName = audioId.Replace('.', '_');
@@ -94,6 +99,7 @@ public static class AudioConfigBootstrapMenu
         return config;
     }
 
+    /// <summary>创建或加载 AudioDatabase 资产。</summary>
     private static AudioDatabaseSO CreateOrLoadDatabase()
     {
         AudioDatabaseSO database = AssetDatabase.LoadAssetAtPath<AudioDatabaseSO>(DatabasePath);

@@ -15,6 +15,7 @@ public static class AchievementDailyConfigBootstrapMenu
     private const string DailyCatalogPath = DailyFolder + "/DailyRewardCatalog_Default.asset";
     private const string DatabasePath = "Assets/Resources/Config/ConfigDatabase.asset";
 
+    /// <summary>菜单：创建默认成就与七日签到配置。</summary>
     [MenuItem("Attack Barbarians/Meta/Create Default Achievement & Daily Reward Assets")]
     public static void CreateDefaultAssets()
     {
@@ -92,6 +93,14 @@ public static class AchievementDailyConfigBootstrapMenu
             "请在 GameSystems 挂载 AchievementManager、DailyRewardManager，并在 UIManager 绑定面板。");
     }
 
+    /// <summary>创建或更新单条 AchievementData。</summary>
+    /// <param name="configId">配置 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="description">描述。</param>
+    /// <param name="targetType">目标类型。</param>
+    /// <param name="targetValue">目标值。</param>
+    /// <param name="rewardType">奖励类型。</param>
+    /// <param name="rewardAmount">奖励数量。</param>
     private static AchievementDataSO CreateOrUpdateAchievement(
         string configId,
         string displayName,
@@ -124,6 +133,7 @@ public static class AchievementDailyConfigBootstrapMenu
         return data;
     }
 
+    /// <summary>创建 7 日签到条目数组。</summary>
     private static DailyRewardEntrySO[] CreateDailyEntries()
     {
         var entries = new DailyRewardEntrySO[7];
@@ -138,6 +148,10 @@ public static class AchievementDailyConfigBootstrapMenu
         return entries;
     }
 
+    /// <summary>创建或更新单日签到条目。</summary>
+    /// <param name="dayIndex">第几天。</param>
+    /// <param name="rewardType">奖励类型。</param>
+    /// <param name="amount">奖励数量。</param>
     private static DailyRewardEntrySO CreateOrUpdateDailyEntry(int dayIndex, ShopRewardType rewardType, long amount)
     {
         string configId = $"daily_reward.day_{dayIndex}";
@@ -163,6 +177,7 @@ public static class AchievementDailyConfigBootstrapMenu
         return entry;
     }
 
+    /// <summary>创建或加载 AchievementCatalog 资产。</summary>
     private static AchievementCatalogSO CreateOrLoadAchievementCatalog()
     {
         AchievementCatalogSO catalog = AssetDatabase.LoadAssetAtPath<AchievementCatalogSO>(AchievementCatalogPath);
@@ -175,6 +190,7 @@ public static class AchievementDailyConfigBootstrapMenu
         return catalog;
     }
 
+    /// <summary>创建或加载 DailyRewardCatalog 资产。</summary>
     private static DailyRewardCatalogSO CreateOrLoadDailyCatalog()
     {
         DailyRewardCatalogSO catalog = AssetDatabase.LoadAssetAtPath<DailyRewardCatalogSO>(DailyCatalogPath);
@@ -187,6 +203,9 @@ public static class AchievementDailyConfigBootstrapMenu
         return catalog;
     }
 
+    /// <summary>向 SerializedProperty 列表追加引用。</summary>
+    /// <param name="listProp">列表属性。</param>
+    /// <param name="asset">资产引用。</param>
     private static void AddRef(SerializedProperty listProp, Object asset)
     {
         int index = listProp.arraySize;
@@ -194,6 +213,12 @@ public static class AchievementDailyConfigBootstrapMenu
         listProp.GetArrayElementAtIndex(index).objectReferenceValue = asset;
     }
 
+    /// <summary>将成就与签到条目注册到 ConfigDatabase。</summary>
+    /// <param name="a1">成就1。</param>
+    /// <param name="a2">成就2。</param>
+    /// <param name="a3">成就3。</param>
+    /// <param name="a4">成就4。</param>
+    /// <param name="dailyEntries">签到条目。</param>
     private static void RegisterInDatabase(
         AchievementDataSO a1,
         AchievementDataSO a2,
@@ -225,6 +250,9 @@ public static class AchievementDailyConfigBootstrapMenu
         EditorUtility.SetDirty(database);
     }
 
+    /// <summary>向列表去重合并多个资产引用。</summary>
+    /// <param name="listProp">列表属性。</param>
+    /// <param name="assets">资产数组。</param>
     private static void MergeUnique(SerializedProperty listProp, params Object[] assets)
     {
         if (listProp == null)

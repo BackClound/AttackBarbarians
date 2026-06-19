@@ -12,6 +12,7 @@ public static class ShopConfigBootstrapMenu
     private const string ShopFolder = "Assets/Resources/Config/Shop";
     private const string CatalogPath = ShopFolder + "/ShopCatalog_Default.asset";
     private const string DatabasePath = "Assets/Resources/Config/ConfigDatabase.asset";
+    /// <summary>菜单：创建默认商店商品与目录。</summary>
 
     [MenuItem("Attack Barbarians/Shop/Create Default Shop Assets")]
     public static void CreateDefaultShopAssets()
@@ -166,6 +167,15 @@ public static class ShopConfigBootstrapMenu
         Debug.Log("[ShopConfigBootstrap] 默认商店配置已创建。请将 ShopPanel 绑定到 UIManager，并配置 itemBindings。");
     }
 
+    /// <summary>创建或更新单个 ShopItemSO。</summary>
+    /// <param name="configId">商品 ID。</param>
+    /// <param name="displayName">显示名。</param>
+    /// <param name="priceCurrency">价格货币。</param>
+    /// <param name="priceAmount">价格数量。</param>
+    /// <param name="rewardType">奖励类型。</param>
+    /// <param name="rewardAmount">奖励数量。</param>
+    /// <param name="purchaseLimit">购买上限。</param>
+    /// <param name="refreshPeriod">刷新周期。</param>
     private static ShopItemSO CreateOrUpdateItem(
         string configId,
         string displayName,
@@ -200,6 +210,7 @@ public static class ShopConfigBootstrapMenu
         return item;
     }
 
+    /// <summary>创建或加载 ShopCatalog 资产。</summary>
     private static ShopCatalogSO CreateOrLoadCatalog()
     {
         ShopCatalogSO catalog = AssetDatabase.LoadAssetAtPath<ShopCatalogSO>(CatalogPath);
@@ -217,6 +228,9 @@ public static class ShopConfigBootstrapMenu
         return catalog;
     }
 
+    /// <summary>向目录 items 列表追加商品引用。</summary>
+    /// <param name="listProp">items 属性。</param>
+    /// <param name="item">商品资产。</param>
     private static void AddItemRef(SerializedProperty listProp, ShopItemSO item)
     {
         int index = listProp.arraySize;
@@ -224,6 +238,8 @@ public static class ShopConfigBootstrapMenu
         listProp.GetArrayElementAtIndex(index).objectReferenceValue = item;
     }
 
+    /// <summary>将商店商品去重注册到 ConfigDatabase。</summary>
+    /// <param name="items">商品数组。</param>
     private static void RegisterInDatabase(params ShopItemSO[] items)
     {
         ConfigDatabaseSO database = AssetDatabase.LoadAssetAtPath<ConfigDatabaseSO>(DatabasePath);

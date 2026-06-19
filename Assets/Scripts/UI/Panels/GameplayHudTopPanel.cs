@@ -99,20 +99,28 @@ public class GameplayHudTopPanel : MonoBehaviour
         RefreshKillCount();
     }
 
+    /// <summary>游戏开始时重置击杀数并全量刷新顶栏。</summary>
+    /// <param name="ctx">游戏开始事件上下文。</param>
     private void OnGameStarted(GameEventContext ctx)
     {
         sessionKillCount = 0;
         RefreshAll();
     }
 
+    /// <summary>局内奖励结算后刷新金币显示。</summary>
+    /// <param name="ctx">结算事件上下文。</param>
     private void OnRunRewardSettled(GameEventContext ctx) => RefreshGold();
 
+    /// <summary>敌人击杀时累加本局击杀数并刷新显示。</summary>
+    /// <param name="ctx">击杀事件上下文。</param>
     private void OnEnemyKilled(GameEventContext ctx)
     {
         sessionKillCount++;
         RefreshKillCount();
     }
 
+    /// <summary>新波次开始时更新波次文本并刷新经验。</summary>
+    /// <param name="ctx">波次开始事件上下文。</param>
     private void OnWaveStarted(GameEventContext ctx)
     {
         if (ctx.Payload is WaveEventArgs args)
@@ -123,12 +131,19 @@ public class GameplayHudTopPanel : MonoBehaviour
         RefreshExperience();
     }
 
+    /// <summary>玩家升级后刷新经验条与等级文本。</summary>
+    /// <param name="ctx">升级事件上下文。</param>
     private void OnPlayerLevelUp(GameEventContext ctx) => RefreshExperience();
 
+    /// <summary>游戏状态变更后刷新经验（暂停等可能影响显示）。</summary>
+    /// <param name="ctx">状态变更事件上下文。</param>
     private void OnGameStateChanged(GameEventContext ctx) => RefreshExperience();
 
+    /// <summary>资源变更后刷新金币显示。</summary>
+    /// <param name="ctx">资源变更事件上下文。</param>
     private void OnResourceChanged(GameEventContext ctx) => RefreshGold();
 
+    /// <summary>暂停按钮点击：播放音效并请求暂停游戏。</summary>
     private void OnPauseClicked()
     {
         GameEvents.RaiseAudioPlaySfx(this, "audio.sfx.ui_click");
@@ -138,6 +153,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         }
     }
 
+    /// <summary>刷新关卡名称文本（优先当前地图显示名）。</summary>
     private void RefreshStageName()
     {
         if (stageNameText == null)
@@ -155,6 +171,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         stageNameText.color = UiTechWastelandPalette.TextPrimary;
     }
 
+    /// <summary>从玩家运行时数据刷新经验条与等级。</summary>
     private void RefreshExperience()
     {
         if (!PlayerSceneAccess.TryGetController(out PlayerController controller) ||
@@ -180,6 +197,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         }
     }
 
+    /// <summary>从 WaveManager 或存档解析当前波次并更新显示。</summary>
     private void RefreshWave()
     {
         int wave = 1;
@@ -197,6 +215,9 @@ public class GameplayHudTopPanel : MonoBehaviour
         UpdateWaveDisplay(wave, total);
     }
 
+    /// <summary>写入波次文本（当前波 / 总波数）。</summary>
+    /// <param name="wave">当前波次索引。</param>
+    /// <param name="total">总波次数。</param>
     private void UpdateWaveDisplay(int wave, int total = 20)
     {
         if (waveText == null)
@@ -208,6 +229,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         waveText.color = UiTechWastelandPalette.TextPrimary;
     }
 
+    /// <summary>刷新本局计时器（优先 RunSessionTracker）。</summary>
     private void RefreshTimer()
     {
         if (timerText == null)
@@ -231,6 +253,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         timerText.color = UiTechWastelandPalette.TextPrimary;
     }
 
+    /// <summary>刷新金币文本（优先 ResourceManager）。</summary>
     private void RefreshGold()
     {
         if (goldText == null)
@@ -252,6 +275,7 @@ public class GameplayHudTopPanel : MonoBehaviour
         goldText.color = UiTechWastelandPalette.AccentAmber;
     }
 
+    /// <summary>刷新本局击杀数文本。</summary>
     private void RefreshKillCount()
     {
         if (killCountText == null)

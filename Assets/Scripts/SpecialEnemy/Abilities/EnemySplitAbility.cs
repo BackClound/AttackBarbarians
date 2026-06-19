@@ -22,6 +22,7 @@ public class EnemySplitAbility : EnemyAbilityBase
     protected override bool TryExecute() => false;
 
     /// <inheritdoc />
+    /// <summary>死亡时生成配置的小怪并防止重复分裂。</summary>
     protected override void OnAbilityDeath(EnemyController controller)
     {
         if (splitTriggered || Config == null || string.IsNullOrEmpty(Config.SummonEnemyConfigId))
