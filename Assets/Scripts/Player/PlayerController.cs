@@ -30,6 +30,9 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
     private readonly PlayerRuntimeStats runtimeStats = new PlayerRuntimeStats();
     private readonly PlayerTargetScanner targetScanner = new PlayerTargetScanner();
 
+    // 升级三选一弹窗进行中标记：弹窗期间经验条显示满格，确认（回到 Playing）后清除并归零经验。
+    private bool levelUpPending;
+
     /// <summary>所属玩家实体。</summary>
     public Player Player => player;
     /// <summary>自动攻击控制器。</summary>
@@ -42,6 +45,8 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
     public PlayerDataSO ActiveData { get; private set; }
     /// <summary>配置与属性是否已完成初始化。</summary>
     public bool IsReady { get; private set; }
+    /// <summary>是否正处于升级三选一弹窗中（供经验条显示满格）。</summary>
+    public bool IsLevelUpPending => levelUpPending;
 
     /// <summary>缓存组件引用并设置扫描原点。</summary>
     private void Awake()
@@ -98,10 +103,11 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         player?.stateMachine?.FixedUpdateState();
     }
 
-    /// <summary>取消 Buff 变更订阅。</summary>
+    /// <summary>取消 Buff 与状态变更订阅。</summary>
     private void OnDestroy()
     {
         GameEvents.UnsubscribeBuffChanged(OnBuffChanged);
+        GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
     }
 
     /// <summary>从 Config / Save 初始化属性并同步到 Entity_Stats。</summary>
@@ -140,6 +146,9 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
 
         GameEvents.UnsubscribeBuffChanged(OnBuffChanged);
         GameEvents.SubscribeBuffChanged(OnBuffChanged);
+        GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
+        GameEvents.SubscribeGameStateChanged(OnGameStateChanged);
+        levelUpPending = false;
     }
 
     /// <summary>扫描射程内敌人并写入 scanner 结果列表。</summary>
@@ -229,6 +238,10 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
     }
 
     /// <summary>击杀敌人获得经验；受 ExperienceGain 属性加成。</summary>
+    /// <remarks>
+    /// 经验填满当前等级即升一级并弹出一次 Buff 三选一；单次击杀最多升一级，溢出经验直接丢弃（不结转），
+    /// 从而保证“经验条满 → 升级 → 弹窗 → 归零”一一对应、选 buff 不改变经验。
+    /// </remarks>
     public void GrantExperience(int baseAmount, object source = null)
     {
         if (!IsReady || baseAmount <= 0 || ActiveData == null)
@@ -236,20 +249,82 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
             return;
         }
 
+        // 升级弹窗未确认前不再累计经验，避免溢出与重复升级。
+        if (levelUpPending)
+        {
+            return;
+        }
+
         float gainMult = 1f + runtimeStats.Get(StatType.ExperienceGain);
         float amount = baseAmount * gainMult;
-        var data = runtimeStats.Data;
-        data.AddExperience(amount);
+        runtimeStats.Data.AddExperience(amount);
 
-        // need 强制 >= 1，避免 Legacy 配置 ExperiencePerLevel<=0 时本循环因减 0 永真而死循环卡死。
-        float need = Mathf.Max(1f, GetNeedExperienceForCurrentLevel());
-        while (data.CurrentExperienceValue >= need)
+        TryTriggerLevelUp();
+    }
+
+    /// <summary>
+    /// 经验达到当前等级所需值时升一级：丢弃溢出经验、标记弹窗进行中并发布升级事件（弹出一次三选一）。
+    /// </summary>
+    /// <remarks>
+    /// <para>仅在 <see cref="GameState.Playing"/> 下触发；升级三选一打开后游戏切到 <see cref="GameState.UpgradeChoosing"/>，
+    /// 期间经验条由 <see cref="IsLevelUpPending"/> 显示为满格，玩家确认回到 Playing 后清除标记并将经验归零（见 <see cref="OnGameStateChanged"/>）。</para>
+    /// <para>need 强制 >= 1，避免 Legacy 配置 ExperiencePerLevel&lt;=0 时判断异常。</para>
+    /// </remarks>
+    private void TryTriggerLevelUp()
+    {
+        if (!IsReady || ActiveData == null || levelUpPending)
         {
-            data.AddExperience(-need);
-            int newLevel = data.CurrentLevel + 1;
-            data.SetLevel(newLevel);
-            GameEvents.RaisePlayerLevelUp(this, newLevel);
-            need = Mathf.Max(1f, GetNeedExperienceForCurrentLevel());
+            return;
+        }
+
+        // 必须确实处于战斗中才升级；若拿不到 GameManager（弹窗也无法打开）则不置标记，避免永久卡住经验。
+        if (!ServiceLocator.TryGet(out GameManager gameManager) ||
+            gameManager.CurrentState != GameState.Playing)
+        {
+            return;
+        }
+
+        var data = runtimeStats.Data;
+        float need = Mathf.Max(1f, GetNeedExperienceForCurrentLevel());
+        if (data.CurrentExperienceValue < need)
+        {
+            return;
+        }
+
+        levelUpPending = true;
+        int newLevel = data.CurrentLevel + 1;
+        data.SetLevel(newLevel);
+        GameEvents.RaisePlayerLevelUp(this, newLevel);
+    }
+
+    /// <summary>状态回到 Playing 时（升级三选一确认完成）：清除弹窗标记并将经验归零，开始累计下一级。</summary>
+    /// <param name="ctx">状态变更事件上下文。</param>
+    private void OnGameStateChanged(GameEventContext ctx)
+    {
+        if (ctx.Payload is not GameStateChange change || change.NewState != GameState.Playing)
+        {
+            return;
+        }
+
+        if (!levelUpPending)
+        {
+            return;
+        }
+
+        levelUpPending = false;
+        if (IsReady)
+        {
+            ResetCurrentExperience();
+        }
+    }
+
+    /// <summary>将当前经验归零（升级结算后调用）。</summary>
+    private void ResetCurrentExperience()
+    {
+        PlayerRuntimeData data = runtimeStats.Data;
+        if (data != null && data.CurrentExperienceValue > 0f)
+        {
+            data.AddExperience(-data.CurrentExperienceValue);
         }
     }
 

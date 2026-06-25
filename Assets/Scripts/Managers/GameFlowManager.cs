@@ -11,8 +11,6 @@ using UnityEngine;
 /// </remarks>
 public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
 {
-    [SerializeField] private bool skipUpgradeChoosingInEditor;
-
     private GameManager gameManager;
     private ConfigManager configManager;
     private bool isInitialized;
@@ -58,7 +56,8 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         isInitialized = false;
     }
 
-    /// <summary>波次系统完成后调用；若当前为 Playing 则直接进入升级三选一（无过渡横幅）。</summary>
+    /// <summary>波次系统完成后调用；三选一仅由玩家升级触发，波次完成不再进入升级选择，仅关闭过渡 UI。</summary>
+    /// <remarks>波次推进由 <see cref="WaveManager"/> 在波次完成时自行驱动，无需经过升级选择阶段。</remarks>
     public void NotifyWaveCompleted(WaveEventArgs args)
     {
         if (gameManager == null || gameManager.CurrentState != GameState.Playing)
@@ -68,10 +67,10 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
 
         if (enableFlowLogs())
         {
-            Debug.Log($"[GameFlowManager] Wave {args.WaveIndex} completed -> UpgradeChoosing.");
+            Debug.Log($"[GameFlowManager] Wave {args.WaveIndex} completed -> continue playing.");
         }
 
-        BeginPostWaveFlow();
+        CloseWaveTransitionPanel();
     }
 
     /// <summary>升级 UI 确认后调用，返回 Playing。</summary>
@@ -175,25 +174,6 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         }
     }
 
-    /// <summary>波次结算后直接进入升级或战斗（跳过 WaveTransition 预告 UI）。</summary>
-    private void BeginPostWaveFlow()
-    {
-        CloseWaveTransitionPanel();
-
-        if (ShouldSkipUpgradeChoosing())
-        {
-            if (enableFlowLogs())
-            {
-                Debug.Log("[GameFlowManager] Skipping upgrade -> Playing.");
-            }
-
-            gameManager.CompleteUpgradeAndResume();
-            return;
-        }
-
-        gameManager.BeginUpgradeChoosing();
-    }
-
     /// <summary>打开升级三选一 UI 并广播事件。</summary>
     private void OpenUpgradeFlow()
     {
@@ -222,24 +202,6 @@ public class GameFlowManager : MonoSingleton<GameFlowManager>, IGameSystem
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.WaveTransition);
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Upgrade);
         GameEvents.RaiseUiPanelClosed(this, GameConstants.UiPanelIds.Pause);
-    }
-
-    /// <summary>判断是否应跳过升级三选一阶段。</summary>
-    /// <returns>跳过返回 true，否则返回 false。</returns>
-    private bool ShouldSkipUpgradeChoosing()
-    {
-#if UNITY_EDITOR
-        if (skipUpgradeChoosingInEditor)
-        {
-            return true;
-        }
-#endif
-        if (configManager != null && configManager.GameConfig != null)
-        {
-            return configManager.GameConfig.SkipUpgradeChoosingOnBootstrap;
-        }
-
-        return false;
     }
 
     /// <summary>是否启用流程调试日志。</summary>

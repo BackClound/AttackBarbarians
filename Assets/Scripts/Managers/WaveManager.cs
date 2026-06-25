@@ -382,15 +382,18 @@ public class WaveManager : MonoBehaviour, IGameSystem
         }
     }
 
-    /// <summary>结束当前波次并广播 WaveCompleted。</summary>
+    /// <summary>结束当前波次并广播 WaveCompleted，随后直接推进下一波。</summary>
+    /// <remarks>三选一仅由玩家升级触发，波次完成不再进入升级选择阶段，故波次在此自行推进。</remarks>
     private void CompleteCurrentWave()
     {
         waveActive = false;
-        advanceWaveAfterUpgrade = true;
+        advanceWaveAfterUpgrade = false;
         GameEvents.RaiseWaveCompleted(this, new WaveEventArgs(
             currentWaveIndex,
             waveElapsed,
             spawnedThisWave));
+
+        StartWave(currentWaveIndex + 1);
     }
 
     /// <summary>敌人击杀事件回调。</summary>

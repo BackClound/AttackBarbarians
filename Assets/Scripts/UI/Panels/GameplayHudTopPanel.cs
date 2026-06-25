@@ -183,7 +183,10 @@ public class GameplayHudTopPanel : MonoBehaviour
 
         PlayerRuntimeData data = controller.RuntimeStats.Data;
         float perLevel = Mathf.Max(1f, controller.GetNeedExperienceForCurrentLevel());
-        float ratio = Mathf.Clamp01(data.CurrentExperienceValue / perLevel);
+        // 升级三选一弹窗期间显示满格（本级已完成），确认后经验归零再从 0 累计。
+        float ratio = controller.IsLevelUpPending
+            ? 1f
+            : Mathf.Clamp01(data.CurrentExperienceValue / perLevel);
 
         if (expSlider != null)
         {

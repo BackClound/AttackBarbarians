@@ -230,8 +230,12 @@ public class RandomRewardManager : MonoBehaviour, IGameSystem
         }
     }
 
-    /// <summary>玩家升级时触发升级选择流程。</summary>
+    /// <summary>玩家升级时触发一次升级选择流程。</summary>
     /// <param name="ctx">游戏事件上下文。</param>
+    /// <remarks>
+    /// 升级节奏由 <see cref="PlayerController.GrantExperience"/> 保证“一次只升一级”，因此每个升级事件对应一次三选一；
+    /// 这里仍保留状态守卫，防止在弹窗已开启时重复进入。
+    /// </remarks>
     private void OnPlayerLevelUp(GameEventContext ctx)
     {
         if (gameFlowManager != null && gameFlowManager.IsAwaitingUpgradeSelection)
