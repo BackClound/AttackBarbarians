@@ -241,14 +241,15 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         var data = runtimeStats.Data;
         data.AddExperience(amount);
 
-        float need = GetNeedExperienceForCurrentLevel();
+        // need 强制 >= 1，避免 Legacy 配置 ExperiencePerLevel<=0 时本循环因减 0 永真而死循环卡死。
+        float need = Mathf.Max(1f, GetNeedExperienceForCurrentLevel());
         while (data.CurrentExperienceValue >= need)
         {
             data.AddExperience(-need);
             int newLevel = data.CurrentLevel + 1;
             data.SetLevel(newLevel);
             GameEvents.RaisePlayerLevelUp(this, newLevel);
-            need = GetNeedExperienceForCurrentLevel();
+            need = Mathf.Max(1f, GetNeedExperienceForCurrentLevel());
         }
     }
 

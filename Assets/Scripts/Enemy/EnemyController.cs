@@ -98,14 +98,14 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     }
 
     /// <summary>
-    /// 对象池回收回调：重置初始化标记并通知敌人清理。
+    /// 对象池回收回调：重置控制器初始化标记与波次状态。
     /// </summary>
+    /// <remarks>由 <see cref="Enemy.OnDespawn"/> 调用，禁止反向调用 <see cref="Enemy.OnDespawn"/>，否则会与其互相递归导致栈溢出崩溃。</remarks>
     public void OnPoolDespawn()
     {
         isInitialized = false;
         waveStatMultiplier = 1f;
         spawnWaveIndex = 1;
-        enemy?.OnDespawn();
     }
 
     /// <summary>每帧驱动状态机与特殊能力组件（受性能预算节流）。</summary>

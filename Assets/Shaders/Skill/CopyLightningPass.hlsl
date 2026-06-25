@@ -37,6 +37,12 @@ float CopyHash(float x)
     return frac(sin(x) * 100000.0);
 }
 
+// 等价 GLSL mod：对负数返回正余数，避免使用 Metal 不支持的 mod()。
+float CopyMod(float x, float y)
+{
+    return x - y * floor(x / y);
+}
+
 float CopyHash12(float2 p)
 {
     return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
@@ -56,7 +62,7 @@ float CopyValueNoise(float2 uv)
 
 float CopyZigZagOffset(float along, float t, float timeShift)
 {
-    float wave = abs(mod(along * _Cycle + (CopyHash(t + timeShift) + timeShift) * _Speed * -1.0, 0.5) - 0.25) - 0.125;
+    float wave = abs(CopyMod(along * _Cycle + (CopyHash(t + timeShift) + timeShift) * _Speed * -1.0, 0.5) - 0.25) - 0.125;
     wave *= 4.0 * _WidthFactor;
     wave *= (0.5 - abs(along - 0.5)) * 2.0;
     return wave;

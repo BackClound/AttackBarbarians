@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 505d9560e925420eb91196e94e3556ab, type: 3}
+  m_Name: EnemyData_Bat
+  m_EditorClassIdentifier: 
+  configId: enemy.fantasy.bat
+  displayName: Fantasy Bat
+  icon: {fileID: 0}
+  baseStats:
+    maxHp: 30
+    moveSpeed: 2.5
+    attackSpeed: 1
+    attackSpeedMulti: 1
+    damage: 10
+    critChance: 0
+    critPower: 0.5
+    fireDamage: 0
+    iceDamage: 0
+    lightningDamage: 0
+    armor: 0
+    armorReduce: 0
+  attackDistance: 1.5
+  contactDamage: 10
+  attackCooldown: 1
+  prefab: {fileID: 5793363241091646054, guid: ad04b4180e9db411a9d593b50cb395fc, type: 3}
+  poolKey: Enemy.Fantasy.Bat
+  spawnWeight: 1
+  abilityTags: 1
+  abilityBindings: []
+  specialBonusExperience: 3
+  experienceReward: 5
