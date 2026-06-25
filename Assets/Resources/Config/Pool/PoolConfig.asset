@@ -69,3 +69,10 @@ MonoBehaviour:
     canExpand: 1
     overflowPolicy: 0
     parent: {fileID: 0}
+  - key: Enemy.Boss.DarkKnight
+    prefab: {fileID: 3453549380425944575, guid: db97625cef05d48b0b924e9d33286e80, type: 3}
+    initialCount: 1
+    maxCount: 4
+    canExpand: 1
+    overflowPolicy: 0
+    parent: {fileID: 0}

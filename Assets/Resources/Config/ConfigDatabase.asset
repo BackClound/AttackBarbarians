@@ -33,6 +33,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1c60fb89171c042ecac5f1268c42523b, type: 2}
   - {fileID: 11400000, guid: 3cbba6dbd710440f7ad7d6593cb66d5a, type: 2}
   - {fileID: 11400000, guid: 05080e868e619447f9bcda9d1309a864, type: 2}
+  - {fileID: 11400000, guid: 1f6e43913deb24e8ebfe1ce59d743551, type: 2}
   skills:
   - {fileID: 11400000, guid: f7415046b87e49f0b74755b50e875dab, type: 2}
   - {fileID: 11400000, guid: 88ebcc46538224c9ab3fb5766606e5e7, type: 2}
@@ -164,9 +165,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 94b96c775ff6b446bab57c378ab7ca31, type: 2}
   waves:
   - {fileID: 11400000, guid: d323b39826634a8fb69b55d9e2a1ef57, type: 2}
+  - {fileID: 11400000, guid: 7e2b9c4a1d6f44e3b8a05c9d3f1e8a26, type: 2}
   waveProgression: {fileID: 11400000, guid: 20b3b9694e1a4b5a9ae8abec10011486, type: 2}
   bosses:
   - {fileID: 11400000, guid: 8dcbb77b23e5c4995a326908774894f4, type: 2}
+  - {fileID: 11400000, guid: 014fc23e1a18343b5ab5e96fc047fd4b, type: 2}
   bossSkills:
   - {fileID: 11400000, guid: 9dbf4cd7b78244b67aa3025a7d98cfbc, type: 2}
   - {fileID: 11400000, guid: 07f9050bbaef94886bc4491d38ec8438, type: 2}
