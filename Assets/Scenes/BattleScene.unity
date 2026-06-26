@@ -8706,6 +8706,11 @@ MonoBehaviour:
   - wave.01
   - wave.01
   - wave.05
+  - wave.01
+  - wave.01
+  - wave.01
+  - wave.01
+  - wave.10
   spawner: {fileID: 0}
   autoStartOnPlaying: 1
 --- !u!1 &1423808818

@@ -76,3 +76,10 @@ MonoBehaviour:
     canExpand: 1
     overflowPolicy: 0
     parent: {fileID: 0}
+  - key: Enemy.Boss.WillOWisp
+    prefab: {fileID: 6678137851281372488, guid: 58977a879399a426ca687143653e53e2, type: 3}
+    initialCount: 1
+    maxCount: 4
+    canExpand: 1
+    overflowPolicy: 0
+    parent: {fileID: 0}
