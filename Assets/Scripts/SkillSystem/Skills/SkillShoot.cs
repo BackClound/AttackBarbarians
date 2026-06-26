@@ -129,7 +129,7 @@ public class SkillShoot : SkillBase
     /// <param name="ctx">技能施放事件上下文。</param>
     private void OnPlayerSkillCast(GameEventContext ctx)
     {
-        if (!driveShootAnimator || player?.anim == null)
+        if (!driveShootAnimator || player?.AnimationDriver == null)
         {
             return;
         }
@@ -139,9 +139,9 @@ public class SkillShoot : SkillBase
             return;
         }
 
-        player.anim.SetTrigger("Shoot");
         RefreshAttackSpeedFromStats();
         ApplyAnimatorSpeedMultiplier();
+        player.AnimationDriver.PlayPulse(EntityAnimParams.PlayerShoot);
     }
 
     /// <summary>按配置间隔执行目标扫描。</summary>
@@ -186,12 +186,14 @@ public class SkillShoot : SkillBase
     /// <summary>将攻速倍率写入 Animator 的 ShootSpeedMulti 参数。</summary>
     private void ApplyAnimatorSpeedMultiplier()
     {
-        if (player?.anim == null)
+        if (player?.AnimationDriver == null)
         {
             return;
         }
 
-        player.anim.SetFloat("ShootSpeedMulti", Mathf.Max(0.1f, shootSpeedAnimMulti));
+        player.AnimationDriver.SetFloat(
+            EntityAnimParams.PlayerShootSpeedMulti,
+            Mathf.Max(0.1f, shootSpeedAnimMulti));
     }
 
     /// <summary>Inspector 调试占位（Legacy 子弹列表刷新）。</summary>

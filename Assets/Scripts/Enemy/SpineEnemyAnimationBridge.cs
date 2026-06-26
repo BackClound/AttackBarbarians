@@ -5,14 +5,14 @@ using SpineAnimationState = Spine.AnimationState;
 
 /// <summary>
 /// 将项目敌人状态机（Idle/Move/Attack/Dead）映射到 Spine 动画，并在攻击/死亡结束时
-/// 回调 <see cref="Enemy.OnAnimatorAttackTrigger"/> 与 <see cref="Enemy.OnAniamtorFinished"/>。
+/// 回调 <see cref="Enemy.OnAnimatorAttackTrigger"/> 与 <see cref="Enemy.OnAnimatorFinished"/>。
 /// </summary>
 /// <remarks>
 /// <para>挂在含 <see cref="SkeletonAnimation"/> 的视觉子物体上；无需 Unity Animator。</para>
 /// </remarks>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(SkeletonAnimation))]
-public class SpineEnemyAnimationBridge : MonoBehaviour
+public class SpineEnemyAnimationBridge : MonoBehaviour, IEntityAnimationDriver
 {
     [Header("Spine Clips")]
     [SerializeField] private string idleAnimation = "idle";
@@ -57,25 +57,67 @@ public class SpineEnemyAnimationBridge : MonoBehaviour
             enemy = GetComponentInParent<Enemy>();
         }
 
-        if (enemy == null || skeletonAnimation == null || !skeletonAnimation.valid)
+        if (enemy == null || trackedState == null)
         {
             return;
         }
 
-        EntityState current = enemy.stateMachine?.currentState;
-        if (current == null)
+        TryRaiseAttackHit(trackedState);
+    }
+
+    public void OnStateEnter(EntityState state, string animParam)
+    {
+        if (enemy == null)
+        {
+            enemy = GetComponentInParent<Enemy>();
+        }
+
+        if (enemy == null || skeletonAnimation == null || !skeletonAnimation.valid || state == null)
         {
             return;
         }
 
-        if (current != trackedState)
+        if (state == trackedState)
         {
-            trackedState = current;
-            attackHitRaised = false;
-            EnterState(current);
+            return;
         }
 
-        TryRaiseAttackHit(current);
+        trackedState = state;
+        attackHitRaised = false;
+        EnterState(state);
+    }
+
+    public void OnStateExit(EntityState state, string animParam)
+    {
+    }
+
+    public void SetFloat(string paramName, float value)
+    {
+    }
+
+    public void PlayPulse(string paramName)
+    {
+    }
+
+    public void OnAnimationEventFinished()
+    {
+    }
+
+    public void ResetDriver()
+    {
+        trackedState = null;
+        attackHitRaised = false;
+        activeEntry = null;
+
+        if (skeletonAnimation != null && skeletonAnimation.AnimationState != null)
+        {
+            skeletonAnimation.AnimationState.Complete -= HandleTrackComplete;
+        }
+
+        if (skeletonAnimation != null && skeletonAnimation.valid)
+        {
+            PlayLoop(idleAnimation);
+        }
     }
 
     private void EnterState(EntityState state)
@@ -143,6 +185,6 @@ public class SpineEnemyAnimationBridge : MonoBehaviour
             return;
         }
 
-        enemy.OnAniamtorFinished();
+        enemy.OnAnimatorFinished();
     }
 }

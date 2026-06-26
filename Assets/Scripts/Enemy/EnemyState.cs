@@ -21,6 +21,7 @@ public class EnemyState : EntityState
         this.enemy = enemy;
         this.anim = enemy.anim;
         this.rb = enemy.rb;
+        BindAnimationDriver(enemy.AnimationDriver);
     }
 
     /// <summary>

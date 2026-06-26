@@ -16,26 +16,7 @@ public class PlayerState : EntityState
     {
         this.player = player;
         this.anim = player.anim;
-    }
-
-    /// <summary>扫描目标并在可战斗时切换至 <see cref="PlayerShootState"/>。</summary>
-    /// <returns>若成功切入射击状态则为 <c>true</c>。</returns>
-    protected bool TryEnterShootState()
-    {
-        if (player == null || player.shootState == null)
-        {
-            return false;
-        }
-
-        Controller?.ScanCombatTargets();
-
-        if (Controller != null && Controller.CanEnterCombatState())
-        {
-            stateMachine.ChangeState(player.shootState);
-            return true;
-        }
-
-        return false;
+        BindAnimationDriver(player.AnimationDriver);
     }
 
     /// <summary>判断是否应退回待机（无法继续战斗）。</summary>

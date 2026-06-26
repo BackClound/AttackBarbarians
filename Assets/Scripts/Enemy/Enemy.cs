@@ -51,6 +51,12 @@ public class Enemy : Entity, IDamagable, IPoolable
     [SerializeField] public float moveSpeed;
     [SerializeField] public float cooldownThreshold;
 
+    [Header("Animation Params")]
+    [SerializeField] private string idleAnimParam = EntityAnimParams.EnemyMove;
+    [SerializeField] private string moveAnimParam = EntityAnimParams.EnemyMove;
+    [SerializeField] private string attackAnimParam = EntityAnimParams.EnemyAttack;
+    [SerializeField] private string deadAnimParam = EntityAnimParams.EnemyDead;
+
     #region States
     /// <summary>待机状态实例。</summary>
     public EnemyIdleState idleState;
@@ -86,6 +92,22 @@ public class Enemy : Entity, IDamagable, IPoolable
         base.Awake();
         enemy_Health = GetComponent<Enemy_Health>();
         controller = GetComponent<EnemyController>();
+        InitializeStateMachine();
+    }
+
+    /// <summary>创建默认四态状态机（Idle/Move/Attack/Dead）。</summary>
+    protected virtual void InitializeStateMachine()
+    {
+        if (stateMachine != null)
+        {
+            return;
+        }
+
+        stateMachine = new StateMachine();
+        idleState = new EnemyIdleState(this, stateMachine, idleAnimParam);
+        moveState = new EnemyMoveState(this, stateMachine, moveAnimParam);
+        attackState = new EnemyAttackState(this, stateMachine, attackAnimParam);
+        deadState = new EnemyDeadState(this, stateMachine, deadAnimParam);
     }
 
     /// <summary>
@@ -144,11 +166,10 @@ public class Enemy : Entity, IDamagable, IPoolable
         rb.velocity = velocity;
     }
 
-    /// <summary>
-    /// Animator 动画结束回调，转发至当前状态。
-    /// </summary>
-    public override void OnAniamtorFinished()
+    /// <summary>Animator 动画结束回调，转发至当前状态。</summary>
+    public override void OnAnimatorFinished()
     {
+        base.OnAnimatorFinished();
         stateMachine.currentState?.OnAnimFinished();
     }
 
@@ -229,11 +250,7 @@ public class Enemy : Entity, IDamagable, IPoolable
             rb.velocity = Vector2.zero;
         }
 
-        if (anim != null)
-        {
-            anim.Rebind();
-            anim.Update(0f);
-        }
+        AnimationDriver?.ResetDriver();
     }
 
     /// <summary>

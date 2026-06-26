@@ -10,6 +10,8 @@ public class Entity : MonoBehaviour, IDamagable
     public StateMachine stateMachine;
     /// <summary>子物体 Animator 组件。</summary>
     public Animator anim { get; private set; }
+    /// <summary>统一动画驱动（Unity Animator 或 Spine 等后端）。</summary>
+    public IEntityAnimationDriver AnimationDriver { get; private set; }
     /// <summary>2D 刚体组件。</summary>
     public Rigidbody2D rb;
     /// <summary>2D 碰撞体组件。</summary>
@@ -21,13 +23,31 @@ public class Entity : MonoBehaviour, IDamagable
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<Collider2D>();
+        ResolveAnimationDriver();
+    }
+
+    /// <summary>解析动画驱动：优先子物体上的 <see cref="IEntityAnimationDriver"/>，否则回退到 Animator。</summary>
+    protected void ResolveAnimationDriver()
+    {
+        AnimationDriver = GetComponentInChildren<IEntityAnimationDriver>();
+        if (AnimationDriver == null && anim != null)
+        {
+            AnimationDriver = new AnimatorEntityAnimationDriver(anim);
+        }
     }
 
     /// <summary>子类可覆写的启动钩子。</summary>
     public virtual void Start() { }
 
     /// <summary>动画播放完成时由 <see cref="EntityAnimatorTrigger"/> 调用。</summary>
-    public virtual void OnAniamtorFinished() { }
+    public virtual void OnAnimatorFinished()
+    {
+        AnimationDriver?.OnAnimationEventFinished();
+    }
+
+    /// <summary>兼容旧拼写，请改用 <see cref="OnAnimatorFinished"/>。</summary>
+    [System.Obsolete("Use OnAnimatorFinished instead.")]
+    public virtual void OnAniamtorFinished() => OnAnimatorFinished();
 
     /// <summary>兼容 float 伤害入口，内部转换为 <see cref="DamageInfo"/>。</summary>
     /// <param name="damage">伤害数值。</param>

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 实体状态基类：封装 Animator 布尔参数与物理更新的生命周期钩子。
+/// 实体状态基类：通过 <see cref="IEntityAnimationDriver"/> 驱动表现层，并提供物理更新生命周期钩子。
 /// </summary>
 /// <remarks>由具体 Idle/Move/Attack 等状态子类继承，无需单独挂载。</remarks>
 public class EntityState
@@ -9,6 +9,7 @@ public class EntityState
     protected StateMachine stateMachine;
     protected string animName;
     protected bool isAnimFinished;
+    protected IEntityAnimationDriver animationDriver;
     protected Animator anim;
     protected Rigidbody2D rb;
 
@@ -21,10 +22,17 @@ public class EntityState
         this.stateMachine = machine;
     }
 
+    /// <summary>绑定动画驱动（由 PlayerState / EnemyState 在构造时注入）。</summary>
+    /// <param name="driver">实体动画驱动。</param>
+    protected void BindAnimationDriver(IEntityAnimationDriver driver)
+    {
+        animationDriver = driver;
+    }
+
     /// <summary>进入状态时开启对应 Animator 布尔参数。</summary>
     public virtual void OnEnter()
     {
-        anim?.SetBool(animName, true);
+        animationDriver?.OnStateEnter(this, animName);
         isAnimFinished = false;
     }
 
@@ -37,10 +45,7 @@ public class EntityState
     /// <summary>离开状态时关闭 Animator 布尔参数。</summary>
     public virtual void OnExit()
     {
-        if (anim != null)
-        {
-            anim.SetBool(animName, false);
-        }
+        animationDriver?.OnStateExit(this, animName);
     }
 
     /// <summary>动画播放完成回调。</summary>

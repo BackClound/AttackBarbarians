@@ -1,5 +1,5 @@
 /// <summary>
-/// 待机状态；射击由 <see cref="SkillShoot"/> 在检测到敌人时驱动，不再切入 <see cref="PlayerShootState"/>。
+/// 待机状态；射击表现由 <see cref="SkillShoot"/> 经 <see cref="Entity.AnimationDriver"/> 驱动。
 /// </summary>
 public class PlayerIdleState : PlayerState
 {

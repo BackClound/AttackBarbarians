@@ -26,8 +26,6 @@ public class Player : Entity
     #region Player State
     /// <summary>待机状态实例。</summary>
     public PlayerIdleState idleState { get; private set; }
-    /// <summary>射击动画状态实例。</summary>
-    public PlayerShootState shootState { get; private set; }
     /// <summary>死亡状态实例。</summary>
     public PlayerDeadState deadState { get; private set; }
     #endregion
@@ -42,9 +40,8 @@ public class Player : Entity
         }
 
         stateMachine = new StateMachine();
-        idleState = new PlayerIdleState(this, stateMachine, "Idle");
-        shootState = new PlayerShootState(this, stateMachine, "Shoot");
-        deadState = new PlayerDeadState(this, stateMachine, "Dead");
+        idleState = new PlayerIdleState(this, stateMachine, EntityAnimParams.PlayerIdle);
+        deadState = new PlayerDeadState(this, stateMachine, EntityAnimParams.PlayerDead);
 
         controller = GetComponent<PlayerController>();
         player_Health = GetComponent<Player_Health>();
@@ -59,8 +56,9 @@ public class Player : Entity
     }
 
     /// <summary>Animator 动画结束回调，转发至当前状态。</summary>
-    public override void OnAniamtorFinished()
+    public override void OnAnimatorFinished()
     {
+        base.OnAnimatorFinished();
         stateMachine.currentState?.OnAnimFinished();
     }
 

@@ -20,10 +20,10 @@ public class EntityAnimatorTrigger : MonoBehaviour
         enemyCombatBridge = GetComponentInParent<EnemyCombatBridge>();
     }
 
-    /// <summary>动画结束事件：通知实体 <see cref="Entity.OnAniamtorFinished"/>。</summary>
+    /// <summary>动画结束事件：通知实体 <see cref="Entity.OnAnimatorFinished"/>。</summary>
     public virtual void OnAnimationFinished()
     {
-        entity?.OnAniamtorFinished();
+        entity?.OnAnimatorFinished();
     }
 
     /// <summary>攻击帧事件：优先走 CombatBridge，否则回退到 Player/Enemy 子类。</summary>

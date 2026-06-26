@@ -148,9 +148,9 @@ public static class DarkKnightBossBootstrapMenu
         }
 
         AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(controllerPath);
-        controller.AddParameter("isMove", AnimatorControllerParameterType.Bool);
-        controller.AddParameter("isAttack", AnimatorControllerParameterType.Bool);
-        controller.AddParameter("isDead", AnimatorControllerParameterType.Bool);
+        controller.AddParameter(EntityAnimParams.EnemyMove, AnimatorControllerParameterType.Bool);
+        controller.AddParameter(EntityAnimParams.EnemyAttack, AnimatorControllerParameterType.Bool);
+        controller.AddParameter(EntityAnimParams.EnemyDead, AnimatorControllerParameterType.Bool);
 
         AnimatorStateMachine root = controller.layers[0].stateMachine;
         AnimatorState moveState = root.AddState("Move", new Vector3(250f, 130f, 0f));
@@ -163,25 +163,25 @@ public static class DarkKnightBossBootstrapMenu
         root.defaultState = moveState;
 
         AnimatorStateTransition moveExit = moveState.AddExitTransition();
-        moveExit.AddCondition(AnimatorConditionMode.IfNot, 0f, "isMove");
+        moveExit.AddCondition(AnimatorConditionMode.IfNot, 0f, EntityAnimParams.EnemyMove);
         moveExit.hasExitTime = false;
         moveExit.duration = 0f;
 
         AnimatorStateTransition attackExit = attackState.AddExitTransition();
-        attackExit.AddCondition(AnimatorConditionMode.IfNot, 0f, "isAttack");
+        attackExit.AddCondition(AnimatorConditionMode.IfNot, 0f, EntityAnimParams.EnemyAttack);
         attackExit.hasExitTime = false;
         attackExit.duration = 0f;
 
         AnimatorStateTransition deadExit = deadState.AddExitTransition();
-        deadExit.AddCondition(AnimatorConditionMode.IfNot, 0f, "isDead");
+        deadExit.AddCondition(AnimatorConditionMode.IfNot, 0f, EntityAnimParams.EnemyDead);
         deadExit.hasExitTime = false;
         deadExit.duration = 0f;
 
         AnimatorTransition toAttack = root.AddEntryTransition(attackState);
-        toAttack.AddCondition(AnimatorConditionMode.If, 0f, "isAttack");
+        toAttack.AddCondition(AnimatorConditionMode.If, 0f, EntityAnimParams.EnemyAttack);
 
         AnimatorTransition toDead = root.AddEntryTransition(deadState);
-        toDead.AddCondition(AnimatorConditionMode.If, 0f, "isDead");
+        toDead.AddCondition(AnimatorConditionMode.If, 0f, EntityAnimParams.EnemyDead);
 
         EditorUtility.SetDirty(controller);
         return controller;
