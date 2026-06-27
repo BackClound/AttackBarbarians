@@ -214,6 +214,7 @@ public static class GameConstants
         public const string ProjectileDefault = "projectile.default";
         public const string BuffAttackUp = "buff.attack_up";
         public const string Wave01 = "wave.01";
+        public const string WaveScheduleDefault = "wave_schedule.default";
         public const string BossBatKing = "boss.bat_king";
         public const string BossSkillAreaSlam = "boss_skill.area_slam";
         public const string BossSkillSummon = "boss_skill.summon_bats";

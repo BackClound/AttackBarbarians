@@ -8700,19 +8700,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a67b930a4c8b4fd493d89af78c2d62f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  waveConfigIds:
-  - wave.01
-  - wave.01
-  - wave.01
-  - wave.01
-  - wave.05
-  - wave.01
-  - wave.01
-  - wave.01
-  - wave.01
-  - wave.10
+  waveScheduleId: wave_schedule.default
   spawner: {fileID: 0}
   autoStartOnPlaying: 1
+  legacyWaveConfigIds:
+  - wave.01
 --- !u!1 &1423808818
 GameObject:
   m_ObjectHideFlags: 0

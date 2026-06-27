@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public class Player_Health : Entity_Health
 {
-    private float currentHp;
+    [SerializeField] private float currentHp;
     private float lastKnownMaxHp;
     private bool isDead;
 
@@ -13,7 +13,7 @@ public class Player_Health : Entity_Health
     public float CurrentHp => currentHp;
 
     /// <summary>最大血量（来自 Entity_Stats）。</summary>
-    public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : 0f;
+    [SerializeField] public float MaxHp => entity_Stats != null ? entity_Stats.GetMaxHp() : 100f;
 
     /// <summary>缓存组件引用。</summary>
     public override void Awake()

@@ -88,6 +88,7 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 
         SetupSpecialEnemyMechanics(data, markAsSpecial);
         NotifyAbilitiesSpawn();
+        ApplyDifficultyVisual();
         isInitialized = true;
 
         GameEvents.RaiseEnemySpawned(this, new EnemyEventArgs(
@@ -103,9 +104,19 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     /// <remarks>由 <see cref="Enemy.OnDespawn"/> 调用，禁止反向调用 <see cref="Enemy.OnDespawn"/>，否则会与其互相递归导致栈溢出崩溃。</remarks>
     public void OnPoolDespawn()
     {
+        EnemyVisualTintUtility.ResetTint(gameObject);
         isInitialized = false;
         waveStatMultiplier = 1f;
         spawnWaveIndex = 1;
+    }
+
+    /// <summary>按当前波次难度档应用外观色调。</summary>
+    private void ApplyDifficultyVisual()
+    {
+        EnemyVisualTintUtility.ApplyDifficultyTint(
+            gameObject,
+            WaveSpawnDifficultyContext.VisualTierIndex,
+            WaveSpawnDifficultyContext.VisualTierMax);
     }
 
     /// <summary>每帧驱动状态机与特殊能力组件（受性能预算节流）。</summary>
@@ -322,18 +333,24 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
     private void ApplyScaledStats()
     {
         scaledSnapshot.CopyFrom(runtimeData.Stats);
+        float combatMult = waveStatMultiplier;
+        float moveMult = WaveSpawnDifficultyContext.MoveSpeedMultiplier;
+
         if (RunProgressionContext.IsActive)
         {
             EnemyStatScaling.ApplyWaveScaling(
                 scaledSnapshot,
                 spawnWaveIndex,
-                waveStatMultiplier,
+                combatMult,
+                moveMult,
                 RunProgressionContext.Config);
         }
         else
         {
-            EnemyStatScaling.ApplyMultiplier(scaledSnapshot, waveStatMultiplier);
+            EnemyStatScaling.ApplyCombatMultiplier(scaledSnapshot, combatMult);
+            EnemyStatScaling.ApplyMoveSpeedMultiplier(scaledSnapshot, moveMult);
         }
+
         ApplyEliteScaling();
         ConfigStatBridge.ApplyToEntityStats(scaledSnapshot, entityStats);
     }
@@ -473,12 +490,13 @@ public class EnemyController : MonoBehaviour, IEntityStateMachineHost
 public static class EnemyStatScaling
 {
     /// <summary>
-    /// V2：按属性曲线应用波次缩放，再乘外部倍率（地图 / 条目）。
+    /// V2：按属性曲线应用波次缩放；战斗与移速使用独立外部乘算。
     /// </summary>
     public static void ApplyWaveScaling(
         StatRuntimeSnapshot snapshot,
         int waveIndex,
-        float externalMultiplier,
+        float combatMultiplier,
+        float moveSpeedMultiplier,
         WaveProgressionConfigSO cfg)
     {
         if (snapshot == null || cfg == null)
@@ -486,21 +504,63 @@ public static class EnemyStatScaling
             return;
         }
 
-        externalMultiplier = Mathf.Max(0.01f, externalMultiplier);
+        combatMultiplier = Mathf.Max(0.01f, combatMultiplier);
+        moveSpeedMultiplier = Mathf.Max(0.01f, moveSpeedMultiplier);
         waveIndex = Mathf.Max(1, waveIndex);
 
-        ApplyMultiplicativeStat(snapshot, StatType.MaxHp, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.Damage, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.FireDamage, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.IceDamage, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.LightningDamage, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.MoveSpeed, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeed, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeedMulti, waveIndex, cfg, externalMultiplier);
-        ApplyMultiplicativeStat(snapshot, StatType.Armor, waveIndex, cfg, externalMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.MaxHp, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.Damage, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.FireDamage, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.IceDamage, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.LightningDamage, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.MoveSpeed, waveIndex, cfg, moveSpeedMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeed, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.AttackSpeedMulti, waveIndex, cfg, combatMultiplier);
+        ApplyMultiplicativeStat(snapshot, StatType.Armor, waveIndex, cfg, combatMultiplier);
 
         ApplyAdditiveStat(snapshot, StatType.CritChance, waveIndex, cfg);
         ApplyAdditiveStat(snapshot, StatType.CritPower, waveIndex, cfg);
+    }
+
+    /// <summary>
+    /// V2 兼容重载（移速与战斗使用同一乘算）。
+    /// </summary>
+    public static void ApplyWaveScaling(
+        StatRuntimeSnapshot snapshot,
+        int waveIndex,
+        float externalMultiplier,
+        WaveProgressionConfigSO cfg)
+    {
+        ApplyWaveScaling(snapshot, waveIndex, externalMultiplier, externalMultiplier, cfg);
+    }
+
+    /// <summary>仅缩放战斗属性（Legacy / 程序化战斗轨）。</summary>
+    public static void ApplyCombatMultiplier(StatRuntimeSnapshot snapshot, float multiplier)
+    {
+        if (snapshot == null || Mathf.Approximately(multiplier, 1f))
+        {
+            return;
+        }
+
+        ScaleStat(snapshot, StatType.MaxHp, multiplier);
+        ScaleStat(snapshot, StatType.AttackSpeed, multiplier);
+        ScaleStat(snapshot, StatType.AttackSpeedMulti, multiplier);
+        ScaleStat(snapshot, StatType.Damage, multiplier);
+        ScaleStat(snapshot, StatType.FireDamage, multiplier);
+        ScaleStat(snapshot, StatType.IceDamage, multiplier);
+        ScaleStat(snapshot, StatType.LightningDamage, multiplier);
+        ScaleStat(snapshot, StatType.Armor, multiplier);
+    }
+
+    /// <summary>仅缩放移速（档内递增、跨档重置）。</summary>
+    public static void ApplyMoveSpeedMultiplier(StatRuntimeSnapshot snapshot, float multiplier)
+    {
+        if (snapshot == null || Mathf.Approximately(multiplier, 1f))
+        {
+            return;
+        }
+
+        ScaleStat(snapshot, StatType.MoveSpeed, multiplier);
     }
 
     /// <summary>
@@ -515,15 +575,8 @@ public static class EnemyStatScaling
             return;
         }
 
-        ScaleStat(snapshot, StatType.MaxHp, multiplier);
-        ScaleStat(snapshot, StatType.MoveSpeed, multiplier);
-        ScaleStat(snapshot, StatType.AttackSpeed, multiplier);
-        ScaleStat(snapshot, StatType.AttackSpeedMulti, multiplier);
-        ScaleStat(snapshot, StatType.Damage, multiplier);
-        ScaleStat(snapshot, StatType.FireDamage, multiplier);
-        ScaleStat(snapshot, StatType.IceDamage, multiplier);
-        ScaleStat(snapshot, StatType.LightningDamage, multiplier);
-        ScaleStat(snapshot, StatType.Armor, multiplier);
+        ApplyCombatMultiplier(snapshot, multiplier);
+        ApplyMoveSpeedMultiplier(snapshot, multiplier);
     }
 
     /// <summary>按波次曲线对外部倍率做乘法缩放并写入快照。</summary>

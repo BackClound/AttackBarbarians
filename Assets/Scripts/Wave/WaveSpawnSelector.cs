@@ -2,39 +2,39 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 根据 <see cref="WaveDataSO"/> 与波次已过时间构建权重池并随机选取敌人 configId。
+/// 根据 <see cref="WaveSpawnProfile"/> 与波次已过时间构建权重池并随机选取敌人 configId。
 /// </summary>
 /// <remarks>纯逻辑类，无需挂载。</remarks>
 public sealed class WaveSpawnSelector
 {
     private readonly List<string> weightedIds = new List<string>(32);
     private readonly List<WaveEnemyEntry> activeEntries = new List<WaveEnemyEntry>(8);
-    private WaveDataSO waveData;
+    private WaveSpawnProfile waveProfile;
     private float effectiveWaveDuration;
 
     /// <summary>
-    /// 根据波次配置构建权重池或条目列表。
+    /// 根据波次快照构建权重池或条目列表。
     /// </summary>
-    /// <param name="wave">波次配置。</param>
+    /// <param name="profile">运行时波次刷怪快照。</param>
     /// <param name="configManager">配置管理器（用于旧式 enemyConfigIds 权重）。</param>
-    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 <see cref="WaveDataSO.WaveDuration"/>。</param>
-    public void Configure(WaveDataSO wave, ConfigManager configManager, float effectiveWaveDurationSeconds = 0f)
+    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 Profile Legacy 时长。</param>
+    public void Configure(WaveSpawnProfile profile, ConfigManager configManager, float effectiveWaveDurationSeconds = 0f)
     {
-        waveData = wave;
+        waveProfile = profile;
         effectiveWaveDuration = effectiveWaveDurationSeconds > 0f
             ? effectiveWaveDurationSeconds
-            : wave != null
-                ? wave.WaveDuration
+            : profile != null
+                ? profile.LegacyWaveDuration
                 : GameConstants.Progression.WaveDurationSeconds;
         weightedIds.Clear();
         activeEntries.Clear();
 
-        if (wave == null)
+        if (profile == null)
         {
             return;
         }
 
-        IReadOnlyList<WaveEnemyEntry> entries = wave.EnemyEntries;
+        IReadOnlyList<WaveEnemyEntry> entries = profile.EnemyEntries;
         if (entries != null && entries.Count > 0)
         {
             for (int i = 0; i < entries.Count; i++)
@@ -51,7 +51,7 @@ public sealed class WaveSpawnSelector
             return;
         }
 
-        BuildPoolFromConfigIds(wave.EnemyConfigIds, configManager);
+        BuildPoolFromConfigIds(profile.EnemyConfigIds, configManager);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public sealed class WaveSpawnSelector
     /// <returns>选中的敌人 configId；无可用池时返回默认蝙蝠 Id。</returns>
     public string PickEnemyId(float waveElapsedSeconds)
     {
-        if (waveData == null)
+        if (waveProfile == null)
         {
             return GameConstants.ConfigIds.EnemyBat;
         }
@@ -105,15 +105,13 @@ public sealed class WaveSpawnSelector
     }
 
     /// <summary>从条目列表按时间窗与权重构建临时池并随机选取。</summary>
-    /// <param name="waveElapsedSeconds">波次已过时间（秒）。</param>
-    /// <returns>选中的敌人 configId。</returns>
     private string PickFromEntries(float waveElapsedSeconds)
     {
         weightedIds.Clear();
         float duration = effectiveWaveDuration > 0f
             ? effectiveWaveDuration
-            : waveData != null
-                ? waveData.WaveDuration
+            : waveProfile != null
+                ? waveProfile.LegacyWaveDuration
                 : GameConstants.Progression.WaveDurationSeconds;
 
         for (int i = 0; i < activeEntries.Count; i++)
@@ -139,8 +137,6 @@ public sealed class WaveSpawnSelector
     }
 
     /// <summary>从旧式 configId 列表按敌人 SpawnWeight 构建权重池。</summary>
-    /// <param name="enemyConfigIds">敌人 configId 列表。</param>
-    /// <param name="configManager">配置管理器。</param>
     private void BuildPoolFromConfigIds(IReadOnlyList<string> enemyConfigIds, ConfigManager configManager)
     {
         if (enemyConfigIds == null || configManager == null)

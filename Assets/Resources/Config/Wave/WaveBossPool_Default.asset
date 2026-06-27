@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee7fdf4a0f82a433380ec4a2d1e6222f, type: 3}
+  m_Name: WaveBossPool_Default
+  m_EditorClassIdentifier: 
+  bossEntries:
+  - bossConfigId: boss.bat_king
+    weight: 1
+  - bossConfigId: boss.dark_knight
+    weight: 1
+  - bossConfigId: boss.will_o_wisp
+    weight: 1
+  selectionMode: 0
+  bossSpawnAtElapsed: 25
+  requireBossDefeatToComplete: 1
+  pauseNormalSpawnsWhileBossAlive: 1

@@ -176,17 +176,22 @@ public class BossController : MonoBehaviour
             }
         }
 
+        float combatMult = waveStatMultiplier;
+        float moveMult = WaveSpawnDifficultyContext.MoveSpeedMultiplier;
+
         if (RunProgressionContext.IsActive)
         {
             EnemyStatScaling.ApplyWaveScaling(
                 bossSnapshot,
                 spawnWaveIndex,
-                waveStatMultiplier,
+                combatMult,
+                moveMult,
                 RunProgressionContext.Config);
         }
         else
         {
-            EnemyStatScaling.ApplyMultiplier(bossSnapshot, waveStatMultiplier);
+            EnemyStatScaling.ApplyCombatMultiplier(bossSnapshot, combatMult);
+            EnemyStatScaling.ApplyMoveSpeedMultiplier(bossSnapshot, moveMult);
         }
 
         if (RunDifficultyContext.IsEliteMode && RunDifficultyContext.EliteConfig != null)

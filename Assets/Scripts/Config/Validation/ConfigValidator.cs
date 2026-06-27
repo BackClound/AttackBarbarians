@@ -32,6 +32,7 @@ public static class ConfigValidator
         ValidateUniqueIds(database.Maps, result);
         ValidateUniqueIds(database.GameplayEvents, result);
         ValidateUniqueIds(database.Waves, result);
+        ValidateUniqueIds(database.WaveSchedules, result);
         ValidateUniqueIds(database.Bosses, result);
         ValidateUniqueIds(database.BossSkills, result);
         ValidateUniqueIds(database.SpecialEnemyAbilities, result);
@@ -46,12 +47,14 @@ public static class ConfigValidator
         ValidateEntries(database.Maps, result);
         ValidateEntries(database.GameplayEvents, result);
         ValidateEntries(database.Waves, result);
+        ValidateEntries(database.WaveSchedules, result);
         ValidateEntries(database.Bosses, result);
         ValidateEntries(database.BossSkills, result);
         ValidateEntries(database.SpecialEnemyAbilities, result);
         ValidateEntries(database.DropTables, result);
 
         ValidateWaveReferences(database, result);
+        ValidateWaveScheduleReferences(database, result);
         ValidateBossReferences(database, result);
         ValidateBossSkillReferences(database, result);
         ValidateSpecialEnemyAbilityReferences(database, result);
@@ -393,6 +396,142 @@ public static class ConfigValidator
             if (!database.TryGetEnemy(enemyId, out _))
             {
                 result.AddError(wave.name, $"引用了不存在的敌人 configId: {enemyId}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// 校验波次表段定义中的敌人、Boss 与特殊敌人引用。
+    /// </summary>
+    private static void ValidateWaveScheduleReferences(ConfigDatabaseSO database, ConfigValidationResult result)
+    {
+        if (database.WaveSchedules == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < database.WaveSchedules.Count; i++)
+        {
+            WaveScheduleSO schedule = database.WaveSchedules[i];
+            if (schedule == null)
+            {
+                continue;
+            }
+
+            ValidateWaveSegmentReferences(schedule.name, schedule.DefaultSegment, database, result);
+
+            IReadOnlyList<WaveSegmentDefinition> segments = schedule.Segments;
+            if (segments != null)
+            {
+                for (int s = 0; s < segments.Count; s++)
+                {
+                    ValidateWaveSegmentReferences($"{schedule.name}/segments[{s}]", segments[s], database, result);
+                }
+            }
+
+            IReadOnlyList<WaveExactOverride> exacts = schedule.ExactOverrides;
+            if (exacts != null)
+            {
+                for (int e = 0; e < exacts.Count; e++)
+                {
+                    WaveExactOverride exact = exacts[e];
+                    if (exact?.Patch == null)
+                    {
+                        continue;
+                    }
+
+                    ValidateWaveSegmentReferences(
+                        $"{schedule.name}/exact[{exact.WaveIndex}]",
+                        exact.Patch,
+                        database,
+                        result);
+                }
+            }
+        }
+    }
+
+    /// <summary>校验单个波次段内的引用。</summary>
+    private static void ValidateWaveSegmentReferences(
+        string context,
+        WaveSegmentDefinition segment,
+        ConfigDatabaseSO database,
+        ConfigValidationResult result)
+    {
+        if (segment == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<string> enemyIds = segment.ResolveEnemyConfigIds();
+        if (enemyIds != null)
+        {
+            for (int j = 0; j < enemyIds.Count; j++)
+            {
+                string enemyId = enemyIds[j];
+                if (string.IsNullOrWhiteSpace(enemyId))
+                {
+                    result.AddWarning(context, $"EnemyConfigIds[{j}] 为空。");
+                    continue;
+                }
+
+                if (!database.TryGetEnemy(enemyId, out _))
+                {
+                    result.AddError(context, $"引用了不存在的敌人 configId: {enemyId}");
+                }
+            }
+        }
+
+        IReadOnlyList<WaveEnemyEntry> entries = segment.ResolveEnemyEntries();
+        if (entries != null)
+        {
+            for (int j = 0; j < entries.Count; j++)
+            {
+                WaveEnemyEntry entry = entries[j];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.EnemyConfigId))
+                {
+                    result.AddWarning(context, $"enemyEntries[{j}] 为空。");
+                    continue;
+                }
+
+                if (!database.TryGetEnemy(entry.EnemyConfigId, out _))
+                {
+                    result.AddError(context, $"enemyEntries[{j}] 引用了不存在的敌人: {entry.EnemyConfigId}");
+                }
+            }
+        }
+
+        int probeWave = Mathf.Max(1, segment.StartWave);
+        if (segment.ResolveHasBoss(probeWave))
+        {
+            string bossId = segment.ResolveBossConfigId(probeWave);
+            if (!string.IsNullOrWhiteSpace(bossId) && !database.TryGetBoss(bossId, out _))
+            {
+                result.AddError(context, $"引用了不存在的 Boss configId: {bossId}");
+            }
+        }
+
+        IReadOnlyList<string> specialIds = segment.SpecialEnemyConfigIds;
+        if (specialIds != null)
+        {
+            for (int j = 0; j < specialIds.Count; j++)
+            {
+                string enemyId = specialIds[j];
+                if (string.IsNullOrWhiteSpace(enemyId))
+                {
+                    result.AddWarning(context, $"SpecialEnemyConfigIds[{j}] 为空。");
+                    continue;
+                }
+
+                if (!database.TryGetEnemy(enemyId, out EnemyDataSO enemyData))
+                {
+                    result.AddError(context, $"引用了不存在的特殊敌人 configId: {enemyId}");
+                    continue;
+                }
+
+                if (!SpecialEnemyRules.HasMechanics(enemyData.AbilityTags))
+                {
+                    result.AddWarning(context, $"SpecialEnemyConfigIds[{j}]={enemyId} 未配置特殊能力标签。");
+                }
             }
         }
     }

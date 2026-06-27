@@ -17,6 +17,7 @@ public class ConfigDatabaseSO : ScriptableObject
     [SerializeField] private SkillUnlockTableSO skillUnlockTable;
     [SerializeField] private List<BuffDataSO> buffs = new List<BuffDataSO>();
     [SerializeField] private List<WaveDataSO> waves = new List<WaveDataSO>();
+    [SerializeField] private List<WaveScheduleSO> waveSchedules = new List<WaveScheduleSO>();
     [SerializeField] private WaveProgressionConfigSO waveProgression;
     [SerializeField] private List<BossDataSO> bosses = new List<BossDataSO>();
     [SerializeField] private List<BossSkillDataSO> bossSkills = new List<BossSkillDataSO>();
@@ -45,8 +46,10 @@ public class ConfigDatabaseSO : ScriptableObject
     public SkillUnlockTableSO SkillUnlockTable => skillUnlockTable;
     /// <summary>所有 Buff 配置条目列表。</summary>
     public IReadOnlyList<BuffDataSO> Buffs => buffs;
-    /// <summary>所有波次配置条目列表。</summary>
+    /// <summary>所有波次配置条目列表（Legacy）。</summary>
     public IReadOnlyList<WaveDataSO> Waves => waves;
+    /// <summary>波次表配置列表。</summary>
+    public IReadOnlyList<WaveScheduleSO> WaveSchedules => waveSchedules;
     /// <summary>局内波次成长曲线配置。</summary>
     public WaveProgressionConfigSO WaveProgression => waveProgression;
     /// <summary>所有 Boss 配置条目列表。</summary>
@@ -116,6 +119,10 @@ public class ConfigDatabaseSO : ScriptableObject
     /// <returns>找到时返回 true，否则返回 false。</returns>
     public bool TryGetWave(string configId, out WaveDataSO data) =>
         TryGet(waves, configId, out data);
+
+    /// <summary>按 configId 查找波次表配置条目。</summary>
+    public bool TryGetWaveSchedule(string configId, out WaveScheduleSO data) =>
+        TryGet(waveSchedules, configId, out data);
 
     /// <summary>按 configId 查找 Boss 配置条目。</summary>
     /// <param name="configId">Boss 配置唯一标识。</param>

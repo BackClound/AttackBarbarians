@@ -13,7 +13,7 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
 
     private readonly WaveSpawnSelector spawnSelector = new WaveSpawnSelector();
     private readonly WaveSpecialEnemySelector specialSelector = new WaveSpecialEnemySelector();
-    private WaveDataSO activeWaveData;
+    private WaveSpawnProfile activeWaveProfile;
 
     private bool isInitialized;
 
@@ -55,22 +55,22 @@ public class EnemySpawnerManager : MonoBehaviour, IGameSystem
     {
         GameEvents.UnsubscribeEnemyKilled(OnEnemyKilled);
         isInitialized = false;
-        activeWaveData = null;
+        activeWaveProfile = null;
     }
 
     /// <summary>配置当前波次的敌人生成池。</summary>
-    /// <param name="waveData">波次配置。</param>
-    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 <see cref="WaveDataSO.WaveDuration"/>。</param>
-    public void ConfigureWavePool(WaveDataSO waveData, float effectiveWaveDurationSeconds = 0f)
+    /// <param name="waveProfile">运行时波次刷怪快照。</param>
+    /// <param name="effectiveWaveDurationSeconds">有效波次时长；≤0 时回退 Profile Legacy 时长。</param>
+    public void ConfigureWavePool(WaveSpawnProfile waveProfile, float effectiveWaveDurationSeconds = 0f)
     {
-        activeWaveData = waveData;
+        activeWaveProfile = waveProfile;
         if (!ServiceLocator.TryGet(out ConfigManager configManager))
         {
             return;
         }
 
-        spawnSelector.Configure(waveData, configManager, effectiveWaveDurationSeconds);
-        specialSelector.Configure(waveData, configManager);
+        spawnSelector.Configure(waveProfile, configManager, effectiveWaveDurationSeconds);
+        specialSelector.Configure(waveProfile, configManager);
     }
 
     /// <summary>生成指定配置的特殊敌人。</summary>

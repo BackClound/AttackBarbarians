@@ -25,6 +25,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     private readonly Dictionary<string, SkillDataSO> skillsById = new Dictionary<string, SkillDataSO>(16);
     private readonly Dictionary<string, BuffDataSO> buffsById = new Dictionary<string, BuffDataSO>(16);
     private readonly Dictionary<string, WaveDataSO> wavesById = new Dictionary<string, WaveDataSO>(8);
+    private readonly Dictionary<string, WaveScheduleSO> waveSchedulesById = new Dictionary<string, WaveScheduleSO>(4);
     private readonly Dictionary<string, BossDataSO> bossesById = new Dictionary<string, BossDataSO>(4);
     private readonly Dictionary<string, BossSkillDataSO> bossSkillsById = new Dictionary<string, BossSkillDataSO>(8);
     private readonly Dictionary<string, SpecialEnemyAbilityDataSO> specialEnemyAbilitiesById =
@@ -117,9 +118,13 @@ public class ConfigManager : MonoBehaviour, IGameSystem
     public bool TryGetBuff(string configId, out BuffDataSO data) =>
         TryGet(buffsById, configId, out data);
 
-    /// <summary>按 configId 查找波次配置。</summary>
+    /// <summary>按 configId 查找波次配置（Legacy）。</summary>
     public bool TryGetWave(string configId, out WaveDataSO data) =>
         TryGet(wavesById, configId, out data);
+
+    /// <summary>按 configId 查找波次表配置。</summary>
+    public bool TryGetWaveSchedule(string configId, out WaveScheduleSO data) =>
+        TryGet(waveSchedulesById, configId, out data);
 
     /// <summary>按 configId 查找 Boss 配置。</summary>
     public bool TryGetBoss(string configId, out BossDataSO data) =>
@@ -274,6 +279,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         IndexList(Database.Skills, skillsById);
         IndexList(Database.Buffs, buffsById);
         IndexList(Database.Waves, wavesById);
+        IndexList(Database.WaveSchedules, waveSchedulesById);
         IndexList(Database.Bosses, bossesById);
         IndexList(Database.BossSkills, bossSkillsById);
         IndexList(Database.SpecialEnemyAbilities, specialEnemyAbilitiesById);
@@ -308,6 +314,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
             Debug.Log(
                 $"[ConfigManager] 已加载配置：Player={playersById.Count}, Enemy={enemiesById.Count}, " +
                 $"Skill={skillsById.Count}, Buff={buffsById.Count}, Wave={wavesById.Count}, " +
+                $"WaveSchedule={waveSchedulesById.Count}, " +
                 $"Boss={bossesById.Count}, BossSkill={bossSkillsById.Count}, " +
                 $"SpecialAbility={specialEnemyAbilitiesById.Count}, DropTable={dropTablesById.Count}, " +
                 $"AutoAttack={autoAttacksById.Count}, Upgrade={upgradeOptionsById.Count}, " +
@@ -372,6 +379,7 @@ public class ConfigManager : MonoBehaviour, IGameSystem
         skillsById.Clear();
         buffsById.Clear();
         wavesById.Clear();
+        waveSchedulesById.Clear();
         bossesById.Clear();
         bossSkillsById.Clear();
         specialEnemyAbilitiesById.Clear();

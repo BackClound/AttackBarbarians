@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 波次生成配置：持续时间、敌人组合、Boss 与奖励表引用。
+/// [Legacy] 单波次生成配置。新内容请使用 <see cref="WaveScheduleSO"/> 段定义 + 可复用池。
 /// </summary>
 /// <remarks>
 /// <para><b>创建：</b>Attack Barbarians → Config → Wave Data。</para>

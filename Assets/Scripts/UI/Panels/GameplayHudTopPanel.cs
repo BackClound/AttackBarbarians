@@ -228,7 +228,7 @@ public class GameplayHudTopPanel : MonoBehaviour
             return;
         }
 
-        waveText.text = $"波次: {wave}/{total}";
+        waveText.text = total > 0 ? $"波次: {wave}/{total}" : $"波次: {wave}";
         waveText.color = UiTechWastelandPalette.TextPrimary;
     }
 

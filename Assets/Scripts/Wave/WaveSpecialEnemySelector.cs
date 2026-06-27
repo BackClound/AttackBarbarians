@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 从波次 <see cref="WaveDataSO.SpecialEnemyConfigIds"/> 中随机选取特殊敌人 configId。
+/// 从波次 <see cref="WaveSpawnProfile.SpecialEnemyConfigIds"/> 中随机选取特殊敌人 configId。
 /// </summary>
 /// <remarks>纯逻辑类，无需挂载。</remarks>
 public sealed class WaveSpecialEnemySelector
@@ -10,19 +10,19 @@ public sealed class WaveSpecialEnemySelector
     private readonly List<string> pool = new List<string>(8);
 
     /// <summary>
-    /// 根据波次配置筛选带机制的特殊敌人并构建随机池。
+    /// 根据波次快照筛选带机制的特殊敌人并构建随机池。
     /// </summary>
-    /// <param name="wave">波次配置。</param>
+    /// <param name="profile">运行时波次刷怪快照。</param>
     /// <param name="configManager">配置管理器。</param>
-    public void Configure(WaveDataSO wave, ConfigManager configManager)
+    public void Configure(WaveSpawnProfile profile, ConfigManager configManager)
     {
         pool.Clear();
-        if (wave == null || configManager == null)
+        if (profile == null || configManager == null)
         {
             return;
         }
 
-        IReadOnlyList<string> ids = wave.SpecialEnemyConfigIds;
+        IReadOnlyList<string> ids = profile.SpecialEnemyConfigIds;
         if (ids == null)
         {
             return;

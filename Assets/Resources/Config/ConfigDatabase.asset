@@ -168,6 +168,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d323b39826634a8fb69b55d9e2a1ef57, type: 2}
   - {fileID: 11400000, guid: 7e2b9c4a1d6f44e3b8a05c9d3f1e8a26, type: 2}
   - {fileID: 11400000, guid: a3f8c2e91b4d4f6a9e0d7c5b2a1f8e34, type: 2}
+  waveSchedules:
+  - {fileID: 11400000, guid: 14a6302e81648454facc822728e4d2f1, type: 2}
   waveProgression: {fileID: 11400000, guid: 20b3b9694e1a4b5a9ae8abec10011486, type: 2}
   bosses:
   - {fileID: 11400000, guid: 8dcbb77b23e5c4995a326908774894f4, type: 2}

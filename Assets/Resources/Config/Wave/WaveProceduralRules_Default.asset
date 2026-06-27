@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5beb7a60083824c5395a0b034c56c68f, type: 3}
+  m_Name: WaveProceduralRules_Default
+  m_EditorClassIdentifier: 
+  difficultyTierWaveSize: 20
+  enemyUnlockWaveInterval: 30
+  enemyPoolSize: 3
+  baseEnemyConfigIds:
+  - enemy.bat
+  - enemy.fantasy.bat
+  - enemy.fantasy.boar
+  enemyUnlockOrder:
+  - enemy.fantasy.wolf
+  - enemy.fantasy.slime
+  - enemy.fantasy.shroom
+  - enemy.fantasy.skeleton
+  - enemy.fantasy.golem
+  - enemy.fantasy.troll
+  specialEnemyConfigIds:
+  - enemy.bat_charge
+  - enemy.bat_shield
+  - enemy.bat_split
+  - enemy.bat_summoner
+  - enemy.bat_ranged
+  bossActivePoolSize: 1
+  bossPool: {fileID: 11400000, guid: fcb0066e060044fe8aea56be4481afdd, type: 2}
+  bossSpawnAtElapsed: 22
+  bossSpawnStaggerSeconds: 4
+  requireBossDefeatToComplete: 1
+  pauseNormalSpawnsWhileBossAlive: 1
+  bossMilestoneInterval: 10
+  bossMilestoneBaseChance: 0.35
+  bossMilestoneChancePerTier: 0.08
+  guaranteedBossOnDifficultyTierBoundary: 1
+  bossBaseStatMultiplier: 1.2
+  bossStatMultiplierPerTier: 0.15
+  bossStatMultiplierMax: 4
+  bossBaseCount: 1
+  bossCountPerTier: 1
+  bossCountMax: 4
+  withinTierCombatIncrement: 0.025
+  maxMoveSpeedMultiplierInTier: 1.35
+  maxDifficultyMultiplier: 3.5
+  difficultySaturationRate: 0.45
+  maxDifficultyTierIndex: 12
+  eliteSpawnChanceBase: 0.08
+  eliteSpawnChancePerTier: 0.015
+  eliteSpawnChanceMax: 0.35
+  specialSpawnChanceBase: 0.12
+  specialSpawnChancePerTier: 0.02
+  specialSpawnChanceMax: 0.4
