@@ -71,8 +71,8 @@ float CopyZigZagOffset(float along, float t, float timeShift)
 float CopyBoltMask(float across, float centerX, float size)
 {
     float dist = abs(across - centerX);
-    float line = 1.0 - smoothstep(size * 0.35, size * 0.5, dist);
-    return pow(saturate(line), _Power);
+    float lineMask = 1.0 - smoothstep(size * 0.35, size * 0.5, dist);
+    return pow(saturate(lineMask), _Power);
 }
 
 CopyLightningVaryings CopyLightningVert(CopyLightningAttributes input)
