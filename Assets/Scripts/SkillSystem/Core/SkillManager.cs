@@ -93,7 +93,7 @@ public class SkillManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 清除本局专属 SkillBuff 选取计数与局内 Profile/属性修正。
+    /// 清除本局专属 SkillBuff 选取计数、局内 Profile/属性修正与 StatBuff。
     /// 局外永久 SkillBuff 需由 <see cref="UpgradeManager"/> 在清空后通过
     /// <see cref="MetaProgressBuffBootstrap"/> 重新施加；技能解锁等级（<see cref="SaveData.skillLevels"/>）不受影响。
     /// </summary>

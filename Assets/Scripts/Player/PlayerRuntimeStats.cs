@@ -11,7 +11,8 @@ public sealed class PlayerRuntimeStats
 {
     private readonly PlayerRuntimeData runtimeData = new PlayerRuntimeData();
     private readonly StatRuntimeSnapshot workingSnapshot = new StatRuntimeSnapshot();
-    private readonly List<BuffRuntimeData> activeBuffs = new List<BuffRuntimeData>(8);
+    private readonly List<BuffRuntimeData> permanentActiveBuffs = new List<BuffRuntimeData>(8);
+    private readonly List<BuffRuntimeData> runScopedActiveBuffs = new List<BuffRuntimeData>(8);
     private readonly List<StatModifierConfig> extraModifiers = new List<StatModifierConfig>(16);
     private readonly List<StatModifierConfig> talentModifiers = new List<StatModifierConfig>(16);
     private readonly List<StatModifierConfig> equipmentModifiers = new List<StatModifierConfig>(16);
@@ -113,19 +114,22 @@ public sealed class PlayerRuntimeStats
         RebuildSnapshot();
     }
 
-    /// <summary>清除局内临时属性修正（全局攻速/伤害等），保留天赋、装备与永久成长 Buff。</summary>
+    /// <summary>
+    /// 清除局内临时属性修正与 StatBuff（<see cref="ApplyBuff"/> 写入项），
+    /// 保留天赋、装备与 <see cref="SaveData.permanentUpgrades"/> 永久成长 Buff。
+    /// </summary>
     public void ClearRunScopedModifiers()
     {
-        if (extraModifiers.Count == 0)
-        {
-            return;
-        }
-
+        bool changed = extraModifiers.Count > 0 || runScopedActiveBuffs.Count > 0;
         extraModifiers.Clear();
-        RebuildSnapshot();
+        runScopedActiveBuffs.Clear();
+        if (changed)
+        {
+            RebuildSnapshot();
+        }
     }
 
-    /// <summary>Buff 系统入口：应用 Buff 配置并重建属性。</summary>
+    /// <summary>局内 Buff 系统入口：应用 StatBuff 配置并重建属性（局末由 <see cref="ClearRunScopedModifiers"/> 清除）。</summary>
     public void ApplyBuff(BuffDataSO buff, int stacks = 1)
     {
         if (buff == null)
@@ -133,11 +137,11 @@ public sealed class PlayerRuntimeStats
             return;
         }
 
-        activeBuffs.Add(ConfigRuntimeFactory.CreateBuff(buff, stacks));
+        runScopedActiveBuffs.Add(ConfigRuntimeFactory.CreateBuff(buff, stacks));
         RebuildSnapshot();
     }
 
-    /// <summary>移除指定 Buff 并重建属性。</summary>
+    /// <summary>移除指定 Buff 并重建属性（优先匹配局内 Buff，其次永久 Buff）。</summary>
     /// <param name="buffConfigId">Buff 配置 Id。</param>
     public void RemoveBuff(string buffConfigId)
     {
@@ -146,31 +150,25 @@ public sealed class PlayerRuntimeStats
             return;
         }
 
-        activeBuffs.RemoveAll(b => b != null && b.ConfigId == buffConfigId);
-        RebuildSnapshot();
+        int removed = runScopedActiveBuffs.RemoveAll(b => b != null && b.ConfigId == buffConfigId);
+        removed += permanentActiveBuffs.RemoveAll(b => b != null && b.ConfigId == buffConfigId);
+        if (removed > 0)
+        {
+            RebuildSnapshot();
+        }
     }
 
     /// <summary>Tick 所有 Buff 持续时间并在过期时重建属性。</summary>
     /// <param name="deltaTime">帧间隔（秒）。</param>
     public void TickBuffs(float deltaTime)
     {
-        if (activeBuffs.Count == 0)
+        if (runScopedActiveBuffs.Count == 0 && permanentActiveBuffs.Count == 0)
         {
             return;
         }
 
-        bool changed = false;
-        for (int i = activeBuffs.Count - 1; i >= 0; i--)
-        {
-            BuffRuntimeData buff = activeBuffs[i];
-            buff.Tick(deltaTime);
-            if (buff.IsExpired)
-            {
-                activeBuffs.RemoveAt(i);
-                changed = true;
-            }
-        }
-
+        bool changed = TickBuffList(runScopedActiveBuffs, deltaTime);
+        changed |= TickBuffList(permanentActiveBuffs, deltaTime);
         if (changed)
         {
             RebuildSnapshot();
@@ -221,9 +219,17 @@ public sealed class PlayerRuntimeStats
         combined.AddRange(talentModifiers);
         combined.AddRange(equipmentModifiers);
 
-        for (int i = 0; i < activeBuffs.Count; i++)
+        AppendBuffModifiers(combined, permanentActiveBuffs);
+        AppendBuffModifiers(combined, runScopedActiveBuffs);
+        return combined;
+    }
+
+    /// <summary>将 Buff 列表中的属性修正追加到目标集合。</summary>
+    private static void AppendBuffModifiers(List<StatModifierConfig> destination, List<BuffRuntimeData> buffs)
+    {
+        for (int i = 0; i < buffs.Count; i++)
         {
-            IReadOnlyList<StatModifierConfig> buffMods = activeBuffs[i].Modifiers;
+            IReadOnlyList<StatModifierConfig> buffMods = buffs[i].Modifiers;
             if (buffMods == null)
             {
                 continue;
@@ -233,12 +239,29 @@ public sealed class PlayerRuntimeStats
             {
                 if (buffMods[j] != null)
                 {
-                    combined.Add(buffMods[j]);
+                    destination.Add(buffMods[j]);
                 }
             }
         }
+    }
 
-        return combined;
+    /// <summary>推进列表内 Buff 计时并移除过期项。</summary>
+    /// <returns>列表发生变化时返回 <c>true</c>。</returns>
+    private static bool TickBuffList(List<BuffRuntimeData> buffs, float deltaTime)
+    {
+        bool changed = false;
+        for (int i = buffs.Count - 1; i >= 0; i--)
+        {
+            BuffRuntimeData buff = buffs[i];
+            buff.Tick(deltaTime);
+            if (buff.IsExpired)
+            {
+                buffs.RemoveAt(i);
+                changed = true;
+            }
+        }
+
+        return changed;
     }
 
     /// <summary>从存档永久成长项恢复 Buff。</summary>
@@ -274,7 +297,7 @@ public sealed class PlayerRuntimeStats
                 continue;
             }
 
-            activeBuffs.Add(ConfigRuntimeFactory.CreateBuff(buffData, entry.value));
+            permanentActiveBuffs.Add(ConfigRuntimeFactory.CreateBuff(buffData, entry.value));
         }
     }
 }
