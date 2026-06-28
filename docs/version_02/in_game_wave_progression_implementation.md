@@ -206,22 +206,16 @@ P_{special}(W) = \mathrm{clamp}\bigl(P_{0,special} + 0.005 \cdot (W-1),\ 0,\ 0.3
 
 ### 5.1 公式（`WaveProgressionCalculator.GetNeedExperience`）
 
-**等级主曲线**：
+升级门槛**仅随玩家等级 `L` 递增**，与当前波次 `W` **无关**。波次只影响击杀经验供给（见 §6），不改变「某级升下一级需要多少经验」。
+
+**等级曲线**：
+
+\[
+NeedExp(L) = NeedExp_{base}(L) \cdot D_{exp}
+\]
 
 \[
 NeedExp_{base}(L) = E_0 \cdot L^{g} \cdot \exp\bigl(\lambda \cdot \max(0,\, L - L_0)\bigr)
-\]
-
-**波次压力**：
-
-\[
-M_{need}(W) = 1 + a_{need} \cdot (W - 1)^{p_{need}}
-\]
-
-**最终**：
-
-\[
-NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 \]
 
 | 参数 | 默认值 | 字段 |
@@ -230,10 +224,8 @@ NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 | `g` | 1.35 | `expGrowthPower` |
 | `λ` | 0.02 | `expLambda` |
 | `L₀` | 8 | `expLambdaStartLevel` |
-| `a_need` | 0.015 | `needWaveCoeff` |
-| `p_need` | 1.2 | `needWavePower` |
 
-`D_exp` = `RunDifficultyContext.ExpNeedDifficultyMult`：
+`D_exp` = `RunDifficultyContext.ExpNeedDifficultyMult`（开局难度档位，非波次内变化）：
 
 | 游戏难度 | 倍率 | 精英模式额外 |
 |----------|------|-------------|
@@ -243,23 +235,23 @@ NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 
 ### 5.2 升级流程（`PlayerController.GrantExperience`）
 
-1. 实际获得 = `baseAmount × (1 + ExperienceGain)`
-2. 当 `CurrentExperience >= NeedExp(L, W)`：扣减需求、等级 +1、发布 `PlayerLevelUp`
-3. 溢出经验保留，可连续升多级
+1. 实际获得 = `baseAmount × (1 + ExperienceGain)`（经验**仅来自击杀**，见 `PlayerExperienceService`）
+2. 当 `CurrentExperience >= NeedExp(L)`：标记升级待选、等级 +1、发布 `PlayerLevelUp`
+3. 单次击杀最多升一级；升级三选一确认后经验**归零**，溢出经验不结转
 
 触发 Roguelike 三选一：`RandomRewardManager` 监听 `PlayerLevelUp` 与 `WaveCompleted`。
 
-### 5.3 升级需求参考表（普通难度）
+### 5.3 升级需求参考表（普通难度，任意波次相同）
 
-| 等级 L→L+1 | W=1 | W=5 | W=10 | W=20 |
-|-----------|-----|-----|------|------|
-| 1→2 | 80 | 86 | 97 | 122 |
-| 3→4 | 353 | 380 | 426 | 538 |
-| 5→6 | 703 | 756 | 850 | 1,072 |
-| 8→9 | 1,325 | 1,425 | 1,603 | 2,021 |
-| 10→11 | 1,864 | 2,005 | 2,255 | 2,843 |
+| 等级 L→L+1 | NeedExp |
+|-----------|---------|
+| 1→2 | 80 |
+| 3→4 | 353 |
+| 5→6 | 703 |
+| 8→9 | 1,325 |
+| 10→11 | 1,864 |
 
-波次对门槛的影响温和：W=10 时约为 W=1 的 **×1.21**（L=1）到 **×1.21**（高等级同比例）。
+波次推进时，同一等级的升级门槛保持不变；后期升级节奏由**等级曲线**与**随波次增加的经验供给**共同决定。
 
 ---
 
@@ -374,11 +366,10 @@ Exp_{wave} \approx Count(W) \times Exp_{kill}(W) \times 0.85
 
 伤害结算管线见 `DamageSystem`：基础伤害 → 技能倍率 → 护甲 → 暴击 → 最终伤害（`damage_system.md`）。
 
-### 7.4 与波次门槛的协同
+### 7.4 与升级门槛的协同
 
-- **门槛主控**：等级曲线 `L^1.35` 决定中后期升级变慢
-- **波次轻压**：`M_need(W)` 使高波次同等级升级略难，抑制「只清怪不推进」
-- **供给主控**：`Count × Exp_kill` 随波次显著上升，奖励积极清场
+- **门槛主控**：等级曲线 `L^1.35` 决定中后期升级变慢（与波次无关）
+- **供给主控**：`Count × Exp_kill(W)` 随波次显著上升，高波次每波可获经验更多
 - **四循环属性池**：防止玩家连续选技能专属而基础面板过低（`UpgradeManager.ShouldForceBasicAttributeBuffPool`）
 
 ---
@@ -405,7 +396,7 @@ Exp_{wave} \approx Count(W) \times Exp_{kill}(W) \times 0.85
 
 - **W=10** 时，积极清怪玩家 **L ≈ 7–9**
 - 若等级偏高：降低 `a_exp` 或提高 `E₀` / `g`
-- 若等级偏低：提高 `a_exp` 或 `Count` / 降低 `needWaveCoeff`
+- 若等级偏低：提高 `a_exp` 或 `Count` / 降低 `E₀`
 - **优先调经验供需，再调 HP 系数**（避免「又肉又穷」或「又脆又富」）
 
 ### 8.3 难度档位分工

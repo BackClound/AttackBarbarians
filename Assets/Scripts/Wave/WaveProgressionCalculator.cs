@@ -5,10 +5,9 @@ using UnityEngine;
 /// </summary>
 public static class WaveProgressionCalculator
 {
-    /// <summary>计算当前等级升级所需经验。</summary>
+    /// <summary>计算当前等级升级所需经验（仅随等级与难度档位变化，与波次无关）。</summary>
     public static float GetNeedExperience(
         int level,
-        int wave,
         WaveProgressionConfigSO cfg,
         float difficultyExpMult)
     {
@@ -18,13 +17,12 @@ public static class WaveProgressionCalculator
         }
 
         level = Mathf.Max(1, level);
-        wave = Mathf.Max(1, wave);
         float mult = Mathf.Max(0.01f, difficultyExpMult);
 
         float baseNeed = cfg.ExpBase * Mathf.Pow(level, cfg.ExpGrowthPower) *
                          Mathf.Exp(cfg.ExpLambda * Mathf.Max(0, level - cfg.ExpLambdaStartLevel));
-        float waveNeed = 1f + cfg.NeedWaveCoeff * Mathf.Pow(wave - 1f, cfg.NeedWavePower);
-        return Mathf.Max(1f, baseNeed * waveNeed * mult);
+        float calculated = Mathf.Max(1f, baseNeed * mult);
+        return LevelExpPlaytestSettings.ResolveNeedExperience(calculated, level);
     }
 
     /// <summary>计算指定属性的波次乘法倍率。</summary>

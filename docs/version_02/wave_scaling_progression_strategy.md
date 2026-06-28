@@ -12,7 +12,7 @@
 
 在竖屏无限防守 + Roguelike 框架下，建立**随波次同步推进**的三条成长曲线：
 
-1. **玩家升级门槛**：等级越高、波次越大，升级所需经验越高。
+1. **玩家升级门槛**：等级越高，升级所需经验越高（**固定 per 等级，与波次无关**）。
 2. **敌人战斗强度**：生命、伤害、暴击、移速、攻速按不同斜率增长，移速/攻速有硬上限。
 3. **经验供给与刷怪压力**：击杀经验、刷怪间隔、单波数量随波次调整，使「难度上升」与「成长供给」保持可控张力。
 
@@ -27,7 +27,7 @@
 
 **本项目取舍**：
 
-- 以**波次序号 `W`**（`WaveManager.CurrentWaveIndex`）为主轴，辅以**局内等级 `L`** 控制升级门槛。
+- 以**波次序号 `W`**（`WaveManager.CurrentWaveIndex`）为主轴驱动敌人强度与**经验供给**；**局内等级 `L`** 独立控制升级门槛。
 - 保留现有精英模式（`EliteModeConfigSO`）、地图修正（`MapWaveModifierConfig`）、条目倍率（`WaveEnemyEntry`）作为**叠加层**，不替换。
 - 经验来源以**击杀**为主（已实现）；时间经验作为可选扩展（GDD 已有，代码待接）。
 
@@ -51,28 +51,20 @@
 ### 3.1 设计原则
 
 1. **前期快、中后期稳**：前 3–5 级快速触发 Roguelike 三选一，建立构筑手感。
-2. **波次加压**：同等级下，波次越高，「再升一级」所需经验略增，避免后期靠高密度刷怪无限连升。
-3. **溢出保留**：经验满级后扣除需求值，余量保留（已实现于 `PlayerController.GrantExperience`）。
+2. **门槛与波次解耦**：同等级在任何波次的升级所需经验相同；波次只提高击杀经验与每波刷怪量。
+3. **升级后经验归零**：单次击杀最多升一级，确认三选一后经验条从 0 重新累计（`PlayerController.GrantExperience`）。
 4. **与 Buff 节奏对齐**：GDD 目标「每 4 次升级触发基础属性池」；10 分钟休闲局目标等级 `L ∈ [6, 10]`。
 
 ### 3.2 升级所需经验公式
 
-**等级主曲线**（来自 `Design_document.md` §6.2）：
+**等级曲线**（来自 `Design_document.md` §6.2，**不含波次项**）：
+
+\[
+NeedExp(L) = NeedExp_{base}(L) \cdot D_{exp}
+\]
 
 \[
 NeedExp_{base}(L) = E_0 \cdot L^{g} \cdot \exp\bigl(\lambda \cdot \max(0,\, L - L_0)\bigr)
-\]
-
-**波次压力修正**：
-
-\[
-M_{need}(W) = 1 + a_{need} \cdot (W - 1)^{p_{need}}
-\]
-
-**最终升级需求**：
-
-\[
-NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 \]
 
 | 参数 | 建议默认 | 说明 |
@@ -81,22 +73,20 @@ NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 | `g` | 1.35 | 等级幂次，控制中后期斜率 |
 | `λ` | 0.02 | 超过 `L₀` 后的指数放缓项 |
 | `L₀` | 8 | 指数项起始等级 |
-| `a_need` | 0.015 | 波次压力系数（温和） |
-| `p_need` | 1.2 | 波次压力幂次 |
-| `D_exp` | 1.0（普通）/ 1.05（精英） | 模式经验门槛微调 |
+| `D_exp` | 1.0（普通）/ 1.05（精英） | 开局难度档位对门槛的微调 |
 
-> **设计意图**：`M_need(W)` 在 W=10 时约为 ×1.12，W=20 时约为 ×1.28——波次对门槛有影响，但**等级曲线仍是主导**，符合 VS / 20MTD 类产品节奏。
+> **设计意图**：升级门槛由等级曲线主导；后期升级节奏通过**随波次增加的经验供给**（击杀奖励 × 刷怪数量）调节，而非抬高同级门槛。
 
-### 3.3 参考数值表（D_exp = 1）
+### 3.3 参考数值表（D_exp = 1，任意波次相同）
 
-| 等级 L | NeedExp_base | W=1 | W=5 | W=10 | W=20 |
-|--------|-------------|-----|-----|------|------|
-| 1→2 | 80 | 80 | 86 | 90 | 102 |
-| 3→4 | 312 | 312 | 335 | 351 | 398 |
-| 5→6 | 548 | 548 | 588 | 617 | 699 |
-| 8→9 | 1,024 | 1,024 | 1,099 | 1,153 | 1,307 |
-| 10→11 | 1,380 | 1,380 | 1,481 | 1,554 | 1,762 |
-| 15→16 | 2,650 | 2,650 | 2,844 | 2,984 | 3,384 |
+| 等级 L | NeedExp |
+|--------|---------|
+| 1→2 | 80 |
+| 3→4 | 353 |
+| 5→6 | 703 |
+| 8→9 | 1,325 |
+| 10→11 | 1,864 |
+| 15→16 | 3,580 |
 
 ### 3.4 经验来源策略
 
@@ -112,7 +102,7 @@ NeedExp(L, W) = NeedExp_{base}(L) \cdot M_{need}(W) \cdot D_{exp}
 
 | 触发 | 行为 | 状态 |
 |------|------|------|
-| 击杀经验满 `NeedExp(L,W)` | `GameEvents.RaisePlayerLevelUp` → 局内三选一 | ✅ |
+| 击杀经验满 `NeedExp(L)` | `GameEvents.RaisePlayerLevelUp` → 局内三选一 | ✅ |
 | 每累计 4 次升级 | 强制基础属性 Buff 池，`counter -= 4` | ❌ GDD 有，待实现 |
 | 波次完成 | `WaveCompleted` → 升级选单 | ✅ |
 
@@ -337,7 +327,6 @@ P_{special}(W) = \mathrm{clamp}\bigl(P_0 + 0.005 \cdot (W-1),\ 0,\ 0.30\bigr)
 // 建议字段分组
 [Header("Player Level")]
 float expBase; float expGrowthPower; float expLambda; int expLambdaStartLevel;
-float needWaveCoeff; float needWavePower;
 
 [Header("Enemy Stats Per Wave")]
 WaveStatCurve hpCurve, damageCurve, moveSpeedCurve, attackSpeedCurve;
@@ -368,7 +357,7 @@ float eliteChanceBase; float eliteChancePerWave; float eliteChanceMax;
 ```csharp
 public static class WaveProgressionCalculator
 {
-    public static float GetNeedExperience(int level, int wave, WaveProgressionConfigSO cfg, float difficultyExpMult);
+    public static float GetNeedExperience(int level, WaveProgressionConfigSO cfg, float difficultyExpMult);
     public static float GetEnemyStatMultiplier(StatType stat, int wave, WaveProgressionConfigSO cfg);
     public static int GetKillExperience(int baseExp, int wave, float typeWeight, WaveProgressionConfigSO cfg, float difficultyGainMult);
     public static float GetSpawnInterval(int wave, WaveProgressionConfigSO cfg, float mapMult);
@@ -394,10 +383,10 @@ public static class RunProgressionContext
 | 优先级 | 文件 | 改动 |
 |--------|------|------|
 | P0 | `EnemyStatScaling.cs` | `ApplyMultiplier` 改为 `ApplyWaveScaling(snapshot, wave, cfg)`，分属性调用 |
-| P0 | `PlayerController.cs` | `GrantExperience` 循环条件改用 `GetNeedExperience(L, W, …)` |
+| P0 | `PlayerController.cs` | `GetNeedExperienceForCurrentLevel` 使用 `GetNeedExperience(L, …)`（与波次无关） |
 | P0 | `EnemyController.cs` | `GetExperienceReward` 乘以 `GetKillExperience` 波次倍率 |
 | P0 | `WaveManager.cs` | `GetEffectiveSpawnInterval/MaxSpawnCount` 改用计算器；`StartWave` 更新 `RunProgressionContext` |
-| P1 | `GameplayHudTopPanel.cs` | 经验条分母改为动态 `NeedExp(L,W)` |
+| P1 | `GameplayHudTopPanel.cs` | 经验条分母改为动态 `NeedExp(L)` |
 | P1 | `WaveDataSO.cs` | 保留 `statScalePerWave` 作**兼容覆写**；新逻辑优先读 `WaveProgressionConfigSO` |
 | P1 | `ConfigDatabaseSO` | 注册 `waveProgression` 条目 |
 | P2 | `PlayerExperienceService` 或新 `PlayerPassiveExpTicker` | 接入 `B_time` 时间经验 |
@@ -416,7 +405,7 @@ WaveManager.StartWave(W)
          → EnemyStatScaling.ApplyWaveScaling(wave)
 EnemyKilled
     → GetKillExperience(wave) → PlayerExperienceService
-    → GrantExperience → NeedExp(L,W) 判定升级
+    → GrantExperience → NeedExp(L) 判定升级
 ```
 
 ### 7.5 迁移与兼容
@@ -483,14 +472,14 @@ D_max: 45
 
 | 能力 | 文档策略 | 代码现状 |
 |------|----------|----------|
-| 升级需求随等级曲线 | `NeedExp(L,W)` | 固定 `PlayerDataSO.ExperiencePerLevel` |
-| 升级需求随波次 | `M_need(W)` | ❌ |
-| 敌人分属性波次缩放 | 幂函数 + 上限 | 统一线性 `statScalePerWave` |
-| 敌人暴击波次成长 | 加法 + 上限 | ❌ 未缩放 |
-| 击杀经验随波次 | `M_exp(W)` | 固定 `experienceReward` |
-| 刷怪间隔/数量随波次 | 指数 / 线性 | 仅 `WaveDataSO` 静态字段 + 地图倍率 |
-| 时间经验 | `B_time` | ❌ |
-| 四循环基础 Buff | counter=4 | ❌ |
+| 升级需求随等级曲线 | `NeedExp(L)` | ✅ `WaveProgressionCalculator.GetNeedExperience` |
+| 升级需求与波次解耦 | 门槛不含 `W` | ✅ 已实现 |
+| 敌人分属性波次缩放 | 幂函数 + 上限 | ✅ V2 `WaveProgressionConfigSO` |
+| 敌人暴击波次成长 | 加法 + 上限 | ✅ V2 曲线 |
+| 击杀经验随波次 | `M_exp(W)` | ✅ `GetKillExperience` |
+| 刷怪间隔/数量随波次 | 指数 / 线性 | ✅ V2 Calculator + WaveManager |
+| 时间经验 | `B_time` | ⚠️ 配置存在，未接入 |
+| 四循环基础 Buff | counter=4 | ⚠️ GDD 有，待实现 |
 
 ---
 

@@ -16,8 +16,6 @@ MonoBehaviour:
   expGrowthPower: 1.35
   expLambda: 0.02
   expLambdaStartLevel: 8
-  needWaveCoeff: 0.015
-  needWavePower: 1.2
   passiveExpPerSecond: 6
   hpCurve:
     coefficient: 0.1

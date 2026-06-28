@@ -328,7 +328,7 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         }
     }
 
-    /// <summary>当前等级升级所需经验（V2 曲线或 Legacy 固定值）。</summary>
+    /// <summary>当前等级升级所需经验（V2 等级曲线或 Legacy 固定值；与波次无关）。</summary>
     public float GetNeedExperienceForCurrentLevel()
     {
         if (!IsReady || ActiveData == null)
@@ -340,12 +340,12 @@ public class PlayerController : MonoBehaviour, IEntityStateMachineHost
         {
             return WaveProgressionCalculator.GetNeedExperience(
                 runtimeStats.Data.CurrentLevel,
-                RunProgressionContext.CurrentWave,
                 RunProgressionContext.Config,
                 RunDifficultyContext.ExpNeedDifficultyMult);
         }
 
-        return ActiveData.ExperiencePerLevel;
+        float legacyNeed = Mathf.Max(1f, ActiveData.ExperiencePerLevel);
+        return LevelExpPlaytestSettings.ResolveNeedExperience(legacyNeed, runtimeStats.Data.CurrentLevel);
     }
 
     /// <summary>配置目标扫描器参数（射程、Layer、策略等）。</summary>

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 局内波次成长全局曲线：玩家升级门槛、敌人属性、击杀经验与刷怪节奏。
+/// 局内波次成长全局曲线：玩家升级门槛（仅随等级）、敌人属性、击杀经验与刷怪节奏。
 /// </summary>
 /// <remarks>
 /// <para><b>路径：</b><c>Assets/Resources/Config/Wave/WaveProgression_Default.asset</c></para>
@@ -14,8 +14,6 @@ public class WaveProgressionConfigSO : ScriptableObject
     [SerializeField] private float expGrowthPower = 1.35f;
     [SerializeField] private float expLambda = 0.02f;
     [SerializeField] private int expLambdaStartLevel = 8;
-    [SerializeField] private float needWaveCoeff = 0.015f;
-    [SerializeField] private float needWavePower = 1.2f;
     [SerializeField] private float passiveExpPerSecond = 6f;
 
     [Header("Enemy Stats Per Wave")]
@@ -54,8 +52,6 @@ public class WaveProgressionConfigSO : ScriptableObject
     public float ExpGrowthPower => Mathf.Max(0.01f, expGrowthPower);
     public float ExpLambda => Mathf.Max(0f, expLambda);
     public int ExpLambdaStartLevel => Mathf.Max(1, expLambdaStartLevel);
-    public float NeedWaveCoeff => Mathf.Max(0f, needWaveCoeff);
-    public float NeedWavePower => Mathf.Max(0.01f, needWavePower);
     public float PassiveExpPerSecond => Mathf.Max(0f, passiveExpPerSecond);
     public WaveStatCurve HpCurve => hpCurve;
     public WaveStatCurve DamageCurve => damageCurve;

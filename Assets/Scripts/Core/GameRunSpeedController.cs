@@ -47,6 +47,7 @@ public class GameRunSpeedController : MonoBehaviour, IGameSystem
         GameEvents.UnsubscribeGameStateChanged(OnGameStateChanged);
         GameRunSpeedSettings.Reset();
         SkillBuffFocusPlaytestSettings.Reset();
+        LevelExpPlaytestSettings.Reset();
         isInitialized = false;
     }
 
