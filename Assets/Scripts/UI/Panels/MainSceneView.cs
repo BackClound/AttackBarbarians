@@ -17,6 +17,12 @@ using UnityEngine;
 /// │       ├── ShopTopBar（固定）
 /// │       ├── ShopScrollHost（仅此区域 ScrollView）
 /// │       └── ShopStatusBar（固定）
+/// ├── TechPageRoot [TechSceneView]
+/// │   ├── PageBackground
+/// │   └── SafeAreaRoot
+/// │       ├── PathSection（60% 路径列表，纵滑）
+/// │       ├── CardBagSection（40% 解锁卡背包，纵滑）
+/// │       └── TechStatusBar
 /// └── BottomNav（Canvas 同级最后子节点，BottomStretch，不随 ScrollView 滚动）
 /// </code>
 /// </remarks>
@@ -28,6 +34,7 @@ public class MainSceneView : MonoBehaviour
     [Header("Pages")]
     [SerializeField] private MainSceneBattlePageView battlePage;
     [SerializeField] private ShopSceneView shopPage;
+    [SerializeField] private TechSceneView techPage;
     [SerializeField] private MainScenePage currentPage = MainScenePage.Home;
 
     [Header("Shared")]
@@ -54,6 +61,11 @@ public class MainSceneView : MonoBehaviour
         if (shopPage != null)
         {
             shopPage.gameObject.SetActive(false);
+        }
+
+        if (techPage != null)
+        {
+            techPage.gameObject.SetActive(false);
         }
 
         if (battlePage != null)
@@ -111,6 +123,7 @@ public class MainSceneView : MonoBehaviour
         GameEvents.UnsubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.UnsubscribeAdRewardCompleted(OnAdRewardCompleted);
         GameEvents.UnsubscribeUpgradeCardGranted(OnUpgradeCardGranted);
+        GameEvents.UnsubscribeBuffUnlockChanged(OnBuffUnlockChanged);
         isSubscribed = false;
     }
 
@@ -125,6 +138,12 @@ public class MainSceneView : MonoBehaviour
             return;
         }
 
+        if (currentPage == MainScenePage.Tech)
+        {
+            techPage?.RefreshAll();
+            return;
+        }
+
         battlePage?.RefreshAll();
     }
 
@@ -135,15 +154,22 @@ public class MainSceneView : MonoBehaviour
     {
         currentPage = page;
         bool isShop = page == MainScenePage.Shop;
+        bool isTech = page == MainScenePage.Tech;
+        bool isBattleHome = !isShop && !isTech;
 
         if (battlePage != null)
         {
-            battlePage.gameObject.SetActive(!isShop);
+            battlePage.gameObject.SetActive(isBattleHome);
         }
 
         if (shopPage != null)
         {
             shopPage.gameObject.SetActive(isShop);
+        }
+
+        if (techPage != null)
+        {
+            techPage.gameObject.SetActive(isTech);
         }
 
         bottomNavCardPanel?.SetNavTabSelected(MapPageToAction(page));
@@ -155,7 +181,7 @@ public class MainSceneView : MonoBehaviour
 
         RefreshAll();
 
-        if (!isShop)
+        if (isBattleHome)
         {
             battlePage?.SetStatus(string.Empty);
         }
@@ -173,13 +199,17 @@ public class MainSceneView : MonoBehaviour
                 ShowPage(MainScenePage.Shop);
                 return;
 
+            case MainSceneAction.Tech:
+                PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
+                ShowPage(MainScenePage.Tech);
+                return;
+
             case MainSceneAction.Battle:
                 PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
                 ShowPage(MainScenePage.Home);
                 return;
 
             case MainSceneAction.Characters:
-            case MainSceneAction.Tech:
             case MainSceneAction.Base:
                 PlayUiSfx(GameConstants.AudioIds.SfxUiClick);
                 ShowPage(MainScenePage.Home);
@@ -218,6 +248,7 @@ public class MainSceneView : MonoBehaviour
         GameEvents.SubscribeAdRewardFailed(OnAdRewardFailed);
         GameEvents.SubscribeAdRewardCompleted(OnAdRewardCompleted);
         GameEvents.SubscribeUpgradeCardGranted(OnUpgradeCardGranted);
+        GameEvents.SubscribeBuffUnlockChanged(OnBuffUnlockChanged);
         isSubscribed = true;
     }
 
@@ -228,6 +259,10 @@ public class MainSceneView : MonoBehaviour
         if (currentPage == MainScenePage.Shop)
         {
             shopPage?.RefreshAll();
+        }
+        else if (currentPage == MainScenePage.Tech)
+        {
+            techPage?.RefreshAll();
         }
     }
 
@@ -361,12 +396,20 @@ public class MainSceneView : MonoBehaviour
         }
     }
 
+    /// <summary>Buff 解锁变更后刷新科技页。</summary>
+    private void OnBuffUnlockChanged(GameEventContext ctx)
+    {
+        if (currentPage == MainScenePage.Tech)
+        {
+            techPage?.RefreshAll();
+        }
+    }
+
     /// <summary>返回尚未接入功能的占位提示文案。</summary>
     private static string GetPendingNavMessage(MainSceneAction action) =>
         action switch
         {
             MainSceneAction.Characters => "角色入口已接入，待绑定角色养成面板",
-            MainSceneAction.Tech => "科技入口已接入，待绑定科技树系统",
             MainSceneAction.Base => "基地入口已接入，待绑定基地系统",
             _ => "功能入口已点击",
         };

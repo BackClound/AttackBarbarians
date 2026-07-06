@@ -13,6 +13,13 @@ MonoBehaviour:
   m_Name: PoolConfig
   m_EditorClassIdentifier: Assembly-CSharp::PoolConfigSO
   entries:
+  - key: Bullet
+    prefab: {fileID: 483969735156635527, guid: 6558555f9e3704151b114be1ceadde70, type: 3}
+    initialCount: 32
+    maxCount: 120
+    canExpand: 1
+    overflowPolicy: 0
+    parent: {fileID: 0}
   - key: Enemy.Fantasy.Bat
     prefab: {fileID: 5793363241091646054, guid: ad04b4180e9db411a9d593b50cb395fc, type: 3}
     initialCount: 4

@@ -139,6 +139,11 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
     [SerializeField] private UpgradeCardManager upgradeCardManager;
 
     /// <summary>
+    /// [作用域: 全局] 局外 Buff 解锁路径与解锁卡库存。
+    /// </summary>
+    [SerializeField] private BuffUnlockService buffUnlockService;
+
+    /// <summary>
     /// [作用域: 全局] Meta 层通用奖励结算。
     /// 初始化顺序：Resolve #9 → Register #9 → Initialize #9。
     /// </summary>
@@ -406,6 +411,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         achievementManager = ResolveOrCreate(achievementManager);
         dailyRewardManager = ResolveOrCreate(dailyRewardManager);
         upgradeCardManager = ResolveOrCreate(upgradeCardManager);
+        buffUnlockService = ResolveOrCreate(buffUnlockService);
         metaRewardService = ResolveOrCreate(metaRewardService);
         talentManager = ResolveOrCreate(talentManager);
         equipmentManager = ResolveOrCreate(equipmentManager);
@@ -453,6 +459,7 @@ public class GameBootstrapper : MonoSingleton<GameBootstrapper>
         RegisterSystem(achievementManager);
         RegisterSystem(dailyRewardManager);
         RegisterSystem(upgradeCardManager);
+        RegisterSystem(buffUnlockService);
         RegisterSystem(metaRewardService);
         RegisterSystem(talentManager);
         RegisterSystem(equipmentManager);

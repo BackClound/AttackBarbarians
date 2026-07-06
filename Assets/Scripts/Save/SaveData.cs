@@ -47,6 +47,8 @@ public class SaveData
     public List<EquipmentSlotSaveEntry> equippedItems = new List<EquipmentSlotSaveEntry>(6);
     public List<ConfigIdIntPair> skillLevels = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> upgradeCardInventory = new List<ConfigIdIntPair>(32);
+    public List<ConfigIdIntPair> buffUnlockCardInventory = new List<ConfigIdIntPair>(16);
+    public List<ConfigIdIntPair> skillBuffUnlockProgress = new List<ConfigIdIntPair>(16);
     public List<ConfigIdIntPair> attributeBaseLevels = new List<ConfigIdIntPair>(8);
 
     public int onlinePlayTimeSeconds;
@@ -146,6 +148,22 @@ public class SaveData
     /// <param name="count">目标数量；为 0 时移除记录。</param>
     public void SetUpgradeCardCount(string configId, int count) =>
         ConfigIdIntPairListUtility.SetValue(upgradeCardInventory, configId, count);
+
+    /// <summary>读取 Buff 解锁卡持有数量。</summary>
+    public int GetBuffUnlockCardCount(string configId) =>
+        ConfigIdIntPairListUtility.GetValue(buffUnlockCardInventory, configId);
+
+    /// <summary>写入 Buff 解锁卡持有数量。</summary>
+    public void SetBuffUnlockCardCount(string configId, int count) =>
+        ConfigIdIntPairListUtility.SetValue(buffUnlockCardInventory, configId, count);
+
+    /// <summary>读取技能 Buff 解锁路径进度（已解锁节点数）。</summary>
+    public int GetSkillBuffUnlockProgress(string skillConfigId) =>
+        ConfigIdIntPairListUtility.GetValue(skillBuffUnlockProgress, skillConfigId);
+
+    /// <summary>写入技能 Buff 解锁路径进度。</summary>
+    public void SetSkillBuffUnlockProgress(string skillConfigId, int unlockedNodeCount) =>
+        ConfigIdIntPairListUtility.SetValue(skillBuffUnlockProgress, skillConfigId, unlockedNodeCount);
 
     /// <summary>读取属性基础等级。</summary>
     /// <param name="statType">属性类型。</param>

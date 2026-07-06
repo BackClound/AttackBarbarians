@@ -16,7 +16,7 @@ public class WaveProceduralRulesSO : ScriptableObject
 
     [Header("Enemy Pool")]
     [Tooltip("每 30 波窗口内保持固定的池大小；加新时随机移除旧成员。")]
-    [SerializeField] private int enemyPoolSize = 3;
+    [SerializeField] private int enemyPoolSize = 5;
     [SerializeField] private List<string> baseEnemyConfigIds = new List<string>();
     [Tooltip("按顺序每隔 enemyUnlockWaveInterval 尝试加入 1 种；全加入后从总池随机替换。")]
     [SerializeField] private List<string> enemyUnlockOrder = new List<string>();

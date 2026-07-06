@@ -44,6 +44,10 @@ public static class SaveVersionMigrator
                     MigrateV2ToV3(data);
                     version = 3;
                     break;
+                case 3:
+                    MigrateV3ToV4(data);
+                    version = 4;
+                    break;
                 default:
                     Debug.LogWarning($"[SaveVersionMigrator] 未知版本 {version}，重置为默认存档。");
                     return SaveData.CreateDefault();
@@ -115,6 +119,16 @@ public static class SaveVersionMigrator
     }
 
     /// <summary>
+    /// 版本 3 → 4：补齐 Buff 解锁卡库存与技能 Buff 解锁路径进度。
+    /// </summary>
+    private static void MigrateV3ToV4(SaveData data)
+    {
+        data.buffUnlockCardInventory ??= new List<ConfigIdIntPair>(4);
+        data.skillBuffUnlockProgress ??= new List<ConfigIdIntPair>(4);
+        EnsureCollections(data);
+    }
+
+    /// <summary>
     /// 确保所有 List 型字段与嵌套对象非 null，并修正默认音量。
     /// </summary>
     /// <param name="data">待补齐的存档数据。</param>
@@ -129,6 +143,8 @@ public static class SaveVersionMigrator
         data.equippedItems ??= new List<EquipmentSlotSaveEntry>(4);
         data.skillLevels ??= new List<ConfigIdIntPair>(4);
         data.upgradeCardInventory ??= new List<ConfigIdIntPair>(4);
+        data.buffUnlockCardInventory ??= new List<ConfigIdIntPair>(4);
+        data.skillBuffUnlockProgress ??= new List<ConfigIdIntPair>(4);
         data.attributeBaseLevels ??= new List<ConfigIdIntPair>(4);
         data.runProgress.activeBuffs ??= new List<ConfigIdIntPair>(4);
         data.shopPurchaseCounts ??= new List<ConfigIdIntPair>(4);

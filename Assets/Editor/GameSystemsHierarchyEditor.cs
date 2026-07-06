@@ -220,6 +220,7 @@ public static class GameSystemsHierarchyEditor
             new("AchievementManager", typeof(AchievementManager), "achievementManager"),
             new("DailyRewardManager", typeof(DailyRewardManager), "dailyRewardManager"),
             new("UpgradeCardManager", typeof(UpgradeCardManager), "upgradeCardManager"),
+            new("BuffUnlockService", typeof(BuffUnlockService), "buffUnlockService"),
             new("MetaRewardService", typeof(MetaRewardService), "metaRewardService"),
             new("TalentManager", typeof(TalentManager), "talentManager"),
             new("EquipmentManager", typeof(EquipmentManager), "equipmentManager"),

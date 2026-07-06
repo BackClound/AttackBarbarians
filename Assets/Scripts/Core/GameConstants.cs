@@ -132,6 +132,7 @@ public static class GameConstants
 
         // Upgrade Card
         public const string UpgradeCardGranted = "UpgradeCard.Granted";
+        public const string BuffUnlockChanged = "BuffUnlock.Changed";
 
         // Ad
         public const string AdRewardCompleted = "Ad.RewardCompleted";

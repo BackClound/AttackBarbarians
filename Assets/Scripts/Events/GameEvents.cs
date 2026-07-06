@@ -917,6 +917,18 @@ public static class GameEvents
     public static void UnsubscribeUpgradeCardGranted(Action<GameEventContext> handler) =>
         Unsubscribe(GameConstants.EventKeys.UpgradeCardGranted, handler);
 
+    /// <summary>发布 Buff 解锁变更事件。</summary>
+    public static void RaiseBuffUnlockChanged(object sender, BuffUnlockChangedEventArgs args) =>
+        Publish(GameConstants.EventKeys.BuffUnlockChanged, sender, args);
+
+    /// <summary>订阅 Buff 解锁变更事件。</summary>
+    public static void SubscribeBuffUnlockChanged(Action<GameEventContext> handler) =>
+        Subscribe(GameConstants.EventKeys.BuffUnlockChanged, handler);
+
+    /// <summary>取消订阅 Buff 解锁变更事件。</summary>
+    public static void UnsubscribeBuffUnlockChanged(Action<GameEventContext> handler) =>
+        Unsubscribe(GameConstants.EventKeys.BuffUnlockChanged, handler);
+
     #endregion
 
     #region Ad
